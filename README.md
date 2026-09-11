@@ -34,6 +34,8 @@ Paciente se cadastra → agenda consulta com médico → faz exame
 ```
 Hemobridge/
 ├── assets/         # Imagens, logos e recursos visuais do projeto
+│   ├── imagens/
+│   └── fonts/
 ├── frontend/       # Aplicação React (interface do usuário)
 ├── backend/        # API NestJS (regras de negócio e serviços)
 ├── database/       # Migrations e scripts do banco de dados
