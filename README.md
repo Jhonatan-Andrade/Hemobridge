@@ -1,10 +1,10 @@
-# 🩸 HemoLink
+# 🩸 Hemobridge
 
 Plataforma web que conecta **doadores de sangue** a **bancos de sangue (hospitais)**, mostrando onde o tipo sanguíneo de cada doador é mais necessário.
 
 ## Problema
 
-Bancos de sangue têm falta de uns tipos sanguíneos e excesso de outros. Doadores não sabem onde sua doação faz mais diferença. O HemoLink resolve isso centralizando essa informação.
+Bancos de sangue têm falta de uns tipos sanguíneos e excesso de outros. Doadores não sabem onde sua doação faz mais diferença. O Hemobridge resolve isso centralizando essa informação.
 
 ## Como funciona (visão geral)
 
@@ -32,11 +32,12 @@ Paciente se cadastra → agenda consulta com médico → faz exame
 ## Estrutura do repositório
 
 ```
-hemolink/
-├── frontend/       # aplicação React
-├── backend/        # API NestJS
-├── database/       # migrations e seeds
-└── docs/           # requisitos, diagramas, DER
+Hemobridge/
+├── assets/         # Imagens, logos e recursos visuais do projeto
+├── frontend/       # Aplicação React (interface do usuário)
+├── backend/        # API NestJS (regras de negócio e serviços)
+├── database/       # Migrations e scripts do banco de dados
+└── docs/           # Requisitos, diagramas de arquitetura, DER
 ```
 
 ## Requisitos do sistema
