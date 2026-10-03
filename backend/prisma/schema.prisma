@@ -94,9 +94,10 @@ model Usuario {
   criadoEm                DateTime      @default(now()) @map("criado_em") @db.Timestamptz(3)
   atualizadoEm            DateTime      @updatedAt @map("atualizado_em") @db.Timestamptz(3)
 
-  paciente      Paciente?
-  medico        Medico?
-  representante RepresentanteHospital?
+  paciente       Paciente?
+  medico         Medico?
+  representante  RepresentanteHospital?
+  consentimentos ConsentimentoLgpd[]
 
   @@index([perfil, status])
   @@map("usuario")
@@ -153,6 +154,26 @@ model RepresentanteHospital {
 }
 
 // ---------------------------------------------------------------------------
+// Proteção de dados (LGPD)
+// ---------------------------------------------------------------------------
+
+// RF02 / RN12: aceite versionado do termo de consentimento.
+model ConsentimentoLgpd {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  usuarioId   String    @map("usuario_id") @db.Uuid
+  versaoTermo String    @map("versao_termo") @db.VarChar(20)
+  finalidade  String    @db.VarChar(255)
+  aceitoEm    DateTime  @default(now()) @map("aceito_em") @db.Timestamptz(3)
+  ipOrigem    String?   @map("ip_origem") @db.Inet
+  revogadoEm  DateTime? @map("revogado_em") @db.Timestamptz(3)
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Restrict)
+
+  @@index([usuarioId])
+  @@map("consentimento_lgpd")
+}
+
+// ---------------------------------------------------------------------------
 // Tipagem sanguínea
 // ---------------------------------------------------------------------------
 
@@ -189,23 +210,23 @@ model CompatibilidadeSanguinea {
 // ---------------------------------------------------------------------------
 
 model Hospital {
-  id                   String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  nome                 String   @db.VarChar(150)
-  cnpj                 String   @unique @db.Char(14)
-  endereco             String   @db.VarChar(255)
-  cidade               String   @db.VarChar(100)
-  estado               String   @db.Char(2)
-  cep                  String   @db.Char(8)
-  telefone             String?  @db.VarChar(20)
-  horarioFuncionamento String?  @map("horario_funcionamento") @db.VarChar(255)
-  latitude             Decimal  @db.Decimal(9, 6)
-  longitude            Decimal  @db.Decimal(9, 6)
+  id                   String                                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nome                 String                                 @db.VarChar(150)
+  cnpj                 String                                 @unique @db.Char(14)
+  endereco             String                                 @db.VarChar(255)
+  cidade               String                                 @db.VarChar(100)
+  estado               String                                 @db.Char(2)
+  cep                  String                                 @db.Char(8)
+  telefone             String?                                @db.VarChar(20)
+  horarioFuncionamento String?                                @map("horario_funcionamento") @db.VarChar(255)
+  latitude             Decimal                                @db.Decimal(9, 6)
+  longitude            Decimal                                @db.Decimal(9, 6)
   // Coluna GERADA a partir de latitude/longitude (GENERATED ALWAYS na migration).
   // O dbgenerated abaixo só espelha a expressão para o Prisma não acusar drift.
   localizacao          Unsupported("geography(Point, 4326)")? @default(dbgenerated("(st_setsrid(st_makepoint((longitude)::double precision, (latitude)::double precision), 4326))::geography"))
-  ativo                Boolean  @default(true)
-  criadoEm             DateTime @default(now()) @map("criado_em") @db.Timestamptz(3)
-  atualizadoEm         DateTime @updatedAt @map("atualizado_em") @db.Timestamptz(3)
+  ativo                Boolean                                @default(true)
+  criadoEm             DateTime                               @default(now()) @map("criado_em") @db.Timestamptz(3)
+  atualizadoEm         DateTime                               @updatedAt @map("atualizado_em") @db.Timestamptz(3)
 
   medicos        Medico[]
   representantes RepresentanteHospital[]

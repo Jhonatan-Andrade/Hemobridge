@@ -1,11 +1,12 @@
 import 'dotenv/config';
-import { PrismaPg } from '@prisma/adapter-pg';
 import { FatorRh, GrupoAbo, PrismaClient } from '../src/generated/prisma/client.js';
 import { isCpfValido, normalizarCpf } from '../src/common/cpf.js';
 import { gerarHashSenha } from '../src/common/senha.js';
+import { criarAdapterPg } from '../src/prisma/adapter.js';
+import { MENSAGEM_SENHA_INVALIDA, isSenhaValida } from '../src/common/validators.js';
 
 const prisma = new PrismaClient({
-  adapter: new PrismaPg({ connectionString: process.env['DATABASE_URL']! }),
+  adapter: criarAdapterPg(process.env['DATABASE_URL']!),
 });
 
 // RN01
@@ -77,6 +78,9 @@ async function seedAdministradorInicial() {
   }
   if (!isCpfValido(ADMIN_CPF)) {
     throw new Error('ADMIN_CPF inválido.');
+  }
+  if (!isSenhaValida(ADMIN_SENHA_INICIAL)) {
+    throw new Error(`ADMIN_SENHA_INICIAL inválida: ${MENSAGEM_SENHA_INVALIDA}.`);
   }
 
   await prisma.usuario.create({
