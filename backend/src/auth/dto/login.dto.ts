@@ -1,21 +1,15 @@
-    import { IsEmail, IsStrongPassword, MinLength } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { IsEmail, IsNotEmpty, IsString, MaxLength } from 'class-validator';
 
-    export class LoginDto { 
+// UC05. A política de senha (RN06) não é aplicada aqui: só se confere a credencial.
+export class LoginDto {
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim().toLowerCase() : value))
+  @IsEmail({}, { message: 'E-mail inválido' })
+  @MaxLength(254)
+  email: string;
 
-        @IsEmail()
-        email: string;
-
-        @IsStrongPassword(
-            {
-                minLength: 8,
-                minLowercase: 1,
-                minUppercase: 1,
-                minNumbers: 1,
-                minSymbols: 1
-            },
-            {
-            message:'A senha deve ter mais de 8 caracteres, com pelo menos uma letra maiúscula, uma minúscula, um número e um caractere especial',
-            }
-        )
-        password: string;
-    }
+  @IsString()
+  @IsNotEmpty({ message: 'Informe a senha' })
+  @MaxLength(128)
+  senha: string;
+}

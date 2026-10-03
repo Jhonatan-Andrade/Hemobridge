@@ -13,9 +13,9 @@ describe('PreCadastroDto', () => {
   it('aceita dados válidos e normaliza os campos', async () => {
     const { dto, campos } = await errosDe(preCadastroValido());
     expect(campos).toEqual([]);
-    expect(dto.nome).toBe('DevJhonatan');
-    expect(dto.cpf).toBe('100.100.100-10');
-    expect(dto.email).toBe('dev@email.com');
+    expect(dto.nome).toBe('Maria da Silva');
+    expect(dto.cpf).toBe('52998224725');
+    expect(dto.email).toBe('maria@email.com');
     expect(dto.telefone).toBe('41999998888');
     expect(dto.estado).toBe('PR');
   });
