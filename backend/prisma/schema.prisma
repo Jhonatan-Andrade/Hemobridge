@@ -1,0 +1,13 @@
+// Modelo de dados do Hemobridge (ver docs/2026-2_Parcial_HemoBridge_01.pdf, cap. 9).
+// Os modelos são adicionados por etapas.
+
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
