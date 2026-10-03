@@ -1,5 +1,7 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Publico } from '../auth/decorators.js';
 
+@Publico()
 @Controller('')
 export class HomeController {
     @Get('')
