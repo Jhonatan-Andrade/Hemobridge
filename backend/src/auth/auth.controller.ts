@@ -1,4 +1,9 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Ip, Post } from '@nestjs/common';
+import {
+  LimiteLogin,
+  LimiteRecuperacaoSenha,
+  LimiteRedefinicaoSenha,
+} from '../common/limite-requisicoes.js';
 import { TERMO_RESPONSABILIDADE } from '../lgpd/termo-responsabilidade.js';
 import { AuthService } from './auth.service.js';
 import type { UsuarioAutenticado } from './auth.types.js';
@@ -16,6 +21,7 @@ export class AuthController {
   ) {}
 
   @Publico()
+  @LimiteLogin()
   @Post('login')
   @HttpCode(HttpStatus.OK)
   login(@Body() dto: LoginDto) {
@@ -24,6 +30,7 @@ export class AuthController {
 
   // UC06: resposta idêntica exista ou não a conta (RN14).
   @Publico()
+  @LimiteRecuperacaoSenha()
   @Post('recuperar-senha')
   @HttpCode(HttpStatus.ACCEPTED)
   recuperarSenha(@Body() dto: RecuperarSenhaDto) {
@@ -31,6 +38,7 @@ export class AuthController {
   }
 
   @Publico()
+  @LimiteRedefinicaoSenha()
   @Post('redefinir-senha')
   @HttpCode(HttpStatus.OK)
   redefinirSenha(@Body() dto: RedefinirSenhaDto) {
