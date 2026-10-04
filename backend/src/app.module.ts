@@ -2,8 +2,10 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { AdminModule } from './admin/admin.module.js';
 import { AuthModule } from './auth/auth.module.js';
 import { LIMITE_PADRAO } from './common/limite-requisicoes.js';
+import { ContasModule } from './contas/contas.module.js';
 import { EmailModule } from './email/email.module.js';
 import { HomeController } from './home/home.controller.js';
 import { HospitaisModule } from './hospitais/hospitais.module.js';
@@ -20,10 +22,12 @@ import { TipagemModule } from './tipagem/tipagem.module.js';
     }),
     PrismaModule,
     EmailModule,
+    ContasModule,
     AuthModule,
     PacientesModule,
     HospitaisModule,
     TipagemModule,
+    AdminModule,
   ],
   controllers: [HomeController],
   // Registrado antes do AuthGuard: o limite vale também para requisições sem token.

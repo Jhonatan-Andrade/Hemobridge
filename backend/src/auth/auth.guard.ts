@@ -9,7 +9,7 @@ import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import type { Perfil } from '../generated/prisma/enums.js';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { papelDe, type TokenPayload } from './auth.types.js';
+import { SELECAO_INSTITUICAO, instituicaoDesativada, papelDe, type TokenPayload } from './auth.types.js';
 import { PERFIS_KEY, PRIMEIRO_ACESSO_KEY, PUBLICO_KEY, type RequestAutenticada,} from './decorators.js';
 
 /**
@@ -51,11 +51,15 @@ export class AuthGuard implements CanActivate {
         senhaProvisoria: true,
         versaoSessao: true,
         paciente: { select: { situacao: true } },
+        ...SELECAO_INSTITUICAO,
       },
     });
     // Token emitido antes de troca de senha ou logout não vale mais.
     if (!usuario || usuario.status !== 'ATIVO' || usuario.versaoSessao !== payload.ver) {
       throw new UnauthorizedException('Sessão inválida ou expirada');
+    }
+    if (instituicaoDesativada(usuario)) {
+      throw new UnauthorizedException('A instituição vinculada à sua conta está desativada.');
     }
 
     if (

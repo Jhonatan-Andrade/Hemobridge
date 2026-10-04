@@ -4,7 +4,7 @@ import { gerarHashSenha, verificarSenha } from '../common/senha.js';
 import type { Perfil, SituacaoPaciente } from '../generated/prisma/enums.js';
 import { TERMO_RESPONSABILIDADE } from '../lgpd/termo-responsabilidade.js';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { papelDe, type TokenPayload } from './auth.types.js';
+import { SELECAO_INSTITUICAO, instituicaoDesativada, papelDe, type TokenPayload } from './auth.types.js';
 import { LoginDto } from './dto/login.dto.js';
 import { PrimeiroAcessoDto } from './dto/primeiro-acesso.dto.js';
 
@@ -53,6 +53,7 @@ export class AuthService {
         bloqueadoAte: true,
         versaoSessao: true,
         paciente: { select: { situacao: true } },
+        ...SELECAO_INSTITUICAO,
       },
     });
 
@@ -77,6 +78,13 @@ export class AuthService {
     if (usuario.status === 'INATIVO') {
       throw new ForbiddenException(
         'Sua conta está desativada. Entre em contato com a instituição ou com a plataforma.',
+      );
+    }
+
+    // RN09
+    if (instituicaoDesativada(usuario)) {
+      throw new ForbiddenException(
+        'A instituição vinculada à sua conta está desativada. Entre em contato com a plataforma.',
       );
     }
 

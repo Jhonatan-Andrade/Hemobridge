@@ -1,4 +1,5 @@
 import { ValidateBy, ValidationOptions, buildMessage } from 'class-validator';
+import { isCnpjValido } from './cnpj.js';
 import { isCpfValido } from './cpf.js';
 
 /** CPF válido pelos dígitos verificadores (RN06). */
@@ -9,6 +10,20 @@ export function IsCpf(options?: ValidationOptions): PropertyDecorator {
       validator: {
         validate: (valor) => typeof valor === 'string' && isCpfValido(valor),
         defaultMessage: buildMessage(() => 'CPF inválido', options),
+      },
+    },
+    options,
+  );
+}
+
+/** CNPJ válido pelos dígitos verificadores. */
+export function IsCnpj(options?: ValidationOptions): PropertyDecorator {
+  return ValidateBy(
+    {
+      name: 'isCnpj',
+      validator: {
+        validate: (valor) => typeof valor === 'string' && isCnpjValido(valor),
+        defaultMessage: buildMessage(() => 'CNPJ inválido', options),
       },
     },
     options,
