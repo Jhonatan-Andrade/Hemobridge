@@ -16,18 +16,13 @@ import {
   Min,
 } from 'class-validator';
 import { Sexo } from '../../generated/prisma/enums.js';
-import { normalizarCpf } from '../../common/cpf.js';
+import { aparar, emailNormalizado, maiusculas, somenteDigitos } from '../../common/transformacoes.js';
 import { UFS } from '../../common/uf.js';
 import { IsCpf, IsIgualA, IsSenhaValida } from '../../common/validators.js';
 
-const apararTexto = ({ value }: { value: unknown }) =>
-  typeof value === 'string' ? value.trim().replace(/\s+/g, ' ') : value;
-const somenteDigitos = ({ value }: { value: unknown }) =>
-  typeof value === 'string' ? normalizarCpf(value) : value;
-
 // RF01 / UC01
 export class PreCadastroDto {
-  @Transform(apararTexto)
+  @Transform(aparar)
   @IsString()
   @Length(3, 150, { message: 'O nome deve ter entre 3 e 150 caracteres' })
   nome: string;
@@ -36,7 +31,7 @@ export class PreCadastroDto {
   @IsCpf()
   cpf: string;
 
-  @Transform(({ value }) => (typeof value === 'string' ? value.trim().toLowerCase() : value))
+  @Transform(emailNormalizado)
   @IsEmail({}, { message: 'E-mail inválido' })
   @MaxLength(254)
   email: string;
@@ -63,12 +58,12 @@ export class PreCadastroDto {
   @Max(400)
   pesoKg: number;
 
-  @Transform(apararTexto)
+  @Transform(aparar)
   @IsString()
   @Length(2, 100)
   cidade: string;
 
-  @Transform(({ value }) => (typeof value === 'string' ? value.trim().toUpperCase() : value))
+  @Transform(maiusculas)
   @IsIn(UFS, { message: 'Estado deve ser uma UF válida' })
   estado: string;
 

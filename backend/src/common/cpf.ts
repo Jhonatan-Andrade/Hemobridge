@@ -21,3 +21,10 @@ export function isCpfValido(cpf: string): boolean {
   const dv2 = calcularDv(digitos.slice(0, 10));
   return dv1 === Number(digitos[9]) && dv2 === Number(digitos[10]);
 }
+
+/** Mascara o CPF para listagens ("12345678909" -> "***.456.789-**"). */
+export function  mascararCpf(cpf?: string | null){
+  const digits = (cpf ?? '').replace(/\D/g, '');
+  if (digits.length !== 11) return cpf ?? '';
+  return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
+};

@@ -15,17 +15,9 @@ import {
   Min,
   ValidateNested,
 } from 'class-validator';
+import { aparar, booleano, emailNormalizado, maiusculas, somenteDigitos } from '../../common/transformacoes.js';
 import { UFS } from '../../common/uf.js';
 import { IsCnpj, IsCpf } from '../../common/validators.js';
-
-const aparar = ({ value }: { value: unknown }) =>
-  typeof value === 'string' ? value.trim().replace(/\s+/g, ' ') : value;
-const somenteDigitos = ({ value }: { value: unknown }) =>
-  typeof value === 'string' ? value.replace(/\D/g, '') : value;
-const maiusculas = ({ value }: { value: unknown }) =>
-  typeof value === 'string' ? value.trim().toUpperCase() : value;
-const emailNormalizado = ({ value }: { value: unknown }) =>
-  typeof value === 'string' ? value.trim().toLowerCase() : value;
 
 // Dados do banco de sangue (UC25 passo 4)
 export class DadosHospitalDto {
@@ -129,7 +121,7 @@ export class ListarHospitaisAdminDto {
   estado?: string;
 
   @IsOptional()
-  @Transform(({ value }) => (value === 'true' ? true : value === 'false' ? false : value))
+  @Transform(booleano)
   @IsBoolean()
   ativo?: boolean;
 

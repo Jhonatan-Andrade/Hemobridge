@@ -1,4 +1,4 @@
-import { isCpfValido, normalizarCpf } from './cpf.js';
+import { isCpfValido, mascararCpf, normalizarCpf } from './cpf.js';
 
 describe('cpf', () => {
   it('normaliza removendo a máscara', () => {
@@ -14,4 +14,11 @@ describe('cpf', () => {
     'rejeita CPF inválido %s',
     (cpf) => expect(isCpfValido(cpf)).toBe(false),
   );
+});
+
+describe('mascararCpf', () => {
+  it('mostra só os dígitos centrais', () => {
+    expect(mascararCpf('52998224725')).toBe('***.982.247-**');
+    expect(mascararCpf('529.982.247-25')).toBe('***.982.247-**');
+  });
 });
