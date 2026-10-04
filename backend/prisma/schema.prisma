@@ -113,6 +113,7 @@ model Usuario {
   consentimentos ConsentimentoLgpd[]
 
   necessidadesAtualizadas NecessidadeEstoque[]
+  crmsConferidos          Medico[]             @relation("CrmConferidoPor")
 
   @@index([perfil, status])
   @@map("usuario")
@@ -142,12 +143,16 @@ model Paciente {
 }
 
 model Medico {
-  usuarioId  String @id @map("usuario_id") @db.Uuid
-  hospitalId String @map("hospital_id") @db.Uuid
-  crm        String @db.VarChar(10)
-  ufCrm      String @map("uf_crm") @db.Char(2)
+  usuarioId         String   @id @map("usuario_id") @db.Uuid
+  hospitalId        String   @map("hospital_id") @db.Uuid
+  crm               String   @db.VarChar(10)
+  ufCrm             String   @map("uf_crm") @db.Char(2)
+  // RF13: declaração do representante de que a instituição conferiu CRM e UF.
+  crmConferidoPorId String   @map("crm_conferido_por") @db.Uuid
+  crmConferidoEm    DateTime @default(now()) @map("crm_conferido_em") @db.Timestamptz(3)
 
   usuario            Usuario    @relation(fields: [usuarioId], references: [id], onDelete: Restrict)
+  crmConferidoPor    Usuario    @relation("CrmConferidoPor", fields: [crmConferidoPorId], references: [id], onDelete: Restrict)
   hospital           Hospital   @relation(fields: [hospitalId], references: [id], onDelete: Restrict)
   pacientesValidados Paciente[]
 

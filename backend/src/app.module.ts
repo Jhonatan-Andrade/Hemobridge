@@ -11,6 +11,7 @@ import { HomeController } from './home/home.controller.js';
 import { HospitaisModule } from './hospitais/hospitais.module.js';
 import { PacientesModule } from './pacientes/pacientes.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
+import { RepresentanteModule } from './representante/representante.module.js';
 import { TipagemModule } from './tipagem/tipagem.module.js';
 
 @Module({
@@ -28,6 +29,7 @@ import { TipagemModule } from './tipagem/tipagem.module.js';
     HospitaisModule,
     TipagemModule,
     AdminModule,
+    RepresentanteModule,
   ],
   controllers: [HomeController],
   // Registrado antes do AuthGuard: o limite vale também para requisições sem token.
