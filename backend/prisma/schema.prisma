@@ -113,7 +113,8 @@ model Usuario {
   consentimentos ConsentimentoLgpd[]
 
   necessidadesAtualizadas NecessidadeEstoque[]
-  crmsConferidos          Medico[]             @relation("CrmConferidoPor")
+  crmsConferidos          Medico[]               @relation("CrmConferidoPor")
+  alteracoesNecessidade   HistoricoNecessidade[]
 
   @@index([perfil, status])
   @@map("usuario")
@@ -271,11 +272,30 @@ model NecessidadeEstoque {
   atualizadoPorId String?          @map("atualizado_por") @db.Uuid
   atualizadoEm    DateTime?        @map("atualizado_em") @db.Timestamptz(3)
 
-  hospital      Hospital      @relation(fields: [hospitalId], references: [id], onDelete: Restrict)
-  tipoSanguineo TipoSanguineo @relation(fields: [tipoSanguineoId], references: [id], onDelete: Restrict)
-  atualizadoPor Usuario?      @relation(fields: [atualizadoPorId], references: [id], onDelete: Restrict)
+  hospital      Hospital               @relation(fields: [hospitalId], references: [id], onDelete: Restrict)
+  tipoSanguineo TipoSanguineo          @relation(fields: [tipoSanguineoId], references: [id], onDelete: Restrict)
+  atualizadoPor Usuario?               @relation(fields: [atualizadoPorId], references: [id], onDelete: Restrict)
+  historico     HistoricoNecessidade[]
 
   @@unique([hospitalId, tipoSanguineoId])
   @@index([tipoSanguineoId, nivel])
   @@map("necessidade_estoque")
+}
+
+// RN03: gravado pelo trigger "necessidade_registrar_historico" a cada mudança
+// de nível; a aplicação apenas consulta.
+model HistoricoNecessidade {
+  id            BigInt           @id @default(autoincrement())
+  necessidadeId String           @map("necessidade_id") @db.Uuid
+  nivelAnterior NivelNecessidade @map("nivel_anterior")
+  nivelNovo     NivelNecessidade @map("nivel_novo")
+  alteradoPorId String           @map("alterado_por") @db.Uuid
+  alteradoEm    DateTime         @map("alterado_em") @db.Timestamptz(3)
+
+  necessidade NecessidadeEstoque @relation(fields: [necessidadeId], references: [id], onDelete: Restrict)
+  alteradoPor Usuario            @relation(fields: [alteradoPorId], references: [id], onDelete: Restrict)
+
+  @@index([necessidadeId, alteradoEm])
+  @@index([alteradoEm])
+  @@map("historico_necessidade")
 }
