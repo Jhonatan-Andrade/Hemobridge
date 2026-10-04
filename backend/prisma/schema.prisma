@@ -91,6 +91,8 @@ model Usuario {
   status                  StatusUsuario @default(ATIVO)
   tentativasLogin         Int           @default(0) @map("tentativas_login") @db.SmallInt
   bloqueadoAte            DateTime?     @map("bloqueado_ate") @db.Timestamptz(3)
+  // Incrementada ao trocar a senha ou sair: invalida os tokens emitidos antes.
+  versaoSessao            Int           @default(0) @map("versao_sessao")
   criadoEm                DateTime      @default(now()) @map("criado_em") @db.Timestamptz(3)
   atualizadoEm            DateTime      @updatedAt @map("atualizado_em") @db.Timestamptz(3)
 

@@ -14,6 +14,7 @@ const usuarioDb = (alteracao: Record<string, unknown> = {}) => ({
   perfil: 'PACIENTE',
   status: 'ATIVO',
   senhaProvisoria: false,
+  versaoSessao: 0,
   paciente: { situacao: 'APROVADO' },
   ...alteracao,
 });
@@ -37,7 +38,7 @@ function montar(
   return { guard, ctx, req, prisma };
 }
 
-const bearer = () => `Bearer ${jwt.sign({ sub: 'u1', perfil: 'PACIENTE' })}`;
+const bearer = (ver = 0) => `Bearer ${jwt.sign({ sub: 'u1', perfil: 'PACIENTE', ver })}`;
 
 describe('AuthGuard', () => {
   it('libera rota pública sem token', async () => {
@@ -77,6 +78,11 @@ describe('AuthGuard', () => {
   ])('recusa token de usuário %s', async (_, usuario) => {
     const { guard, ctx } = montar({}, usuario, bearer());
     await expect(guard.canActivate(ctx)).rejects.toBeInstanceOf(UnauthorizedException);
+  });
+
+  it('recusa token emitido antes de troca de senha ou logout', async () => {
+    const { guard, ctx } = montar({}, usuarioDb({ versaoSessao: 2 }), bearer(1));
+    await expect(guard.canActivate(ctx)).rejects.toThrow(/Sessão inválida/);
   });
 
   it('restringe por perfil', async () => {
