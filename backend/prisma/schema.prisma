@@ -12,7 +12,7 @@ generator client {
 
 datasource db {
   provider   = "postgresql"
-  extensions = [postgis]
+  extensions = [postgis, unaccent]
 }
 
 // ---------------------------------------------------------------------------
@@ -53,6 +53,17 @@ enum SituacaoPaciente {
   REPROVADO
 
   @@map("situacao_paciente")
+}
+
+// RN02 — ordem decrescente de prioridade; NAO_INFORMADO não entra na priorização.
+enum NivelNecessidade {
+  CRITICO
+  BAIXO
+  ESTAVEL
+  ADEQUADO
+  NAO_INFORMADO
+
+  @@map("nivel_necessidade")
 }
 
 enum GrupoAbo {
@@ -100,6 +111,8 @@ model Usuario {
   medico         Medico?
   representante  RepresentanteHospital?
   consentimentos ConsentimentoLgpd[]
+
+  necessidadesAtualizadas NecessidadeEstoque[]
 
   @@index([perfil, status])
   @@map("usuario")
@@ -186,9 +199,10 @@ model TipoSanguineo {
   grupoAbo GrupoAbo @map("grupo_abo")
   fatorRh  FatorRh  @map("fator_rh")
 
-  doaPara   CompatibilidadeSanguinea[] @relation("TipoDoador")
-  recebeDe  CompatibilidadeSanguinea[] @relation("TipoReceptor")
-  pacientes Paciente[]
+  doaPara      CompatibilidadeSanguinea[] @relation("TipoDoador")
+  recebeDe     CompatibilidadeSanguinea[] @relation("TipoReceptor")
+  pacientes    Paciente[]
+  necessidades NecessidadeEstoque[]
 
   @@unique([grupoAbo, fatorRh])
   @@map("tipo_sanguineo")
@@ -232,8 +246,31 @@ model Hospital {
 
   medicos        Medico[]
   representantes RepresentanteHospital[]
+  necessidades   NecessidadeEstoque[]
 
   @@index([ativo, estado])
   @@index([localizacao], type: Gist)
   @@map("hospital")
+}
+
+// ---------------------------------------------------------------------------
+// Necessidades de estoque (nível qualitativo, não quantidade de bolsas)
+// ---------------------------------------------------------------------------
+
+model NecessidadeEstoque {
+  id              String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  hospitalId      String           @map("hospital_id") @db.Uuid
+  tipoSanguineoId Int              @map("tipo_sanguineo_id") @db.SmallInt
+  nivel           NivelNecessidade @default(NAO_INFORMADO)
+  // Nulos enquanto o nível nunca foi informado pelo representante.
+  atualizadoPorId String?          @map("atualizado_por") @db.Uuid
+  atualizadoEm    DateTime?        @map("atualizado_em") @db.Timestamptz(3)
+
+  hospital      Hospital      @relation(fields: [hospitalId], references: [id], onDelete: Restrict)
+  tipoSanguineo TipoSanguineo @relation(fields: [tipoSanguineoId], references: [id], onDelete: Restrict)
+  atualizadoPor Usuario?      @relation(fields: [atualizadoPorId], references: [id], onDelete: Restrict)
+
+  @@unique([hospitalId, tipoSanguineoId])
+  @@index([tipoSanguineoId, nivel])
+  @@map("necessidade_estoque")
 }

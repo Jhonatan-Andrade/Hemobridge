@@ -9,5 +9,7 @@ export default defineConfig({
     globals: true,
     root: './',
     include: ['**/*.spec.ts'],
+    // Decorators do class-transformer/Nest dependem dos metadados de reflexão.
+    setupFiles: ['reflect-metadata'],
   },
 });

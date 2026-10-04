@@ -6,8 +6,10 @@ import { AuthModule } from './auth/auth.module.js';
 import { LIMITE_PADRAO } from './common/limite-requisicoes.js';
 import { EmailModule } from './email/email.module.js';
 import { HomeController } from './home/home.controller.js';
+import { HospitaisModule } from './hospitais/hospitais.module.js';
 import { PacientesModule } from './pacientes/pacientes.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
+import { TipagemModule } from './tipagem/tipagem.module.js';
 
 @Module({
   imports: [
@@ -20,6 +22,8 @@ import { PrismaModule } from './prisma/prisma.module.js';
     EmailModule,
     AuthModule,
     PacientesModule,
+    HospitaisModule,
+    TipagemModule,
   ],
   controllers: [HomeController],
   // Registrado antes do AuthGuard: o limite vale também para requisições sem token.
