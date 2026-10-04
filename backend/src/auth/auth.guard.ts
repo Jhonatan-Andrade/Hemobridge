@@ -49,10 +49,12 @@ export class AuthGuard implements CanActivate {
         perfil: true,
         status: true,
         senhaProvisoria: true,
+        versaoSessao: true,
         paciente: { select: { situacao: true } },
       },
     });
-    if (!usuario || usuario.status !== 'ATIVO') {
+    // Token emitido antes de troca de senha ou logout não vale mais.
+    if (!usuario || usuario.status !== 'ATIVO' || usuario.versaoSessao !== payload.ver) {
       throw new UnauthorizedException('Sessão inválida ou expirada');
     }
 

@@ -1,4 +1,4 @@
-import { ForbiddenException, HttpStatus, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, HttpStatus, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { gerarHashSenha } from '../common/senha.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -18,6 +18,7 @@ async function criarUsuario(alteracao: Record<string, unknown> = {}) {
     senhaProvisoria: false,
     senhaProvisoriaExpiraEm: null,
     bloqueadoAte: null,
+    versaoSessao: 3,
     paciente: { situacao: 'PRE_CADASTRADO' },
     ...alteracao,
   };
@@ -27,6 +28,7 @@ function criarService(usuario: unknown, tentativasAposFalha = 1) {
   const prisma = {
     usuario: {
       findUnique: vi.fn().mockResolvedValue(usuario),
+      findUniqueOrThrow: vi.fn().mockResolvedValue(usuario),
       update: vi.fn().mockResolvedValue({ tentativasLogin: tentativasAposFalha }),
     },
   };
@@ -54,7 +56,7 @@ describe('AuthService.login', () => {
       primeiroAcesso: false,
       usuario: { id: 'u1', perfil: 'PACIENTE', papel: 'PACIENTE' },
     });
-    expect(jwt.verify(r.accessToken)).toMatchObject({ sub: 'u1', perfil: 'PACIENTE' });
+    expect(jwt.verify(r.accessToken)).toMatchObject({ sub: 'u1', perfil: 'PACIENTE', ver: 3 });
     expect(prisma.usuario.update).toHaveBeenCalledWith({
       where: { id: 'u1' },
       data: { tentativasLogin: 0, bloqueadoAte: null },
@@ -148,5 +150,105 @@ describe('AuthService.login', () => {
     await expect(service.login(login())).rejects.toThrow(
       new ForbiddenException('Sua senha provisória expirou. Solicite o reenvio a quem criou sua conta.'),
     );
+  });
+});
+
+describe('AuthService.definirSenhaPrimeiroAcesso', () => {
+  const PROVISORIA = 'Provisoria1';
+  const dto = (alteracao: Record<string, unknown> = {}) => ({
+    novaSenha: 'NovaSenha9',
+    confirmacaoSenha: 'NovaSenha9',
+    aceiteTermo: true,
+    versaoTermo: '1.0',
+    ...alteracao,
+  });
+
+  async function montar(alteracao: Record<string, unknown> = {}) {
+    const usuario = {
+      senhaHash: await gerarHashSenha(PROVISORIA),
+      senhaProvisoria: true,
+      senhaProvisoriaExpiraEm: new Date('2026-10-05T12:00:00Z'),
+      ...alteracao,
+    };
+    const ctx = criarService(usuario);
+    ctx.prisma.usuario.update.mockImplementation(({ data }) =>
+      Promise.resolve({
+        id: 'm1',
+        nome: 'Dr. João',
+        email: 'joao@hospital.com',
+        perfil: 'MEDICO',
+        senhaProvisoria: data.senhaProvisoria,
+        versaoSessao: 1,
+        paciente: null,
+      }),
+    );
+    return ctx;
+  }
+
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(AGORA);
+  });
+  afterEach(() => vi.useRealTimers());
+
+  it('grava a nova senha, registra o termo, invalida sessões anteriores e devolve nova sessão', async () => {
+    const { service, prisma, jwt } = await montar();
+
+    const r = await service.definirSenhaPrimeiroAcesso('m1', dto(), '10.0.0.1');
+
+    const { where, data } = prisma.usuario.update.mock.calls[0][0];
+    expect(where).toEqual({ id: 'm1', senhaProvisoria: true });
+    expect(data).toMatchObject({
+      senhaProvisoria: false,
+      senhaProvisoriaExpiraEm: null,
+      versaoSessao: { increment: 1 },
+      consentimentos: { create: { versaoTermo: '1.0', ipOrigem: '10.0.0.1' } },
+    });
+    expect(data.senhaHash).toMatch(/^\$argon2id\$/);
+    expect(r.primeiroAcesso).toBe(false);
+    expect(jwt.verify(r.accessToken)).toMatchObject({ sub: 'm1', ver: 1 });
+  });
+
+  it('recusa nova senha igual à provisória (passo 4)', async () => {
+    const { service, prisma } = await montar();
+    await expect(
+      service.definirSenhaPrimeiroAcesso('m1', dto({ novaSenha: PROVISORIA, confirmacaoSenha: PROVISORIA })),
+    ).rejects.toThrow(/diferente da senha provisória/);
+    expect(prisma.usuario.update).not.toHaveBeenCalled();
+  });
+
+  it('recusa senha provisória expirada (FE01)', async () => {
+    const { service } = await montar({ senhaProvisoriaExpiraEm: new Date('2026-10-03T11:00:00Z') });
+    await expect(service.definirSenhaPrimeiroAcesso('m1', dto())).rejects.toBeInstanceOf(
+      ForbiddenException,
+    );
+  });
+
+  it('aceita provisória sem data de expiração (administrador inicial)', async () => {
+    const { service } = await montar({ senhaProvisoriaExpiraEm: null });
+    await expect(service.definirSenhaPrimeiroAcesso('m1', dto())).resolves.toBeDefined();
+  });
+
+  it('recusa conta que já definiu a senha', async () => {
+    const { service } = await montar({ senhaProvisoria: false });
+    await expect(service.definirSenhaPrimeiroAcesso('m1', dto())).rejects.toThrow(/já foi definida/);
+  });
+
+  it('recusa versão do termo diferente da vigente', async () => {
+    const { service } = await montar();
+    await expect(
+      service.definirSenhaPrimeiroAcesso('m1', dto({ versaoTermo: '0.9' })),
+    ).rejects.toBeInstanceOf(BadRequestException);
+  });
+});
+
+describe('AuthService.logout', () => {
+  it('incrementa a versão da sessão', async () => {
+    const { service, prisma } = criarService(null);
+    await service.logout('u1');
+    expect(prisma.usuario.update).toHaveBeenCalledWith({
+      where: { id: 'u1' },
+      data: { versaoSessao: { increment: 1 } },
+    });
   });
 });

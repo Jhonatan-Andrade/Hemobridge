@@ -3,6 +3,8 @@ import type { Perfil, SituacaoPaciente } from '../generated/prisma/enums.js';
 export interface TokenPayload {
   sub: string;
   perfil: Perfil;
+  /** Versão da sessão do usuário quando o token foi emitido. */
+  ver: number;
 }
 
 /** Papel exibido ao usuário: Doador é o Paciente com situação APROVADO. */

@@ -1,15 +1,30 @@
-import { ForbiddenException, HttpException, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, HttpException, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { gerarHashSenha, verificarSenha } from '../common/senha.js';
+import type { Perfil, SituacaoPaciente } from '../generated/prisma/enums.js';
+import { TERMO_RESPONSABILIDADE } from '../lgpd/termo-responsabilidade.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { papelDe, type TokenPayload } from './auth.types.js';
 import { LoginDto } from './dto/login.dto.js';
+import { PrimeiroAcessoDto } from './dto/primeiro-acesso.dto.js';
 
 // RN07
 export const MAX_TENTATIVAS_LOGIN = 5;
 export const MINUTOS_BLOQUEIO = 15;
 
 const MENSAGEM_CREDENCIAIS_INVALIDAS = 'E-mail ou senha incorretos';
+const MENSAGEM_PROVISORIA_EXPIRADA =
+  'Sua senha provisória expirou. Solicite o reenvio a quem criou sua conta.';
+
+interface DadosSessao {
+  id: string;
+  nome: string;
+  email: string;
+  perfil: Perfil;
+  senhaProvisoria: boolean;
+  versaoSessao: number;
+  paciente: { situacao: SituacaoPaciente } | null;
+}
 
 @Injectable()
 export class AuthService {
@@ -36,6 +51,7 @@ export class AuthService {
         senhaProvisoria: true,
         senhaProvisoriaExpiraEm: true,
         bloqueadoAte: true,
+        versaoSessao: true,
         paciente: { select: { situacao: true } },
       },
     });
@@ -65,14 +81,8 @@ export class AuthService {
     }
 
     // UC07 FE01 / RN15
-    if (
-      usuario.senhaProvisoria &&
-      usuario.senhaProvisoriaExpiraEm &&
-      usuario.senhaProvisoriaExpiraEm <= agora
-    ) {
-      throw new ForbiddenException(
-        'Sua senha provisória expirou. Solicite o reenvio a quem criou sua conta.',
-      );
+    if (usuario.senhaProvisoria && this.provisoriaExpirada(usuario.senhaProvisoriaExpiraEm, agora)) {
+      throw new ForbiddenException(MENSAGEM_PROVISORIA_EXPIRADA);
     }
 
     await this.prisma.usuario.update({
@@ -80,7 +90,78 @@ export class AuthService {
       data: { tentativasLogin: 0, bloqueadoAte: null },
     });
 
-    const payload: TokenPayload = { sub: usuario.id, perfil: usuario.perfil };
+    return this.emitirSessao(usuario);
+  }
+
+  // UC07 – Definir Senha no Primeiro Acesso
+  async definirSenhaPrimeiroAcesso(usuarioId: string, dto: PrimeiroAcessoDto, ipOrigem?: string) {
+    if (dto.versaoTermo !== TERMO_RESPONSABILIDADE.versao) {
+      throw new BadRequestException(
+        'A versão do termo de responsabilidade aceita não é a vigente. Recarregue a página e aceite o termo atual.',
+      );
+    }
+    const usuario = await this.prisma.usuario.findUniqueOrThrow({
+      where: { id: usuarioId },
+      select: { senhaHash: true, senhaProvisoria: true, senhaProvisoriaExpiraEm: true },
+    });
+    if (!usuario.senhaProvisoria) {
+      throw new BadRequestException('A senha desta conta já foi definida.');
+    }
+    // FE01: o token pode ter sido emitido antes de a senha provisória expirar.
+    if (this.provisoriaExpirada(usuario.senhaProvisoriaExpiraEm, new Date())) {
+      throw new ForbiddenException(MENSAGEM_PROVISORIA_EXPIRADA);
+    }
+    // Passo 4: a nova senha não pode ser igual à provisória.
+    if (await verificarSenha(usuario.senhaHash, dto.novaSenha)) {
+      throw new BadRequestException('A nova senha deve ser diferente da senha provisória.');
+    }
+
+    // O filtro senhaProvisoria: true impede que duas requisições concorrentes
+    // definam a senha duas vezes.
+    const atualizado = await this.prisma.usuario.update({
+      where: { id: usuarioId, senhaProvisoria: true },
+      data: {
+        senhaHash: await gerarHashSenha(dto.novaSenha),
+        senhaProvisoria: false,
+        senhaProvisoriaExpiraEm: null,
+        versaoSessao: { increment: 1 },
+        consentimentos: {
+          create: {
+            versaoTermo: TERMO_RESPONSABILIDADE.versao,
+            finalidade: TERMO_RESPONSABILIDADE.finalidade,
+            ipOrigem,
+          },
+        },
+      },
+      select: {
+        id: true,
+        nome: true,
+        email: true,
+        perfil: true,
+        senhaProvisoria: true,
+        versaoSessao: true,
+        paciente: { select: { situacao: true } },
+      },
+    });
+
+    // Passo 6: segue para o painel com uma sessão nova.
+    return this.emitirSessao(atualizado);
+  }
+
+  /** UC05 FA01: encerra a sessão invalidando todos os tokens já emitidos. */
+  async logout(usuarioId: string) {
+    await this.prisma.usuario.update({
+      where: { id: usuarioId },
+      data: { versaoSessao: { increment: 1 } },
+    });
+  }
+
+  private async emitirSessao(usuario: DadosSessao) {
+    const payload: TokenPayload = {
+      sub: usuario.id,
+      perfil: usuario.perfil,
+      ver: usuario.versaoSessao,
+    };
     const accessToken = await this.jwt.signAsync(payload);
     const { exp } = this.jwt.decode<{ exp: number }>(accessToken);
 
@@ -98,6 +179,11 @@ export class AuthService {
         papel: papelDe(usuario.perfil, usuario.paciente?.situacao),
       },
     };
+  }
+
+  /** RN15: sem data de expiração (ex.: administrador inicial), a provisória não expira. */
+  private provisoriaExpirada(expiraEm: Date | null, agora: Date): boolean {
+    return expiraEm !== null && expiraEm <= agora;
   }
 
   /** Conta a tentativa inválida; na 5ª consecutiva bloqueia a conta (RN07). */
