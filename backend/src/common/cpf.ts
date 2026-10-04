@@ -23,8 +23,7 @@ export function isCpfValido(cpf: string): boolean {
 }
 
 /** Mascara o CPF para listagens ("12345678909" -> "***.456.789-**"). */
-export function  mascararCpf(cpf?: string | null){
-  const digits = (cpf ?? '').replace(/\D/g, '');
-  if (digits.length !== 11) return cpf ?? '';
-  return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
-};
+export function mascararCpf(cpf: string): string {
+  const d = normalizarCpf(cpf);
+  return d.length === 11 ? `***.${d.slice(3, 6)}.${d.slice(6, 9)}-**` : '***';
+}
