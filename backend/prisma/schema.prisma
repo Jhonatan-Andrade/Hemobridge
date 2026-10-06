@@ -1,0 +1,301 @@
+// Modelo de dados do Hemobridge (ver docs/2026-2_Parcial_HemoBridge_01.pdf, cap. 9).
+// Os modelos são adicionados por etapas. Regras que o Prisma não expressa
+// (CHECK, colunas geradas, índices GiST) ficam no SQL das migrations.
+
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
+  previewFeatures     = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  extensions = [postgis, unaccent]
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum Perfil {
+  PACIENTE
+  MEDICO
+  REPRESENTANTE
+  ADMINISTRADOR
+
+  @@map("perfil")
+}
+
+enum StatusUsuario {
+  ATIVO
+  INATIVO
+  ENCERRADO
+
+  @@map("status_usuario")
+}
+
+enum Sexo {
+  MASCULINO
+  FEMININO
+
+  @@map("sexo")
+}
+
+// RN10
+enum SituacaoPaciente {
+  PRE_CADASTRADO
+  CONSULTA_AGENDADA
+  AGUARDANDO_EXAME
+  EM_ANALISE
+  APROVADO
+  REPROVADO
+
+  @@map("situacao_paciente")
+}
+
+// RN02 — ordem decrescente de prioridade; NAO_INFORMADO não entra na priorização.
+enum NivelNecessidade {
+  CRITICO
+  BAIXO
+  ESTAVEL
+  ADEQUADO
+  NAO_INFORMADO
+
+  @@map("nivel_necessidade")
+}
+
+enum GrupoAbo {
+  A
+  B
+  AB
+  O
+
+  @@map("grupo_abo")
+}
+
+enum FatorRh {
+  POSITIVO
+  NEGATIVO
+
+  @@map("fator_rh")
+}
+
+// ---------------------------------------------------------------------------
+// Identidade e perfis
+// ---------------------------------------------------------------------------
+
+model Usuario {
+  id                      String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nome                    String        @db.VarChar(150)
+  email                   String        @unique @db.VarChar(254)
+  cpf                     String        @unique @db.Char(11)
+  telefone                String?       @db.VarChar(20)
+  senhaHash               String        @map("senha_hash")
+  senhaProvisoria         Boolean       @default(false) @map("senha_provisoria")
+  senhaProvisoriaExpiraEm DateTime?     @map("senha_provisoria_expira_em") @db.Timestamptz(3)
+  senhaResetTokenHash     String?       @unique @map("senha_reset_token_hash")
+  senhaResetExpiraEm      DateTime?     @map("senha_reset_expira_em") @db.Timestamptz(3)
+  senhaResetUsadoEm       DateTime?     @map("senha_reset_usado_em") @db.Timestamptz(3)
+  perfil                  Perfil
+  status                  StatusUsuario @default(ATIVO)
+  tentativasLogin         Int           @default(0) @map("tentativas_login") @db.SmallInt
+  bloqueadoAte            DateTime?     @map("bloqueado_ate") @db.Timestamptz(3)
+  // Incrementada ao trocar a senha ou sair: invalida os tokens emitidos antes.
+  versaoSessao            Int           @default(0) @map("versao_sessao")
+  criadoEm                DateTime      @default(now()) @map("criado_em") @db.Timestamptz(3)
+  atualizadoEm            DateTime      @updatedAt @map("atualizado_em") @db.Timestamptz(3)
+
+  paciente       Paciente?
+  medico         Medico?
+  representante  RepresentanteHospital?
+  consentimentos ConsentimentoLgpd[]
+
+  necessidadesAtualizadas NecessidadeEstoque[]
+  crmsConferidos          Medico[]               @relation("CrmConferidoPor")
+  alteracoesNecessidade   HistoricoNecessidade[]
+
+  @@index([perfil, status])
+  @@map("usuario")
+}
+
+// Doador = Paciente com situacao APROVADO (não há tabela própria).
+model Paciente {
+  usuarioId         String           @id @map("usuario_id") @db.Uuid
+  dataNascimento    DateTime         @map("data_nascimento") @db.Date
+  sexo              Sexo
+  pesoKg            Decimal          @map("peso_kg") @db.Decimal(5, 2)
+  cidade            String           @db.VarChar(100)
+  estado            String           @db.Char(2)
+  situacao          SituacaoPaciente @default(PRE_CADASTRADO)
+  tipoSanguineoId   Int?             @map("tipo_sanguineo_id") @db.SmallInt
+  medicoValidadorId String?          @map("medico_validador_id") @db.Uuid
+  validadoEm        DateTime?        @map("validado_em") @db.Timestamptz(3)
+
+  usuario         Usuario        @relation(fields: [usuarioId], references: [id], onDelete: Restrict)
+  tipoSanguineo   TipoSanguineo? @relation(fields: [tipoSanguineoId], references: [id], onDelete: Restrict)
+  medicoValidador Medico?        @relation(fields: [medicoValidadorId], references: [usuarioId], onDelete: Restrict)
+
+  @@index([situacao, estado])
+  @@index([tipoSanguineoId])
+  @@index([medicoValidadorId])
+  @@map("paciente")
+}
+
+model Medico {
+  usuarioId         String   @id @map("usuario_id") @db.Uuid
+  hospitalId        String   @map("hospital_id") @db.Uuid
+  crm               String   @db.VarChar(10)
+  ufCrm             String   @map("uf_crm") @db.Char(2)
+  // RF13: declaração do representante de que a instituição conferiu CRM e UF.
+  crmConferidoPorId String   @map("crm_conferido_por") @db.Uuid
+  crmConferidoEm    DateTime @default(now()) @map("crm_conferido_em") @db.Timestamptz(3)
+
+  usuario            Usuario    @relation(fields: [usuarioId], references: [id], onDelete: Restrict)
+  crmConferidoPor    Usuario    @relation("CrmConferidoPor", fields: [crmConferidoPorId], references: [id], onDelete: Restrict)
+  hospital           Hospital   @relation(fields: [hospitalId], references: [id], onDelete: Restrict)
+  pacientesValidados Paciente[]
+
+  @@unique([crm, ufCrm])
+  @@index([hospitalId])
+  @@map("medico")
+}
+
+model RepresentanteHospital {
+  usuarioId  String  @id @map("usuario_id") @db.Uuid
+  hospitalId String  @map("hospital_id") @db.Uuid
+  cargo      String? @db.VarChar(100)
+
+  usuario  Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Restrict)
+  hospital Hospital @relation(fields: [hospitalId], references: [id], onDelete: Restrict)
+
+  @@index([hospitalId])
+  @@map("representante_hospital")
+}
+
+// ---------------------------------------------------------------------------
+// Proteção de dados (LGPD)
+// ---------------------------------------------------------------------------
+
+// RF02 / RN12: aceite versionado do termo de consentimento.
+model ConsentimentoLgpd {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  usuarioId   String    @map("usuario_id") @db.Uuid
+  versaoTermo String    @map("versao_termo") @db.VarChar(20)
+  finalidade  String    @db.VarChar(255)
+  aceitoEm    DateTime  @default(now()) @map("aceito_em") @db.Timestamptz(3)
+  ipOrigem    String?   @map("ip_origem") @db.Inet
+  revogadoEm  DateTime? @map("revogado_em") @db.Timestamptz(3)
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Restrict)
+
+  @@index([usuarioId])
+  @@map("consentimento_lgpd")
+}
+
+// ---------------------------------------------------------------------------
+// Tipagem sanguínea
+// ---------------------------------------------------------------------------
+
+// RN01
+model TipoSanguineo {
+  id       Int      @id @default(autoincrement()) @db.SmallInt
+  sigla    String   @unique @db.VarChar(3)
+  grupoAbo GrupoAbo @map("grupo_abo")
+  fatorRh  FatorRh  @map("fator_rh")
+
+  doaPara      CompatibilidadeSanguinea[] @relation("TipoDoador")
+  recebeDe     CompatibilidadeSanguinea[] @relation("TipoReceptor")
+  pacientes    Paciente[]
+  necessidades NecessidadeEstoque[]
+
+  @@unique([grupoAbo, fatorRh])
+  @@map("tipo_sanguineo")
+}
+
+// RN05 — concentrado de hemácias.
+model CompatibilidadeSanguinea {
+  tipoDoadorId   Int @map("tipo_doador_id") @db.SmallInt
+  tipoReceptorId Int @map("tipo_receptor_id") @db.SmallInt
+
+  tipoDoador   TipoSanguineo @relation("TipoDoador", fields: [tipoDoadorId], references: [id], onDelete: Restrict)
+  tipoReceptor TipoSanguineo @relation("TipoReceptor", fields: [tipoReceptorId], references: [id], onDelete: Restrict)
+
+  @@id([tipoDoadorId, tipoReceptorId])
+  @@index([tipoReceptorId])
+  @@map("compatibilidade_sanguinea")
+}
+
+// ---------------------------------------------------------------------------
+// Hospitais (bancos de sangue)
+// ---------------------------------------------------------------------------
+
+model Hospital {
+  id                   String                                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nome                 String                                 @db.VarChar(150)
+  cnpj                 String                                 @unique @db.Char(14)
+  endereco             String                                 @db.VarChar(255)
+  cidade               String                                 @db.VarChar(100)
+  estado               String                                 @db.Char(2)
+  cep                  String                                 @db.Char(8)
+  telefone             String?                                @db.VarChar(20)
+  horarioFuncionamento String?                                @map("horario_funcionamento") @db.VarChar(255)
+  latitude             Decimal                                @db.Decimal(9, 6)
+  longitude            Decimal                                @db.Decimal(9, 6)
+  // Coluna GERADA a partir de latitude/longitude (GENERATED ALWAYS na migration).
+  // O dbgenerated abaixo só espelha a expressão para o Prisma não acusar drift.
+  localizacao          Unsupported("geography(Point, 4326)")? @default(dbgenerated("(st_setsrid(st_makepoint((longitude)::double precision, (latitude)::double precision), 4326))::geography"))
+  ativo                Boolean                                @default(true)
+  criadoEm             DateTime                               @default(now()) @map("criado_em") @db.Timestamptz(3)
+  atualizadoEm         DateTime                               @updatedAt @map("atualizado_em") @db.Timestamptz(3)
+
+  medicos        Medico[]
+  representantes RepresentanteHospital[]
+  necessidades   NecessidadeEstoque[]
+
+  @@index([ativo, estado])
+  @@index([localizacao], type: Gist)
+  @@map("hospital")
+}
+
+// ---------------------------------------------------------------------------
+// Necessidades de estoque (nível qualitativo, não quantidade de bolsas)
+// ---------------------------------------------------------------------------
+
+model NecessidadeEstoque {
+  id              String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  hospitalId      String           @map("hospital_id") @db.Uuid
+  tipoSanguineoId Int              @map("tipo_sanguineo_id") @db.SmallInt
+  nivel           NivelNecessidade @default(NAO_INFORMADO)
+  // Nulos enquanto o nível nunca foi informado pelo representante.
+  atualizadoPorId String?          @map("atualizado_por") @db.Uuid
+  atualizadoEm    DateTime?        @map("atualizado_em") @db.Timestamptz(3)
+
+  hospital      Hospital               @relation(fields: [hospitalId], references: [id], onDelete: Restrict)
+  tipoSanguineo TipoSanguineo          @relation(fields: [tipoSanguineoId], references: [id], onDelete: Restrict)
+  atualizadoPor Usuario?               @relation(fields: [atualizadoPorId], references: [id], onDelete: Restrict)
+  historico     HistoricoNecessidade[]
+
+  @@unique([hospitalId, tipoSanguineoId])
+  @@index([tipoSanguineoId, nivel])
+  @@map("necessidade_estoque")
+}
+
+// RN03: gravado pelo trigger "necessidade_registrar_historico" a cada mudança
+// de nível; a aplicação apenas consulta.
+model HistoricoNecessidade {
+  id            BigInt           @id @default(autoincrement())
+  necessidadeId String           @map("necessidade_id") @db.Uuid
+  nivelAnterior NivelNecessidade @map("nivel_anterior")
+  nivelNovo     NivelNecessidade @map("nivel_novo")
+  alteradoPorId String           @map("alterado_por") @db.Uuid
+  alteradoEm    DateTime         @map("alterado_em") @db.Timestamptz(3)
+
+  necessidade NecessidadeEstoque @relation(fields: [necessidadeId], references: [id], onDelete: Restrict)
+  alteradoPor Usuario            @relation(fields: [alteradoPorId], references: [id], onDelete: Restrict)
+
+  @@index([necessidadeId, alteradoEm])
+  @@index([alteradoEm])
+  @@map("historico_necessidade")
+}

@@ -1,0 +1,760 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hemobridge API</title>
+<style>
+  :root {
+    --bg: #f7f7f8;
+    --surface: #ffffff;
+    --surface-2: #f1f1f4;
+    --border: #e2e2e8;
+    --text: #1d1d24;
+    --muted: #61616e;
+    --accent: #b3122e;
+    --accent-soft: #fbe9ec;
+    --code-bg: #f4f4f7;
+    --get: #1b6fd1;
+    --post: #1f8a4c;
+    --put: #b8740d;
+    --patch: #8a4fd1;
+    --delete: #c62f3c;
+    --chip-bg: #ececf1;
+    --shadow: 0 1px 2px rgb(0 0 0 / 5%);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #121216;
+      --surface: #1a1a20;
+      --surface-2: #22222a;
+      --border: #2e2e38;
+      --text: #ececf1;
+      --muted: #a0a0ad;
+      --accent: #ff5c73;
+      --accent-soft: #3a1820;
+      --code-bg: #15151a;
+      --get: #5aa2f5;
+      --post: #4cc27f;
+      --put: #e8a83c;
+      --patch: #b38af0;
+      --delete: #f0606b;
+      --chip-bg: #2a2a33;
+      --shadow: none;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #121216;
+    --surface: #1a1a20;
+    --surface-2: #22222a;
+    --border: #2e2e38;
+    --text: #ececf1;
+    --muted: #a0a0ad;
+    --accent: #ff5c73;
+    --accent-soft: #3a1820;
+    --code-bg: #15151a;
+    --get: #5aa2f5;
+    --post: #4cc27f;
+    --put: #e8a83c;
+    --patch: #b38af0;
+    --delete: #f0606b;
+    --chip-bg: #2a2a33;
+    --shadow: none;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 76px; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 15px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  code, pre, .mono { font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace; font-size: 13px; }
+  a { color: var(--accent); }
+
+  header.topo {
+    position: sticky; top: 0; z-index: 10;
+    display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center;
+    padding: 12px 16px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+  .marca { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 17px; margin-right: auto; }
+  .marca .gota { width: 14px; height: 18px; background: var(--accent); border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; transform: rotate(180deg); }
+  .marca small { font-weight: 400; color: var(--muted); font-size: 13px; }
+  .config { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .config label { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+  input[type="text"], input[type="search"] {
+    background: var(--surface-2); color: var(--text);
+    border: 1px solid var(--border); border-radius: 6px;
+    padding: 6px 9px; font: inherit; font-size: 13px; min-width: 0;
+  }
+  input:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  #baseUrl { width: 190px; }
+  #token { width: 210px; }
+  button {
+    background: var(--surface-2); color: var(--text);
+    border: 1px solid var(--border); border-radius: 6px;
+    padding: 6px 10px; font: inherit; font-size: 13px; cursor: pointer;
+  }
+  button:hover { border-color: var(--muted); }
+
+  .layout { display: grid; grid-template-columns: 270px minmax(0, 1fr); max-width: 1280px; margin: 0 auto; }
+  nav.lateral {
+    position: sticky; top: 61px; align-self: start;
+    height: calc(100vh - 61px); overflow-y: auto;
+    padding: 16px 12px 40px; border-right: 1px solid var(--border);
+  }
+  nav.lateral input { width: 100%; margin-bottom: 14px; }
+  nav.lateral h4 { margin: 16px 6px 6px; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+  nav.lateral a {
+    display: flex; gap: 8px; align-items: baseline;
+    padding: 4px 6px; border-radius: 5px;
+    color: var(--text); text-decoration: none; font-size: 13px;
+  }
+  nav.lateral a:hover { background: var(--surface-2); }
+  nav.lateral a .metodo { flex: 0 0 44px; font-size: 10px; }
+  nav.lateral a span.caminho { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  main { padding: 24px 24px 80px; min-width: 0; }
+  h1 { font-size: 26px; margin: 0 0 6px; }
+  h2.grupo { font-size: 20px; margin: 40px 0 4px; padding-top: 8px; }
+  p.grupo-desc { margin: 0 0 14px; color: var(--muted); }
+  .intro { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; box-shadow: var(--shadow); }
+  .intro h3 { margin: 18px 0 6px; font-size: 15px; }
+  .intro h3:first-child { margin-top: 0; }
+  .intro ul, .intro ol { margin: 6px 0; padding-left: 20px; }
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { font-size: 12px; color: var(--muted); font-weight: 600; }
+  .tabela-scroll { overflow-x: auto; }
+
+  .metodo {
+    display: inline-block; min-width: 54px; text-align: center;
+    font-weight: 700; font-size: 11.5px; letter-spacing: .03em;
+    padding: 2px 6px; border-radius: 4px; color: #fff;
+  }
+  .metodo.GET { background: var(--get); }
+  .metodo.POST { background: var(--post); }
+  .metodo.PUT { background: var(--put); }
+  .metodo.PATCH { background: var(--patch); }
+  .metodo.DELETE { background: var(--delete); }
+  nav.lateral .metodo { color: var(--get); background: none; padding: 0; text-align: left; }
+  nav.lateral .metodo.POST { color: var(--post); }
+  nav.lateral .metodo.PUT { color: var(--put); }
+  nav.lateral .metodo.PATCH { color: var(--patch); }
+
+  details.rota {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; margin: 10px 0; box-shadow: var(--shadow);
+  }
+  details.rota > summary {
+    list-style: none; cursor: pointer;
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px;
+    padding: 12px 14px;
+  }
+  details.rota > summary::-webkit-details-marker { display: none; }
+  details.rota > summary .caminho { font-weight: 600; word-break: break-all; }
+  details.rota > summary .resumo { color: var(--muted); font-size: 13.5px; flex: 1 1 220px; }
+  details.rota[open] > summary { border-bottom: 1px solid var(--border); }
+  .corpo { padding: 14px 16px 16px; }
+  .corpo h5 { margin: 16px 0 6px; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+  .corpo h5:first-child { margin-top: 0; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { font-size: 11.5px; padding: 2px 8px; border-radius: 999px; background: var(--chip-bg); color: var(--text); white-space: nowrap; }
+  .chip.publico { background: color-mix(in srgb, var(--post) 18%, transparent); }
+  .chip.perfil { background: var(--accent-soft); }
+  .chip.limite { background: color-mix(in srgb, var(--put) 18%, transparent); }
+  ul.regras { margin: 4px 0; padding-left: 18px; }
+  ul.regras li { margin: 2px 0; }
+  pre {
+    margin: 0; padding: 12px 14px; overflow-x: auto;
+    background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px;
+    line-height: 1.45;
+  }
+  .exemplos { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+  .exemplos > div { min-width: 0; }
+  .rotulo { font-size: 12px; color: var(--muted); margin: 0 0 4px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  td.campo code { font-weight: 600; }
+  .obrig { color: var(--accent); font-size: 12px; }
+  .opc { color: var(--muted); font-size: 12px; }
+  .erros td:first-child { white-space: nowrap; font-weight: 600; }
+  .aviso { border-left: 3px solid var(--accent); padding: 6px 12px; background: var(--accent-soft); border-radius: 0 6px 6px 0; font-size: 13.5px; margin: 8px 0; }
+  .vazio { color: var(--muted); padding: 30px 0; text-align: center; display: none; }
+  .copiado { color: var(--post); font-size: 12px; }
+
+  @media (max-width: 860px) {
+    .layout { grid-template-columns: 1fr; }
+    nav.lateral { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--border); max-height: 50vh; }
+    main { padding: 16px 16px 60px; }
+    #baseUrl, #token { width: 100%; }
+    .config { width: 100%; }
+    .config label { flex: 1 1 100%; }
+    .config label input { flex: 1; }
+  }
+</style>
+</head>
+<body>
+<header class="topo">
+  <div class="marca"><span class="gota" aria-hidden="true"></span>Hemobridge API <small>v0.1 · documentação</small></div>
+  <div class="config">
+    <label>URL base <input id="baseUrl" type="text" spellcheck="false" aria-label="URL base da API"></label>
+    <label>Token <input id="token" type="text" spellcheck="false" placeholder="cole o accessToken" aria-label="Token de acesso"></label>
+    <button id="tema" type="button" title="Alternar tema claro/escuro">◐ Tema</button>
+  </div>
+</header>
+
+<div class="layout">
+  <nav class="lateral" aria-label="Rotas">
+    <input id="busca" type="search" placeholder="Buscar rota, campo, regra…" aria-label="Buscar">
+    <div id="menu"></div>
+  </nav>
+
+  <main>
+    <h1>Hemobridge API</h1>
+    <p style="color:var(--muted);margin:0 0 18px">Plataforma de direcionamento de doações de sangue · NestJS + PostgreSQL/PostGIS. Referências (RFxx, RNxx, UCxx) seguem o projeto lógico.</p>
+
+    <section class="intro" id="visao-geral">
+      <h3>Autenticação</h3>
+      <p>Todas as rotas exigem o cabeçalho <code>Authorization: Bearer &lt;accessToken&gt;</code>, exceto as marcadas como <span class="chip publico">Público</span>. O token é obtido em <code>POST /auth/login</code> e vale por 1 hora (<code>JWT_EXPIRACAO</code>). A cada requisição o usuário é relido do banco: conta desativada, instituição desativada, troca de senha ou logout invalidam o token na hora.</p>
+
+      <h3>Perfis e papéis</h3>
+      <table>
+        <tr><th>Perfil</th><th>Como é criado</th><th>Observação</th></tr>
+        <tr><td><code>PACIENTE</code></td><td>Pré-cadastro público (<code>POST /pacientes</code>)</td><td>Recebe <code>papel: "DOADOR"</code> quando a situação é <code>APROVADO</code>.</td></tr>
+        <tr><td><code>REPRESENTANTE</code></td><td>Administrador, junto com o banco de sangue</td><td>Vinculado a um único hospital; só acessa os dados dele (RN08).</td></tr>
+        <tr><td><code>MEDICO</code></td><td>Representante do hospital</td><td>Vinculado a um único hospital (RN04).</td></tr>
+        <tr><td><code>ADMINISTRADOR</code></td><td>Seed inicial (RN16) ou outro administrador</td><td>Visão de toda a plataforma.</td></tr>
+      </table>
+
+      <h3>Primeiro acesso (senha provisória)</h3>
+      <ol>
+        <li>Contas criadas por terceiros recebem por e-mail uma senha provisória válida por 72h (RN15).</li>
+        <li><code>POST /auth/login</code> com a provisória responde <code>"primeiroAcesso": true</code>.</li>
+        <li>Enquanto isso, só funcionam <code>/auth/me</code>, <code>/auth/logout</code> e <code>/auth/primeiro-acesso*</code>; as demais respondem <b>403</b>.</li>
+        <li><code>POST /auth/primeiro-acesso</code> define a senha e devolve um <b>novo token</b> — o anterior deixa de valer.</li>
+      </ol>
+
+      <h3>Formato de erro</h3>
+<pre>{
+  "statusCode": 400,
+  "error": "Bad Request",
+  "message": ["CPF inválido", "E-mail inválido"]   // texto ou lista
+}</pre>
+      <p>Códigos usados: <b>400</b> dados inválidos · <b>401</b> sem token / sessão inválida · <b>403</b> perfil sem permissão, conta ou instituição desativada, primeiro acesso pendente · <b>404</b> não encontrado (inclui recurso de outro hospital) · <b>409</b> conflito (CPF, e-mail, CNPJ, CRM) · <b>422</b> critério de doação não atendido · <b>423</b> conta bloqueada por tentativas · <b>429</b> limite de requisições (ver cabeçalho <code>Retry-After</code>).</p>
+
+      <h3>Convenções</h3>
+      <ul>
+        <li>Campos extras no corpo são recusados (<code>property X should not exist</code>).</li>
+        <li>CPF, CNPJ, CEP e telefone aceitam máscara; são gravados só com dígitos. E-mail é gravado em minúsculas.</li>
+        <li>Senha: 8 a 128 caracteres, com letra maiúscula, letra minúscula e número (RN06).</li>
+        <li>Datas em ISO 8601 (UTC). Datas de nascimento em <code>AAAA-MM-DD</code>.</li>
+        <li>Listas paginadas devolvem <code>{ itens, total, pagina, tamanhoPagina }</code>.</li>
+        <li>Na query string, <code>+</code> deve ser enviado como <code>%2B</code> (ex.: <code>tipos=A%2B</code>); a API também aceita <code>A+</code> sem codificação.</li>
+        <li>Limite geral: 100 requisições/min por IP; rotas sensíveis têm limites próprios.</li>
+      </ul>
+    </section>
+
+    <div id="conteudo"></div>
+    <p class="vazio" id="vazio">Nenhuma rota encontrada para a busca.</p>
+  </main>
+</div>
+
+<script>
+const PUBLICO = { publico: true };
+const perfis = (...p) => ({ perfis: p });
+
+const GRUPOS = [
+  {
+    id: 'auth', nome: 'Autenticação', desc: 'Login, sessão, primeiro acesso e recuperação de senha (RF14 · UC05, UC06, UC07).',
+    rotas: [
+      {
+        metodo: 'POST', caminho: '/auth/login', resumo: 'Entrar com e-mail e senha', acesso: PUBLICO, limite: '10/min por IP', status: 200,
+        regras: [
+          'Mensagem única "E-mail ou senha incorretos" para e-mail inexistente ou senha errada (FE01), com tempo de resposta equivalente.',
+          '5 tentativas inválidas seguidas bloqueiam a conta por 15 minutos (RN07); durante o bloqueio, nem a senha certa entra.',
+          'primeiroAcesso: true indica senha provisória — encaminhar para UC07.',
+        ],
+        corpo: [
+          ['email', 'string', true, 'E-mail cadastrado.'],
+          ['senha', 'string', true, 'Senha atual (a política RN06 não é verificada aqui).'],
+        ],
+        exReq: { email: 'maria@email.com', senha: 'SenhaForte1' },
+        exRes: {
+          accessToken: 'eyJhbGciOiJIUzI1NiIs…', tokenType: 'Bearer', expiraEm: '2026-10-04T13:00:00.000Z', primeiroAcesso: false,
+          usuario: { id: 'uuid', nome: 'Maria da Silva', email: 'maria@email.com', perfil: 'PACIENTE', papel: 'PACIENTE' },
+        },
+        erros: [
+          [401, 'E-mail ou senha incorretos.'],
+          [403, 'Conta desativada (FE03), instituição desativada (RN09) ou senha provisória expirada (RN15).'],
+          [423, 'Conta bloqueada; resposta traz bloqueadoAte e minutos restantes (FE02).'],
+          [429, 'Limite de requisições.'],
+        ],
+      },
+      {
+        metodo: 'POST', caminho: '/auth/logout', resumo: 'Encerrar a sessão', acesso: { autenticado: true, primeiroAcesso: true }, status: 204,
+        regras: ['Invalida todos os tokens já emitidos para o usuário (todos os dispositivos).'],
+        erros: [[401, 'Sem token ou sessão inválida.']],
+      },
+      {
+        metodo: 'GET', caminho: '/auth/me', resumo: 'Dados da sessão atual', acesso: { autenticado: true, primeiroAcesso: true }, status: 200,
+        exRes: { id: 'uuid', nome: 'Maria da Silva', email: 'maria@email.com', perfil: 'PACIENTE', papel: 'DOADOR', senhaProvisoria: false },
+        erros: [[401, 'Sem token ou sessão inválida.']],
+      },
+      {
+        metodo: 'GET', caminho: '/auth/primeiro-acesso/termo', resumo: 'Termo de responsabilidade e sigilo vigente',
+        acesso: { ...perfis('MEDICO', 'REPRESENTANTE', 'ADMINISTRADOR'), primeiroAcesso: true }, status: 200,
+        exRes: { versao: '1.0', finalidade: 'Termo de responsabilidade e sigilo sobre os dados de pacientes acessados na plataforma' },
+      },
+      {
+        metodo: 'POST', caminho: '/auth/primeiro-acesso', resumo: 'Definir a senha no primeiro acesso (UC07)',
+        acesso: { ...perfis('MEDICO', 'REPRESENTANTE', 'ADMINISTRADOR'), primeiroAcesso: true }, status: 200,
+        regras: [
+          'A nova senha não pode ser igual à provisória e segue RN06.',
+          'Registra o aceite do termo (versão, data/hora e IP).',
+          'Devolve uma sessão nova (mesmo formato do login); o token anterior deixa de valer.',
+        ],
+        corpo: [
+          ['novaSenha', 'string', true, 'Nova senha (RN06).'],
+          ['confirmacaoSenha', 'string', true, 'Igual a novaSenha.'],
+          ['aceiteTermo', 'boolean', true, 'Deve ser true (FE03).'],
+          ['versaoTermo', 'string', true, 'Versão exibida (GET /auth/primeiro-acesso/termo).'],
+        ],
+        exReq: { novaSenha: 'NovaSenha9', confirmacaoSenha: 'NovaSenha9', aceiteTermo: true, versaoTermo: '1.0' },
+        exRes: { accessToken: 'eyJ…', tokenType: 'Bearer', expiraEm: '…', primeiroAcesso: false, usuario: { perfil: 'REPRESENTANTE', '…': '…' } },
+        erros: [
+          [400, 'Senha inválida, igual à provisória, termo não aceito, versão do termo desatualizada ou senha já definida.'],
+          [403, 'Senha provisória expirada (FE01) ou perfil PACIENTE.'],
+        ],
+      },
+      {
+        metodo: 'POST', caminho: '/auth/recuperar-senha', resumo: 'Solicitar link de redefinição (UC06)', acesso: PUBLICO, limite: '5 a cada 15 min por IP', status: 202,
+        regras: [
+          'Resposta idêntica exista ou não a conta (RN14); o e-mail é enviado em segundo plano.',
+          'Link válido por 30 minutos e de uso único; um novo pedido invalida o anterior.',
+          'Contas inativas, encerradas ou com senha provisória não recebem link.',
+          'O link aponta para FRONTEND_URL/redefinir-senha?token=… — o frontend lê o token e chama /auth/redefinir-senha.',
+        ],
+        corpo: [['email', 'string', true, 'E-mail da conta.']],
+        exReq: { email: 'maria@email.com' },
+        exRes: { mensagem: 'Se houver uma conta com este e-mail, enviaremos um link para redefinir a senha.' },
+      },
+      {
+        metodo: 'POST', caminho: '/auth/redefinir-senha', resumo: 'Definir nova senha com o token do e-mail', acesso: PUBLICO, limite: '10/min por IP', status: 200,
+        regras: ['Desbloqueia a conta (RN07) e encerra todas as sessões abertas.'],
+        corpo: [
+          ['token', 'string', true, 'Token recebido no link do e-mail.'],
+          ['novaSenha', 'string', true, 'Nova senha (RN06).'],
+          ['confirmacaoSenha', 'string', true, 'Igual a novaSenha.'],
+        ],
+        exReq: { token: '402Xivh-j1bxcoOL7UTsFZEmuauE-RT8eE2L09FsDo4', novaSenha: 'NovaSenha9', confirmacaoSenha: 'NovaSenha9' },
+        exRes: { mensagem: 'Senha redefinida com sucesso. Entre com a nova senha.' },
+        erros: [[400, 'Senha inválida ou link expirado / já utilizado / inexistente (FE01).']],
+      },
+    ],
+  },
+  {
+    id: 'pacientes', nome: 'Pacientes', desc: 'Pré-cadastro do paciente com consentimento LGPD (RF01, RF02 · UC01).',
+    rotas: [
+      {
+        metodo: 'GET', caminho: '/pacientes/termo-consentimento', resumo: 'Termo de consentimento vigente', acesso: PUBLICO, status: 200,
+        exRes: { versao: '1.0', finalidade: 'Tratamento de dados pessoais sensíveis de saúde (peso, exames e tipo sanguíneo)…' },
+      },
+      {
+        metodo: 'POST', caminho: '/pacientes', resumo: 'Pré-cadastro do paciente', acesso: PUBLICO, limite: '10/min por IP', status: 201,
+        regras: [
+          'Cria usuário + paciente (PRE_CADASTRADO) + consentimento numa única operação.',
+          'Idade entre 16 e 69 anos e peso ≥ 50 kg (RN17, FE04); acima de 60 anos exige cienteRegraAcimaDe60 (FA01).',
+          'E-mail ou CPF já cadastrado: 409 sem indicar qual (FE02).',
+        ],
+        corpo: [
+          ['nome', 'string', true, '3 a 150 caracteres.'],
+          ['cpf', 'string', true, 'Com ou sem máscara; dígitos verificadores (RN06).'],
+          ['email', 'string', true, 'E-mail válido.'],
+          ['senha', 'string', true, 'RN06.'],
+          ['confirmacaoSenha', 'string', true, 'Igual a senha.'],
+          ['telefone', 'string', true, 'DDD + 8 ou 9 dígitos.'],
+          ['dataNascimento', 'string', true, 'AAAA-MM-DD.'],
+          ['sexo', 'enum', true, 'MASCULINO | FEMININO.'],
+          ['pesoKg', 'number', true, 'Até 2 casas decimais.'],
+          ['cidade', 'string', true, '2 a 100 caracteres.'],
+          ['estado', 'string', true, 'UF.'],
+          ['aceiteTermo', 'boolean', true, 'Deve ser true (RN12, FE03).'],
+          ['versaoTermo', 'string', true, 'Versão vigente do termo.'],
+          ['cienteRegraAcimaDe60', 'boolean', false, 'Obrigatório (true) para maiores de 60 anos.'],
+        ],
+        exReq: {
+          nome: 'Maria da Silva', cpf: '111.444.777-35', email: 'maria@email.com', senha: 'SenhaForte1', confirmacaoSenha: 'SenhaForte1',
+          telefone: '(41) 99999-8888', dataNascimento: '1995-05-20', sexo: 'FEMININO', pesoKg: 62.5, cidade: 'Curitiba', estado: 'PR',
+          aceiteTermo: true, versaoTermo: '1.0',
+        },
+        exRes: { id: 'uuid', nome: 'Maria da Silva', email: 'maria@email.com', situacao: 'PRE_CADASTRADO', proximoPasso: 'AGENDAR_CONSULTA' },
+        erros: [[400, 'Campos inválidos, termo não aceito ou versão desatualizada.'], [409, 'E-mail ou CPF já cadastrado.'], [422, 'Idade ou peso fora dos critérios (RN17).']],
+      },
+    ],
+  },
+  {
+    id: 'publico', nome: 'Consulta pública', desc: 'Bancos de sangue ativos, necessidades por tipo e compatibilidade (RF19–RF22 · UC02, UC03, UC04).',
+    rotas: [
+      {
+        metodo: 'GET', caminho: '/hospitais', resumo: 'Listar bancos de sangue ativos com níveis', acesso: PUBLICO, status: 200,
+        regras: [
+          'Com tipos: ordena por necessidade CRITICO > BAIXO > ESTAVEL > ADEQUADO; NAO_INFORMADO por último (RN02).',
+          'Com lat/lng: devolve distanciaKm e desempata por proximidade; raioKm limita a busca.',
+          'Hospitais desativados não aparecem (RN09).',
+        ],
+        query: [
+          ['estado', 'string', false, 'UF.'],
+          ['cidade', 'string', false, 'Ignora maiúsculas e acentos.'],
+          ['tipos', 'string', false, 'Lista separada por vírgula ou parâmetro repetido (ex.: O-,A%2B).'],
+          ['lat', 'number', false, 'Latitude de referência (exige lng).'],
+          ['lng', 'number', false, 'Longitude de referência (exige lat).'],
+          ['raioKm', 'number', false, '1 a 1000; exige lat e lng.'],
+          ['pagina', 'int', false, 'Padrão 1.'],
+          ['tamanhoPagina', 'int', false, 'Padrão 20, máximo 50.'],
+        ],
+        exQuery: '?estado=PR&tipos=O-&lat=-25.4296&lng=-49.2713',
+        exRes: {
+          itens: [{ id: 'uuid', nome: 'Hospital Exemplo Centro', cidade: 'Curitiba', estado: 'PR', distanciaKm: 0.2,
+            necessidades: [{ tipo: 'A+', nivel: 'ESTAVEL' }, { tipo: 'O-', nivel: 'CRITICO' }, { '…': '8 tipos' }] }],
+          total: 4, pagina: 1, tamanhoPagina: 20,
+        },
+        erros: [[400, 'Filtros inválidos, lat sem lng ou raioKm sem coordenadas.']],
+      },
+      {
+        metodo: 'GET', caminho: '/hospitais/:id', resumo: 'Detalhe de um banco de sangue', acesso: PUBLICO, status: 200,
+        exRes: {
+          id: 'uuid', nome: 'Hospital Exemplo Centro', endereco: 'Rua Exemplo, 100 – Centro', cidade: 'Curitiba', estado: 'PR', cep: '80010000',
+          telefone: '4130000000', horarioFuncionamento: 'Segunda a sexta, 7h às 18h', latitude: -25.4284, longitude: -49.2733,
+          necessidades: [{ tipo: 'O-', nivel: 'CRITICO', atualizadoEm: '2026-10-04T01:54:34.332Z' }], ultimaAtualizacao: '2026-10-04T01:54:34.336Z',
+        },
+        erros: [[400, 'id não é UUID.'], [404, 'Inexistente ou desativado.']],
+      },
+      {
+        metodo: 'GET', caminho: '/tipos-sanguineos', resumo: 'Os oito tipos ABO/Rh (RN01)', acesso: PUBLICO, status: 200,
+        exRes: [{ sigla: 'A+', grupoAbo: 'A', fatorRh: 'POSITIVO' }, { '…': '…' }],
+      },
+      {
+        metodo: 'GET', caminho: '/tipos-sanguineos/compatibilidade', resumo: 'Quem doa para quem (RN05)', acesso: PUBLICO, status: 200,
+        exRes: {
+          aviso: 'Informação educativa sobre doação de concentrado de hemácias. Não substitui a orientação do serviço de hemoterapia.',
+          tipos: [{ sigla: 'O-', podeDoarPara: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'], podeReceberDe: ['O-'] }, { '…': '…' }],
+        },
+      },
+    ],
+  },
+  {
+    id: 'admin-hospitais', nome: 'Admin · Bancos de sangue', desc: 'Cadastro e situação dos bancos de sangue e seus representantes (RF15, RF16, RF22 · UC25).',
+    rotas: [
+      {
+        metodo: 'GET', caminho: '/admin/hospitais', resumo: 'Listar todos, inclusive desativados', acesso: perfis('ADMINISTRADOR'), status: 200,
+        query: [['busca', 'string', false, 'Nome, cidade ou CNPJ.'], ['estado', 'string', false, 'UF.'], ['ativo', 'boolean', false, 'true | false.'], ['pagina', 'int', false, ''], ['tamanhoPagina', 'int', false, 'Máximo 50.']],
+        exRes: { itens: [{ id: 'uuid', nome: 'Hospital X', cnpj: '11222333000181', cidade: 'Curitiba', estado: 'PR', ativo: true, criadoEm: '…', totalRepresentantes: 2, totalMedicos: 5 }], total: 1, pagina: 1, tamanhoPagina: 20 },
+      },
+      {
+        metodo: 'GET', caminho: '/admin/hospitais/:id', resumo: 'Detalhe com representantes', acesso: perfis('ADMINISTRADOR'), status: 200,
+        exRes: { id: 'uuid', nome: 'Hospital X', cnpj: '…', ativo: true, totalMedicos: 5, '…': '…',
+          representantes: [{ id: 'uuid', nome: 'Rita', email: 'rita@h.com', cargo: 'Coordenadora', status: 'ATIVO', primeiroAcessoPendente: false, senhaProvisoriaExpiraEm: null }] },
+        erros: [[404, 'Não encontrado.']],
+      },
+      {
+        metodo: 'POST', caminho: '/admin/hospitais', resumo: 'Criar banco de sangue + primeiro representante', acesso: perfis('ADMINISTRADOR'), status: 201,
+        regras: [
+          'O representante recebe por e-mail uma senha provisória válida por 72h (RN15).',
+          'Se o e-mail falhar, a conta é criada e senhaProvisoriaEnviada vem false — use o reenvio.',
+          'O banco nasce com os 8 níveis NAO_INFORMADO.',
+        ],
+        corpo: [
+          ['nome', 'string', true, '3 a 150.'], ['cnpj', 'string', true, 'Dígitos verificadores.'], ['endereco', 'string', true, '5 a 255.'],
+          ['cidade', 'string', true, ''], ['estado', 'string', true, 'UF.'], ['cep', 'string', true, '8 dígitos.'], ['telefone', 'string', true, 'DDD + 8/9 dígitos.'],
+          ['horarioFuncionamento', 'string', false, 'Até 255.'], ['latitude', 'number', true, '-90 a 90.'], ['longitude', 'number', true, '-180 a 180.'],
+          ['representante.nome', 'string', true, ''], ['representante.cpf', 'string', true, ''], ['representante.email', 'string', true, ''],
+          ['representante.telefone', 'string', true, ''], ['representante.cargo', 'string', false, 'Até 100.'],
+        ],
+        exReq: {
+          nome: 'Hospital Teste', cnpj: '45.997.418/0001-53', endereco: 'Rua Teste, 10', cidade: 'Ponta Grossa', estado: 'PR', cep: '84010-000',
+          telefone: '(42) 3333-4444', horarioFuncionamento: '24 horas', latitude: -25.0945, longitude: -50.1633,
+          representante: { nome: 'Rita Representante', cpf: '390.533.447-05', email: 'rita@hospitalteste.com', telefone: '42999990000', cargo: 'Coordenadora' },
+        },
+        exRes: { hospital: { id: 'uuid', nome: 'Hospital Teste', cnpj: '45997418000153', cidade: 'Ponta Grossa', estado: 'PR', ativo: true },
+          representante: { id: 'uuid', nome: 'Rita Representante', email: 'rita@hospitalteste.com' }, senhaProvisoriaEnviada: true },
+        erros: [[400, 'Dados inválidos.'], [409, 'Lista indicando CNPJ, CPF e/ou e-mail já cadastrados (FE01).']],
+      },
+      {
+        metodo: 'PATCH', caminho: '/admin/hospitais/:id', resumo: 'Editar dados do banco (FA01)', acesso: perfis('ADMINISTRADOR'), status: 200,
+        regras: ['Envie apenas os campos a alterar (mesmos campos do cadastro, sem representante).'],
+        exReq: { telefone: '(42) 3000-0000', horarioFuncionamento: 'Seg-sex 8h-18h' },
+        erros: [[400, 'Dados inválidos.'], [404, 'Não encontrado.'], [409, 'CNPJ já cadastrado.']],
+      },
+      {
+        metodo: 'POST', caminho: '/admin/hospitais/:id/desativar', resumo: 'Desativar banco (FA02, RN09)', acesso: perfis('ADMINISTRADOR'), status: 200,
+        regras: ['Some das consultas públicas; representantes e médicos perdem o acesso e têm as sessões encerradas.', 'Reativar devolve o acesso.'],
+        exRes: { id: 'uuid', ativo: false }, erros: [[404, 'Não encontrado.']],
+      },
+      { metodo: 'POST', caminho: '/admin/hospitais/:id/ativar', resumo: 'Reativar banco', acesso: perfis('ADMINISTRADOR'), status: 200, exRes: { id: 'uuid', ativo: true } },
+      {
+        metodo: 'POST', caminho: '/admin/hospitais/:id/representantes', resumo: 'Cadastrar representante adicional (FA03)', acesso: perfis('ADMINISTRADOR'), status: 201,
+        corpo: [['nome', 'string', true, ''], ['cpf', 'string', true, ''], ['email', 'string', true, ''], ['telefone', 'string', true, ''], ['cargo', 'string', false, '']],
+        exReq: { nome: 'Beto Rep', cpf: '861.124.110-51', email: 'beto@hospitalteste.com', telefone: '42988887777' },
+        exRes: { representante: { id: 'uuid', nome: 'Beto Rep', email: 'beto@hospitalteste.com' }, senhaProvisoriaEnviada: true },
+        erros: [[400, 'Banco desativado.'], [404, 'Banco não encontrado.'], [409, 'CPF ou e-mail já cadastrado.']],
+      },
+    ],
+  },
+  {
+    id: 'admin-usuarios', nome: 'Admin · Usuários', desc: 'Gestão de contas da plataforma (RF27 · UC26).',
+    rotas: [
+      {
+        metodo: 'GET', caminho: '/admin/usuarios', resumo: 'Listar usuários', acesso: perfis('ADMINISTRADOR'), status: 200,
+        regras: ['CPF sempre mascarado e sem dados clínicos (RNF02).'],
+        query: [['perfil', 'enum', false, 'PACIENTE | MEDICO | REPRESENTANTE | ADMINISTRADOR.'], ['status', 'enum', false, 'ATIVO | INATIVO | ENCERRADO.'], ['busca', 'string', false, 'Nome, e-mail ou parte do CPF.'], ['pagina', 'int', false, ''], ['tamanhoPagina', 'int', false, 'Máximo 50.']],
+        exRes: { itens: [{ id: 'uuid', nome: 'Maria', email: 'maria@email.com', cpf: '***.982.247-**', perfil: 'PACIENTE', papel: 'DOADOR', status: 'ATIVO', primeiroAcessoPendente: false, hospital: null, criadoEm: '…' }], total: 1, pagina: 1, tamanhoPagina: 20 },
+      },
+      {
+        metodo: 'POST', caminho: '/admin/usuarios/administradores', resumo: 'Cadastrar novo administrador (FA01)', acesso: perfis('ADMINISTRADOR'), status: 201,
+        corpo: [['nome', 'string', true, ''], ['cpf', 'string', true, ''], ['email', 'string', true, ''], ['telefone', 'string', false, '']],
+        exReq: { nome: 'Admin Dois', cpf: '204.648.327-80', email: 'admin2@hemobridge.local' },
+        exRes: { administrador: { id: 'uuid', nome: 'Admin Dois', email: 'admin2@hemobridge.local' }, senhaProvisoriaEnviada: true },
+        erros: [[409, 'Lista com CPF e/ou e-mail já cadastrados.']],
+      },
+      {
+        metodo: 'GET', caminho: '/admin/usuarios/:id', resumo: 'Detalhe do usuário', acesso: perfis('ADMINISTRADOR'), status: 200,
+        regras: ['Mostra vínculo (hospital, CRM, cargo); de pacientes, só situação, cidade e estado.'],
+        exRes: { id: 'uuid', nome: 'Maria', email: '…', cpf: '52998224725', telefone: '…', perfil: 'PACIENTE', papel: 'PACIENTE', status: 'ATIVO', primeiroAcessoPendente: false,
+          paciente: { situacao: 'PRE_CADASTRADO', cidade: 'Curitiba', estado: 'PR' }, medico: null, representante: null },
+        erros: [[404, 'Não encontrado.']],
+      },
+      {
+        metodo: 'PATCH', caminho: '/admin/usuarios/:id', resumo: 'Editar nome, e-mail ou telefone', acesso: perfis('ADMINISTRADOR'), status: 200,
+        corpo: [['nome', 'string', false, ''], ['email', 'string', false, ''], ['telefone', 'string', false, '']],
+        exReq: { telefone: '(41) 97777-6666' },
+        erros: [[400, 'Dados inválidos ou campo não editável (ex.: cpf).'], [409, 'E-mail de outro usuário.']],
+      },
+      {
+        metodo: 'POST', caminho: '/admin/usuarios/:id/desativar', resumo: 'Desativar conta', acesso: perfis('ADMINISTRADOR'), status: 200,
+        regras: ['Encerra as sessões do usuário.', 'O administrador não pode desativar a própria conta (FE02).'],
+        exRes: { id: 'uuid', status: 'INATIVO' }, erros: [[400, 'Própria conta ou conta encerrada.'], [404, 'Não encontrado.']],
+      },
+      { metodo: 'POST', caminho: '/admin/usuarios/:id/ativar', resumo: 'Reativar conta', acesso: perfis('ADMINISTRADOR'), status: 200, exRes: { id: 'uuid', status: 'ATIVO' }, erros: [[400, 'Conta encerrada.']] },
+      {
+        metodo: 'POST', caminho: '/admin/usuarios/:id/reenviar-senha-provisoria', resumo: 'Reenviar senha provisória (FA02)', acesso: perfis('ADMINISTRADOR'), status: 200,
+        regras: ['Só para contas ativas que ainda não fizeram o primeiro acesso; invalida a senha e as sessões anteriores.'],
+        exRes: { senhaProvisoriaEnviada: true, senhaProvisoriaExpiraEm: '2026-10-07T03:25:05.184Z' },
+        erros: [[400, 'Conta já ativada ou desativada.'], [404, 'Não encontrado.']],
+      },
+    ],
+  },
+  {
+    id: 'rep-medicos', nome: 'Representante · Médicos', desc: 'Médicos do próprio banco de sangue (RF13 · UC22). Médico de outro hospital responde 404 (RN08).',
+    rotas: [
+      {
+        metodo: 'GET', caminho: '/representante/medicos', resumo: 'Listar médicos do hospital', acesso: perfis('REPRESENTANTE'), status: 200,
+        query: [['status', 'enum', false, 'ATIVO | INATIVO | ENCERRADO.'], ['busca', 'string', false, 'Nome, e-mail ou CRM.'], ['pagina', 'int', false, ''], ['tamanhoPagina', 'int', false, 'Máximo 50.']],
+        exRes: { itens: [{ id: 'uuid', nome: 'Dra. Ana', email: 'ana@h.com', cpf: '***.384.864-**', telefone: '41988887777', crm: '964612', ufCrm: 'PR', crmConferidoEm: '…', status: 'ATIVO', primeiroAcessoPendente: true, senhaProvisoriaExpiraEm: '…' }], total: 1, pagina: 1, tamanhoPagina: 20 },
+      },
+      {
+        metodo: 'POST', caminho: '/representante/medicos', resumo: 'Cadastrar médico', acesso: perfis('REPRESENTANTE'), status: 201,
+        regras: [
+          'Obrigatório declarar que a instituição conferiu CRM e UF (RF13); a declaração é registrada com responsável e data.',
+          'CPF, e-mail e CRM/UF são únicos na plataforma — cada médico pertence a um só hospital (RN04, FE02).',
+          'Senha provisória enviada por e-mail (RN15).',
+        ],
+        corpo: [
+          ['nome', 'string', true, ''], ['cpf', 'string', true, ''], ['email', 'string', true, ''], ['telefone', 'string', true, ''],
+          ['crm', 'string', true, 'Só números, até 10 dígitos.'], ['ufCrm', 'string', true, 'UF.'], ['declaracaoCrmConferido', 'boolean', true, 'Deve ser true.'],
+        ],
+        exReq: { nome: 'Dr. Carlos Eduardo Mendes', cpf: '204.648.327-80', email: 'carlos.mendes@exemplo.com', telefone: '(41) 98765-4321', crm: '45821', ufCrm: 'PR', declaracaoCrmConferido: true },
+        exRes: { medico: { id: 'uuid', nome: 'Dr. Carlos Eduardo Mendes', crm: '45821', ufCrm: 'PR', status: 'ATIVO', primeiroAcessoPendente: true, '…': '…' }, senhaProvisoriaEnviada: true },
+        erros: [[400, 'Dados inválidos ou declaração ausente.'], [409, 'Lista com CPF, e-mail e/ou CRM já cadastrados.']],
+      },
+      { metodo: 'GET', caminho: '/representante/medicos/:id', resumo: 'Detalhe do médico', acesso: perfis('REPRESENTANTE'), status: 200, erros: [[404, 'Não encontrado ou de outro hospital.']] },
+      {
+        metodo: 'PATCH', caminho: '/representante/medicos/:id', resumo: 'Editar e-mail ou telefone (FA01)', acesso: perfis('REPRESENTANTE'), status: 200,
+        regras: ['CPF e CRM não são editáveis.'], corpo: [['email', 'string', false, ''], ['telefone', 'string', false, '']],
+        exReq: { telefone: '(41) 3222-1111' }, erros: [[400, 'Dados inválidos ou campo não editável.'], [404, 'Não encontrado.'], [409, 'E-mail em uso.']],
+      },
+      { metodo: 'POST', caminho: '/representante/medicos/:id/desativar', resumo: 'Desativar médico (FA02)', acesso: perfis('REPRESENTANTE'), status: 200, regras: ['Encerra as sessões do médico.'], erros: [[404, 'Não encontrado.']] },
+      { metodo: 'POST', caminho: '/representante/medicos/:id/ativar', resumo: 'Reativar médico', acesso: perfis('REPRESENTANTE'), status: 200, erros: [[404, 'Não encontrado.']] },
+      {
+        metodo: 'POST', caminho: '/representante/medicos/:id/reenviar-senha-provisoria', resumo: 'Reenviar senha provisória (FA03)', acesso: perfis('REPRESENTANTE'), status: 200,
+        exRes: { senhaProvisoriaEnviada: true, senhaProvisoriaExpiraEm: '…' }, erros: [[400, 'Conta já ativada.'], [404, 'Não encontrado.']],
+      },
+    ],
+  },
+  {
+    id: 'rep-necessidades', nome: 'Representante · Necessidades', desc: 'Níveis de necessidade do próprio banco de sangue (RF17 · UC18).',
+    rotas: [
+      {
+        metodo: 'GET', caminho: '/representante/necessidades', resumo: 'Níveis atuais dos 8 tipos', acesso: perfis('REPRESENTANTE'), status: 200,
+        exRes: { hospital: { id: 'uuid', nome: 'Hospital X' }, ultimaAtualizacao: '2026-10-04T05:45:00.000Z',
+          necessidades: [{ tipo: 'O-', nivel: 'CRITICO', atualizadoEm: '…', atualizadoPor: 'Rita' }, { tipo: 'A+', nivel: 'NAO_INFORMADO', atualizadoEm: null, atualizadoPor: null }] },
+      },
+      {
+        metodo: 'PUT', caminho: '/representante/necessidades', resumo: 'Atualizar um ou mais níveis', acesso: perfis('REPRESENTANTE'), status: 200,
+        regras: [
+          'Níveis aceitos: CRITICO, BAIXO, ESTAVEL, ADEQUADO (FE01). NAO_INFORMADO não pode ser escolhido.',
+          'Só os tipos que mudaram são gravados; sem mudanças, responde "Não há alterações a salvar." (FA01).',
+          'Toda mudança vai para o histórico (RN03) via trigger do banco.',
+          'passaramACritico lista os tipos que viraram críticos (base para notificar doadores — UC19).',
+        ],
+        corpo: [['niveis', 'array', true, '1 a 8 itens { tipo, nivel }, sem repetir tipo.'], ['niveis[].tipo', 'string', true, 'Sigla (O-, A+, …).'], ['niveis[].nivel', 'enum', true, 'CRITICO | BAIXO | ESTAVEL | ADEQUADO.']],
+        exReq: { niveis: [{ tipo: 'O-', nivel: 'CRITICO' }, { tipo: 'A+', nivel: 'BAIXO' }] },
+        exRes: { mensagem: 'Necessidades atualizadas.', alteracoes: [{ tipo: 'O-', de: 'BAIXO', para: 'CRITICO' }], passaramACritico: ['O-'], hospital: { '…': '…' }, ultimaAtualizacao: '…', necessidades: ['…'] },
+        erros: [[400, 'Nível ou tipo inválido, tipo repetido ou campo extra.']],
+      },
+      {
+        metodo: 'GET', caminho: '/representante/necessidades/historico', resumo: 'Histórico de alterações (RN03)', acesso: perfis('REPRESENTANTE'), status: 200,
+        query: [['tipo', 'string', false, 'Sigla.'], ['de', 'string', false, 'Data/hora ISO inicial.'], ['ate', 'string', false, 'Data/hora ISO final.'], ['pagina', 'int', false, ''], ['tamanhoPagina', 'int', false, 'Padrão 50, máximo 100.']],
+        exRes: { itens: [{ tipo: 'O-', de: 'CRITICO', para: 'ESTAVEL', alteradoEm: '…', alteradoPor: 'Rita' }], total: 4, pagina: 1, tamanhoPagina: 50 },
+      },
+    ],
+  },
+  {
+    id: 'home', nome: 'Home (provisório)', desc: 'Rotas de exemplo usadas pelo frontend; ainda não fazem parte do domínio.',
+    rotas: [
+      { metodo: 'GET', caminho: '/', resumo: 'Retorna lista vazia', acesso: PUBLICO, status: 200, exRes: [] },
+      { metodo: 'GET', caminho: '/post', resumo: 'Notícias fictícias de saúde', acesso: PUBLICO, status: 200, exRes: [{ id: 1, titulo: '…', descricao: '…', data: '2026-09-30', like: 128 }] },
+      { metodo: 'POST', caminho: '/post', resumo: 'Exemplo; devolve o id recebido', acesso: PUBLICO, status: 201, exReq: { id: '1' } },
+    ],
+  },
+];
+
+// ----------------------------------------------------------------------------
+
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+const json = (v) => esc(JSON.stringify(v, null, 2));
+const slug = (r) => (r.metodo + r.caminho).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-$/, '');
+
+function guardar(chave, valor) { try { localStorage.setItem(chave, valor); } catch {} }
+function ler(chave) { try { return localStorage.getItem(chave); } catch { return null; } }
+
+function chipsAcesso(r) {
+  const a = r.acesso || {};
+  const chips = [];
+  if (a.publico) chips.push('<span class="chip publico">Público</span>');
+  else if (a.perfis) chips.push(...a.perfis.map((p) => `<span class="chip perfil">${p}</span>`));
+  else chips.push('<span class="chip perfil">Autenticado</span>');
+  if (a.primeiroAcesso) chips.push('<span class="chip">Liberada no primeiro acesso</span>');
+  if (r.limite) chips.push(`<span class="chip limite">Limite: ${esc(r.limite)}</span>`);
+  if (r.status) chips.push(`<span class="chip">Sucesso: ${r.status}</span>`);
+  return `<div class="chips">${chips.join('')}</div>`;
+}
+
+function tabelaCampos(titulo, campos) {
+  if (!campos?.length) return '';
+  const linhas = campos.map(([nome, tipo, obrig, desc]) => `
+    <tr><td class="campo"><code>${esc(nome)}</code></td><td class="mono">${esc(tipo)}</td>
+    <td>${obrig ? '<span class="obrig">obrigatório</span>' : '<span class="opc">opcional</span>'}</td><td>${esc(desc)}</td></tr>`).join('');
+  return `<h5>${titulo}</h5><div class="tabela-scroll"><table><tr><th>Campo</th><th>Tipo</th><th></th><th>Descrição</th></tr>${linhas}</table></div>`;
+}
+
+function curl(r) {
+  const base = ($('#baseUrl').value || '').replace(/\/$/, '');
+  const token = $('#token').value.trim();
+  const partes = [`curl -X ${r.metodo} '${base}${r.caminho}${r.exQuery || ''}'`];
+  if (!r.acesso?.publico) partes.push(`  -H 'Authorization: Bearer ${token || '<token>'}'`);
+  if (r.exReq) {
+    partes.push(`  -H 'Content-Type: application/json'`);
+    partes.push(`  -d '${JSON.stringify(r.exReq).replace(/'/g, "'\\''")}'`);
+  }
+  return partes.join(' \\\n');
+}
+
+function renderRota(r) {
+  const exemplos = [];
+  if (r.exReq || r.exQuery) {
+    const conteudo = r.exReq ? json(r.exReq) : esc(r.caminho + r.exQuery);
+    exemplos.push(`<div><p class="rotulo">Requisição</p><pre>${conteudo}</pre></div>`);
+  }
+  if (r.exRes !== undefined) exemplos.push(`<div><p class="rotulo">Resposta ${r.status || ''}</p><pre>${json(r.exRes)}</pre></div>`);
+
+  const erros = r.erros?.length
+    ? `<h5>Erros</h5><div class="tabela-scroll"><table class="erros">${r.erros.map(([c, d]) => `<tr><td>${c}</td><td>${esc(d)}</td></tr>`).join('')}</table></div>`
+    : '';
+  const regras = r.regras?.length ? `<h5>Regras</h5><ul class="regras">${r.regras.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>` : '';
+
+  return `
+  <details class="rota" id="${slug(r)}" data-busca="${esc([r.metodo, r.caminho, r.resumo, ...(r.regras || []), ...(r.corpo || []).map((c) => c[0]), ...(r.query || []).map((c) => c[0])].join(' ').toLowerCase())}">
+    <summary><span class="metodo ${r.metodo}">${r.metodo}</span><span class="caminho mono">${esc(r.caminho)}</span><span class="resumo">${esc(r.resumo)}</span></summary>
+    <div class="corpo">
+      <h5>Acesso</h5>${chipsAcesso(r)}
+      ${regras}
+      ${tabelaCampos('Parâmetros de query', r.query)}
+      ${tabelaCampos('Corpo (JSON)', r.corpo)}
+      ${exemplos.length ? `<h5>Exemplos</h5><div class="exemplos">${exemplos.join('')}</div>` : ''}
+      ${erros}
+      <h5>cURL</h5>
+      <p class="rotulo"><span>Usa a URL base e o token do topo da página.</span><span><button type="button" data-copiar="${slug(r)}">Copiar</button> <span class="copiado" hidden>copiado!</span></span></p>
+      <pre class="curl" data-rota="${slug(r)}"></pre>
+    </div>
+  </details>`;
+}
+
+function render() {
+  $('#conteudo').innerHTML = GRUPOS.map((g) => `
+    <section class="grupo" id="grupo-${g.id}">
+      <h2 class="grupo">${esc(g.nome)}</h2><p class="grupo-desc">${esc(g.desc)}</p>
+      ${g.rotas.map(renderRota).join('')}
+    </section>`).join('');
+
+  $('#menu').innerHTML = `<a href="#visao-geral"><span>Visão geral</span></a>` + GRUPOS.map((g) => `
+    <h4>${esc(g.nome)}</h4>
+    ${g.rotas.map((r) => `<a href="#${slug(r)}" data-alvo="${slug(r)}"><span class="metodo ${r.metodo}">${r.metodo}</span><span class="caminho mono">${esc(r.caminho)}</span></a>`).join('')}`).join('');
+
+  atualizarCurls();
+}
+
+const ROTAS = new Map(GRUPOS.flatMap((g) => g.rotas.map((r) => [slug(r), r])));
+function atualizarCurls() {
+  document.querySelectorAll('pre.curl').forEach((pre) => { pre.textContent = curl(ROTAS.get(pre.dataset.rota)); });
+}
+
+function filtrar(termo) {
+  const t = termo.trim().toLowerCase();
+  let visiveis = 0;
+  document.querySelectorAll('details.rota').forEach((d) => {
+    const mostra = !t || d.dataset.busca.includes(t);
+    d.hidden = !mostra;
+    if (mostra) visiveis++;
+    const link = document.querySelector(`#menu a[data-alvo="${d.id}"]`);
+    if (link) link.hidden = !mostra;
+  });
+  document.querySelectorAll('section.grupo').forEach((s) => { s.hidden = !s.querySelector('details.rota:not([hidden])'); });
+  $('#vazio').style.display = visiveis ? 'none' : 'block';
+}
+
+// Inicialização
+$('#baseUrl').value = ler('hb-baseUrl') || 'http://localhost:3333';
+$('#token').value = ler('hb-token') || '';
+const temaSalvo = ler('hb-tema');
+if (temaSalvo) document.documentElement.dataset.theme = temaSalvo;
+render();
+
+$('#baseUrl').addEventListener('input', (e) => { guardar('hb-baseUrl', e.target.value); atualizarCurls(); });
+$('#token').addEventListener('input', (e) => { guardar('hb-token', e.target.value); atualizarCurls(); });
+$('#busca').addEventListener('input', (e) => filtrar(e.target.value));
+$('#tema').addEventListener('click', () => {
+  const escuro = matchMedia('(prefers-color-scheme: dark)').matches;
+  const atual = document.documentElement.dataset.theme || (escuro ? 'dark' : 'light');
+  const novo = atual === 'dark' ? 'light' : 'dark';
+  document.documentElement.dataset.theme = novo;
+  guardar('hb-tema', novo);
+});
+document.addEventListener('click', async (e) => {
+  const botao = e.target.closest('button[data-copiar]');
+  if (botao) {
+    const texto = document.querySelector(`pre.curl[data-rota="${botao.dataset.copiar}"]`).textContent;
+    try { await navigator.clipboard.writeText(texto); } catch {}
+    const aviso = botao.nextElementSibling;
+    aviso.hidden = false;
+    setTimeout(() => { aviso.hidden = true; }, 1500);
+  }
+  const link = e.target.closest('#menu a[data-alvo]');
+  if (link) document.getElementById(link.dataset.alvo).open = true;
+});
+if (location.hash) { const alvo = document.querySelector(location.hash); if (alvo?.tagName === 'DETAILS') alvo.open = true; }
+</script>
+</body>
+</html>

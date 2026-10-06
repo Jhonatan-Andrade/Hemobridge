@@ -1,0 +1,120 @@
+@baseUrl = http://localhost:3333
+@email = admin@hemobridge.com
+@senha = SenhaProvisoria1
+@novaSenha = NovaSenha9
+@token = {{login.response.body.accessToken}}
+
+# ============================================================
+# Autenticação (UC05 / UC07)
+#
+# Todas as rotas exigem "Authorization: Bearer <token>", exceto
+# POST /auth/login. Execute primeiro o "Login" — o token é
+# reaproveitado automaticamente pelas demais requisições.
+# ============================================================
+
+
+### Login (UC05)
+# Público. Respostas:
+#   200 { accessToken, tokenType, expiraEm, primeiroAcesso, usuario }
+#   400 dados inválidos | 401 e-mail ou senha incorretos
+#   403 conta inativa ou senha provisória expirada
+#   423 conta bloqueada após 5 tentativas (RN07) — inclui "bloqueadoAte"
+# Se "primeiroAcesso" for true, o usuário só acessa as rotas desta
+# seção até definir a senha (POST /auth/primeiro-acesso).
+# @name login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+Accept: application/json
+
+{
+  "email": "{{email}}",
+  "senha": "{{senha}}"
+}
+
+
+### Login com senha incorreta (401; na 5ª tentativa consecutiva → 423)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+Accept: application/json
+
+{
+  "email": "{{email}}",
+  "senha": "SenhaErrada1"
+}
+
+
+### Login com corpo inválido (400)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+Accept: application/json
+
+{
+  "email": "nao-e-um-email",
+  "senha": ""
+}
+
+
+### Dados da sessão atual
+# Disponível também durante o primeiro acesso.
+# 200 com os dados do usuário autenticado | 401 token ausente/inválido
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{token}}
+Accept: application/json
+
+
+### Termo de responsabilidade e sigilo (UC07 / RN12)
+# Perfis: MEDICO, REPRESENTANTE, ADMINISTRADOR (paciente → 403).
+# 200 { versao, finalidade }
+GET {{baseUrl}}/auth/primeiro-acesso/termo
+Authorization: Bearer {{token}}
+Accept: application/json
+
+
+### Definir senha no primeiro acesso (UC07)
+# Perfis: MEDICO, REPRESENTANTE, ADMINISTRADOR.
+# A nova senha segue a RN06 (8+ caracteres, maiúscula, minúscula e número)
+# e deve ser diferente da provisória. "versaoTermo" deve ser a vigente.
+# 200 nova sessão (mesmo formato do login) — o token anterior é invalidado
+# 400 dados inválidos, termo desatualizado ou senha já definida
+# 403 senha provisória expirada ou perfil sem permissão
+# @name primeiroAcesso
+POST {{baseUrl}}/auth/primeiro-acesso
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "novaSenha": "{{novaSenha}}",
+  "confirmacaoSenha": "{{novaSenha}}",
+  "aceiteTermo": true,
+  "versaoTermo": "1.0"
+}
+
+
+### Primeiro acesso sem aceite do termo (400)
+POST {{baseUrl}}/auth/primeiro-acesso
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "novaSenha": "{{novaSenha}}",
+  "confirmacaoSenha": "OutraSenha9",
+  "aceiteTermo": false,
+  "versaoTermo": "1.0"
+}
+
+
+### Logout (UC05 FA01)
+# Invalida todos os tokens já emitidos para o usuário.
+# 204 sem corpo | 401 token ausente/inválido
+# Após o primeiro acesso, use o token novo:
+# {{primeiroAcesso.response.body.accessToken}}
+POST {{baseUrl}}/auth/logout
+Authorization: Bearer {{token}}
+
+
+### Rota protegida sem token (401)
+GET {{baseUrl}}/auth/me
+Accept: application/json
+Authorization: Bearer {{token}}

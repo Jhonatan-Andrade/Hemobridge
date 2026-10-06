@@ -1,0 +1,40 @@
+@baseUrl = http://localhost:3333
+@patientId = 1
+
+### Listar todos os pacientes
+GET {{baseUrl}}/pacientes
+Accept: application/json
+
+### Buscar paciente por ID
+GET {{baseUrl}}/pacientes/{{patientId}}
+Accept: application/json
+
+### Criar paciente
+POST {{baseUrl}}/pacientes
+Content-Type: application/json
+Accept: application/json
+
+{
+  "nome": "João da Silva",
+  "cpf": "12345678909",
+  "dataNascimento": "1990-01-15",
+  "telefone": "(11) 99999-8888",
+  "email": "joao@email.com"
+}
+
+### Atualizar paciente
+PUT {{baseUrl}}/pacientes/{{patientId}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "nome": "João da Silva",
+  "cpf": "12345678909",
+  "dataNascimento": "1990-01-15",
+  "telefone": "(11) 98888-7777",
+  "email": "joao.atualizado@email.com"
+}
+
+### Excluir paciente
+DELETE {{baseUrl}}/pacientes/{{patientId}}
+Accept: application/json
