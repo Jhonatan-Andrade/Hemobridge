@@ -541,6 +541,10 @@
     <a class="side-link" href="#api">Visão geral da API</a>
   </div>
   <div class="side-group">
+    <div class="side-group-label">DESENVOLVIMENTO</div>
+    <a class="side-link" href="#instalacao">Instalação</a>
+  </div>
+  <div class="side-group">
     <div class="side-group-label">USO</div>
     <a class="side-link" href="#fluxo">Como funciona</a>
     <a class="side-link" href="#funcionalidades">Funcionalidades</a>
@@ -641,28 +645,78 @@
     <section class="doc-section" id="api">
       <span class="section-kicker">05 — TÉCNICO</span>
       <h2>Visão geral da API</h2>
-      <p>A API é organizada em módulos NestJS que espelham os domínios levantados nos requisitos funcionais. Abaixo, os principais grupos de rotas previstos para a versão inicial do backend.</p>
-      <pre><span class="comment">// Autenticação e perfis (RF11, RF14)</span>
-<span class="kw">POST</span> /auth/login
-<span class="kw">POST</span> /auth/registro
+      <p>A API é organizada em módulos NestJS que espelham os domínios levantados nos requisitos funcionais. A autenticação usa JWT no cabeçalho <code>Authorization: Bearer &lt;token&gt;</code>; rotas marcadas como públicas não exigem login, e as demais são restritas ao perfil indicado.</p>
+      <pre><span class="comment">// Autenticação (UC05, UC07) — login e recuperação de senha são públicos</span>
+<span class="kw">POST</span>  /auth/login
+<span class="kw">POST</span>  /auth/logout
+<span class="kw">GET</span>   /auth/me
+<span class="kw">POST</span>  /auth/recuperar-senha
+<span class="kw">POST</span>  /auth/redefinir-senha
+<span class="kw">GET</span>   /auth/primeiro-acesso/termo     <span class="comment">// médico, representante, admin</span>
+<span class="kw">POST</span>  /auth/primeiro-acesso           <span class="comment">// troca da senha provisória</span>
 
-<span class="comment">// Pacientes e validação médica (RF01–RF13)</span>
-<span class="kw">POST</span> /pacientes            <span class="comment">// pré-cadastro</span>
-<span class="kw">POST</span> /consultas            <span class="comment">// agendamento com médico</span>
-<span class="kw">POST</span> /exames               <span class="comment">// envio de resultado de exame</span>
-<span class="kw">PATCH</span> /pacientes/:id/aprovacao
+<span class="comment">// Pacientes (RF01, RF02) — público</span>
+<span class="kw">GET</span>   /pacientes/termo-consentimento
+<span class="kw">POST</span>  /pacientes                      <span class="comment">// pré-cadastro com consentimento LGPD</span>
 
-<span class="comment">// Bancos de sangue e estoque (RF15–RF22)</span>
-<span class="kw">GET</span> /bancos-sangue?tipo=<span class="str">"O-"</span>&amp;lat=..&amp;lng=..
-<span class="kw">PATCH</span> /bancos-sangue/:id/necessidades
+<span class="comment">// Consulta de bancos de sangue (RF20–RF22) — público</span>
+<span class="kw">GET</span>   /hospitais?estado=..&amp;cidade=..&amp;tipos=<span class="str">O-</span>&amp;lat=..&amp;lng=..&amp;raioKm=..
+<span class="kw">GET</span>   /hospitais/:id
+<span class="kw">GET</span>   /tipos-sanguineos
+<span class="kw">GET</span>   /tipos-sanguineos/compatibilidade
 
-<span class="comment">// Notificações (RF25)</span>
-<span class="kw">GET</span> /notificacoes/doador/:id</pre>
-      <p class="muted">Este é um panorama de arquitetura baseado no levantamento de requisitos do projeto — os endpoints finais podem variar durante a implementação.</p>
+<span class="comment">// Representante do hospital (RF13, RF17, UC18, UC22)</span>
+<span class="kw">GET</span>   /representante/necessidades
+<span class="kw">PUT</span>   /representante/necessidades
+<span class="kw">GET</span>   /representante/necessidades/historico
+<span class="kw">GET</span>   /representante/medicos
+<span class="kw">POST</span>  /representante/medicos
+<span class="kw">GET</span>   /representante/medicos/:id
+<span class="kw">PATCH</span> /representante/medicos/:id
+<span class="kw">POST</span>  /representante/medicos/:id/desativar | ativar | reenviar-senha-provisoria
+
+<span class="comment">// Administrador (RF27, UC26)</span>
+<span class="kw">GET</span>   /admin/hospitais
+<span class="kw">POST</span>  /admin/hospitais
+<span class="kw">GET</span>   /admin/hospitais/:id
+<span class="kw">PATCH</span> /admin/hospitais/:id
+<span class="kw">POST</span>  /admin/hospitais/:id/desativar | ativar
+<span class="kw">POST</span>  /admin/hospitais/:id/representantes
+<span class="kw">GET</span>   /admin/usuarios
+<span class="kw">POST</span>  /admin/usuarios/administradores
+<span class="kw">GET</span>   /admin/usuarios/:id
+<span class="kw">PATCH</span> /admin/usuarios/:id
+<span class="kw">POST</span>  /admin/usuarios/:id/desativar | ativar | reenviar-senha-provisoria</pre>
+      <p class="muted">Rotas já implementadas no backend. Agendamento de consultas, envio de exames e notificações ainda estão em desenvolvimento. Parâmetros, corpos e respostas de cada rota estão em <a href="../backend/docs/rotas.html"><code>backend/docs/rotas.html</code></a>.</p>
+    </section>
+
+    <section class="doc-section" id="instalacao">
+      <span class="section-kicker">06 — DESENVOLVIMENTO</span>
+      <h2>Instalação</h2>
+      <p>Para rodar o backend localmente você precisa de <strong>Node.js 24</strong> e <strong>Docker</strong>. O <code>docker-compose.yml</code> sobe o PostgreSQL 17 com PostGIS e o Mailpit, que captura os e-mails enviados em desenvolvimento. Todos os comandos são executados dentro da pasta <code>backend/</code>.</p>
+      <pre><span class="kw">cp</span> .env.example .env           <span class="comment"># ajuste senhas e JWT_SECRET</span>
+<span class="kw">docker</span> compose up -d           <span class="comment"># PostgreSQL + Mailpit</span>
+<span class="kw">npm</span> install                    <span class="comment"># dependências + prisma generate</span>
+<span class="kw">npx</span> prisma migrate dev         <span class="comment"># cria as tabelas</span>
+<span class="kw">npx</span> prisma db seed             <span class="comment"># tipos sanguíneos + administrador inicial</span>
+<span class="kw">npm</span> run start:dev              <span class="comment"># sobe a API</span></pre>
+      <h3>Endereços em desenvolvimento</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Serviço</th><th>Endereço</th><th>Observação</th></tr></thead>
+          <tbody>
+            <tr><td>API</td><td class="mono-cell">localhost:3333</td><td>Porta definida em <code>PORT</code> no <code>.env</code>.</td></tr>
+            <tr><td>Prisma Studio</td><td class="mono-cell">localhost:5555</td><td>Abra com <code>npm run db:studio</code> para ver e editar o banco.</td></tr>
+            <tr><td>E-mails (Mailpit)</td><td class="mono-cell">localhost:8025</td><td>Caixa de entrada com todos os e-mails enviados pela API.</td></tr>
+            <tr><td>PostgreSQL</td><td class="mono-cell">localhost:5434</td><td>Deve bater com a <code>DATABASE_URL</code> do <code>.env</code>.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="muted">A senha do administrador inicial (<code>ADMIN_SENHA_INICIAL</code>) precisa ter de 8 a 128 caracteres, com letra maiúscula, letra minúscula e número (RN06); caso contrário o seed falha. Ela é provisória e deve ser trocada no primeiro acesso. O passo a passo completo, com todas as variáveis de ambiente, comandos do Prisma e problemas comuns, está em <a href="../backend/docs/install.md"><code>backend/docs/install.md</code></a>.</p>
     </section>
 
     <section class="doc-section" id="fluxo">
-      <span class="section-kicker">06 — USO</span>
+      <span class="section-kicker">07 — USO</span>
       <h2>Como funciona</h2>
       <h3>Para quem quer doar</h3>
       <div class="steps">
@@ -678,7 +732,7 @@
     </section>
 
     <section class="doc-section" id="funcionalidades">
-      <span class="section-kicker">07 — USO</span>
+      <span class="section-kicker">08 — USO</span>
       <h2>Funcionalidades</h2>
       <p class="muted">27 requisitos funcionais, agrupados por área do sistema.</p>
 
@@ -741,7 +795,7 @@
     </section>
 
     <section class="doc-section" id="nao-funcionais">
-      <span class="section-kicker">08 — USO</span>
+      <span class="section-kicker">09 — USO</span>
       <h2>Requisitos não funcionais</h2>
       <div class="table-wrap">
         <table>
@@ -759,7 +813,7 @@
     </section>
 
     <section class="doc-section" id="faq">
-      <span class="section-kicker">09 — MAIS</span>
+      <span class="section-kicker">10 — MAIS</span>
       <h2>Perguntas frequentes</h2>
 
       <details class="faq-item" open>
@@ -785,7 +839,7 @@
     </section>
 
     <section class="doc-section" id="roadmap">
-      <span class="section-kicker">10 — MAIS</span>
+      <span class="section-kicker">11 — MAIS</span>
       <h2>Roadmap</h2>
       <p class="muted">Fases do projeto, de agosto a novembro de 2026.</p>
       <div class="roadmap">
