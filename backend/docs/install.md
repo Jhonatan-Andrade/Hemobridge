@@ -65,9 +65,9 @@ administrador (RN16).
 | `ADMIN_CPF` | `52998224725` | Precisa ser um CPF **válido** (com ou sem máscara). |
 | `ADMIN_SENHA_INICIAL` | `Admin12345` | Precisa seguir a RN06: 8 a 128 caracteres, com maiúscula, minúscula e número. |
 
-> ⚠️ O valor de exemplo `troque-esta-senha` do `.env.example` **não passa** na
-> validação (não tem maiúscula nem número) e o seed vai falhar com
-> `ADMIN_SENHA_INICIAL inválida`. Troque por algo como `Admin12345`.
+> ⚠️ Se a senha não seguir essa regra, o seed falha com
+> `ADMIN_SENHA_INICIAL inválida`. O valor do `.env.example`
+> (`Troque-Esta-Senha1`) já é válido, mas troque-o fora do ambiente local.
 >
 > A senha é **provisória**: no primeiro login o sistema exige a troca.
 
