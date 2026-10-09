@@ -33,7 +33,7 @@ export class HospitaisService {
 
     const condicoes = [Prisma.sql`h.ativo`];
     if (estado) condicoes.push(Prisma.sql`h.estado = ${estado}`);
-    if (cidade) condicoes.push(Prisma.sql`unaccent(lower(h.cidade)) = unaccent(lower(${cidade}))`);
+    if (cidade) condicoes.push(Prisma.sql`f_unaccent(lower(h.cidade)) = f_unaccent(lower(${cidade}))`);
     // UC03 pós-condição: com tipos selecionados, só bancos que informaram o nível
     // de algum desses tipos (NAO_INFORMADO não entra na consulta, RN02).
     if (tipos?.length) {

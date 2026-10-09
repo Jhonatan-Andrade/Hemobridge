@@ -256,6 +256,10 @@ existir, ele avisa e não faz nada).
 > formato/tamanho válidos, doação coerente etc.), rode `npm run test:banco`.
 > Os testes rodam em transação desfeita ao final, sem deixar dados.
 
+> **Massa de teste e contas de demonstração:** `npm run db:seed:teste` (só em bancos de
+> teste). Detalhes, contas e senha em [`dados-de-teste.md`](./dados-de-teste.md); a medição de
+> desempenho do PT20 está em [`desempenho-rnf08.md`](./desempenho-rnf08.md).
+
 ### 4.5 Prisma Studio (ver e editar o banco no navegador)
 
 ```bash
