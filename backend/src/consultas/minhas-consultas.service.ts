@@ -89,7 +89,9 @@ export class MinhasConsultasService {
           ? 1
           : 2;
     const itens = horarios
-      .map((h) => ({
+      .map((h) => ({ prioridade: peso(h), h }))
+      .sort((a, b) => a.prioridade - b.prioridade || a.h.inicio.getTime() - b.h.inicio.getTime())
+      .map(({ h }) => ({
         disponibilidadeId: h.id,
         inicio: h.inicio,
         fim: h.fim,
@@ -98,10 +100,7 @@ export class MinhasConsultasService {
         hospital: h.medico.hospital.nome,
         cidade: h.medico.hospital.cidade,
         estado: h.medico.hospital.estado,
-        prioridade: peso(h),
-      }))
-      .sort((a, b) => a.prioridade - b.prioridade || a.inicio.getTime() - b.inicio.getTime())
-      .map(({ prioridade: _, ...h }) => h);
+      }));
 
     return {
       itens,

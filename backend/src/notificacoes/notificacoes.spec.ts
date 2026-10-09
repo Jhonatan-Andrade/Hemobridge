@@ -131,9 +131,10 @@ describe('NecessidadeCriticaService (HEM-38 / UC19)', () => {
       paciente: { findMany: vi.fn().mockResolvedValue(candidatos), count: vi.fn().mockResolvedValue(totalCompativeis) },
     };
     const notificacoes = { notificar: vi.fn().mockResolvedValue([]) };
-    const auditoria = { registrar: vi.fn().mockResolvedValue(undefined) } as unknown as AuditoriaService;
+    const registrar = vi.fn().mockResolvedValue(undefined);
+    const auditoria = { registrar } as unknown as AuditoriaService;
     const service = new NecessidadeCriticaService(prisma as unknown as PrismaService, notificacoes as never, auditoria);
-    return { service, prisma, notificacoes, auditoria };
+    return { service, prisma, notificacoes, registrar };
   }
 
   it('filtra por estado, compatibilidade e janela de 7 dias do mesmo banco (RN05/RN20)', async () => {
@@ -168,11 +169,11 @@ describe('NecessidadeCriticaService (HEM-38 / UC19)', () => {
   });
 
   it('sem doador apto, registra a ocorrência (FE01)', async () => {
-    const { service, notificacoes, auditoria } = montar([]);
+    const { service, notificacoes, registrar } = montar([]);
     const r = await service.notificarDoadores('h1', ['O+'], AGORA);
     expect(r.doadoresNotificados).toBe(0);
     expect(notificacoes.notificar).not.toHaveBeenCalled();
-    expect(auditoria.registrar).toHaveBeenCalledWith(
+    expect(registrar).toHaveBeenCalledWith(
       expect.objectContaining({ acao: 'NOTIFICACAO_CRITICA_SEM_DESTINATARIOS', entidadeId: 'h1' }),
     );
   });
