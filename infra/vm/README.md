@@ -9,7 +9,7 @@ Roda numa EC2 do **AWS Academy Learner Lab**.
 | Instância | `hemobridge-db` (t2.medium, 2 vCPU, 4 GB + 2 GB de swap) |
 | Sistema | Ubuntu Server 26.04 LTS, disco gp3 de 20 GB |
 | IP (Elastic IP) | `44.194.55.230` |
-| Usuário SSH | `ubuntu` (somente chave; senha e root desativados) |
+| Usuários SSH | `ubuntu` (administração) e `equipe` (desenvolvimento: só túnel, sem sudo e sem Docker); somente chave |
 | Security Group | entrada só na porta 22 (SSH), para IPs liberados |
 
 ## O que roda na VM
@@ -29,14 +29,15 @@ por túnel SSH.
 
 ## Como conectar (túnel SSH)
 
-1. Peça a chave de acesso ao responsável pela VM e salve em `~/.ssh/` (permissão 600).
+1. Peça a chave da equipe (`hemobridge-equipe`) ao Gean e salve em `~/.ssh/` (permissão 600).
+   O Security Group precisa liberar a porta 22 para o seu IP (ou para qualquer IP, já que só entra com chave).
 2. Adicione ao `~/.ssh/config`:
 
    ```
    Host hemobridge
        HostName 44.194.55.230
-       User ubuntu
-       IdentityFile ~/.ssh/<sua-chave>
+       User equipe
+       IdentityFile ~/.ssh/hemobridge-equipe
        IdentitiesOnly yes
        ServerAliveInterval 30
    ```
@@ -57,7 +58,7 @@ por túnel SSH.
    S3_ENDPOINT=http://localhost:8333
    ```
 
-   As senhas ficam só na VM: `ssh hemobridge cat /opt/hemobridge/infra/.env`.
+   As senhas ficam só na VM: `ssh hemobridge cat LEIA-ME.txt` (usuário `equipe`).
    Nunca as coloque no repositório (RNF07).
 
 5. E-mails de teste: <http://localhost:8025>.
