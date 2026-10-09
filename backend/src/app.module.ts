@@ -10,6 +10,7 @@ import { LIMITE_PADRAO } from './common/limite-requisicoes.js';
 import { ConsultasModule } from './consultas/consultas.module.js';
 import { ContasModule } from './contas/contas.module.js';
 import { EmailModule } from './email/email.module.js';
+import { ExamesModule } from './exames/exames.module.js';
 import { HomeController } from './home/home.controller.js';
 import { HospitaisModule } from './hospitais/hospitais.module.js';
 import { NotificacoesModule } from './notificacoes/notificacoes.module.js';
@@ -31,6 +32,7 @@ import { TipagemModule } from './tipagem/tipagem.module.js';
     ArmazenamentoModule,
     NotificacoesModule,
     ConsultasModule,
+    ExamesModule,
     ContasModule,
     AuthModule,
     PacientesModule,
