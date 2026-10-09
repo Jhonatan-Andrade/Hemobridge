@@ -99,13 +99,24 @@ valores do `.env.example` já funcionam:
 | `CORS_ORIGENS` | `http://localhost:5173,https://app.exemplo.com` | Opcional. Origens liberadas, separadas por vírgula. |
 | `TRUST_PROXY` | `1` | Opcional. Só atrás de proxy reverso (nginx, load balancer). |
 
-### 2.7 Dados de exemplo
+### 2.7 Armazenamento de exames (S3)
+
+| Variável | Exemplo | Observação |
+| --- | --- | --- |
+| `S3_ENDPOINT` | `http://localhost:8333` | SeaweedFS do docker-compose (ou túnel para a VM). |
+| `S3_BUCKET` | `hemobridge-exames` | Criado automaticamente na primeira execução. |
+| `S3_ACCESS_KEY` / `S3_SECRET_KEY` | `hemobridge-dev` / `hemobridge-dev-secret` | Os valores do `.env.example` batem com `docker/seaweedfs/s3.dev.json`. |
+| `ARMAZENAMENTO_CHAVE` | (gerado) | **Obrigatória.** Gere com `openssl rand -base64 32`. Cifra os exames (AES-256-GCM). |
+
+Detalhes em [`armazenamento.md`](./armazenamento.md).
+
+### 2.8 Dados de exemplo
 
 | Variável | Valor | Observação |
 | --- | --- | --- |
 | `SEED_DADOS_EXEMPLO` | `true` / `false` | Com `true`, o seed cria hospitais **fictícios** para testar. Nunca use em produção. |
 
-### 2.8 Exemplo de `.env` pronto para desenvolvimento
+### 2.9 Exemplo de `.env` pronto para desenvolvimento
 
 ```dotenv
 PORT=3333
@@ -129,6 +140,12 @@ SMTP_PORTA=1025
 SMTP_SEGURO=false
 EMAIL_REMETENTE=Hemobridge <nao-responda@hemobridge.local>
 
+S3_ENDPOINT=http://localhost:8333
+S3_BUCKET=hemobridge-exames
+S3_ACCESS_KEY=hemobridge-dev
+S3_SECRET_KEY=hemobridge-dev-secret
+ARMAZENAMENTO_CHAVE=cole-aqui-a-saida-do-openssl-rand-base64-32
+
 FRONTEND_URL=http://localhost:5173
 
 SEED_DADOS_EXEMPLO=true
@@ -143,6 +160,7 @@ O arquivo `docker-compose.yml` sobe dois serviços:
 | Serviço | Container | Imagem | Porta |
 | --- | --- | --- | --- |
 | `db` | `hemobridge-postgres` | `postgis/postgis:17-3.5` (PostgreSQL 17 + PostGIS) | `5434` → 5432 |
+| `s3` | `hemobridge-s3` | `chrislusf/seaweedfs:4.47` (API S3) | `8333` |
 | `mail` | `hemobridge-mailpit` | `axllent/mailpit` | `1025` (SMTP) e `8025` (interface web) |
 
 O Docker Compose lê o `.env` automaticamente, então crie o `.env` **antes** de
@@ -322,7 +340,7 @@ Para usar um SMTP real (produção), troque `SMTP_HOST`, `SMTP_PORTA`,
 ```bash
 cd backend
 cp .env.example .env           # e ajuste as senhas (seção 2)
-docker compose up -d           # Postgres + Mailpit
+docker compose up -d           # Postgres + S3 + Mailpit
 npm install                    # dependências + prisma generate
 npm run db:setup               # cria as tabelas + tipos sanguíneos + admin
 npm run start:dev              # API em http://localhost:3333
