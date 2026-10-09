@@ -7,6 +7,7 @@ import { ArmazenamentoModule } from './armazenamento/armazenamento.module.js';
 import { AuditoriaModule } from './auditoria/auditoria.module.js';
 import { AuthModule } from './auth/auth.module.js';
 import { LIMITE_PADRAO } from './common/limite-requisicoes.js';
+import { ConsultasModule } from './consultas/consultas.module.js';
 import { ContasModule } from './contas/contas.module.js';
 import { EmailModule } from './email/email.module.js';
 import { HomeController } from './home/home.controller.js';
@@ -29,6 +30,7 @@ import { TipagemModule } from './tipagem/tipagem.module.js';
     EmailModule,
     ArmazenamentoModule,
     NotificacoesModule,
+    ConsultasModule,
     ContasModule,
     AuthModule,
     PacientesModule,

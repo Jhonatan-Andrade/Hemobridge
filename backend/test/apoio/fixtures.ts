@@ -128,3 +128,30 @@ export async function definirNivel(
     data: { nivel, atualizadoPorId: usuarioId, atualizadoEm: new Date() },
   });
 }
+
+/** Horário do médico começando daqui a `horas` horas, com 30 minutos. */
+export async function criarDisponibilidade(prisma: PrismaClient, medicoId: string, horas: number) {
+  const inicio = new Date(Date.now() + horas * 3_600_000);
+  return prisma.disponibilidadeMedico.create({
+    data: {
+      medicoId,
+      inicio,
+      fim: new Date(inicio.getTime() + 30 * 60_000),
+      linkVideochamada: `https://meet.teste.local/${randomUUID().slice(0, 8)}`,
+    },
+  });
+}
+
+/** Consulta AGENDADA (paciente passa a CONSULTA_AGENDADA). */
+export async function agendarConsulta(prisma: PrismaClient, pacienteId: string, disponibilidade: { id: string; medicoId: string; linkVideochamada: string }) {
+  await prisma.paciente.update({ where: { usuarioId: pacienteId }, data: { situacao: 'CONSULTA_AGENDADA' } });
+  return prisma.consulta.create({
+    data: {
+      pacienteId,
+      medicoId: disponibilidade.medicoId,
+      disponibilidadeId: disponibilidade.id,
+      linkVideochamada: disponibilidade.linkVideochamada,
+      termoTelemedicinaAceitoEm: new Date(),
+    },
+  });
+}
