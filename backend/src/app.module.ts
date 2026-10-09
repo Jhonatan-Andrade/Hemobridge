@@ -11,6 +11,7 @@ import { ContasModule } from './contas/contas.module.js';
 import { EmailModule } from './email/email.module.js';
 import { HomeController } from './home/home.controller.js';
 import { HospitaisModule } from './hospitais/hospitais.module.js';
+import { NotificacoesModule } from './notificacoes/notificacoes.module.js';
 import { PacientesModule } from './pacientes/pacientes.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
 import { RepresentanteModule } from './representante/representante.module.js';
@@ -27,6 +28,7 @@ import { TipagemModule } from './tipagem/tipagem.module.js';
     AuditoriaModule,
     EmailModule,
     ArmazenamentoModule,
+    NotificacoesModule,
     ContasModule,
     AuthModule,
     PacientesModule,
