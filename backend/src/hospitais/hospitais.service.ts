@@ -34,6 +34,15 @@ export class HospitaisService {
     const condicoes = [Prisma.sql`h.ativo`];
     if (estado) condicoes.push(Prisma.sql`h.estado = ${estado}`);
     if (cidade) condicoes.push(Prisma.sql`unaccent(lower(h.cidade)) = unaccent(lower(${cidade}))`);
+    // UC03 pós-condição: com tipos selecionados, só bancos que informaram o nível
+    // de algum desses tipos (NAO_INFORMADO não entra na consulta, RN02).
+    if (tipos?.length) {
+      condicoes.push(Prisma.sql`EXISTS (
+        SELECT 1 FROM necessidade_estoque nf
+          JOIN tipo_sanguineo tf ON tf.id = nf.tipo_sanguineo_id
+         WHERE nf.hospital_id = h.id AND nf.nivel <> 'NAO_INFORMADO'
+           AND tf.sigla IN (${Prisma.join(tipos)}))`);
+    }
     if (ponto && raioKm !== undefined) {
       condicoes.push(Prisma.sql`ST_DWithin(h.localizacao, ${ponto}, ${raioKm * 1000}::float8)`);
     }
@@ -76,6 +85,26 @@ export class HospitaisService {
       total,
       pagina,
       tamanhoPagina,
+      // UC03 FE01
+      mensagem:
+        total === 0
+          ? 'Nenhum banco de sangue atende aos critérios informados. Tente ampliar a busca: remova a cidade ou algum tipo sanguíneo.'
+          : undefined,
+    };
+  }
+
+  // UC03 FA01: filtros iniciais a partir do cadastro do usuário autenticado.
+  async filtrosPadrao(usuarioId: string) {
+    const paciente = await this.prisma.paciente.findUnique({
+      where: { usuarioId },
+      select: { cidade: true, estado: true, situacao: true, tipoSanguineo: { select: { sigla: true } } },
+    });
+    if (!paciente) return { estado: null, cidade: null, tipos: [] };
+    return {
+      estado: paciente.estado,
+      cidade: paciente.cidade,
+      // Só o Doador tem tipo validado pelo médico (RN01).
+      tipos: paciente.situacao === 'APROVADO' && paciente.tipoSanguineo ? [paciente.tipoSanguineo.sigla] : [],
     };
   }
 
