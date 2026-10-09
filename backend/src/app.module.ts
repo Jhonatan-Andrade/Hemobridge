@@ -13,6 +13,7 @@ import { EmailModule } from './email/email.module.js';
 import { ExamesModule } from './exames/exames.module.js';
 import { HomeController } from './home/home.controller.js';
 import { HospitaisModule } from './hospitais/hospitais.module.js';
+import { IndicadoresModule } from './indicadores/indicadores.module.js';
 import { NotificacoesModule } from './notificacoes/notificacoes.module.js';
 import { PacientesModule } from './pacientes/pacientes.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
@@ -33,6 +34,7 @@ import { TipagemModule } from './tipagem/tipagem.module.js';
     NotificacoesModule,
     ConsultasModule,
     ExamesModule,
+    IndicadoresModule,
     ContasModule,
     AuthModule,
     PacientesModule,

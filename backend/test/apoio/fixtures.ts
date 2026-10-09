@@ -155,3 +155,26 @@ export async function agendarConsulta(prisma: PrismaClient, pacienteId: string, 
     },
   });
 }
+
+export async function criarAdministrador(prisma: PrismaClient) {
+  return prisma.usuario.create({
+    data: { nome: 'Admin E2E', email: email('adm'), cpf: gerarCpf(), senhaHash: await hashSenha, perfil: 'ADMINISTRADOR' },
+  });
+}
+
+/** Doação registrada pelo representante (vinculada se informar o paciente aprovado). */
+export async function registrarDoacao(
+  prisma: PrismaClient,
+  dados: { hospitalId: string; representanteId: string; tipo: string; dataColeta: string; pacienteId?: string },
+) {
+  return prisma.doacao.create({
+    data: {
+      hospitalId: dados.hospitalId,
+      pacienteId: dados.pacienteId ?? null,
+      tipoSanguineoId: await tipoId(prisma, dados.tipo),
+      dataColeta: new Date(`${dados.dataColeta}T00:00:00Z`),
+      pesoAferido: dados.pacienteId ? 72 : null,
+      registradoPorId: dados.representanteId,
+    },
+  });
+}
