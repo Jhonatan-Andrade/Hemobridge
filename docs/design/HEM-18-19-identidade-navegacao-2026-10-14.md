@@ -37,8 +37,8 @@ Não houve mídia nova nesta rodada. Origem, crédito e licença Unsplash dos fu
 | Fundo de proteção mobile | Abrir menu | 180 ms | Sem deslocamento; opacidade 0→1 | `ease-out` | Aparece imediatamente |
 | Título e blocos do hero | Entrada da home | 480 ms; atrasos 0/70/130/190 ms | `translateY(12px)`→0, opacidade .55→1 | `cubic-bezier(.2,.8,.2,1)` | Estado final estático |
 | Traço do hero | Entrada da home | 700 ms | Escala horizontal 0→1 | Mesma curva | Traço completo |
-| Prévias da comunidade na home | Entrada da home | 260 ms; atrasos 0/55/110 ms | `translateY(6px)`→0, opacidade .88→1 | Mesma curva | Cartões estáticos |
-| Botões e cartões | Hover com ponteiro | 180 ms | Botões −2 px; cartões −3 px | Mesma curva | Sem transformação/transição |
+| Prévias da comunidade na home | Entrada da home | 380 ms; atrasos 0/75/150 ms | `translateY(12px)`→0, opacidade .55→1 | Mesma curva | Cartões estáticos |
+| Botões e cartões | Hover com ponteiro | 180 ms nos botões | Botões −2 px; cartões −4 px | Mesma curva | Sem transformação/transição |
 | Cartão do tour | Abrir tour | 240 ms | `translateY(8px)`→0, opacidade .94→1 | Mesma curva | Aparece no estado final |
 | Holofote do tour | Mudar etapa/alvo ou viewport | 180 ms | Interpolação geométrica até o elemento-alvo | `ease` | Posicionamento imediato |
 | Marca no hero | Hero visível | 4,8 s, ciclo discreto | Escala 1→1,035→1 | `ease-in-out` | Marca estática |
