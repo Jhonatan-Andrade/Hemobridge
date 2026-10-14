@@ -1,0 +1,40 @@
+.hb-journey-shell .home-logo--symbol{align-self:flex-start}
+.hb-journey-shell .home-logo--symbol .logo{width:48px;height:48px;object-fit:contain}
+.hb-journey-header-note{font-size:.75rem;font-weight:600;color:var(--brand);text-align:right}
+.hb-journey-content{min-width:0;overflow-wrap:anywhere}
+.hb-journey-content>.alert{max-width:900px}
+.hb-journey-progress{display:flex;gap:8px;flex-wrap:wrap;margin:22px 0}
+.hb-journey-progress span{display:inline-flex;align-items:center;min-height:38px;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-size:.75rem;font-weight:600}
+.hb-journey-progress span[aria-current=step]{color:var(--brand);background:var(--soft);border-color:var(--brand)}
+.hb-journey-questions{display:grid;gap:16px;max-width:900px;margin:22px 0}
+.hb-journey-question{min-width:0;margin:0;padding:20px;border:1px solid var(--line);display:grid;gap:12px}
+.hb-journey-question legend,.hb-journey-question>label{font-size:.875rem;font-weight:600;padding:0 3px}
+.hb-journey-question p{font-size:.75rem;color:var(--muted)}
+.hb-journey-question input[type=date],.hb-journey-question input[type=number]{min-width:0;width:100%;max-width:420px;min-height:48px;border:1px solid var(--input-line);border-radius:var(--control-radius);padding:10px 14px;background:#fff;color:var(--ink)}
+.hb-journey-options{display:flex;gap:10px 20px;flex-wrap:wrap}
+.hb-journey-options label,.hb-journey-ack{display:flex;align-items:center;gap:9px;min-height:44px;font-size:.8125rem}
+.hb-journey-options input,.hb-journey-ack input{width:20px;height:20px;flex-shrink:0;accent-color:var(--brand)}
+.hb-journey-next{margin:10px 0 22px}
+.hb-journey-booking{max-width:900px}
+.hb-journey-booking .button{align-self:flex-start}
+.hb-journey-slot-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:4px 0}
+.hb-journey-slot-grid button{min-width:0;min-height:116px;text-align:left;padding:16px;border:1px solid var(--input-line);border-radius:var(--control-radius);background:var(--surface);color:var(--ink);display:flex;flex-direction:column;gap:5px}
+.hb-journey-slot-grid button[aria-pressed=true]{border:3px solid var(--brand);background:var(--soft)}
+.hb-journey-slot-grid span{color:var(--muted)}
+.hb-journey-slot-grid b{color:var(--brand)}
+.hb-journey-card-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin:24px 0}
+.hb-journey-card-grid>.card{min-width:0;align-items:flex-start}
+.hb-journey-card-grid .button{max-width:100%;white-space:normal}
+.hb-journey-actions{display:flex;gap:10px;flex-wrap:wrap}
+.hb-journey-notification.is-unread{border-left:5px solid var(--brand)}
+.hb-journey-notification .eyebrow{display:block}
+.hb-journey-notification-tools{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:22px 0}
+.hb-journey-notification-tools p{font-weight:600}
+.hb-journey-stage-nav{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;border-top:1px solid var(--line);margin:36px 0 20px;padding-top:24px}
+.hb-journey-stage-nav a{display:flex;flex-direction:column;gap:4px;min-width:0;min-height:72px;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);text-decoration:none;font-size:.75rem}
+.hb-journey-stage-nav a span{font-weight:700;color:var(--brand)}
+.hb-journey-stage-nav a[aria-current=page]{border:2px solid var(--brand);background:var(--soft);font-weight:600}
+.hb-journey-back{margin-bottom:12px}
+@media(max-width:1199px){.hb-journey-stage-nav{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:899px){.hb-journey-content{padding-bottom:calc(132px + env(safe-area-inset-bottom,0px))}.hb-journey-header-note{font-size:.6875rem}}
+@media(max-width:599px){.hb-journey-progress{display:grid;grid-template-columns:1fr 1fr}.hb-journey-progress span{align-items:center;font-size:.6875rem}.hb-journey-card-grid,.hb-journey-slot-grid{grid-template-columns:1fr}.hb-journey-stage-nav{grid-template-columns:repeat(2,minmax(0,1fr))}.hb-journey-actions{display:grid;grid-template-columns:1fr}.hb-journey-actions .button,.hb-journey-notification-tools .button,.hb-journey-next,.hb-journey-back{width:100%}.hb-journey-question{padding:18px}.hb-journey-question legend{max-width:100%}}

@@ -1,0 +1,122 @@
+/* HEM-18/19: a restrained visual layer over the existing tokens and routes. */
+:root{
+  --hb-ease-out:cubic-bezier(.22,1,.36,1);
+  --hb-shadow-soft:0 2px 8px #1B202B09,0 14px 34px #1B202B0B;
+  --hb-shadow-raised:0 5px 12px #1B202B0B,0 22px 46px #1B202B14;
+}
+
+/* Public narrative: light surfaces, clear actions, and the existing editorial art. */
+.public-home{
+  background:radial-gradient(circle at 88% 3%,#F9E8EBB3 0,transparent 420px),var(--background);
+}
+.public-home .home-header{padding-bottom:20px}
+.public-home .home-hero{
+  position:relative;
+  isolation:isolate;
+  border:1px solid #E8DADD;
+  border-top:4px solid var(--brand);
+  background:linear-gradient(112deg,var(--surface) 0%,#FFFCFB 55%,#FDF3F4 100%);
+  box-shadow:var(--hb-shadow-raised);
+}
+.public-home .home-hero::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  background:radial-gradient(circle at 77% -15%,#F9E8EB 0,transparent 34%);
+}
+.public-home .home-hero-copy{gap:16px}
+.public-home .home-hero-copy .eyebrow{display:inline-flex;align-items:center;gap:9px;width:max-content;max-width:100%}
+.public-home .home-hero-copy .eyebrow::before{content:"";width:7px;height:7px;flex:none;border-radius:50%;background:var(--brand)}
+.public-home .home-hero h1{font-weight:700;line-height:1.23;letter-spacing:-.035em;text-wrap:balance}
+.public-home .home-lead{color:#3D4656;max-width:54ch}
+.public-home .home-context{max-width:62ch}
+.public-home .home-hero-art{
+  border-color:#E6DCDA;
+  border-radius:20px 20px 20px 36px;
+  box-shadow:0 8px 24px #1B202B0D;
+}
+.public-home .home-hero-art figcaption{border-top:1px solid var(--line)}
+.public-home .home-hero .home-hero-mark{animation:none;box-shadow:0 8px 20px #1B202B18}
+.public-home .home-actions .button:not(.secondary){box-shadow:0 6px 14px #C0102B24}
+.public-home .home-tour-button{border-color:#ABB0BA}
+
+/* The three previews get depth while remaining ordinary, readable articles. */
+.public-home .home-community{padding-top:22px;border-top:1px solid #DED9D6}
+.public-home .community-heading h2{font-size:1.5rem;letter-spacing:-.025em;display:flex;align-items:center;gap:12px}
+.public-home .community-heading h2::before{content:"";width:4px;height:1.2em;flex:none;border-radius:99px;background:var(--brand)}
+.public-home .post-preview .post-card{
+  position:relative;
+  border-color:#E5DFDC;
+  border-radius:20px;
+  box-shadow:var(--hb-shadow-soft);
+  transition:transform 180ms var(--hb-ease-out),box-shadow 180ms ease,border-color 180ms ease;
+}
+.public-home .post-preview .post-card::before{content:"";position:absolute;top:0;left:24px;width:48px;height:3px;border-radius:0 0 4px 4px;background:var(--brand)}
+.public-home .post-preview .post-card:focus-within{border-color:var(--brand);box-shadow:var(--hb-shadow-raised)}
+.public-home .post-preview .post-card .post-read{font-weight:700;text-underline-offset:4px}
+
+/* Small interaction cues never replace the existing focus indicator or label. */
+.public-home .button,.community-page .button,.post-actions button,.post-actions a,.desktop-nav a,.bottom-nav a,.guided-tour-controls button{
+  transition:background-color 180ms ease,border-color 180ms ease,color 180ms ease,box-shadow 180ms ease,transform 180ms var(--hb-ease-out);
+}
+.post-actions button:focus-visible,.post-actions a:focus-visible,.public-home .button:focus-visible,.guided-tour-controls button:focus-visible{
+  outline:3px solid var(--info);
+  outline-offset:3px;
+}
+@media(hover:hover) and (prefers-reduced-motion:no-preference){
+  .public-home .home-actions .button:hover,.public-home .home-tour-button:hover,.public-home .community-heading .button:hover{transform:translateY(-2px)}
+  .public-home .post-preview .post-card:hover{transform:translateY(-3px);box-shadow:var(--hb-shadow-raised)}
+}
+@media(hover:hover){.post-actions button:hover,.post-actions a:hover{border-color:var(--brand);background:var(--soft)}}
+
+/* Tour: show progress and make the fictional example easy to scan. */
+.guided-tour-card{
+  border:1px solid #E8DADD;
+  border-top:4px solid var(--brand);
+  border-radius:24px;
+  background:linear-gradient(160deg,var(--surface) 72%,#FFFAFA 100%);
+  box-shadow:0 22px 62px #1117213D;
+}
+.guided-tour-heading{gap:12px}
+.guided-tour-heading img{width:34px;height:34px}
+.guided-tour-progress-row{display:flex;align-items:center;gap:14px;margin:15px 0 9px}
+.guided-tour-progress-row .guided-tour-progress{margin:0;white-space:nowrap}
+.guided-tour-progress-track{display:block;flex:1;min-width:50px;height:5px;border-radius:99px;background:var(--soft);overflow:hidden}
+.guided-tour-progress-track>span{display:block;height:100%;border-radius:inherit;background:var(--brand);transition:width 180ms var(--hb-ease-out)}
+.guided-tour-preview{border-left:3px solid var(--brand);background:#FFF8F9}
+.guided-tour-example{padding:12px 14px;border-radius:10px;background:var(--background);color:var(--ink)}
+.guided-tour-controls .guided-tour-next{box-shadow:0 4px 10px #C0102B24}
+@media(hover:hover) and (prefers-reduced-motion:no-preference){
+  .guided-tour-controls button:not(:disabled):hover{transform:translateY(-2px)}
+}
+@media(prefers-reduced-motion:no-preference){
+  .public-home .post-preview .post-card{animation:hb-preview-arrive 260ms var(--hb-ease-out) both}
+  .public-home .post-preview .post-card:nth-child(2){animation-delay:55ms}
+  .public-home .post-preview .post-card:nth-child(3){animation-delay:110ms}
+  .guided-tour[open] .guided-tour-card{animation:hb-tour-arrive 240ms var(--hb-ease-out) both}
+}
+@keyframes hb-preview-arrive{from{opacity:.88;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes hb-tour-arrive{from{opacity:.94;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+@media(max-width:899px){
+  .public-home .home-community{padding-top:18px}
+  .public-home .home-hero{background:linear-gradient(165deg,var(--surface) 0%,#FFF9F9 100%)}
+}
+@media(max-width:599px){
+  .public-home .home-hero-copy{gap:18px}
+  .public-home .community-heading h2{font-size:1.3125rem}
+  .public-home .post-preview .post-card{border-radius:16px}
+  .guided-tour-card{border-radius:20px 20px 0 0}
+  .guided-tour-controls{flex-direction:column;align-items:stretch}
+  .guided-tour-controls>div{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);width:100%}
+  .guided-tour-controls button{min-width:0;overflow-wrap:anywhere}
+  .guided-tour-quiet{align-self:flex-start}
+  html[data-font-scale="200"] .with-bottom-nav #app{padding-bottom:calc(132px + env(safe-area-inset-bottom,0px))}
+}
+@media(prefers-reduced-motion:reduce){
+  .public-home .post-preview .post-card,.guided-tour[open] .guided-tour-card{animation:none!important;transform:none!important}
+  .public-home .button,.community-page .button,.post-actions button,.post-actions a,.desktop-nav a,.bottom-nav a,.guided-tour-controls button,.guided-tour-progress-track>span{transition:none!important}
+  .public-home .home-hero-art picture img{transform:none!important}
+}
