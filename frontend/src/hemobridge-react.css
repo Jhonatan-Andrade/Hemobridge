@@ -1,0 +1,46 @@
+/* React integration adjustments. The preceding styles preserve the prototype's visual tokens. */
+#root{min-height:100dvh;min-width:0}
+.demo-health{max-width:300px;overflow-wrap:anywhere}
+.patient-sidebar{height:auto}
+.comments-section h2[tabindex="-1"]:focus{outline:none}
+.intro{min-width:0}.intro h1,.accessibility-page h1,.accessibility-page h2{overflow-wrap:anywhere}
+.bottom-nav a span{max-width:100%;overflow-wrap:anywhere;text-align:center}
+.home-header-tools,.auth-header-links,.patient-header-actions{display:flex;align-items:center;gap:18px;min-width:0}
+.accessibility-link,.patient-header-actions>a,.patient-header-actions>button{font-weight:600;font-size:0.8125rem;white-space:nowrap}
+.patient-header-actions>button{background:none;border:0;padding:8px;color:var(--brand);text-decoration:underline;text-underline-offset:3px}
+.auth-header-links{flex-wrap:wrap;justify-content:flex-end}
+@media(max-width:599px){.home-header-tools{gap:8px}.accessibility-link{font-size:0.75rem}.auth-header-links{gap:4px 12px}.patient-header-actions{gap:10px}.patient-header-actions .avatar{display:none}.patient-header-actions>a,.patient-header-actions>button{font-size:0.6875rem}}
+@media(max-width:899px){.patient-sidebar{display:none}}
+
+/* Editorial image is separate from copy and controls; only its pixels may move. */
+.public-home .home-grid{grid-template-columns:minmax(0,1fr)}
+.public-home .home-hero{display:flex;flex-direction:column;gap:20px;padding:32px;overflow:hidden}
+.home-hero-copy{display:flex;flex-direction:column;justify-content:center;gap:20px;min-width:0;position:relative;z-index:1}
+.home-tour-button{align-self:flex-start}
+.home-hero-copy h1{overflow-wrap:break-word}
+.home-hero-art{position:relative;isolation:isolate;display:grid;grid-template-rows:minmax(110px,1fr) auto;min-width:0;min-height:170px;margin:0;overflow:hidden;border:1px solid var(--line);border-radius:18px;background:#f3d6bb}
+.home-hero-art picture{position:relative;display:block;overflow:hidden;min-width:0;min-height:0}
+.home-hero-art picture img{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:cover;object-position:center;transform:translate3d(0,var(--home-image-shift,0px),0) scale(1.14)}
+.home-hero-art figcaption{padding:7px 12px;background:var(--surface);color:var(--muted);font-size:0.6875rem;line-height:1.5}
+.home-hero-art figcaption a{color:var(--brand);font-weight:600}
+.home-hero-art figcaption a:focus-visible{outline:3px solid var(--info);outline-offset:2px}
+.public-home .home-hero .home-hero-mark{position:absolute;z-index:1;top:14px;right:14px;display:grid;place-items:center;width:72px;height:72px;border-radius:50%;background:#ffffffe0;box-shadow:0 12px 32px #1b202b1c;pointer-events:none}
+.public-home .home-hero .home-hero-mark img{display:block;width:50px;height:50px;object-fit:contain}
+@media(min-width:900px){
+  .public-home .home-hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(250px,.43fr);gap:24px;align-items:stretch;padding:26px 28px}
+  .home-hero-art{height:auto;min-height:290px}
+  .home-hero-copy{gap:13px}
+  .home-hero-copy h1{font-size:2rem;max-width:38ch}
+}
+@media(max-width:899px){.public-home .home-hero{padding:28px}.home-hero-art{height:auto;min-height:158px}.home-hero-art picture img{transform:none}.public-home .home-context{display:block}}
+@media(max-width:599px){.public-home .home-hero{padding:24px;gap:18px}.home-hero-copy{gap:18px}.home-hero-art{min-height:136px}.public-home .home-hero .home-hero-mark{width:52px;height:52px}.public-home .home-hero .home-hero-mark img{width:38px;height:38px}}
+@media(max-width:599px){.home-tour-button{width:100%}}
+@media(max-width:599px){.public-home .home-hero h1{font-size:1.375rem;overflow-wrap:break-word;word-break:normal;hyphens:auto}}
+@media(max-width:375px){.public-home .home-hero{padding:24px 20px}.public-home .home-hero h1{font-size:1.25rem}}
+@media(prefers-reduced-motion:reduce){.home-hero-art picture img{animation:none!important;transform:none}}
+@media(min-width:900px){
+  html[data-font-scale="150"] .public-home .home-grid,html[data-font-scale="200"] .public-home .home-grid{grid-template-columns:minmax(0,1fr);max-width:920px}
+  html[data-font-scale="150"] .public-home .home-hero,html[data-font-scale="200"] .public-home .home-hero{display:flex;flex-direction:column;align-items:stretch}
+  html[data-font-scale="150"] .public-home .home-hero h1,html[data-font-scale="200"] .public-home .home-hero h1{max-width:100%;overflow-wrap:break-word;hyphens:none}
+  html[data-font-scale="150"] .public-home .home-hero-art,html[data-font-scale="200"] .public-home .home-hero-art{height:240px;min-height:240px}
+}
