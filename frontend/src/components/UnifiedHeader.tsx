@@ -35,6 +35,7 @@ export function UnifiedHeader({ identity, route, navigate, professionalRole, onT
   const toggleRef = useRef<HTMLButtonElement>(null)
   const railRef = useRef<HTMLElement>(null)
   const [isExpanded, setIsExpanded] = useState(false)
+  const [isCompact, setIsCompact] = useState(() => window.matchMedia('(max-width: 899px)').matches)
   const primary = getPrimaryNavigationItems(identity)
   const active = activePrimaryRoute(route)
   const roleLabel = identity === 'patient' ? 'Área do paciente'
@@ -60,15 +61,44 @@ export function UnifiedHeader({ identity, route, navigate, professionalRole, onT
   }, [])
 
   useEffect(() => {
+    const media = window.matchMedia('(max-width: 899px)')
+    const updateCompact = () => setIsCompact(media.matches)
+    media.addEventListener('change', updateCompact)
+    return () => media.removeEventListener('change', updateCompact)
+  }, [])
+
+  useLayoutEffect(() => {
+    if (!isExpanded || !isCompact) return
+    const background = Array.from(document.querySelectorAll<HTMLElement>('.demo-bar, .hb-unified-header, #app'))
+    const previouslyInert = background.map((element) => element.inert)
+    background.forEach((element) => { element.inert = true })
+    if (!railRef.current?.contains(document.activeElement)) toggleRef.current?.focus()
+    return () => background.forEach((element, index) => { element.inert = previouslyInert[index] })
+  }, [isExpanded, isCompact])
+
+  useEffect(() => {
     if (!isExpanded) return
     const onKeyDown = (event: globalThis.KeyboardEvent) => {
       if (event.key === 'Escape') {
         setIsExpanded(false)
         toggleRef.current?.focus()
       }
+      if (event.key === 'Tab' && isCompact) {
+        const focusable = Array.from(railRef.current?.querySelectorAll<HTMLElement>('a[href], button:not([disabled])') ?? [])
+        if (!focusable.length) return
+        const first = focusable[0]
+        const last = focusable[focusable.length - 1]
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault()
+          last.focus()
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault()
+          first.focus()
+        }
+      }
     }
     const onPointerDown = (event: PointerEvent) => {
-      if (window.matchMedia('(max-width: 899px)').matches && !railRef.current?.contains(event.target as Node)) setIsExpanded(false)
+      if (isCompact && !railRef.current?.contains(event.target as Node)) setIsExpanded(false)
     }
     window.addEventListener('keydown', onKeyDown)
     window.addEventListener('pointerdown', onPointerDown)
@@ -76,13 +106,15 @@ export function UnifiedHeader({ identity, route, navigate, professionalRole, onT
       window.removeEventListener('keydown', onKeyDown)
       window.removeEventListener('pointerdown', onPointerDown)
     }
-  }, [isExpanded])
+  }, [isExpanded, isCompact])
 
-  function followRoute() { setIsExpanded(true) }
+  function followRoute() {
+    setIsExpanded(!isCompact)
+  }
 
   return <>
     {isExpanded && <div className="hb-unified-rail-scrim" aria-hidden="true" />}
-    <aside ref={railRef} className="hb-unified-rail" data-expanded={isExpanded} aria-label="Navegação HemoBridge">
+    <aside ref={railRef} className="hb-unified-rail" data-expanded={isExpanded} role={isExpanded && isCompact ? 'dialog' : undefined} aria-modal={isExpanded && isCompact ? true : undefined} aria-label="Navegação HemoBridge">
       <div className="hb-unified-rail-inner" id={railId}>
         <button ref={toggleRef} className="hb-unified-rail-toggle" type="button" aria-label={isExpanded ? 'Recolher navegação' : 'Expandir navegação'} aria-controls={railId} aria-expanded={isExpanded} onClick={() => setIsExpanded((current) => !current)}>
           <span className="hb-unified-menu-lines" aria-hidden="true"><span /><span /><span /></span>

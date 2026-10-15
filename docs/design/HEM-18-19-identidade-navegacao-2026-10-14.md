@@ -12,7 +12,7 @@ Continuação da HEM-18/19 sobre o React e o [arquivo Figma existente](https://w
 | [Painel anterior](review-frontend-final-2026-10-02/dashboard-1440.png) → [atual](qa-2026-10-14/dashboard-1440.png) | Navegação própria da área e estados de hover com contraste insuficiente. | Mesmo menu lateral da área pública, rótulos brancos legíveis em hover/foco, conteúdo de situação e próximo passo com superfícies discretas. |
 | [Painel mobile anterior](review-frontend-final-2026-10-02/dashboard-360.png) → [atual](qa-2026-10-14/dashboard-360.png) | Barra inferior e conteúdo comprimido. | Ícones persistentes no trilho esquerdo e cartões em uma coluna, sem controles cobertos por navegação fixa inferior. |
 
-O menu mostra os ícones quando recolhido. O botão de três traços iguais alterna a expansão; clicar em um destino também revela os rótulos. Em telas estreitas, a expansão fica sobre o conteúdo com fundo de proteção, e `Esc` fecha o menu e devolve o foco ao botão. Os destinos continuam definidos por perfil; as áreas profissionais mantêm subdestinos próprios. O botão “Como funciona? Ver tour” tem área de respiro interna e contraste no hover. A home recebeu explicação factual sobre o processo, sem prometer correspondência automática entre doadores e hospitais.
+O menu mostra os ícones quando recolhido. O botão de três traços iguais alterna a expansão; no desktop, escolher um ícone mantém os rótulos visíveis. Em telas estreitas, a expansão fica sobre o conteúdo com fundo de proteção: o conteúdo atrás fica inerte, `Tab` e `Shift+Tab` circulam nos controles do menu, escolher um destino recolhe o menu e `Esc` o fecha devolvendo o foco ao botão. Os destinos continuam definidos por perfil; as áreas profissionais mantêm subdestinos próprios. O botão “Como funciona? Ver tour” tem área de respiro interna e contraste no hover. A home recebeu explicação factual sobre o processo, sem prometer correspondência automática entre doadores e hospitais.
 
 ## Direção visual e referências
 
@@ -32,7 +32,7 @@ Não houve mídia nova nesta rodada. Origem, crédito e licença Unsplash dos fu
 
 | Elemento | Gatilho | Duração e intervalo | Deslocamento | Easing | `prefers-reduced-motion: reduce` |
 | --- | --- | --- | --- | --- | --- |
-| Barra lateral e recuo do conteúdo | Abrir/fechar ou escolher ícone | 260 ms | Largura 76→238 px no desktop; 60→238 px no mobile; margem acompanha | `cubic-bezier(.2,.8,.2,1)` | Troca imediata |
+| Barra lateral e recuo do conteúdo | Abrir/fechar; escolher ícone expande no desktop e recolhe no mobile | 260 ms | Largura 76→238 px no desktop; 60→238 px no mobile; margem acompanha apenas no desktop | `cubic-bezier(.2,.8,.2,1)` | Troca imediata |
 | Rótulos do menu | Expansão/recolhimento | Opacidade 140 ms; largura até 230 ms | Sem translação | `ease` / curva acima | Texto aparece imediatamente |
 | Fundo de proteção mobile | Abrir menu | 180 ms | Sem deslocamento; opacidade 0→1 | `ease-out` | Aparece imediatamente |
 | Título e blocos do hero | Entrada da home | 480 ms; atrasos 0/70/130/190 ms | `translateY(12px)`→0, opacidade .55→1 | `cubic-bezier(.2,.8,.2,1)` | Estado final estático |
