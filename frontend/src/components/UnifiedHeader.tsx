@@ -109,7 +109,7 @@ export function UnifiedHeader({ identity, route, navigate, professionalRole, onT
   }, [isExpanded, isCompact])
 
   function followRoute() {
-    setIsExpanded(!isCompact)
+    setIsExpanded(false)
   }
 
   return <>

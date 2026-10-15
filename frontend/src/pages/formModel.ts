@@ -28,6 +28,6 @@ export function validateForm(kind: FormKind, values: Values, consent: boolean): 
       if (!Number.isFinite(age) || age < 16 || age > 69) errors.birth = 'O pré-cadastro aceita idade de 16 a 69 anos.'
     }
   }
-  if ((kind === 'register' || kind === 'first') && !consent) errors.consent = 'Confirme a leitura do aviso de uso e privacidade.'
+  if ((kind === 'register' || kind === 'first') && !consent) errors.consent = 'Confirme a leitura do aviso desta versão de avaliação.'
   return errors
 }
