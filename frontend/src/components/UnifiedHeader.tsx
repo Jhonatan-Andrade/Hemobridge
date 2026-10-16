@@ -13,7 +13,9 @@ export type UnifiedHeaderProps = {
   onTour?: () => void
 }
 
-const professionalSections: Record<ProfessionalRole, { to: string; label: string; icon: 'calendar' | 'activity' | 'exams' }[]> = {
+type NavigationItem = { to: string; label: string; icon: 'home' | 'community' | 'dashboard' | 'profile' | 'calendar' | 'activity' | 'exams' }
+
+const professionalSections: Record<ProfessionalRole, NavigationItem[]> = {
   doctor: [
     { to: 'professional', label: 'Minha agenda', icon: 'calendar' },
     { to: 'professional/attendance', label: 'Atendimento', icon: 'activity' },
@@ -26,14 +28,15 @@ const professionalSections: Record<ProfessionalRole, { to: string; label: string
 function activePrimaryRoute(route: string) {
   if (route.startsWith('post/')) return 'community'
   if (route.startsWith('external-')) return 'dashboard'
-  if (route.startsWith('professional/')) return 'professional'
   return route
 }
 
 export function UnifiedHeader({ identity, route, navigate, professionalRole, onTour }: UnifiedHeaderProps) {
   const railId = useId()
+  const menuId = useId()
   const toggleRef = useRef<HTMLButtonElement>(null)
-  const railRef = useRef<HTMLElement>(null)
+  const railToggleRef = useRef<HTMLButtonElement>(null)
+  const menuRef = useRef<HTMLElement>(null)
   const [isExpanded, setIsExpanded] = useState(false)
   const [isCompact, setIsCompact] = useState(() => window.matchMedia('(max-width: 899px)').matches)
   const primary = getPrimaryNavigationItems(identity)
@@ -62,92 +65,104 @@ export function UnifiedHeader({ identity, route, navigate, professionalRole, onT
 
   useEffect(() => {
     const media = window.matchMedia('(max-width: 899px)')
-    const updateCompact = () => setIsCompact(media.matches)
-    media.addEventListener('change', updateCompact)
-    return () => media.removeEventListener('change', updateCompact)
+    const update = () => { setIsCompact(media.matches); setIsExpanded(false) }
+    media.addEventListener('change', update)
+    return () => media.removeEventListener('change', update)
   }, [])
-
-  useLayoutEffect(() => {
-    if (!isExpanded || !isCompact) return
-    const background = Array.from(document.querySelectorAll<HTMLElement>('.demo-bar, .hb-unified-header, #app'))
-    const previouslyInert = background.map((element) => element.inert)
-    background.forEach((element) => { element.inert = true })
-    if (!railRef.current?.contains(document.activeElement)) toggleRef.current?.focus()
-    return () => background.forEach((element, index) => { element.inert = previouslyInert[index] })
-  }, [isExpanded, isCompact])
 
   useEffect(() => {
     if (!isExpanded) return
-    const onKeyDown = (event: globalThis.KeyboardEvent) => {
+    const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         setIsExpanded(false)
-        toggleRef.current?.focus()
-      }
-      if (event.key === 'Tab' && isCompact) {
-        const focusable = Array.from(railRef.current?.querySelectorAll<HTMLElement>('a[href], button:not([disabled])') ?? [])
-        if (!focusable.length) return
-        const first = focusable[0]
-        const last = focusable[focusable.length - 1]
-        if (event.shiftKey && document.activeElement === first) {
-          event.preventDefault()
-          last.focus()
-        } else if (!event.shiftKey && document.activeElement === last) {
-          event.preventDefault()
-          first.focus()
-        }
+        const toggle = isCompact ? toggleRef.current : railToggleRef.current
+        toggle?.focus()
       }
     }
     const onPointerDown = (event: PointerEvent) => {
-      if (isCompact && !railRef.current?.contains(event.target as Node)) setIsExpanded(false)
+      if (isCompact && !menuRef.current?.contains(event.target as Node) && !toggleRef.current?.contains(event.target as Node)) setIsExpanded(false)
     }
+    const media = window.matchMedia('(max-width: 899px)')
+    const onResize = () => setIsExpanded(false)
+    const onHistory = () => setIsExpanded(false)
     window.addEventListener('keydown', onKeyDown)
     window.addEventListener('pointerdown', onPointerDown)
+    window.addEventListener('popstate', onHistory)
+    window.addEventListener('hashchange', onHistory)
+    media.addEventListener('change', onResize)
     return () => {
       window.removeEventListener('keydown', onKeyDown)
       window.removeEventListener('pointerdown', onPointerDown)
+      window.removeEventListener('popstate', onHistory)
+      window.removeEventListener('hashchange', onHistory)
+      media.removeEventListener('change', onResize)
     }
   }, [isExpanded, isCompact])
 
-  function followRoute() {
-    setIsExpanded(false)
-  }
+  function followRoute() { setIsExpanded(false) }
 
   return <>
-    {isExpanded && <div className="hb-unified-rail-scrim" aria-hidden="true" />}
-    <aside ref={railRef} className="hb-unified-rail" data-expanded={isExpanded} role={isExpanded && isCompact ? 'dialog' : undefined} aria-modal={isExpanded && isCompact ? true : undefined} aria-label="Navegação HemoBridge">
+    <aside className="hb-unified-rail" data-expanded={isExpanded} aria-label="Navegação HemoBridge">
       <div className="hb-unified-rail-inner" id={railId}>
-        <button ref={toggleRef} className="hb-unified-rail-toggle" type="button" aria-label={isExpanded ? 'Recolher navegação' : 'Expandir navegação'} aria-controls={railId} aria-expanded={isExpanded} onClick={() => setIsExpanded((current) => !current)}>
+        <button ref={railToggleRef} className="hb-unified-rail-toggle" type="button" aria-label={isExpanded ? 'Recolher navegação' : 'Expandir navegação'} aria-controls={railId} aria-expanded={isExpanded} onClick={() => setIsExpanded((current) => !current)}>
           <span className="hb-unified-menu-lines" aria-hidden="true"><span /><span /><span /></span>
           <span className="hb-unified-rail-label">Menu</span>
         </button>
         <p className="hb-unified-rail-role">{roleLabel}</p>
         <nav className="hb-unified-rail-nav" aria-label="Navegação principal">
-          {primary.map(({ to, label, icon }) => <RouteLink key={to} to={to} navigate={navigate} aria-label={label} title={!isExpanded ? label : undefined} aria-current={active === to ? 'page' : undefined} onClick={followRoute}><Icon name={icon} /><span className="hb-unified-rail-label">{label}</span></RouteLink>)}
+          {primary.map(({ to, label, icon }) => <RouteLink key={to} to={to} navigate={navigate} aria-label={label} aria-current={active === to ? 'page' : undefined} onClick={followRoute}><Icon name={icon} /><span className="hb-unified-rail-label">{label}</span></RouteLink>)}
         </nav>
         {identity === 'professional' && professionalSections[professionalRole].length > 0 && <div className="hb-unified-rail-group">
           <p className="hb-unified-rail-group-title">Área profissional</p>
           <nav className="hb-unified-rail-nav" aria-label="Áreas profissionais">
-            {professionalSections[professionalRole].map(({ to, label, icon }) => <RouteLink key={to} to={to} navigate={navigate} aria-label={label} title={!isExpanded ? label : undefined} aria-current={route === to ? 'page' : undefined} onClick={followRoute}><Icon name={icon} /><span className="hb-unified-rail-label">{label}</span></RouteLink>)}
+            {professionalSections[professionalRole].map(({ to, label, icon }) => <RouteLink key={to} to={to} navigate={navigate} aria-label={label} aria-current={route === to ? 'page' : undefined} onClick={followRoute}><Icon name={icon} /><span className="hb-unified-rail-label">{label}</span></RouteLink>)}
           </nav>
         </div>}
         <div className="hb-unified-rail-group hb-unified-rail-more">
           <p className="hb-unified-rail-group-title">Mais opções</p>
           <nav className="hb-unified-rail-nav" aria-label="Mais opções">
-            <RouteLink to="accessibility" navigate={navigate} aria-label="Acessibilidade" title={!isExpanded ? 'Acessibilidade' : undefined} aria-current={route === 'accessibility' ? 'page' : undefined} onClick={followRoute}><Icon name="accessibility" /><span className="hb-unified-rail-label">Acessibilidade</span></RouteLink>
-            {identity === 'visitor' && <RouteLink to="register" navigate={navigate} aria-label="Fazer pré-cadastro" title={!isExpanded ? 'Fazer pré-cadastro' : undefined} aria-current={route === 'register' ? 'page' : undefined} onClick={followRoute}><Icon name="register" /><span className="hb-unified-rail-label">Fazer pré-cadastro</span></RouteLink>}
-            {onTour && <button type="button" aria-label="Ver tour de orientação" title={!isExpanded ? 'Ver tour de orientação' : undefined} onClick={() => { setIsExpanded(false); onTour() }}><Icon name="help" /><span className="hb-unified-rail-label">Ver tour</span></button>}
+            <RouteLink to="accessibility" navigate={navigate} aria-label="Acessibilidade" aria-current={route === 'accessibility' ? 'page' : undefined} onClick={followRoute}><Icon name="accessibility" /><span className="hb-unified-rail-label">Acessibilidade</span></RouteLink>
+            {identity === 'visitor' && <RouteLink to="register" navigate={navigate} aria-label="Fazer pré-cadastro" aria-current={route === 'register' ? 'page' : undefined} onClick={followRoute}><Icon name="register" /><span className="hb-unified-rail-label">Fazer pré-cadastro</span></RouteLink>}
+            {onTour && <button type="button" aria-label="Ver tour de orientação" onClick={() => { followRoute(); onTour() }}><Icon name="help" /><span className="hb-unified-rail-label">Ver tour</span></button>}
           </nav>
         </div>
       </div>
     </aside>
     <header className="hb-unified-header">
       <div className="hb-unified-header-inner">
-        <BrandLogo navigate={navigate} />
+        <div className="hb-unified-header-brand" onClickCapture={() => setIsExpanded(false)}>
+          <button ref={toggleRef} className="hb-unified-menu-button" type="button" aria-label={isExpanded ? 'Fechar menu' : 'Abrir menu'} aria-controls={menuId} aria-expanded={isExpanded} onClick={() => {
+            const next = !isExpanded
+            setIsExpanded(next)
+            if (next) requestAnimationFrame(() => menuRef.current?.querySelector<HTMLElement>('a, button')?.focus())
+          }}>
+            <span className="hb-unified-menu-lines" aria-hidden="true"><span /><span /><span /></span>
+          </button>
+          <BrandLogo navigate={navigate} />
+        </div>
         <div className="hb-unified-header-actions">
           <span className="hb-unified-header-context">{roleLabel}</span>
-          {onTour && <button className="hb-unified-tour-button" type="button" onClick={onTour}>Ver tour</button>}
+          <RouteLink to="accessibility" navigate={navigate} className="hb-unified-header-accessibility" aria-label="Acessibilidade" title="Acessibilidade" aria-current={route === 'accessibility' ? 'page' : undefined} onClick={followRoute}><Icon name="accessibility" /><span>Acessibilidade</span></RouteLink>
+          {onTour && <button className="hb-unified-tour-button" type="button" onClick={() => { followRoute(); onTour() }}><Icon name="help" /><span>Ver tour</span></button>}
         </div>
       </div>
+      <nav ref={menuRef} id={menuId} className="hb-unified-menu" aria-label="Menu principal" hidden={!isExpanded}>
+        <p className="hb-unified-menu-role">{roleLabel}</p>
+        <div className="hb-unified-menu-links">
+          {primary.map(({ to, label, icon }) => <RouteLink key={to} to={to} navigate={navigate} aria-current={active === to ? 'page' : undefined} onClick={followRoute}><Icon name={icon} /><span>{label}</span></RouteLink>)}
+        </div>
+        {identity === 'professional' && professionalSections[professionalRole].length > 0 && <>
+          <p className="hb-unified-menu-group-title">Área profissional</p>
+          <div className="hb-unified-menu-links">
+            {professionalSections[professionalRole].map(({ to, label, icon }) => <RouteLink key={to} to={to} navigate={navigate} aria-current={route === to ? 'page' : undefined} onClick={followRoute}><Icon name={icon} /><span>{label}</span></RouteLink>)}
+          </div>
+        </>}
+        <p className="hb-unified-menu-group-title">Mais opções</p>
+        <div className="hb-unified-menu-links">
+          {identity === 'visitor' && <RouteLink to="register" navigate={navigate} aria-current={route === 'register' ? 'page' : undefined} onClick={followRoute}><Icon name="register" /><span>Fazer pré-cadastro</span></RouteLink>}
+          {onTour && <button type="button" onClick={() => { followRoute(); onTour() }}><Icon name="help" /><span>Ver tour</span></button>}
+        </div>
+      </nav>
     </header>
   </>
 }

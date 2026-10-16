@@ -1,5 +1,7 @@
 # HemoBridge — identidade e navegação, revisão de 14/10/2026
 
+> **Atualização de 16/10:** a orientação final separa [site desktop, site mobile e protótipo de app mobile](HEM-18-19-navegacao-por-contexto-2026-10-16.md). As descrições históricas abaixo sobre trilho lateral em telas mobile e barra inferior oculta foram substituídas por essa decisão.
+
 Continuação da HEM-18/19 sobre o React e o [arquivo Figma existente](https://www.figma.com/design/7aKvXrajoLmEGpaYsn0dQ1/Hemobridge). O objetivo desta passagem foi reduzir salmão/rosa, consolidar azul-petróleo com vermelho/magenta, tornar a navegação lateral única e dar mais clareza à proposta da plataforma. Home pública, comunidade, painel do paciente e tarefas profissionais continuam áreas distintas. Backend, banco, requisitos de outros integrantes e cópias de referência não foram alterados.
 
 ## Antes e depois
