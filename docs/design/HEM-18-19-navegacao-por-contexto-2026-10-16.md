@@ -8,7 +8,7 @@ Esta decisão substitui a descrição de navegação mobile da [revisão de 14/1
 | Site no navegador mobile, até 899 px | Somente ícone de menu no cabeçalho; sem barra lateral persistente e sem navegação inferior | O menu abre abaixo do cabeçalho, mostra rótulos e se fecha ao escolher destino, clicar fora ou pressionar `Esc`. O primeiro destino recebe foco. |
 | Protótipo de app mobile no Figma, 390 × 844 px | Barra inferior com ícones e rótulos nos quadros principais; sem trilho lateral | Visitante: Início, Comunidade e Entrar. Paciente: Início, Comunidade, Meu painel e Perfil. Formulários, tour e estados técnicos podem ocultar a barra para priorizar a tarefa. |
 
-Os destinos do React continuam definidos por `navigationItems.ts`; médico, hospital e administrador mantêm seus subdestinos próprios. O protótipo do Figma representa a interface do **app**, não a quebra responsiva do navegador. O React permanece a referência executável para 360, 390, 768 e 1440 px.
+Os destinos do React continuam definidos por `navigationItems.ts`; médico, hospital e administrador mantêm seus subdestinos próprios. Os quadros originais de 390 px representam o **app**. Uma [página adicional no Figma para o navegador mobile](HEM-18-19-paridade-visual-2026-10-16.md) preserva esses originais e documenta o menu superior; o React permanece a referência executável para a adaptação contínua em 360, 390, 768 e 1440 px.
 
 ## Antes e depois verificável
 
@@ -17,6 +17,7 @@ Os destinos do React continuam definidos por `navigationItems.ts`; médico, hosp
 | Web desktop | [Captura anterior com trilho lateral](qa-2026-10-14/home-1440.png) | [Barra lateral atual, comunidade](qa-2026-10-16/web-desktop-1440.png) |
 | Web mobile | [Captura anterior com trilho lateral estreito](qa-2026-10-14/home-360.png) | [Home atual com ícone de menu](qa-2026-10-16/web-mobile-390.png) |
 | App mobile no Figma | Trilho lateral cobria 60 px de um quadro de 390 px; a barra inferior existente estava oculta | [Painel no Present com barra inferior](qa-2026-10-16/figma-app-mobile-patient-present.png) |
+| Navegador mobile no Figma | O arquivo mostrava a experiência de app, sem uma sequência própria para o navegador pequeno | [Página Web mobile com 123 quadros editáveis](https://www.figma.com/design/7aKvXrajoLmEGpaYsn0dQ1/Hemobridge?node-id=660-5911), logo completa e menu superior por perfil; o app original continua separado |
 
 No Figma existente, as barras antigas foram **reexibidas** em 79 quadros mobile de navegação e os trilhos mobile anteriores foram ocultos, sem apagar componentes nem reconectar para destinos diferentes. Os demais quadros de 390 px incluem etapas focadas de cadastro, autenticação, tour e estados de apoio. Nas 246 ligações visíveis dessas barras, `resetScrollPosition` está ativo. Isso resolve a entrada da comunidade no meio do feed após sair da home, observada em teste por clique.
 
@@ -37,8 +38,9 @@ Todas as transições CSS acima estão sob `prefers-reduced-motion: no-preferenc
 - React: build e lint passaram; o menu mobile abriu por clique, moveu foco para o primeiro link e fechou com `Esc`, devolvendo foco ao botão. O desktop expandiu e recolheu a barra com `Esc`.
 - Largura: a home não excedeu o viewport a 360 e 768 px, e a home a 390 px com texto em 200% permaneceu sem rolagem horizontal. A preferência foi restaurada para 100% após o teste.
 - Present **por clique**: Home mobile `43:1309` → Comunidade `49:13034` abriu no topo; painel do paciente `8:518` → Perfil `8:751` abriu no topo. Isto é evidência de clique, além da inspeção das propriedades dos 246 links.
+- Present **por clique, navegador mobile**: Home `660:7571` → Pré-cadastro `660:6034`; menu de visitante → Comunidade `660:7691` → Entrar `660:6373`; painel `660:6547` → menu do paciente → Perfil `660:6886`; acesso profissional `660:7312` → menu profissional → Jornada `660:11382`. A inspeção de propriedades encontrou 1.165 ações internas nessa página; os cliques verificam os percursos citados, não todas as ligações.
 - Present **por observação temporal**: duas capturas da home após intervalo superior a 3 s produziram os mesmos bytes; a inspeção confirmou zero nós com trilhas de keyframe nas duas homes. Isso valida as cenas verificadas, não todos os fluxos do arquivo.
 
 ## Limites e próximos cuidados
 
-O Figma é uma demonstração estática de quadros de 390 px; não simula responsividade contínua, foco real, zoom a 200% nem `prefers-reduced-motion`. As entradas desktop legadas do Figma, como a home `43:1340`, ainda apresentam o antigo acionador de sobreposição; sua migração visual total para a barra lateral exigirá ajustar composições fixas de 1440 px e repetir os cliques no Present. A navegação do **site desktop executável** já usa a barra lateral. O conteúdo do app continua protótipo: não há integração nativa nem autenticação/agenda reais.
+O Figma é uma demonstração estática por quadros; não simula responsividade contínua, foco real, zoom a 200% nem `prefers-reduced-motion`. A [revisão de paridade](HEM-18-19-paridade-visual-2026-10-16.md) registra barra lateral em 83 dos 110 quadros desktop de 1440 × 1000 px; os 27 restantes são retornos/infraestrutura, tours com máscaras fixas e overlays do próprio menu. O novo teste por clique no Present desktop foi inconclusivo, embora as propriedades dos quadros e pontos interativos tenham sido verificadas. A navegação do **site desktop executável** usa a barra lateral. O conteúdo do app continua protótipo: não há integração nativa nem autenticação/agenda reais.

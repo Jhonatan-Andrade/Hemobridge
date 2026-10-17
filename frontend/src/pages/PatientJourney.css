@@ -36,5 +36,5 @@
 .hb-journey-stage-nav a[aria-current=page]{border:2px solid var(--brand);background:var(--soft);font-weight:600}
 .hb-journey-back{margin-bottom:12px}
 @media(max-width:1199px){.hb-journey-stage-nav{grid-template-columns:repeat(3,minmax(0,1fr))}}
-@media(max-width:899px){.hb-journey-content{padding-bottom:calc(132px + env(safe-area-inset-bottom,0px))}.hb-journey-header-note{font-size:.6875rem}}
+@media(max-width:899px){.hb-journey-content{padding-bottom:calc(48px + env(safe-area-inset-bottom,0px))}.hb-journey-header-note{font-size:.6875rem}}
 @media(max-width:599px){.hb-journey-progress{display:grid;grid-template-columns:1fr 1fr}.hb-journey-progress span{align-items:center;font-size:.6875rem}.hb-journey-card-grid,.hb-journey-slot-grid{grid-template-columns:1fr}.hb-journey-stage-nav{grid-template-columns:repeat(2,minmax(0,1fr))}.hb-journey-actions{display:grid;grid-template-columns:1fr}.hb-journey-actions .button,.hb-journey-notification-tools .button,.hb-journey-next,.hb-journey-back{width:100%}.hb-journey-question{padding:18px}.hb-journey-question legend{max-width:100%}}

@@ -19,12 +19,13 @@
   --hb-accent: #BD1745;
   --hb-cream: #F8F7F3;
   --hb-display: Georgia, 'Times New Roman', serif;
+  --hb-pill-radius: 999px;
   --hb-ease-out: cubic-bezier(.2,.8,.2,1);
 }
 
 body { background: radial-gradient(ellipse at 92% 2%,#D9E5E280 0,transparent 29%), radial-gradient(ellipse at 2% 90%,#A71D4920 0,transparent 34%), var(--background); }
 ::selection { background: #D5AEC0; color: var(--hb-night); }
-.button { border-radius: 999px; box-shadow: 0 8px 18px #7F173118; letter-spacing: .01em; }
+.button { border-radius: var(--hb-pill-radius); box-shadow: 0 8px 18px #7F173118; letter-spacing: .01em; }
 .button.secondary { box-shadow: none; }
 .surface, .post-card, .hb-pro-card { box-shadow: var(--shadow); }
 .field input, .field select, .comments-section textarea { background: #FFFEFB; }

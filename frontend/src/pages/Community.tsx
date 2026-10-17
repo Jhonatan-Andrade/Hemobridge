@@ -17,7 +17,7 @@ type CommunityProps = {
 }
 
 function PublicationArt() {
-  return <svg className="post-image" viewBox="0 0 600 160" role="img" aria-label="Três etapas conectadas em sequência"><rect width="600" height="160" fill="#F9E8EB" /><path d="M100 80h400" stroke="#C0102B" strokeWidth="3" />{[100, 300, 500].map((x, index) => <g key={x}><circle cx={x} cy="80" r="28" fill="#fff" stroke="#C0102B" strokeWidth="2" /><text x={x} y="87" textAnchor="middle" fontSize="20" fill="#C0102B">{index + 1}</text></g>)}</svg>
+  return <svg className="post-image" viewBox="0 0 600 160" role="img" aria-label="Três etapas conectadas em sequência" style={{ color: 'var(--hb-accent)' }}><rect width="600" height="160" fill="var(--soft)" /><path d="M100 80h400" stroke="currentColor" strokeWidth="3" />{[100, 300, 500].map((x, index) => <g key={x}><circle cx={x} cy="80" r="28" fill="var(--surface)" stroke="currentColor" strokeWidth="2" /><text x={x} y="87" textAnchor="middle" fontSize="20" fill="currentColor">{index + 1}</text></g>)}</svg>
 }
 
 function PublicationCard({ publication: post, full = false, onLike, onOpenPost }: { publication: Publication; full?: boolean; onLike: CommunityProps['onLike']; onOpenPost: CommunityProps['onOpenPost'] }) {
