@@ -1,6 +1,6 @@
 # Aviso de privacidade do HemoBridge — minuta para serviço futuro
 
-**Status: não vigente; não publicar sem mapa de dados, identificação real e revisão jurídica.** Versão da minuta 0.1, 15/10/2026. Este texto descreve o **desenho pretendido**, não afirma que as integrações existem.
+**Status: não vigente; não publicar sem mapa de dados, identificação real e revisão jurídica.** Versão da minuta 0.2, 17/10/2026. Este texto descreve o **desenho pretendido**, não afirma que as integrações existem.
 
 ## Quem decide sobre os dados
 
@@ -15,13 +15,14 @@
 | Consulta, se integrada | Disponibilidade, solicitação, confirmação e dados necessários à consulta | Organizar atendimento com instituição participante | Base a definir conforme responsável e natureza do atendimento; tutela da saúde do art. 11, II, “f”, exige procedimento por profissional, serviço de saúde ou autoridade sanitária |
 | Conta profissional | Identificação, vínculo institucional, credenciais, perfil e registros de acesso | Autorizar somente tarefas compatíveis com o papel | Base legal a definir pelo controlador e pelas instituições conforme vínculo e obrigações |
 | Comunidade, se publicada | Nome de exibição, publicação, comentário e interação | Exibir e organizar conversas | Base legal a definir; não incluir dados de saúde no feed público por padrão |
+| Busca de locais, se mantida na operação | Cidade e UF digitadas; região aproximada somente se a pessoa escolher usar a localização | Apresentar mapa de referência e facilitar a busca externa por locais de doação e exames | Base legal, necessidade e fornecedores a definir por operação; a permissão do navegador para geolocalização não substitui a análise da LGPD |
 | Segurança e direitos | Registros técnicos estritamente necessários, pedidos e respostas | Proteger o serviço, responder ao titular e cumprir obrigações | Base e prazo a justificar por categoria; verificar se o regime do art. 15 do Marco Civil se aplica ao operador real |
 
 Este quadro não substitui o registro das operações nem concede autorização genérica. Dados de saúde são **sensíveis**; a equipe deve aplicar necessidade, acesso mínimo e avaliação de risco. Não usar dado de saúde para publicidade direcionada ou comercialização. Compartilhamentos entre controlador, profissional, instituição e fornecedores exigem finalidade, papel, contrato e transparência específicos.
 
 ## Compartilhamento, fornecedores e localização
 
-Os destinatários efetivos, fornecedores de hospedagem, mensagens, métricas, acessibilidade e eventual transferência internacional devem ser descritos **antes da coleta real**: **[LISTA DE DESTINATÁRIOS E FINALIDADES]**, **[PAÍSES E MECANISMO DE TRANSFERÊNCIA, SE HOUVER]**. O acesso por profissionais deverá respeitar a atribuição e a instituição vinculada. Não presumir que um hospital possa ver informações de outro. Pedidos de autoridades serão avaliados segundo a legislação aplicável.
+Os destinatários efetivos, fornecedores de hospedagem, mensagens, métricas, acessibilidade, mapas e busca de locais, bem como eventual transferência internacional, devem ser descritos **antes da coleta real**: **[LISTA DE DESTINATÁRIOS E FINALIDADES]**, **[PAÍSES E MECANISMO DE TRANSFERÊNCIA, SE HOUVER]**. Caso o mapa e as buscas externas permaneçam no serviço final, avaliar especificamente os fluxos para OpenStreetMap e Google Maps, suas condições e políticas, a alternativa para quem não conceder localização e a minimização da região compartilhada. O acesso por profissionais deverá respeitar a atribuição e a instituição vinculada. Não presumir que um hospital possa ver informações de outro. Pedidos de autoridades serão avaliados segundo a legislação aplicável.
 
 ## Guarda, proteção e eliminação
 
@@ -37,7 +38,7 @@ O projeto prevê eventual pré-cadastro de pessoas de 16 e 17 anos. Qualquer tra
 
 ## Tecnologias locais e terceiros
 
-O protótipo usa `localStorage` para escala de texto, opção de carregamento do VLibras e marca de tour visto. Quando ativado, o VLibras é carregado do domínio `vlibras.gov.br`. Antes da operação pública, realizar inventário de cookies e outras tecnologias no domínio final, indicar responsáveis, finalidades e duração, oferecer escolhas quando a base legal exigir e não pré-autorizar tecnologias não necessárias. Consultar também o [aviso específico do protótipo](aviso-do-prototipo.md).
+O protótipo usa `localStorage` para escala de texto, opção de carregamento do VLibras e marca de tour visto. Publicações e comentários criados na comunidade ficam apenas na memória da página durante a sessão. Quando ativado, o VLibras é carregado do domínio `vlibras.gov.br`. A página de locais incorpora um mapa do OpenStreetMap; ao abri-la, o navegador pode se conectar ao serviço externo e transmitir dados técnicos. A localização do dispositivo só é solicitada após a pessoa acionar “Ver minha região”; uma coordenada arredondada é então incluída no endereço do mapa enviado ao OpenStreetMap. As buscas por cidade e tipo de serviço abrem no Google Maps somente após o clique. Antes da operação pública, realizar inventário de cookies e outras tecnologias no domínio final, indicar responsáveis, finalidades e duração, oferecer escolhas quando a base legal exigir e não pré-autorizar tecnologias não necessárias. Consultar também o [aviso específico do protótipo](aviso-do-prototipo.md).
 
 ## Atualizações
 

@@ -26,6 +26,7 @@ const paths: Record<string, ReactNode> = {
   calendar: <><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M7 3v4m10-4v4M3 10h18" /></>,
   activity: <path d="M2 12h5l2-5 4 10 2-5h7" />,
   exams: <><path d="M7 3h8l4 4v14H5V5a2 2 0 0 1 2-2zM15 3v5h5M8 13h8M8 17h6" /></>,
+  map: <><path d="m3 5 6-2 6 2 6-2v16l-6 2-6-2-6 2zM9 3v16m6-14v16" /><circle cx="15" cy="10" r="1.5" /></>,
   heart: <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8z" />,
   comment: <path d="M21 11a9 9 0 0 1-9 9 10 10 0 0 1-4-.8L3 21l1.8-5A9 9 0 1 1 21 11z" />,
   back: <path d="m14 5-7 7 7 7M7 12h14" />,

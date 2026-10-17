@@ -1,5 +1,5 @@
-import { demoPatient, exampleFormValues, exampleProfile, initialPublications, patientStatuses } from '../data/fixtures'
-import type { Comment, DemoProfile, DemoResponse, PatientStatus, Publication } from '../data/fixtures'
+import { communitySessionAuthors, demoPatient, exampleFormValues, exampleProfile, initialPublications, patientStatuses } from '../data/fixtures'
+import type { Comment, CommunityParticipantRole, DemoProfile, DemoResponse, PatientStatus, Publication } from '../data/fixtures'
 import type { FormKind, Values } from '../pages/formModel'
 
 // Every operation here is local to the demo app. These are replaceable UI contracts,
@@ -20,7 +20,8 @@ export interface DemoService {
   patientDisplay(): typeof demoPatient
   submit(request: DemoSubmission, response: DemoResponse): Promise<void>
   retryLoad(response: DemoResponse): Promise<void>
-  sendComment(publicationId: string, text: string, response: DemoResponse): Promise<Comment>
+  sendComment(publicationId: string, text: string, role: CommunityParticipantRole, response: DemoResponse): Promise<Comment>
+  createPublication(title: string, content: string, role: CommunityParticipantRole, response: DemoResponse): Promise<Publication>
   toggleLike(publication: Publication): Publication
 }
 
@@ -46,10 +47,25 @@ export const demoService: DemoService = {
     await pause()
     if (response === 'loadError') throw new DemoServiceError('Os dados continuam indisponíveis. Verifique o estado selecionado nos controles de revisão.')
   },
-  async sendComment(_publicationId, text, response) {
+  async sendComment(_publicationId, text, role, response) {
     await pause()
     if (response === 'network') throw new DemoServiceError('Não foi possível enviar. Seu texto foi preservado. Tente novamente.')
-    return { id: `demo-${Date.now()}`, author: demoPatient.commentAuthor, date: new Date().toISOString().slice(0, 10), text }
+    const cleanText = text.trim()
+    if (!cleanText || cleanText.length > 2000) throw new DemoServiceError('Escreva um comentário de até 2.000 caracteres.')
+    return { id: `comment-${crypto.randomUUID()}`, author: communitySessionAuthors[role], date: new Date().toISOString().slice(0, 10), text: cleanText, role }
+  },
+  async createPublication(title, content, role, response) {
+    await pause()
+    if (response === 'network') throw new DemoServiceError('Não foi possível publicar. Seu texto foi preservado. Tente novamente.')
+    const cleanTitle = title.trim()
+    const cleanContent = content.trim()
+    if (cleanTitle.length < 8 || cleanTitle.length > 120) throw new DemoServiceError('O título deve ter entre 8 e 120 caracteres.')
+    if (cleanContent.length < 20 || cleanContent.length > 2000) throw new DemoServiceError('O texto deve ter entre 20 e 2.000 caracteres.')
+    return {
+      id: `post-${crypto.randomUUID()}`, author: communitySessionAuthors[role],
+      date: new Date().toISOString().slice(0, 10), title: cleanTitle, content: cleanContent,
+      likes: 0, liked: false, comments: [], role,
+    }
   },
   toggleLike(publication) {
     const liked = !publication.liked

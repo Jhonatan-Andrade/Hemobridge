@@ -5,6 +5,7 @@ import { demoJourneyNotifications } from '../data/patientJourneyFixtures'
 import type { JourneyNotification } from '../data/patientJourneyFixtures'
 import { Alert, Intro, RouteLink } from '../components/ui'
 import type { Navigate } from '../components/ui'
+import { LocalDiscovery } from './LocalDiscovery'
 import './PatientJourney.css'
 
 type Props = {
@@ -30,6 +31,7 @@ function JourneyShell({ route, navigate, children }: { route: string; navigate: 
         <nav className="hb-journey-stage-nav" aria-label="Etapas do acompanhamento">
           {stages.map((stage) => <RouteLink key={stage.code} to={stage.to} navigate={navigate} aria-current={route === stage.to ? 'page' : undefined}><span>{stage.code}</span>{stage.label}</RouteLink>)}
         </nav>
+        {route !== 'external-locations' && <RouteLink className="button secondary hb-journey-map-nav" to="external-locations" navigate={navigate}>Encontrar locais para exames e doação</RouteLink>}
         <RouteLink className="button secondary hb-journey-back" to="dashboard" navigate={navigate}>Voltar ao painel</RouteLink>
   </main>
 }
@@ -121,10 +123,11 @@ function Notifications({ response, notifications, onMarkNotification, navigate }
   </>
 }
 
-function Locations({ status, response }: { status: PatientStatus; response: DemoResponse }) {
+function Locations({ status, response, navigate }: { status: PatientStatus; response: DemoResponse; navigate: Navigate }) {
   return <>
     <Intro title="P08 · Locais recomendados" description="Saiba como serão apresentados os locais após aprovação." />
     <Alert tone="warning">Não calculamos compatibilidade, elegibilidade, data possível nem prioridade de hospitais. Nenhum estoque real foi consultado. A aprovação do cadastro não substitui a triagem do hemocentro.</Alert>
+    <RouteLink className="button secondary hb-journey-map-shortcut" to="external-locations" navigate={navigate}>Explorar locais para exames e doação</RouteLink>
     {status !== 'APROVADO' ? <PreviewState response="empty" empty="Recomendações personalizadas ficam disponíveis somente após aprovação pela equipe." /> : response === 'loading' || response === 'loadError' ? <PreviewState response={response} empty="" /> : <div className="hb-journey-card-grid">
       <section className="surface card"><h2>Tipo sanguíneo</h2><p>Será definido pela equipe após validação. Nenhum tipo clínico é inferido nesta tela.</p></section>
       <section className="surface card"><h2>Próxima data possível</h2><p>Indisponível sem histórico e regra clínica confirmada; sempre sujeita à triagem no local.</p></section>
@@ -145,7 +148,8 @@ export function PatientJourneyPage({ route, navigate, status, response, notifica
       : route === 'external-P04' ? <Consultations status={status} response={response} />
         : route === 'external-P05' ? <Exams status={status} response={response} />
           : route === 'external-P06' ? <Notifications response={response} notifications={shownNotifications} onMarkNotification={mark} navigate={navigate} />
-            : route === 'external-P08' ? <Locations status={status} response={response} />
+            : route === 'external-P08' ? <Locations status={status} response={response} navigate={navigate} />
+              : route === 'external-locations' ? <LocalDiscovery />
               : <><Intro title="Etapa indisponível" description="Este destino ainda não está disponível." /><Alert>Nenhuma ação clínica ou operacional foi executada.</Alert></>
   return <JourneyShell route={route} navigate={navigate}>{content}</JourneyShell>
 }

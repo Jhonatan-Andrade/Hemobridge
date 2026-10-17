@@ -7,6 +7,33 @@ textarea{font:inherit;resize:vertical}textarea:focus-visible{outline:3px solid v
 .post-actions a{border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);display:flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:8px 10px;font-size:0.75rem;text-decoration:none}.post-actions a:focus-visible,.back-link:focus-visible{outline:3px solid var(--info);outline-offset:3px}.back-link{text-decoration:none}.comments-section textarea{scroll-margin-bottom:160px}#comment-feedback:empty{display:none}
 @media(min-width:900px){.post-preview,.feed-list{align-items:start}.post-actions{margin-top:0}.home-about{justify-content:flex-start}.home-hero{min-width:0}.home-hero h1{max-width:100%;overflow-wrap:break-word}}
 
+/* Community participation stays legible and task-focused across profile contexts. */
+.post-labels{display:flex;flex-wrap:wrap;gap:6px;margin-top:-7px;font-size:.6875rem;font-weight:600;line-height:1.4}
+.post-role,.post-example{display:inline-flex;align-items:center;min-height:26px;padding:3px 9px;border-radius:999px}
+.post-role{background:#f2e5e9;color:#75213c}
+.post-example{background:#edf3f4;color:#244453}
+.comment-role{display:inline-block;margin-left:10px;color:#6a3a50;font-size:.75rem;font-weight:600}
+.community-composer{margin:28px 0 32px;padding:clamp(20px,3vw,32px);border:1px solid var(--line);border-top:4px solid var(--brand);border-radius:24px;background:linear-gradient(130deg,#fff 55%,#f8eff2 100%);box-shadow:0 16px 42px #17313b0a}
+.community-composer-intro{display:flex;justify-content:space-between;align-items:start;gap:24px;margin-bottom:20px}
+.community-composer-intro>div{flex:0 0 auto}
+.community-composer-intro h2{margin:4px 0 0;font-size:clamp(1.25rem,2vw,1.625rem);line-height:1.25;color:var(--ink)}
+.community-composer-intro p{max-width:45ch;margin:0;color:var(--muted);font-size:.8125rem;line-height:1.6}
+.community-composer-kicker{color:var(--brand);font-size:.6875rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase}
+.community-composer form{display:grid;gap:14px}
+.community-composer-author{margin:0;color:var(--muted);font-size:.8125rem}
+.community-composer-author strong{color:var(--ink)}
+.community-composer-fields{display:grid;gap:14px}
+.community-composer-fields>div{display:grid;gap:7px;min-width:0}
+.community-composer-fields label{font-weight:600;font-size:.8125rem;color:var(--ink)}
+.community-composer-fields input,.community-composer-fields textarea{width:100%;min-width:0;border:1px solid var(--input-line);border-radius:12px;background:#fff;color:var(--ink);padding:12px 14px;font:inherit;font-size:.9375rem;line-height:1.5}
+.community-composer-fields textarea{min-height:120px}
+.community-composer-fields input[aria-invalid=true],.community-composer-fields textarea[aria-invalid=true]{border-color:var(--brand)}
+.community-composer-fields input:focus-visible,.community-composer-fields textarea:focus-visible{outline:3px solid var(--info);outline-offset:2px}
+.community-composer .help{margin:0;color:var(--muted);font-size:.75rem;line-height:1.6}
+.community-composer form>.button{justify-self:start}
+#community-composer-feedback:empty{display:none}
+@media(max-width:699px){.community-composer-intro{display:block}.community-composer-intro p{margin-top:12px}.community-composer{margin-block:20px 24px}}
+
 /* A small licensed editorial image supports the feed introduction without implying clinical evidence. */
 .community-intro{display:grid;grid-template-columns:minmax(0,1fr) minmax(220px,320px);gap:24px;align-items:center}.community-art{margin:0;min-width:0;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--surface)}.community-art img{display:block;width:100%;height:132px;object-fit:cover}.community-art figcaption{padding:8px 12px;color:var(--muted);font-size:0.6875rem;line-height:1.5}.community-art a{color:var(--brand)}.community-art a:focus-visible{outline:3px solid var(--info);outline-offset:2px}
 @media(max-width:599px){.community-intro{grid-template-columns:1fr;gap:12px}.community-art img{height:112px}}

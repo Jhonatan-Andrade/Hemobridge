@@ -13,7 +13,7 @@ export type UnifiedHeaderProps = {
   onTour?: () => void
 }
 
-type NavigationItem = { to: string; label: string; icon: 'home' | 'community' | 'dashboard' | 'profile' | 'calendar' | 'activity' | 'exams' }
+type NavigationItem = { to: string; label: string; icon: 'home' | 'community' | 'dashboard' | 'profile' | 'calendar' | 'activity' | 'exams' | 'map' }
 
 const professionalSections: Record<ProfessionalRole, NavigationItem[]> = {
   doctor: [
@@ -22,11 +22,12 @@ const professionalSections: Record<ProfessionalRole, NavigationItem[]> = {
     { to: 'professional/exams', label: 'Exames', icon: 'exams' },
   ],
   representative: [{ to: 'professional/needs', label: 'Necessidades', icon: 'activity' }],
-  administrator: [],
+  administrator: [{ to: 'professional/admin', label: 'Mapa regional', icon: 'map' }],
 }
 
 function activePrimaryRoute(route: string) {
   if (route.startsWith('post/')) return 'community'
+  if (route === 'external-locations') return 'external-locations'
   if (route.startsWith('external-')) return 'dashboard'
   return route
 }
