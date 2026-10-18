@@ -35,7 +35,7 @@ export function AccessibilityPage({
         title="Acessibilidade"
         description="Ajuste a leitura e escolha quando usar recursos externos. Estas preferências não alteram seus dados de saúde."
       />
-      <p className="demo-content-label">
+      <p className="reading-preference-note">
         Suas preferências de leitura ficam guardadas neste navegador.
       </p>
       <div className="accessibility-grid">

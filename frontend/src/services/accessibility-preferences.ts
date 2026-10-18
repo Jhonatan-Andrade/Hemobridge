@@ -2,7 +2,6 @@ export type FontScale = 100 | 125 | 150 | 200
 
 const FONT_KEY = 'hemobridge.fontScale'
 const LIBRAS_KEY = 'hemobridge.vlibrasAuto'
-const TOUR_KEY = 'hemobridge.isFirstAccess'
 const scales: FontScale[] = [100, 125, 150, 200]
 
 function read(key: string) {
@@ -35,12 +34,6 @@ export function readVlibrasAuto() {
 }
 export function saveVlibrasAuto(value: boolean) {
   write(LIBRAS_KEY, value ? 'true' : null)
-}
-export function readFirstAccess(userId: string) {
-  return read(`${TOUR_KEY}.${userId}`) !== 'false'
-}
-export function completeFirstAccess(userId: string) {
-  write(`${TOUR_KEY}.${userId}`, 'false')
 }
 
 const SCRIPT_ID = 'hemobridge-vlibras-plugin'

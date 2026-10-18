@@ -1,4 +1,4 @@
-/* HEM-19 · expressão editorial: o conteúdo e os destinos continuam os mesmos. */
+/* Identidade editorial e composição das páginas. */
 :root {
   --brand: #ac123f;
   --brand-hover: #850d31;
@@ -274,7 +274,7 @@ body {
   border-color: var(--hb-cream);
   color: var(--hb-night);
 }
-.public-home .demo-content-label {
+.public-home .reading-preference-note {
   color: #f3edf0;
   font-weight: 600;
   letter-spacing: 0.03em;

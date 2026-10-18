@@ -9,14 +9,14 @@ import './styles/production.css'
 import { ApiError, api, messageOf } from './services/api-client'
 import { expirePinnedPublications, nextPinExpiryDelay } from './services/feed-expiration'
 import {
-  completeFirstAccess,
   loadVlibras,
-  readFirstAccess,
   readFontScale,
   readVlibrasAuto,
   saveFontScale,
   saveVlibrasAuto,
 } from './services/accessibility-preferences'
+import { completeFirstAccess, readFirstAccess } from './services/first-access'
+import { savedRoute } from './services/saved-routes'
 import type { FontScale } from './services/accessibility-preferences'
 import { entryRouteOf, professionalRoleOf } from './types/domain'
 import type {
@@ -42,15 +42,7 @@ import { AccessibilityPage } from './pages/accessibility'
 import { LegalContent, LegalPage } from './pages/legal'
 const routeFromHash = () => {
   const route = decodeURIComponent(location.hash.slice(1).split('?')[0] || 'home')
-  const aliases: Record<string, string> = {
-    'redefinir-senha': 'reset',
-    'external-P03': 'external-pre-triage',
-    'external-P04': 'external-consultations',
-    'external-P05': 'external-exams',
-    'external-P06': 'external-notifications',
-    'external-P08': 'external-locations',
-  }
-  return aliases[route] ?? route
+  return savedRoute(route)
 }
 const protectedRoute = (r: string) =>
   r === 'dashboard' ||
@@ -72,7 +64,7 @@ function App() {
     [feedError, setFeedError] = useState(false),
     [drafts, setDrafts] = useState<Record<string, string>>({}),
     [tourRequested, setTourRequested] = useState(false),
-    [tourCompleted, setTourCompleted] = useState(''),
+    [tourAccess, setTourAccess] = useState({ userId: '', isFirstAccess: true }),
     [legalOpen, setLegalOpen] = useState(false)
   const [fontScale, setFontScale] = useState<FontScale>(readFontScale),
     [vlibrasAuto, setVlibrasAuto] = useState(readVlibrasAuto),
@@ -109,6 +101,8 @@ function App() {
     const controller = new AbortController()
     api<SessionUser>('/auth/me', { signal: controller.signal })
       .then((u) => {
+        if (controller.signal.aborted) return
+        setTourAccess({ userId: u.id, isFirstAccess: readFirstAccess(u.id) })
         setUser(u)
         setSessionReady(true)
       })
@@ -236,6 +230,7 @@ function App() {
   async function authDone(kind: string) {
     if (kind === 'login' || kind === 'first') {
       const u = await api<SessionUser>('/auth/me')
+      setTourAccess({ userId: u.id, isFirstAccess: readFirstAccess(u.id) })
       setUser(u)
       navigate(entryRouteOf(u))
       setSessionRevision((v) => v + 1)
@@ -370,8 +365,8 @@ function App() {
     postOrigin: 'community' as const,
     onTour: () => setTourRequested(true),
   }
-  const mandatory =
-    !!user && !user.senhaProvisoria && tourCompleted !== user.id && readFirstAccess(user.id)
+  const isFirstAccess = !!user && (tourAccess.userId !== user.id || tourAccess.isFirstAccess)
+  const mandatory = !!user && !user.senhaProvisoria && isFirstAccess
   const denied =
     user &&
     ((identity === 'patient' && route.startsWith('professional')) ||
@@ -516,7 +511,7 @@ function App() {
           onComplete={() => {
             if (user) {
               completeFirstAccess(user.id)
-              setTourCompleted(user.id)
+              setTourAccess({ userId: user.id, isFirstAccess: false })
             }
             setTourRequested(false)
           }}

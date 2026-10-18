@@ -72,8 +72,11 @@ class SessionController extends ChangeNotifier {
   }
 
   Future<void> completeTour() async {
+    final userId = user?['id'];
+    if (userId is! String) throw StateError('Sessão indisponível.');
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('isFirstAccess.${user!['id']}', false);
+    final saved = await prefs.setBool('isFirstAccess.$userId', false);
+    if (!saved) throw StateError('Não foi possível salvar a conclusão.');
     isFirstAccess = false;
     notifyListeners();
   }
@@ -85,6 +88,7 @@ class SessionController extends ChangeNotifier {
       await storage.delete(key: 'sessionToken');
       api.token = null;
       user = null;
+      isFirstAccess = true;
       notifyListeners();
     }
   }

@@ -22,7 +22,7 @@ h1[tabindex='-1']:focus {
 .community-heading p {
   margin-top: 8px;
 }
-.demo-content-label {
+.reading-preference-note {
   color: var(--muted);
   font-size: 0.6875rem;
   margin: 16px 0;

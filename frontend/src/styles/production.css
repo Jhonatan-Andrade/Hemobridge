@@ -15,7 +15,10 @@
   transform: none;
 }
 @media (max-width: 899px) {
-  .community-intro .community-art { top: 36px; margin-bottom: -20px; }
+  .community-intro .community-art {
+    top: 36px;
+    margin-bottom: -20px;
+  }
 }
 @media (max-width: 599px) {
   .community-intro .community-art {
@@ -25,7 +28,9 @@
     justify-self: end;
     margin-bottom: -32px;
   }
-  .community-intro { margin-bottom: 72px; }
+  .community-intro {
+    margin-bottom: 72px;
+  }
 }
 body,
 button,
@@ -207,15 +212,34 @@ form .button {
 }
 .onboarding-dialog {
   width: 620px;
-  padding: clamp(24px, 4vw, 40px);
+  padding: 0;
   max-height: calc(100dvh - 32px);
   max-width: calc(100vw - 24px);
   animation: onboarding-enter 180ms ease-out;
+  overflow: hidden;
+}
+.onboarding-dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+.onboarding-body {
+  padding: clamp(24px, 4vw, 40px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.onboarding-footer {
+  flex-shrink: 0;
+  padding: 16px clamp(24px, 4vw, 40px) 24px;
+  border-top: 1px solid var(--line);
+  background: white;
 }
 .onboarding-dialog h2 {
   font-size: 1.5rem;
   line-height: 1.35;
   margin-top: 24px;
+}
+.onboarding-dialog h2:focus {
+  outline: none;
 }
 .onboarding-dialog p {
   line-height: 1.8;
@@ -245,13 +269,33 @@ form .button {
 .onboarding-time p {
   margin-top: 8px;
 }
+.onboarding-time h3 {
+  font-size: 1rem;
+}
+.onboarding-phases {
+  padding-left: 24px;
+}
+.onboarding-phases > li {
+  margin-top: 20px;
+}
+.onboarding-phases strong {
+  font-size: 0.875rem;
+  color: var(--ink);
+}
+.onboarding-phases ul {
+  padding-left: 18px;
+}
+.onboarding-phases small {
+  display: block;
+  margin: 4px 0 12px;
+}
 .onboarding-dialog .actions {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
 }
 .onboarding-dialog .help {
-  margin-top: 24px;
+  margin-top: 12px;
   font-size: 0.7rem;
 }
 .onboarding-dialog::backdrop {

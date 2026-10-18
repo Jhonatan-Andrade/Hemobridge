@@ -264,6 +264,7 @@ export function UnifiedHeader({
               <button
                 className="hb-unified-tour-button"
                 type="button"
+                aria-label="Ver tour"
                 onClick={() => {
                   followRoute()
                   onTour()
