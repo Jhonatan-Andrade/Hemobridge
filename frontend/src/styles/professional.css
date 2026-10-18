@@ -105,6 +105,54 @@
 .hb-pro-card h2 {
   font-size: 1.0625rem;
 }
+.exam-review-list {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 16px;
+}
+.exam-review {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.exam-review h4, .exam-review a {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.exam-review-state {
+  font-weight: 600;
+  color: var(--brand);
+}
+.exam-review-details summary {
+  min-height: 44px;
+  padding: 10px 0;
+  cursor: pointer;
+  font-weight: 600;
+}
+.exam-review-fields {
+  min-width: 0;
+  margin: 12px 0 0;
+  padding: 14px;
+  display: grid;
+  gap: 16px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.exam-review-fields label:not(.checkbox-row) {
+  min-width: 0;
+  display: grid;
+  gap: 6px;
+}
+.exam-review-fields select, .exam-review-fields textarea, .exam-review-fields .button {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+.exam-review-fields .button {
+  white-space: normal;
+}
 .hb-pro-card p {
   font-size: 0.8125rem;
   line-height: 1.6;

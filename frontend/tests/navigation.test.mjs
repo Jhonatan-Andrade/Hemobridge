@@ -1,6 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { postContext, routeFromLocation } from '../src/services/saved-routes.ts'
+import { loginRouteOf } from '../src/types/domain.ts'
 test('links novos e antigos de redefinição abrem a mesma tela', () => {
   for (const location of [{ hash: '#reset?token=123', pathname: '/' }, { hash: '', pathname: '/redefinir-senha' }, { hash: '#redefinir-senha?token=123', pathname: '/' }]) {
     assert.equal(routeFromLocation(location), 'reset')
@@ -11,4 +12,28 @@ test('o retorno do post só aceita origem interna, posição válida e identific
   const context = { origin: 'home', scroll: 300, postId: '12345678-1234-1234-1234-123456789012' }
   assert.deepEqual(postContext(context), context)
   for (const value of [null, { ...context, origin: 'https://externo.invalid' }, { ...context, scroll: -1 }, { ...context, postId: 'x"]script' }]) assert.equal(postContext(value), null)
+})
+
+test('a troca de perfil após expiração da sessão retorna à área autorizada da nova conta', () => {
+  for (const [perfil, entrada] of [
+    ['PACIENTE', 'dashboard'], ['MEDICO', 'professional'],
+    ['REPRESENTANTE', 'professional/needs'], ['ADMINISTRADOR', 'professional/admin'],
+  ]) {
+    const user = { perfil, senhaProvisoria: false }
+    const outraArea = perfil === 'PACIENTE' ? 'professional/exams' : 'dashboard'
+    assert.equal(loginRouteOf(user, outraArea), entrada)
+    assert.equal(loginRouteOf(user, 'https://externo.invalid'), entrada)
+    assert.equal(loginRouteOf(user, null), entrada)
+    assert.equal(loginRouteOf(user, entrada), entrada)
+  }
+})
+test('o retorno a comentários e notificações é preservado sem desviar a troca da senha inicial', () => {
+  const post = 'post/12345678-1234-1234-1234-123456789012/comments'
+  for (const perfil of ['PACIENTE', 'MEDICO', 'REPRESENTANTE', 'ADMINISTRADOR']) {
+    const user = { perfil, senhaProvisoria: false }
+    assert.equal(loginRouteOf(user, post), post)
+    assert.equal(loginRouteOf(user, 'notifications'), 'notifications')
+    assert.equal(loginRouteOf({ ...user, senhaProvisoria: true }, post), 'first')
+  }
+  assert.equal(loginRouteOf({ perfil: 'MEDICO', senhaProvisoria: false }, 'professional/stock'), 'professional')
 })

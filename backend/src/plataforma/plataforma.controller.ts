@@ -15,6 +15,10 @@ import {
 } from '@nestjs/common';
 import { Prisma } from '../generated/prisma/client.js';
 import { vinculoDaAgendaAtivo } from '../consultas/instituicao-agenda.js';
+import {
+  consultaComVinculoClinicoAtivo,
+  horarioComVinculoClinicoAtivo,
+} from '../consultas/acesso-clinico.js';
 import { Perfis, UsuarioAtual } from '../auth/decorators.js';
 import type { UsuarioAutenticado } from '../auth/auth.types.js';
 import { Auditar } from '../auditoria/auditar.decorator.js';
@@ -256,15 +260,19 @@ export class PlataformaController {
     if (q.hospitalId) await this.validarVinculo(u, q.hospitalId);
     return this.prisma.disponibilidadeMedico.findMany({
       where: {
-        medicoId: u.id,
-        ...(q.hospitalId
-          ? {
-              OR: [
-                { hospitalId: q.hospitalId },
-                { hospitalId: null, medico: { hospitalId: q.hospitalId } },
-              ],
-            }
-          : {}),
+        AND: [
+          horarioComVinculoClinicoAtivo(u.id),
+          ...(q.hospitalId
+            ? [
+                {
+                  OR: [
+                    { hospitalId: q.hospitalId },
+                    { hospitalId: null, medico: { hospitalId: q.hospitalId } },
+                  ],
+                },
+              ]
+            : []),
+        ],
       },
       orderBy: { inicio: 'asc' },
       take: 100,
@@ -274,7 +282,10 @@ export class PlataformaController {
         fim: true,
         hospitalId: true,
         consultas: {
-          where: { status: 'AGENDADA' },
+          where: {
+            status: 'AGENDADA',
+            paciente: { usuario: { status: 'ATIVO' } },
+          },
           select: {
             id: true,
             status: true,
@@ -327,24 +338,45 @@ export class PlataformaController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: AtendimentoDto,
   ) {
-    const result = await this.prisma.consulta.updateMany({
-      where: {
-        id,
-        medicoId: u.id,
-        status: 'AGENDADA',
-        disponibilidade: { inicio: { lte: new Date() } },
-      },
-      data: { status: dto.status },
+    const consulta = await this.prisma.consulta.findFirst({
+      where: { id, ...consultaComVinculoClinicoAtivo(u.id) },
+      select: { pacienteId: true },
     });
-    if (!result.count)
+    if (!consulta)
       throw new ConflictException('Atendimento indisponível para atualização.');
+    await this.prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT usuario_id FROM paciente WHERE usuario_id=${consulta.pacienteId}::uuid FOR UPDATE`;
+      const result = await tx.consulta.updateMany({
+        where: {
+          id,
+          ...consultaComVinculoClinicoAtivo(u.id),
+          status: 'AGENDADA',
+          AND: [{ disponibilidade: { inicio: { lte: new Date() } } }],
+        },
+        data: { status: dto.status },
+      });
+      if (!result.count)
+        throw new ConflictException(
+          'Atendimento indisponível para atualização.',
+        );
+      if (dto.status === 'NAO_COMPARECEU') {
+        await tx.paciente.updateMany({
+          where: {
+            usuarioId: consulta.pacienteId,
+            situacao: 'CONSULTA_AGENDADA',
+            consultas: { none: { status: 'AGENDADA' } },
+          },
+          data: { situacao: 'PRE_CADASTRADO' },
+        });
+      }
+    });
     return { mensagem: 'Atendimento registrado.' };
   }
-  @Perfis('MEDICO') @Get('medico/exames') exames(
+  @Perfis('MEDICO') @Get('medico/exames') async exames(
     @UsuarioAtual() u: UsuarioAutenticado,
   ) {
-    return this.prisma.solicitacaoExame.findMany({
-      where: { consulta: { medicoId: u.id } },
+    const solicitacoes = await this.prisma.solicitacaoExame.findMany({
+      where: { consulta: consultaComVinculoClinicoAtivo(u.id) },
       select: {
         id: true,
         descricao: true,
@@ -352,6 +384,7 @@ export class PlataformaController {
         consulta: {
           select: {
             id: true,
+            status: true,
             paciente: { select: { usuario: { select: { nome: true } } } },
           },
         },
@@ -361,12 +394,26 @@ export class PlataformaController {
             situacao: true,
             nomeOriginal: true,
             enviadoEm: true,
+            motivoReprovacao: true,
+            avaliadoEm: true,
+            tipoSanguineoId: true,
           },
+          orderBy: [{ enviadoEm: 'desc' }, { id: 'desc' }],
         },
       },
       orderBy: { solicitadoEm: 'desc' },
       take: 100,
     });
+    return solicitacoes.map((s) => ({
+      ...s,
+      exames: s.exames.map((e, index) => ({
+        ...e,
+        podeAvaliar:
+          index === 0 &&
+          e.situacao === 'EM_ANALISE' &&
+          s.consulta.status === 'REALIZADA',
+      })),
+    }));
   }
 
   @Perfis('REPRESENTANTE') @Get('representante/estoque') async estoque(

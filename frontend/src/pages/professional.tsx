@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import type { ProfessionalRole } from '../types/domain'
-import { api, fileUrl, messageOf } from '../services/api-client'
+import { api, messageOf } from '../services/api-client'
 import { useResource } from '../services/use-resource'
 import { Alert, Intro, RouteLink } from '../components/ui'
 import type { Navigate } from '../components/ui'
+import { ExamReview } from '../components/exam-review'
+import type { ReviewableExam } from '../components/exam-review'
 import { BrazilRegionsMap } from './brazil-regions-map'
 import type { RegionId } from './brazil-regions-map'
 import '../styles/professional.css'
@@ -241,10 +243,11 @@ type ClinicalExam = {
   id: string
   descricao: string
   consulta: { id: string; paciente: { usuario: { nome: string } } }
-  exames: { id: string; situacao: string; nomeOriginal: string; enviadoEm: string }[]
+  exames: ReviewableExam[]
 }
 function DoctorExams() {
   const r = useResource<ClinicalExam[]>('/medico/exames')
+  const types = useResource<{ id: number; sigla: string }[]>('/tipos-sanguineos')
   return (
     <section className="hb-pro-card">
       <h2>Exames dos seus atendimentos</h2>
@@ -257,17 +260,11 @@ function DoctorExams() {
           <article className="schedule-item" key={item.id}>
             <h3>{item.consulta.paciente.usuario.nome}</h3>
             <p>{item.descricao}</p>
-            <ul>
+            <ul className="exam-review-list">
               {item.exames.map((exam) => (
                 <li key={exam.id}>
-                  <a
-                    href={fileUrl(`/medico/exames/${exam.id}/arquivo`)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {exam.nomeOriginal} ↗
-                  </a>{' '}
-                  · {exam.situacao.replaceAll('_', ' ')}
+                  <ExamReview exam={exam} bloodTypes={types.data ?? []} typesLoading={types.loading}
+                    typesError={types.error} onRetryTypes={types.reload} onUpdated={r.reload} />
                 </li>
               ))}
             </ul>

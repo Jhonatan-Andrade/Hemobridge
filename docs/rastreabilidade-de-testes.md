@@ -9,18 +9,18 @@ Revisão de 18/10/2026. Esta matriz relaciona os 23 casos do documento acadêmic
 | PT03 | Pré-triagem e intervalo | Integração e regras de elegibilidade; resultado é orientativo |
 | PT04 | Concorrência no agendamento | Integração de consultas e restrições de horário; regressão de conta/instituição inativa |
 | PT05 | Cancelar/reagendar | Integração de consultas, antecedência e liberação do horário; cancelamento institucional é um fluxo distinto |
-| PT06 | Ausência ao atendimento | Integração de atendimento e transições; conferir comunicação no roteiro manual |
+| PT06 | Ausência ao atendimento | Jornada de integração confirma retorno a Pré-cadastrado e novo agendamento; conferir comunicação no aceite formal |
 | PT07 | Arquivos válidos/5 MB | Testes de assinatura, limite, cifra e integração S3 local |
-| PT08 | Reprovação e reenvio de exame | Integração do ciclo de exames e autorização |
+| PT08 | Reprovação e reenvio de exame | Jornada via API reprova com motivo, aceita novo envio, preserva histórico e valida a nova versão |
 | PT09 | Paciente não altera tipo sanguíneo | Validação de contrato, autorização e integridade do cadastro |
-| PT10 | Aprovação exige tipagem | Testes de banco/serviço; decisão cabe ao profissional autorizado |
+| PT10 | Aprovação exige tipagem | Jornada exige tipagem conferida, todos os pedidos resolvidos e concordância dos resultados; decisão do médico autorizado |
 | PT11 | Nível de necessidade e histórico | Integração de necessidade e trigger de histórico |
 | PT12 | Alerta crítico/RN20 | Integração de compatibilidade e regressão concorrente com duas instâncias; recuperação de evento após falha |
 | PT13 | Doação vinculada | Integração de doação, situação e tipagem coerentes |
 | PT14 | Doação avulsa | Integração de registro institucional e restrições de doação |
 | PT15 | Intervalos 60/90 dias | Regras de elegibilidade e restrições PostgreSQL; não substituem triagem individual |
 | PT16 | Isolamento institucional | Testes de autorização; regressão de médico com dois hospitais preserva o vínculo restante |
-| PT17 | Restrição de exames | Integração de acesso por perfil e vínculo; administrador não recebe o arquivo no fluxo de privacidade |
+| PT17 | Restrição de exames | Integração bloqueia dados alheios, administrador, representante e médico sem vínculo atual, inclusive após revogação parcial |
 | PT18 | Ordenação de locais | Integração de recomendação/consulta; disponibilidade real exige conferência da instituição |
 | PT19 | Encerramento | Nova regressão cobre protocolo único, decisão autorizada, revogação, dados sem histórico, cifra e retenção; operação de backups/chaves ainda exige homologação |
 | PT20 | Desempenho | Medição histórica local existe; falta carga concorrente representativa no ambiente AWS e registro formal atualizado |

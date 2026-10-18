@@ -12,9 +12,9 @@ O Figma concentra as interfaces oficiais em uma página. As versões anteriores 
 
 | Verificação | Resultado |
 |---|---|
-| Site | Compilação, lint e convenção de nomes; 24 testes de feed, IBGE, tour e rotas |
-| API | 216 testes unitários e bateria de integração ampliada com nove regressões da auditoria; evidências da revisão em `correcoes-da-auditoria.md` |
-| Banco | Doze migrações versionadas e SQL consolidado; aplicação somente em PostgreSQL/PostGIS descartável nesta revisão |
+| Site | Compilação, lint e convenção de nomes; 29 testes de feed, IBGE, tour, rotas e avaliação de exames |
+| API | 219 testes unitários e 77 de integração; jornada clínica e permissões descritas em `homologacao-clinica.md` |
+| Banco | Treze migrações e SQL consolidado; homologação em PostgreSQL/PostGIS descartável e atualização conferida do banco local de testes |
 | Autorização | Testes cobrem isolamento institucional, sessão, publicação por perfis, consentimento e operações de estoque |
 | Arquivos | Envio e recuperação de exames validados com armazenamento S3 local e cifra da aplicação |
 | Imagens Docker | API e site compilados e executados localmente com usuário não root e sistema de arquivos somente leitura |

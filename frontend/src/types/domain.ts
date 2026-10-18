@@ -91,3 +91,18 @@ export const entryRouteOf = (u: SessionUser) =>
         : u.perfil === 'ADMINISTRADOR'
           ? 'professional/admin'
           : 'professional'
+
+export function loginRouteOf(user: SessionUser, requested: string | null): string {
+  if (user.senhaProvisoria || !requested) return entryRouteOf(user)
+  if (/^post\/[\da-f-]{36}(?:\/comments)?$/i.test(requested) ||
+    ['home', 'community', 'notifications', 'change', 'external-locations'].includes(requested))
+    return requested
+  const patient = ['dashboard', 'profile', 'external-booking', 'external-consultations',
+    'external-exams', 'external-notifications', 'external-pre-triage']
+  if (user.perfil === 'PACIENTE') return patient.includes(requested) ? requested : entryRouteOf(user)
+  const professional = ['professional', 'professional/profile']
+  const areas = user.perfil === 'MEDICO' ? ['professional/attendance', 'professional/exams']
+    : user.perfil === 'REPRESENTANTE' ? ['professional/needs', 'professional/stock']
+      : ['professional/admin', 'professional/moderation', 'professional/privacy']
+  return [...professional, ...areas].includes(requested) ? requested : entryRouteOf(user)
+}

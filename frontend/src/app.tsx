@@ -23,7 +23,7 @@ import { completeFirstAccess, readFirstAccess } from './services/first-access'
 import { postContext, routeFromLocation } from './services/saved-routes'
 import type { PostContext } from './services/saved-routes'
 import type { FontScale } from './services/accessibility-preferences'
-import { entryRouteOf, professionalRoleOf } from './types/domain'
+import { entryRouteOf, loginRouteOf, professionalRoleOf } from './types/domain'
 import type {
   Comment,
   CommunityParticipantRole,
@@ -262,7 +262,7 @@ function App() {
     if (kind === 'login' || kind === 'first') {
       const u = await api<SessionUser>('/auth/me')
       setUser(u)
-      navigate(u.senhaProvisoria ? 'first' : (loginReturn.current ?? entryRouteOf(u)))
+      navigate(loginRouteOf(u, loginReturn.current))
       loginReturn.current = null
       setSessionRevision((v) => v + 1)
     } else

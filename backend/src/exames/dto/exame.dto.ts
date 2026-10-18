@@ -1,5 +1,5 @@
 import { Transform } from 'class-transformer';
-import { ArrayMaxSize, ArrayMinSize, IsArray, IsOptional, IsString, MaxLength } from 'class-validator';
+import { ArrayMaxSize, ArrayMinSize, IsArray, IsIn, IsInt, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
 
 // UC15
 export class SolicitarExamesDto {
@@ -15,4 +15,20 @@ export class SolicitarExamesDto {
   @IsString()
   @MaxLength(2000)
   orientacoes?: string;
+}
+
+export class AvaliarExameDto {
+  @IsIn(['VALIDADO', 'REPROVADO'])
+  situacao: 'VALIDADO' | 'REPROVADO';
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(1000)
+  motivoReprovacao?: string;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(32767)
+  tipoSanguineoId?: number;
 }

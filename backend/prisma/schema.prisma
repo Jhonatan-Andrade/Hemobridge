@@ -415,9 +415,11 @@ model Exame {
   medicoAvaliadorId  String?       @map("medico_avaliador_id") @db.Uuid
   motivoReprovacao   String?       @map("motivo_reprovacao") @db.VarChar(1000)
   avaliadoEm         DateTime?     @map("avaliado_em") @db.Timestamptz(3)
+  tipoSanguineoId    Int?          @map("tipo_sanguineo_id") @db.SmallInt
 
   solicitacao     SolicitacaoExame @relation(fields: [solicitacaoExameId], references: [id], onDelete: Restrict)
   medicoAvaliador Medico?          @relation(fields: [medicoAvaliadorId], references: [usuarioId], onDelete: Restrict)
+  tipoSanguineo   TipoSanguineo?    @relation(fields: [tipoSanguineoId], references: [id], onDelete: Restrict)
 
   @@index([solicitacaoExameId, enviadoEm])
   @@index([situacao])
@@ -441,6 +443,7 @@ model TipoSanguineo {
   necessidades NecessidadeEstoque[]
   doacoes      Doacao[]
   bolsas       BolsaSangue[]
+  exames       Exame[]
 
   @@unique([grupoAbo, fatorRh])
   @@map("tipo_sanguineo")

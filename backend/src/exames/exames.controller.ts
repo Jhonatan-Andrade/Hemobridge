@@ -8,6 +8,7 @@ import {
   Ip,
   Param,
   ParseUUIDPipe,
+  Patch,
   PayloadTooLargeException,
   Post,
   StreamableFile,
@@ -20,7 +21,7 @@ import type { Response } from 'express';
 import type { UsuarioAutenticado } from '../auth/auth.types.js';
 import { Perfis, UsuarioAtual } from '../auth/decorators.js';
 import { MENSAGEM_ARQUIVO_INVALIDO, TAMANHO_MAXIMO_EXAME } from '../armazenamento/arquivo-exame.js';
-import { SolicitarExamesDto } from './dto/exame.dto.js';
+import { AvaliarExameDto, SolicitarExamesDto } from './dto/exame.dto.js';
 import { type ArquivoParaDownload, type ArquivoRecebido, ExamesService } from './exames.service.js';
 
 const arquivo = (a: ArquivoParaDownload) =>
@@ -84,6 +85,15 @@ export class MeusExamesController {
 @Controller('medico')
 export class ExamesMedicoController {
   constructor(private readonly exames: ExamesService) {}
+
+  @Patch('exames/:exameId/avaliacao')
+  avaliar(
+    @UsuarioAtual() medico: UsuarioAutenticado,
+    @Param('exameId', ParseUUIDPipe) exameId: string,
+    @Body() dto: AvaliarExameDto,
+  ) {
+    return this.exames.avaliar(medico.id, exameId, dto);
+  }
 
   @Post('consultas/:consultaId/solicitar-exames')
   solicitar(

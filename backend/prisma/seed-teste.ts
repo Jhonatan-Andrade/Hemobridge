@@ -264,6 +264,7 @@ async function main() {
       data: {
         solicitacaoExameId: solicitacao.id,
         situacao: p.situacao === 'APROVADO' ? 'VALIDADO' : p.situacao === 'REPROVADO' ? 'REPROVADO' : 'EM_ANALISE',
+        tipoSanguineoId: p.situacao === 'APROVADO' ? tipos.get(p.tipo!)! : null,
         chaveArmazenamento: arquivo.chave,
         nomeOriginal: 'laudo-tipagem.pdf',
         mimeType: 'application/pdf',
