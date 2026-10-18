@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:production": "node scripts/check-release-config.mjs && npm run build",
+    "check:naming": "node scripts/check-naming.mjs",
     "lint": "eslint .",
     "preview": "vite preview"
   },

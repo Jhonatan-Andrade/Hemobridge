@@ -11,7 +11,7 @@ export class TipagemService {
   // RN01
   listarTipos() {
     return this.prisma.tipoSanguineo.findMany({
-      select: { sigla: true, grupoAbo: true, fatorRh: true },
+      select: { id: true, sigla: true, grupoAbo: true, fatorRh: true },
       orderBy: { id: 'asc' },
     });
   }
@@ -21,8 +21,12 @@ export class TipagemService {
     const tipos = await this.prisma.tipoSanguineo.findMany({
       select: {
         sigla: true,
-        doaPara: { select: { tipoReceptor: { select: { id: true, sigla: true } } } },
-        recebeDe: { select: { tipoDoador: { select: { id: true, sigla: true } } } },
+        doaPara: {
+          select: { tipoReceptor: { select: { id: true, sigla: true } } },
+        },
+        recebeDe: {
+          select: { tipoDoador: { select: { id: true, sigla: true } } },
+        },
       },
       orderBy: { id: 'asc' },
     });

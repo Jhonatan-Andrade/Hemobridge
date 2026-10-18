@@ -87,7 +87,7 @@ Accept: application/json
   "novaSenha": "{{novaSenha}}",
   "confirmacaoSenha": "{{novaSenha}}",
   "aceiteTermo": true,
-  "versaoTermo": "1.0"
+  "versaoTermo": "1.1"
 }
 
 
@@ -101,7 +101,7 @@ Accept: application/json
   "novaSenha": "{{novaSenha}}",
   "confirmacaoSenha": "OutraSenha9",
   "aceiteTermo": false,
-  "versaoTermo": "1.0"
+  "versaoTermo": "1.1"
 }
 
 

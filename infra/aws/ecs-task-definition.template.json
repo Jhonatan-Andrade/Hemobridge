@@ -1,0 +1,144 @@
+{
+  "family": "hemobridge-api",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
+  "cpu": "512",
+  "memory": "1024",
+  "executionRoleArn": "${EXECUTION_ROLE_ARN}",
+  "taskRoleArn": "${TASK_ROLE_ARN}",
+  "runtimePlatform": {
+    "cpuArchitecture": "X86_64",
+    "operatingSystemFamily": "LINUX"
+  },
+  "containerDefinitions": [
+    {
+      "name": "api",
+      "image": "${IMAGE_DIGEST}",
+      "essential": true,
+      "user": "node",
+      "readonlyRootFilesystem": true,
+      "portMappings": [
+        {
+          "containerPort": 3000,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        {
+          "name": "NODE_ENV",
+          "value": "production"
+        },
+        {
+          "name": "API_PREFIX",
+          "value": "api"
+        },
+        {
+          "name": "PORT",
+          "value": "3000"
+        },
+        {
+          "name": "TRUST_PROXY",
+          "value": "1"
+        },
+        {
+          "name": "JWT_EXPIRACAO",
+          "value": "15m"
+        },
+        {
+          "name": "FRONTEND_URL",
+          "value": "${FRONTEND_URL}"
+        },
+        {
+          "name": "CORS_ORIGENS",
+          "value": "${FRONTEND_URL}"
+        },
+        {
+          "name": "S3_BUCKET",
+          "value": "${EXAMS_BUCKET}"
+        },
+        {
+          "name": "S3_REGIAO",
+          "value": "${AWS_REGION}"
+        },
+        {
+          "name": "S3_FORCE_PATH_STYLE",
+          "value": "false"
+        },
+        {
+          "name": "S3_KMS_KEY_ID",
+          "value": "${EXAMS_KMS_KEY_ARN}"
+        },
+        {
+          "name": "SMTP_HOST",
+          "value": "${SMTP_HOST}"
+        },
+        {
+          "name": "SMTP_PORTA",
+          "value": "465"
+        },
+        {
+          "name": "SMTP_SEGURO",
+          "value": "true"
+        },
+        {
+          "name": "EMAIL_REMETENTE",
+          "value": "${EMAIL_FROM}"
+        },
+        {
+          "name": "LEGAL_ENTITY_NAME",
+          "value": "${LEGAL_ENTITY_NAME}"
+        },
+        {
+          "name": "PRIVACY_CONTACT",
+          "value": "${PRIVACY_CONTACT}"
+        }
+      ],
+      "secrets": [
+        {
+          "name": "DATABASE_URL",
+          "valueFrom": "${CONFIG_SECRET_ARN}:DATABASE_URL::"
+        },
+        {
+          "name": "JWT_SECRET",
+          "valueFrom": "${CONFIG_SECRET_ARN}:JWT_SECRET::"
+        },
+        {
+          "name": "ARMAZENAMENTO_CHAVE",
+          "valueFrom": "${CONFIG_SECRET_ARN}:ARMAZENAMENTO_CHAVE::"
+        },
+        {
+          "name": "SMTP_USUARIO",
+          "valueFrom": "${CONFIG_SECRET_ARN}:SMTP_USUARIO::"
+        },
+        {
+          "name": "SMTP_SENHA",
+          "valueFrom": "${CONFIG_SECRET_ARN}:SMTP_SENHA::"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/hemobridge/api",
+          "awslogs-region": "${AWS_REGION}",
+          "awslogs-stream-prefix": "api"
+        }
+      },
+      "healthCheck": {
+        "command": [
+          "CMD-SHELL",
+          "node -e \"fetch('http://127.0.0.1:3000/api/health/live').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""
+        ],
+        "interval": 30,
+        "timeout": 5,
+        "retries": 3,
+        "startPeriod": 45
+      },
+      "linuxParameters": {
+        "initProcessEnabled": true
+      },
+      "stopTimeout": 60
+    }
+  ]
+}

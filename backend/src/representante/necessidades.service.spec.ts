@@ -20,7 +20,12 @@ function montar() {
     },
     $transaction: vi.fn().mockResolvedValue([]),
   };
-  return { service: new NecessidadesService(prisma as unknown as PrismaService), prisma };
+  const necessidadeCritica = { notificarDoadores: vi.fn().mockResolvedValue({ doadoresNotificados: 3 }) };
+  return {
+    service: new NecessidadesService(prisma as unknown as PrismaService, necessidadeCritica as never),
+    prisma,
+    necessidadeCritica,
+  };
 }
 
 describe('NecessidadesService.atualizar', () => {
@@ -42,6 +47,27 @@ describe('NecessidadesService.atualizar', () => {
     });
     expect(r.alteracoes).toEqual([{ tipo: 'O-', de: 'BAIXO', para: 'CRITICO' }]);
     expect(r.passaramACritico).toEqual(['O-']);
+  });
+
+  it('dispara UC19 para os tipos que passaram a crítico e informa quantos doadores foram avisados', async () => {
+    const { service, necessidadeCritica } = montar();
+    const r = await service.atualizar('h1', 'rep1', { niveis: [{ tipo: 'O-', nivel: 'CRITICO' }] });
+    expect(necessidadeCritica.notificarDoadores).toHaveBeenCalledWith('h1', ['O-']);
+    expect(r.doadoresNotificados).toBe(3);
+  });
+
+  it('mantém a atualização mesmo se a notificação falhar', async () => {
+    const { service, necessidadeCritica } = montar();
+    necessidadeCritica.notificarDoadores.mockRejectedValue(new Error('smtp'));
+    const r = await service.atualizar('h1', 'rep1', { niveis: [{ tipo: 'O-', nivel: 'CRITICO' }] });
+    expect(r.alteracoes).toHaveLength(1);
+    expect(r.doadoresNotificados).toBe(0);
+  });
+
+  it('não dispara UC19 quando nenhum tipo virou crítico', async () => {
+    const { service, necessidadeCritica } = montar();
+    await service.atualizar('h1', 'rep1', { niveis: [{ tipo: 'O-', nivel: 'ESTAVEL' }] });
+    expect(necessidadeCritica.notificarDoadores).not.toHaveBeenCalled();
   });
 
   it('informa que não há alterações quando nada muda (FA01)', async () => {

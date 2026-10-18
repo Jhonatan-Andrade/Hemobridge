@@ -9,8 +9,19 @@ import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import type { Perfil } from '../generated/prisma/enums.js';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { SELECAO_INSTITUICAO, instituicaoDesativada, papelDe, type TokenPayload } from './auth.types.js';
-import { PERFIS_KEY, PRIMEIRO_ACESSO_KEY, PUBLICO_KEY, type RequestAutenticada,} from './decorators.js';
+import {
+  SELECAO_INSTITUICAO,
+  instituicaoDesativada,
+  papelDe,
+  type TokenPayload,
+} from './auth.types.js';
+import {
+  PERFIS_KEY,
+  PRIMEIRO_ACESSO_KEY,
+  PUBLICO_KEY,
+  type RequestAutenticada,
+} from './decorators.js';
+import { assertCookieOrigin, readSessionCookie } from './web-session.js';
 
 /**
  * Guard global: toda rota exige token, salvo as marcadas com @Publico().
@@ -27,7 +38,8 @@ export class AuthGuard implements CanActivate {
 
   async canActivate(ctx: ExecutionContext): Promise<boolean> {
     const alvos = [ctx.getHandler(), ctx.getClass()];
-    if (this.reflector.getAllAndOverride<boolean>(PUBLICO_KEY, alvos)) return true;
+    if (this.reflector.getAllAndOverride<boolean>(PUBLICO_KEY, alvos))
+      return true;
 
     const req = ctx.switchToHttp().getRequest<RequestAutenticada>();
     const token = this.extrairToken(req);
@@ -55,21 +67,32 @@ export class AuthGuard implements CanActivate {
       },
     });
     // Token emitido antes de troca de senha ou logout não vale mais.
-    if (!usuario || usuario.status !== 'ATIVO' || usuario.versaoSessao !== payload.ver) {
+    if (
+      !usuario ||
+      usuario.status !== 'ATIVO' ||
+      usuario.versaoSessao !== payload.ver
+    ) {
       throw new UnauthorizedException('Sessão inválida ou expirada');
     }
     if (instituicaoDesativada(usuario)) {
-      throw new UnauthorizedException('A instituição vinculada à sua conta está desativada.');
+      throw new UnauthorizedException(
+        'A instituição vinculada à sua conta está desativada.',
+      );
     }
 
     if (
       usuario.senhaProvisoria &&
       !this.reflector.getAllAndOverride<boolean>(PRIMEIRO_ACESSO_KEY, alvos)
     ) {
-      throw new ForbiddenException('Defina uma nova senha para concluir o primeiro acesso');
+      throw new ForbiddenException(
+        'Defina uma nova senha para concluir o primeiro acesso',
+      );
     }
 
-    const perfis = this.reflector.getAllAndOverride<Perfil[] | undefined>(PERFIS_KEY, alvos);
+    const perfis = this.reflector.getAllAndOverride<Perfil[] | undefined>(
+      PERFIS_KEY,
+      alvos,
+    );
     if (perfis && !perfis.includes(usuario.perfil)) {
       throw new ForbiddenException('Acesso não permitido para o seu perfil');
     }
@@ -87,6 +110,9 @@ export class AuthGuard implements CanActivate {
 
   private extrairToken(req: RequestAutenticada): string | undefined {
     const [tipo, token] = req.headers.authorization?.split(' ') ?? [];
-    return tipo === 'Bearer' ? token : undefined;
+    if (tipo === 'Bearer') return token;
+    const cookie = readSessionCookie(req);
+    if (cookie) assertCookieOrigin(req);
+    return cookie;
   }
 }

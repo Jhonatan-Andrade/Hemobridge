@@ -1,0 +1,97 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'api_client.dart';
+
+class SessionController extends ChangeNotifier {
+  final ApiClient api;
+  final FlutterSecureStorage storage;
+  Map<String, dynamic>? user;
+  bool ready = false, isFirstAccess = true;
+  String? error;
+  SessionController(this.api, {this.storage = const FlutterSecureStorage()});
+  Future<void> initialize() async {
+    try {
+      api.token = await storage.read(key: 'sessionToken');
+      if (api.token != null) {
+        user = Map<String, dynamic>.from(await api.request('/auth/me'));
+        await _readFirstAccess();
+      }
+    } on ApiException catch (e) {
+      if (e.status == 401) {
+        api.token = null;
+        await storage.delete(key: 'sessionToken');
+      } else {
+        error = e.message;
+      }
+    } catch (_) {
+      error = 'Não foi possível restaurar sua sessão.';
+    }
+    ready = true;
+    notifyListeners();
+  }
+
+  Future<void> login(String email, String password) async {
+    final result = await api.request(
+      '/auth/login',
+      method: 'POST',
+      body: {'email': email.trim().toLowerCase(), 'senha': password},
+    );
+    api.token = result['accessToken'] as String;
+    await storage.write(key: 'sessionToken', value: api.token);
+    user = Map<String, dynamic>.from(await api.request('/auth/me'));
+    error = null;
+    await _readFirstAccess();
+    notifyListeners();
+  }
+
+  Future<void> firstPassword(
+    String password,
+    bool consent,
+    String version,
+  ) async {
+    final result = await api.request(
+      '/auth/primeiro-acesso',
+      method: 'POST',
+      body: {
+        'novaSenha': password,
+        'confirmacaoSenha': password,
+        'aceiteTermo': consent,
+        'versaoTermo': version,
+      },
+    );
+    api.token = result['accessToken'];
+    await storage.write(key: 'sessionToken', value: api.token);
+    user = Map<String, dynamic>.from(await api.request('/auth/me'));
+    notifyListeners();
+  }
+
+  Future<void> _readFirstAccess() async {
+    final prefs = await SharedPreferences.getInstance();
+    isFirstAccess = prefs.getBool('isFirstAccess.${user!['id']}') ?? true;
+  }
+
+  Future<void> completeTour() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isFirstAccess.${user!['id']}', false);
+    isFirstAccess = false;
+    notifyListeners();
+  }
+
+  Future<void> logout() async {
+    try {
+      await api.request('/auth/logout', method: 'POST');
+    } finally {
+      await storage.delete(key: 'sessionToken');
+      api.token = null;
+      user = null;
+      notifyListeners();
+    }
+  }
+
+  @override
+  void dispose() {
+    api.close();
+    super.dispose();
+  }
+}

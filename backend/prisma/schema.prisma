@@ -12,7 +12,7 @@ generator client {
 
 datasource db {
   provider   = "postgresql"
-  extensions = [postgis, unaccent]
+  extensions = [postgis, unaccent, btree_gist]
 }
 
 // ---------------------------------------------------------------------------
@@ -82,30 +82,72 @@ enum FatorRh {
   @@map("fator_rh")
 }
 
+// Quadro 31
+enum SituacaoConsulta {
+  AGENDADA
+  REALIZADA
+  NAO_COMPARECEU
+  CANCELADA
+
+  @@map("situacao_consulta")
+}
+
+// Quadro 31. Cada envio cria um Exame já EM_ANALISE; AGUARDANDO_RESULTADO é a
+// situação derivada de uma solicitação ainda sem envio.
+enum SituacaoExame {
+  AGUARDANDO_RESULTADO
+  EM_ANALISE
+  REPROVADO
+  VALIDADO
+
+  @@map("situacao_exame")
+}
+
+// Quadro 31 / RF28
+enum ResultadoPreTriagem {
+  APTO_CRITERIOS_BASICOS
+  AGUARDAR_INTERVALO
+  REQUER_CONFIRMACAO
+
+  @@map("resultado_pre_triagem")
+}
+
+// RF31 / RNF06
+enum StatusSolicitacaoExclusao {
+  PENDENTE
+  EM_ANDAMENTO
+  CONCLUIDA
+  RECUSADA
+
+  @@map("status_solicitacao_exclusao")
+}
+
 // ---------------------------------------------------------------------------
 // Identidade e perfis
 // ---------------------------------------------------------------------------
 
 model Usuario {
-  id                      String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  nome                    String        @db.VarChar(150)
-  email                   String        @unique @db.VarChar(254)
-  cpf                     String        @unique @db.Char(11)
-  telefone                String?       @db.VarChar(20)
-  senhaHash               String        @map("senha_hash")
-  senhaProvisoria         Boolean       @default(false) @map("senha_provisoria")
-  senhaProvisoriaExpiraEm DateTime?     @map("senha_provisoria_expira_em") @db.Timestamptz(3)
-  senhaResetTokenHash     String?       @unique @map("senha_reset_token_hash")
-  senhaResetExpiraEm      DateTime?     @map("senha_reset_expira_em") @db.Timestamptz(3)
-  senhaResetUsadoEm       DateTime?     @map("senha_reset_usado_em") @db.Timestamptz(3)
-  perfil                  Perfil
-  status                  StatusUsuario @default(ATIVO)
-  tentativasLogin         Int           @default(0) @map("tentativas_login") @db.SmallInt
-  bloqueadoAte            DateTime?     @map("bloqueado_ate") @db.Timestamptz(3)
+  id                        String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nome                      String        @db.VarChar(150)
+  email                     String        @unique @db.VarChar(254)
+  cpf                       String        @unique @db.Char(11)
+  telefone                  String?       @db.VarChar(20)
+  senhaHash                 String        @map("senha_hash")
+  senhaProvisoria           Boolean       @default(false) @map("senha_provisoria")
+  senhaProvisoriaExpiraEm   DateTime?     @map("senha_provisoria_expira_em") @db.Timestamptz(3)
+  senhaResetTokenHash       String?       @unique @map("senha_reset_token_hash")
+  senhaResetExpiraEm        DateTime?     @map("senha_reset_expira_em") @db.Timestamptz(3)
+  senhaResetUsadoEm         DateTime?     @map("senha_reset_usado_em") @db.Timestamptz(3)
+  perfil                    Perfil
+  status                    StatusUsuario @default(ATIVO)
+  tentativasLogin           Int           @default(0) @map("tentativas_login") @db.SmallInt
+  bloqueadoAte              DateTime?     @map("bloqueado_ate") @db.Timestamptz(3)
   // Incrementada ao trocar a senha ou sair: invalida os tokens emitidos antes.
-  versaoSessao            Int           @default(0) @map("versao_sessao")
-  criadoEm                DateTime      @default(now()) @map("criado_em") @db.Timestamptz(3)
-  atualizadoEm            DateTime      @updatedAt @map("atualizado_em") @db.Timestamptz(3)
+  versaoSessao              Int           @default(0) @map("versao_sessao")
+  criadoEm                  DateTime      @default(now()) @map("criado_em") @db.Timestamptz(3)
+  atualizadoEm              DateTime      @updatedAt @map("atualizado_em") @db.Timestamptz(3)
+  normasComunidadeVersao    String?       @map("normas_comunidade_versao") @db.VarChar(20)
+  normasComunidadeAceitasEm DateTime?     @map("normas_comunidade_aceitas_em") @db.Timestamptz(3)
 
   paciente       Paciente?
   medico         Medico?
@@ -115,6 +157,17 @@ model Usuario {
   necessidadesAtualizadas NecessidadeEstoque[]
   crmsConferidos          Medico[]               @relation("CrmConferidoPor")
   alteracoesNecessidade   HistoricoNecessidade[]
+  solicitacoesExclusao    SolicitacaoExclusao[]  @relation("SolicitanteExclusao")
+  exclusoesAtendidas      SolicitacaoExclusao[]  @relation("AtendenteExclusao")
+  logsAuditoria           LogAuditoria[]
+  consultasCanceladas     Consulta[]             @relation("ConsultaCanceladaPor")
+  doacoesRegistradas      Doacao[]
+  notificacoes            Notificacao[]
+  publicacoes             Publicacao[]
+  comentarios             Comentario[]
+  reacoes                 ReacaoPublicacao[]
+  denuncias               DenunciaPublicacao[]
+  movimentosEstoque       MovimentoEstoque[]
 
   @@index([perfil, status])
   @@map("usuario")
@@ -136,6 +189,9 @@ model Paciente {
   usuario         Usuario        @relation(fields: [usuarioId], references: [id], onDelete: Restrict)
   tipoSanguineo   TipoSanguineo? @relation(fields: [tipoSanguineoId], references: [id], onDelete: Restrict)
   medicoValidador Medico?        @relation(fields: [medicoValidadorId], references: [usuarioId], onDelete: Restrict)
+  preTriagens     PreTriagem[]
+  consultas       Consulta[]
+  doacoes         Doacao[]
 
   @@index([situacao, estado])
   @@index([tipoSanguineoId])
@@ -152,10 +208,14 @@ model Medico {
   crmConferidoPorId String   @map("crm_conferido_por") @db.Uuid
   crmConferidoEm    DateTime @default(now()) @map("crm_conferido_em") @db.Timestamptz(3)
 
-  usuario            Usuario    @relation(fields: [usuarioId], references: [id], onDelete: Restrict)
-  crmConferidoPor    Usuario    @relation("CrmConferidoPor", fields: [crmConferidoPorId], references: [id], onDelete: Restrict)
-  hospital           Hospital   @relation(fields: [hospitalId], references: [id], onDelete: Restrict)
+  usuario            Usuario                 @relation(fields: [usuarioId], references: [id], onDelete: Restrict)
+  crmConferidoPor    Usuario                 @relation("CrmConferidoPor", fields: [crmConferidoPorId], references: [id], onDelete: Restrict)
+  hospital           Hospital                @relation(fields: [hospitalId], references: [id], onDelete: Restrict)
   pacientesValidados Paciente[]
+  disponibilidades   DisponibilidadeMedico[]
+  consultas          Consulta[]
+  examesAvaliados    Exame[]
+  vinculos           MedicoHospital[]
 
   @@unique([crm, ufCrm])
   @@index([hospitalId])
@@ -194,6 +254,172 @@ model ConsentimentoLgpd {
   @@map("consentimento_lgpd")
 }
 
+// RF31 / RNF06 / RN13: pedido do titular e trilha de processamento.
+model SolicitacaoExclusao {
+  id            String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  usuarioId     String                    @map("usuario_id") @db.Uuid
+  status        StatusSolicitacaoExclusao @default(PENDENTE)
+  solicitadoEm  DateTime                  @default(now()) @map("solicitado_em") @db.Timestamptz(3)
+  atendidoPorId String?                   @map("atendido_por") @db.Uuid
+  concluidoEm   DateTime?                 @map("concluido_em") @db.Timestamptz(3)
+  justificativa String?                   @db.VarChar(1000)
+
+  usuario     Usuario  @relation("SolicitanteExclusao", fields: [usuarioId], references: [id], onDelete: Restrict)
+  atendidoPor Usuario? @relation("AtendenteExclusao", fields: [atendidoPorId], references: [id], onDelete: Restrict)
+
+  @@index([usuarioId])
+  @@index([status, solicitadoEm])
+  @@map("solicitacao_exclusao")
+}
+
+// RNF05: somente inclusão. UPDATE e DELETE são bloqueados por trigger.
+model LogAuditoria {
+  id         BigInt   @id @default(autoincrement())
+  // Nulo em operações anônimas (ex.: tentativa de login com e-mail inexistente).
+  usuarioId  String?  @map("usuario_id") @db.Uuid
+  acao       String   @db.VarChar(60)
+  entidade   String   @db.VarChar(60)
+  entidadeId String?  @map("entidade_id") @db.VarChar(64)
+  ipOrigem   String?  @map("ip_origem") @db.Inet
+  // Contexto adicional, sem dados sensíveis (nunca senha, exame ou tipo sanguíneo).
+  detalhes   Json?
+  ocorridoEm DateTime @default(now()) @map("ocorrido_em") @db.Timestamptz(3)
+
+  usuario Usuario? @relation(fields: [usuarioId], references: [id], onDelete: Restrict)
+
+  @@index([usuarioId, ocorridoEm])
+  @@index([entidade, entidadeId])
+  @@index([ocorridoEm])
+  @@map("log_auditoria")
+}
+
+// ---------------------------------------------------------------------------
+// Pré-triagem, agenda e teleconsulta
+// ---------------------------------------------------------------------------
+
+// RF28: resultado orientativo, não substitui a triagem do hemocentro.
+model PreTriagem {
+  id                  String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  pacienteId          String              @map("paciente_id") @db.Uuid
+  resultado           ResultadoPreTriagem
+  respondidaEm        DateTime            @default(now()) @map("respondida_em") @db.Timestamptz(3)
+  proximaDataPossivel DateTime?           @map("proxima_data_possivel") @db.Date
+
+  paciente  Paciente             @relation(fields: [pacienteId], references: [usuarioId], onDelete: Restrict)
+  respostas RespostaPreTriagem[]
+
+  @@index([pacienteId, respondidaEm])
+  @@map("pre_triagem")
+}
+
+// Quadro 32: cada resposta preservada para o médico ver o contexto.
+model RespostaPreTriagem {
+  id           BigInt @id @default(autoincrement())
+  preTriagemId String @map("pre_triagem_id") @db.Uuid
+  pergunta     String @db.VarChar(255)
+  resposta     String @db.VarChar(255)
+
+  preTriagem PreTriagem @relation(fields: [preTriagemId], references: [id], onDelete: Restrict)
+
+  @@index([preTriagemId])
+  @@map("resposta_pre_triagem")
+}
+
+// UC13 / RN18: horário publicado pelo médico, com o link da sala.
+// A sobreposição de horários do mesmo médico é impedida por EXCLUDE (GiST).
+model DisponibilidadeMedico {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  medicoId         String   @map("medico_id") @db.Uuid
+  hospitalId       String?  @map("hospital_id") @db.Uuid
+  inicio           DateTime @db.Timestamptz(3)
+  fim              DateTime @db.Timestamptz(3)
+  linkVideochamada String   @map("link_videochamada") @db.VarChar(500)
+  criadoEm         DateTime @default(now()) @map("criado_em") @db.Timestamptz(3)
+
+  medico    Medico     @relation(fields: [medicoId], references: [usuarioId], onDelete: Restrict)
+  hospital  Hospital?  @relation(fields: [hospitalId], references: [id], onDelete: Restrict)
+  consultas Consulta[]
+
+  @@unique([medicoId, inicio, fim])
+  @@index([inicio])
+  @@map("disponibilidade_medico")
+}
+
+// UC09, UC10, UC14. Reagendamento cria nova consulta com consulta_origem_id.
+// Unicidade de horário e de consulta futura vale só para AGENDADA (índices parciais).
+model Consulta {
+  id                        String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  pacienteId                String           @map("paciente_id") @db.Uuid
+  medicoId                  String           @map("medico_id") @db.Uuid
+  disponibilidadeId         String           @map("disponibilidade_id") @db.Uuid
+  consultaOrigemId          String?          @map("consulta_origem_id") @db.Uuid
+  status                    SituacaoConsulta @default(AGENDADA)
+  linkVideochamada          String           @map("link_videochamada") @db.VarChar(500)
+  termoTelemedicinaAceitoEm DateTime         @map("termo_telemedicina_aceito_em") @db.Timestamptz(3)
+  observacoes               String?          @db.Text
+  motivoCancelamento        String?          @map("motivo_cancelamento") @db.VarChar(500)
+  canceladaPorId            String?          @map("cancelada_por") @db.Uuid
+  canceladaEm               DateTime?        @map("cancelada_em") @db.Timestamptz(3)
+  criadoEm                  DateTime         @default(now()) @map("criado_em") @db.Timestamptz(3)
+  atualizadoEm              DateTime         @updatedAt @map("atualizado_em") @db.Timestamptz(3)
+
+  paciente        Paciente              @relation(fields: [pacienteId], references: [usuarioId], onDelete: Restrict)
+  medico          Medico                @relation(fields: [medicoId], references: [usuarioId], onDelete: Restrict)
+  disponibilidade DisponibilidadeMedico @relation(fields: [disponibilidadeId], references: [id], onDelete: Restrict)
+  consultaOrigem  Consulta?             @relation("Reagendamento", fields: [consultaOrigemId], references: [id], onDelete: Restrict)
+  reagendamentos  Consulta[]            @relation("Reagendamento")
+  canceladaPor    Usuario?              @relation("ConsultaCanceladaPor", fields: [canceladaPorId], references: [id], onDelete: Restrict)
+  solicitacoes    SolicitacaoExame[]
+
+  @@index([pacienteId, status])
+  @@index([medicoId, status])
+  @@index([disponibilidadeId])
+  @@map("consulta")
+}
+
+// ---------------------------------------------------------------------------
+// Exames e validação médica
+// ---------------------------------------------------------------------------
+
+// UC15 / RF06
+model SolicitacaoExame {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  consultaId   String   @map("consulta_id") @db.Uuid
+  descricao    String   @db.VarChar(1000)
+  orientacoes  String?  @db.VarChar(2000)
+  solicitadoEm DateTime @default(now()) @map("solicitado_em") @db.Timestamptz(3)
+
+  consulta Consulta @relation(fields: [consultaId], references: [id], onDelete: Restrict)
+  exames   Exame[]
+
+  @@index([consultaId])
+  @@map("solicitacao_exame")
+}
+
+// UC11 / UC16 / RN19: cada envio é um novo registro; o arquivo fica no
+// armazenamento de objetos e o banco guarda apenas metadados e hash.
+model Exame {
+  id                 String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  solicitacaoExameId String        @map("solicitacao_exame_id") @db.Uuid
+  situacao           SituacaoExame @default(EM_ANALISE)
+  chaveArmazenamento String        @unique @map("chave_armazenamento") @db.VarChar(255)
+  nomeOriginal       String        @map("nome_original") @db.VarChar(255)
+  mimeType           String        @map("mime_type") @db.VarChar(50)
+  tamanhoBytes       Int           @map("tamanho_bytes")
+  hashSha256         String        @map("hash_sha256") @db.Char(64)
+  enviadoEm          DateTime      @default(now()) @map("enviado_em") @db.Timestamptz(3)
+  medicoAvaliadorId  String?       @map("medico_avaliador_id") @db.Uuid
+  motivoReprovacao   String?       @map("motivo_reprovacao") @db.VarChar(1000)
+  avaliadoEm         DateTime?     @map("avaliado_em") @db.Timestamptz(3)
+
+  solicitacao     SolicitacaoExame @relation(fields: [solicitacaoExameId], references: [id], onDelete: Restrict)
+  medicoAvaliador Medico?          @relation(fields: [medicoAvaliadorId], references: [usuarioId], onDelete: Restrict)
+
+  @@index([solicitacaoExameId, enviadoEm])
+  @@index([situacao])
+  @@map("exame")
+}
+
 // ---------------------------------------------------------------------------
 // Tipagem sanguínea
 // ---------------------------------------------------------------------------
@@ -209,6 +435,8 @@ model TipoSanguineo {
   recebeDe     CompatibilidadeSanguinea[] @relation("TipoReceptor")
   pacientes    Paciente[]
   necessidades NecessidadeEstoque[]
+  doacoes      Doacao[]
+  bolsas       BolsaSangue[]
 
   @@unique([grupoAbo, fatorRh])
   @@map("tipo_sanguineo")
@@ -249,10 +477,17 @@ model Hospital {
   ativo                Boolean                                @default(true)
   criadoEm             DateTime                               @default(now()) @map("criado_em") @db.Timestamptz(3)
   atualizadoEm         DateTime                               @updatedAt @map("atualizado_em") @db.Timestamptz(3)
+  verificadoEm         DateTime?                              @map("verificado_em") @db.Timestamptz(3)
+  fonteVerificacao     String?                                @map("fonte_verificacao") @db.VarChar(500)
 
-  medicos        Medico[]
-  representantes RepresentanteHospital[]
-  necessidades   NecessidadeEstoque[]
+  medicos          Medico[]
+  representantes   RepresentanteHospital[]
+  necessidades     NecessidadeEstoque[]
+  doacoes          Doacao[]
+  vinculosMedicos  MedicoHospital[]
+  bolsas           BolsaSangue[]
+  estimativas      EstimativaEtapa[]
+  disponibilidades DisponibilidadeMedico[]
 
   @@index([ativo, estado])
   @@index([localizacao], type: Gist)
@@ -276,6 +511,7 @@ model NecessidadeEstoque {
   tipoSanguineo TipoSanguineo          @relation(fields: [tipoSanguineoId], references: [id], onDelete: Restrict)
   atualizadoPor Usuario?               @relation(fields: [atualizadoPorId], references: [id], onDelete: Restrict)
   historico     HistoricoNecessidade[]
+  notificacoes  Notificacao[]
 
   @@unique([hospitalId, tipoSanguineoId])
   @@index([tipoSanguineoId, nivel])
@@ -298,4 +534,217 @@ model HistoricoNecessidade {
   @@index([necessidadeId, alteradoEm])
   @@index([alteradoEm])
   @@map("historico_necessidade")
+}
+
+// ---------------------------------------------------------------------------
+// Doações
+// ---------------------------------------------------------------------------
+
+// UC20 / RN11: vinculada a Paciente APROVADO ou avulsa (paciente_id nulo).
+// Não altera o nível de necessidade. Coerência validada por trigger.
+model Doacao {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  hospitalId      String   @map("hospital_id") @db.Uuid
+  pacienteId      String?  @map("paciente_id") @db.Uuid
+  tipoSanguineoId Int      @map("tipo_sanguineo_id") @db.SmallInt
+  dataColeta      DateTime @map("data_coleta") @db.Date
+  // Aferido na triagem; obrigatório para doação vinculada (UC21).
+  pesoAferido     Decimal? @map("peso_aferido") @db.Decimal(5, 2)
+  registradoPorId String   @map("registrado_por") @db.Uuid
+  registradaEm    DateTime @default(now()) @map("registrada_em") @db.Timestamptz(3)
+
+  hospital      Hospital      @relation(fields: [hospitalId], references: [id], onDelete: Restrict)
+  paciente      Paciente?     @relation(fields: [pacienteId], references: [usuarioId], onDelete: Restrict)
+  tipoSanguineo TipoSanguineo @relation(fields: [tipoSanguineoId], references: [id], onDelete: Restrict)
+  registradoPor Usuario       @relation(fields: [registradoPorId], references: [id], onDelete: Restrict)
+
+  @@index([hospitalId, dataColeta])
+  @@index([pacienteId, dataColeta])
+  @@index([tipoSanguineoId])
+  @@index([dataColeta])
+  @@map("doacao")
+}
+
+// ---------------------------------------------------------------------------
+// Notificações (UC12, UC19, RN20)
+// ---------------------------------------------------------------------------
+
+model Notificacao {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  usuarioId       String    @map("usuario_id") @db.Uuid
+  // Preenchida quando a notificação nasce de uma necessidade crítica (UC19).
+  necessidadeId   String?   @map("necessidade_id") @db.Uuid
+  titulo          String    @db.VarChar(150)
+  mensagem        String    @db.VarChar(2000)
+  // Rota da funcionalidade relacionada no frontend (ex.: /meus-exames).
+  link            String?   @db.VarChar(255)
+  enviadaEm       DateTime  @default(now()) @map("enviada_em") @db.Timestamptz(3)
+  lidaEm          DateTime? @map("lida_em") @db.Timestamptz(3)
+  // E-mail: solicitado, enviado ou pendente de nova tentativa (UC19 FE02).
+  emailSolicitado Boolean   @default(false) @map("email_solicitado")
+  emailEnviadoEm  DateTime? @map("email_enviado_em") @db.Timestamptz(3)
+  emailTentativas Int       @default(0) @map("email_tentativas") @db.SmallInt
+  emailUltimoErro String?   @map("email_ultimo_erro") @db.VarChar(500)
+
+  usuario     Usuario             @relation(fields: [usuarioId], references: [id], onDelete: Restrict)
+  necessidade NecessidadeEstoque? @relation(fields: [necessidadeId], references: [id], onDelete: Restrict)
+
+  @@index([usuarioId, enviadaEm])
+  @@index([usuarioId, lidaEm])
+  @@index([necessidadeId, enviadaEm])
+  @@map("notificacao")
+}
+
+enum TipoPublicacao {
+  COMUM
+  AVISO_CRITICO
+
+  @@map("tipo_publicacao")
+}
+
+enum TemaComunidade {
+  DOACAO
+  SAUDE
+  AVISO_INSTITUCIONAL
+
+  @@map("tema_comunidade")
+}
+
+enum StatusConteudo {
+  PUBLICADO
+  OCULTO
+
+  @@map("status_conteudo")
+}
+
+model Publicacao {
+  id           String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  autorId      String               @map("autor_id") @db.Uuid
+  titulo       String               @db.VarChar(120)
+  texto        String               @db.VarChar(2000)
+  tema         TemaComunidade
+  tipo         TipoPublicacao       @default(COMUM)
+  status       StatusConteudo       @default(PUBLICADO)
+  fixadaAte    DateTime?            @map("fixada_ate") @db.Timestamptz(3)
+  criadoEm     DateTime             @default(now()) @map("criado_em") @db.Timestamptz(3)
+  atualizadoEm DateTime             @updatedAt @map("atualizado_em") @db.Timestamptz(3)
+  autor        Usuario              @relation(fields: [autorId], references: [id], onDelete: Restrict)
+  comentarios  Comentario[]
+  reacoes      ReacaoPublicacao[]
+  denuncias    DenunciaPublicacao[]
+
+  @@index([status, criadoEm, id])
+  @@index([autorId])
+  @@map("publicacao")
+}
+
+model Comentario {
+  id           String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  publicacaoId String         @map("publicacao_id") @db.Uuid
+  autorId      String         @map("autor_id") @db.Uuid
+  texto        String         @db.VarChar(2000)
+  status       StatusConteudo @default(PUBLICADO)
+  criadoEm     DateTime       @default(now()) @map("criado_em") @db.Timestamptz(3)
+  publicacao   Publicacao     @relation(fields: [publicacaoId], references: [id], onDelete: Restrict)
+  autor        Usuario        @relation(fields: [autorId], references: [id], onDelete: Restrict)
+
+  @@index([publicacaoId, status, criadoEm, id])
+  @@index([autorId])
+  @@map("comentario")
+}
+
+model ReacaoPublicacao {
+  publicacaoId String     @map("publicacao_id") @db.Uuid
+  usuarioId    String     @map("usuario_id") @db.Uuid
+  criadaEm     DateTime   @default(now()) @map("criada_em") @db.Timestamptz(3)
+  publicacao   Publicacao @relation(fields: [publicacaoId], references: [id], onDelete: Restrict)
+  usuario      Usuario    @relation(fields: [usuarioId], references: [id], onDelete: Restrict)
+
+  @@id([publicacaoId, usuarioId])
+  @@index([usuarioId])
+  @@map("reacao_publicacao")
+}
+
+model DenunciaPublicacao {
+  id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  publicacaoId String     @map("publicacao_id") @db.Uuid
+  usuarioId    String     @map("usuario_id") @db.Uuid
+  motivo       String     @db.VarChar(500)
+  criadaEm     DateTime   @default(now()) @map("criada_em") @db.Timestamptz(3)
+  publicacao   Publicacao @relation(fields: [publicacaoId], references: [id], onDelete: Restrict)
+  usuario      Usuario    @relation(fields: [usuarioId], references: [id], onDelete: Restrict)
+
+  @@unique([publicacaoId, usuarioId])
+  @@map("denuncia_publicacao")
+}
+
+model MedicoHospital {
+  medicoId   String   @map("medico_id") @db.Uuid
+  hospitalId String   @map("hospital_id") @db.Uuid
+  ativo      Boolean  @default(true)
+  medico     Medico   @relation(fields: [medicoId], references: [usuarioId], onDelete: Restrict)
+  hospital   Hospital @relation(fields: [hospitalId], references: [id], onDelete: Restrict)
+
+  @@id([medicoId, hospitalId])
+  @@index([hospitalId, ativo])
+  @@map("medico_hospital")
+}
+
+enum StatusBolsa {
+  QUARENTENA
+  DISPONIVEL
+  RESERVADA
+  UTILIZADA
+  DESCARTADA
+
+  @@map("status_bolsa")
+}
+
+model BolsaSangue {
+  id                  String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  hospitalId          String             @map("hospital_id") @db.Uuid
+  tipoSanguineoId     Int                @map("tipo_sanguineo_id") @db.SmallInt
+  codigo              String             @db.VarChar(100)
+  componente          String             @db.VarChar(80)
+  coletadaEm          DateTime           @map("coletada_em") @db.Timestamptz(3)
+  validadeEm          DateTime           @map("validade_em") @db.Timestamptz(3)
+  status              StatusBolsa        @default(QUARENTENA)
+  liberacaoReferencia String?            @map("liberacao_referencia") @db.VarChar(200)
+  criadaEm            DateTime           @default(now()) @map("criada_em") @db.Timestamptz(3)
+  atualizadaEm        DateTime           @updatedAt @map("atualizada_em") @db.Timestamptz(3)
+  hospital            Hospital           @relation(fields: [hospitalId], references: [id], onDelete: Restrict)
+  tipoSanguineo       TipoSanguineo      @relation(fields: [tipoSanguineoId], references: [id], onDelete: Restrict)
+  movimentos          MovimentoEstoque[]
+
+  @@unique([hospitalId, codigo])
+  @@index([hospitalId, status, tipoSanguineoId, validadeEm])
+  @@map("bolsa_sangue")
+}
+
+model MovimentoEstoque {
+  id         String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  bolsaId    String       @map("bolsa_id") @db.Uuid
+  usuarioId  String       @map("usuario_id") @db.Uuid
+  anterior   StatusBolsa?
+  atual      StatusBolsa
+  motivo     String       @db.VarChar(500)
+  ocorridoEm DateTime     @default(now()) @map("ocorrido_em") @db.Timestamptz(3)
+  bolsa      BolsaSangue  @relation(fields: [bolsaId], references: [id], onDelete: Restrict)
+  usuario    Usuario      @relation(fields: [usuarioId], references: [id], onDelete: Restrict)
+
+  @@index([bolsaId, ocorridoEm])
+  @@map("movimento_estoque")
+}
+
+model EstimativaEtapa {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  hospitalId   String   @map("hospital_id") @db.Uuid
+  etapa        String   @db.VarChar(40)
+  minutos      Int
+  fonte        String   @db.VarChar(500)
+  atualizadaEm DateTime @updatedAt @map("atualizada_em") @db.Timestamptz(3)
+  hospital     Hospital @relation(fields: [hospitalId], references: [id], onDelete: Restrict)
+
+  @@unique([hospitalId, etapa])
+  @@map("estimativa_etapa")
 }
