@@ -2,10 +2,17 @@ import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { PrimeiroAcessoDto } from './primeiro-acesso.dto.js';
 
-const valido = { novaSenha: 'NovaSenha9', confirmacaoSenha: 'NovaSenha9', aceiteTermo: true, versaoTermo: '1.0' };
+const valido = {
+  novaSenha: 'NovaSenha9',
+  confirmacaoSenha: 'NovaSenha9',
+  aceiteTermo: true,
+  versaoTermo: '1.1',
+};
 
 async function camposComErro(alteracao: Record<string, unknown>) {
-  const erros = await validate(plainToInstance(PrimeiroAcessoDto, { ...valido, ...alteracao }));
+  const erros = await validate(
+    plainToInstance(PrimeiroAcessoDto, { ...valido, ...alteracao }),
+  );
   return erros.map((e) => e.property);
 }
 

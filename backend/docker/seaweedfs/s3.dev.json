@@ -1,0 +1,20 @@
+{
+  "identities": [
+    {
+      "name": "hemobridge-dev",
+      "credentials": [
+        {
+          "accessKey": "hemobridge-dev",
+          "secretKey": "hemobridge-dev-secret"
+        }
+      ],
+      "actions": [
+        "Admin",
+        "Read",
+        "Write",
+        "List",
+        "Tagging"
+      ]
+    }
+  ]
+}

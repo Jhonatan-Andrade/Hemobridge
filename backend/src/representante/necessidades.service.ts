@@ -1,4 +1,5 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { NecessidadeCriticaService } from '../notificacoes/necessidade-critica.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import {
   AtualizarNecessidadesDto,
@@ -8,7 +9,12 @@ import {
 // UC18 – Atualizar Necessidades de Estoque (RF17). Sempre no hospital do representante (RN08).
 @Injectable()
 export class NecessidadesService {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly logger = new Logger(NecessidadesService.name);
+
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly necessidadeCritica: NecessidadeCriticaService,
+  ) {}
 
   // Passo 2: os oito tipos com nível atual e data da última atualização.
   async listar(hospitalId: string) {
@@ -66,6 +72,7 @@ export class NecessidadesService {
         mensagem: 'Não há alterações a salvar.',
         alteracoes: [],
         passaramACritico: [],
+        doadoresNotificados: 0,
         ...(await this.listar(hospitalId)),
       };
     }
@@ -80,14 +87,23 @@ export class NecessidadesService {
       ),
     );
 
-    // UC18 passo 5: ponto de extensão "Nível crítico".
-    // TODO(etapa 10): disparar UC19 (notificar doadores compatíveis) para estes tipos.
+    // UC18 passo 5: ponto de extensão "Nível crítico" → UC19. Uma falha ao
+    // notificar não desfaz a atualização já gravada.
     const passaramACritico = alteracoes.filter((a) => a.para === 'CRITICO').map((a) => a.tipo);
+    let doadoresNotificados = 0;
+    if (passaramACritico.length) {
+      try {
+        ({ doadoresNotificados } = await this.necessidadeCritica.notificarDoadores(hospitalId, passaramACritico));
+      } catch (erro) {
+        this.logger.error(`Falha ao notificar doadores (UC19): ${String(erro)}`);
+      }
+    }
 
     return {
       mensagem: 'Necessidades atualizadas.',
       alteracoes: alteracoes.map(({ tipo, de, para }) => ({ tipo, de, para })),
       passaramACritico,
+      doadoresNotificados,
       ...(await this.listar(hospitalId)),
     };
   }

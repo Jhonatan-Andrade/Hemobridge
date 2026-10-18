@@ -1,78 +1,19 @@
-# React + TypeScript + Vite
+# Site HemoBridge
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Aplicação React/TypeScript conectada à API. Sessão por cookie HttpOnly; perfis e permissões vêm do servidor. Não existe seleção local de papel profissional. A comunidade usa persistência no PostgreSQL, paginação, comentários autenticados, perfis verificados e avisos críticos ativos no topo.
 
-Currently, two official plugins are available:
+## Executar
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Use Node.js 24. Execute npm ci e npm run dev -- --host 127.0.0.1 --port 5174. Inicie a API na porta 3000; o proxy do Vite remove /api no desenvolvimento. Para outra topologia, configure VITE_API_URL. Em produção, a distribuição deve encaminhar /api para a API com cache desabilitado.
 
-## React Compiler
+## Organização
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+Arquivos em src seguem kebab-case. Componentes e tipos usam PascalCase; funções e variáveis usam camelCase. Os estilos ficam em src/styles. api-client centraliza transporte, use-resource centraliza carregamento e ibge-localities fornece os seletores encadeados de UF e município com cancelamento, cache e tentativa novamente.
 
-Note: This will impact Vite dev & build performances.
-You can also try [the experimental native React Compiler support in plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md#rust-react-compiler) by using `compiler: true` in the plugin options instead of using the Babel plugin.
+Desktop usa navegação lateral expansível. Web mobile mostra apenas o acionador do menu. A navegação inferior pertence ao aplicativo Flutter. A apresentação inicial por perfil é obrigatória; isFirstAccess é persistido por usuário apenas após a conclusão. Preferências locais não guardam token ou dados clínicos.
 
-## Expanding the ESLint configuration
+## Verificação e publicação
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Execute npm run lint, npm run check:naming e npm run build. Para publicar, configure VITE_LEGAL_ENTITY_NAME e VITE_PRIVACY_CONTACT, então execute npm run build:production. Nunca inclua segredos em variáveis VITE_: elas são públicas. O Dockerfile gera a distribuição e o nginx serve os arquivos na porta 8080 como usuário não root.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
-```
-
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
-```
+Locais usa cartografia e buscas de referência. A localização é opcional. Informações de disponibilidade e necessidades devem vir das instituições; a pesquisa externa não comprova que uma unidade realiza determinado procedimento.

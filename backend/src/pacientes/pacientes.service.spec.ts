@@ -1,4 +1,7 @@
-import { ConflictException, UnprocessableEntityException } from '@nestjs/common';
+import {
+  ConflictException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -53,30 +56,45 @@ describe('PacientesService.preCadastrar', () => {
     expect(data.cpf).toBe('52998224725');
     expect(data.senhaHash).toMatch(/^\$argon2id\$/);
     expect(data).not.toHaveProperty('senha');
-    expect(data.paciente.create.dataNascimento).toEqual(new Date('1995-05-20T00:00:00Z'));
-    expect(data.consentimentos.create).toMatchObject({ versaoTermo: '1.0', ipOrigem: '127.0.0.1' });
+    expect(data.paciente.create.dataNascimento).toEqual(
+      new Date('1995-05-20T00:00:00Z'),
+    );
+    expect(data.consentimentos.create).toMatchObject({
+      versaoTermo: '1.1',
+      ipOrigem: '127.0.0.1',
+    });
   });
 
   it('rejeita e-mail ou CPF já cadastrado (FE02)', async () => {
     const { service, prisma } = criarService();
     prisma.usuario.findFirst.mockResolvedValue({ id: 'outro' });
 
-    await expect(service.preCadastrar(dto())).rejects.toBeInstanceOf(ConflictException);
+    await expect(service.preCadastrar(dto())).rejects.toBeInstanceOf(
+      ConflictException,
+    );
     expect(prisma.usuario.create).not.toHaveBeenCalled();
   });
 
   it('converte violação de unicidade concorrente (P2002) em conflito', async () => {
     const { service, prisma } = criarService();
     prisma.usuario.create.mockRejectedValue(
-      new Prisma.PrismaClientKnownRequestError('unique', { code: 'P2002', clientVersion: 'x' }),
+      new Prisma.PrismaClientKnownRequestError('unique', {
+        code: 'P2002',
+        clientVersion: 'x',
+      }),
     );
 
-    await expect(service.preCadastrar(dto())).rejects.toBeInstanceOf(ConflictException);
+    await expect(service.preCadastrar(dto())).rejects.toBeInstanceOf(
+      ConflictException,
+    );
   });
 
   it.each([
     ['menor de 16 anos', { dataNascimento: '2010-10-04' }],
-    ['maior de 69 anos', { dataNascimento: '1956-10-03', cienteRegraAcimaDe60: true }],
+    [
+      'maior de 69 anos',
+      { dataNascimento: '1956-10-03', cienteRegraAcimaDe60: true },
+    ],
     ['peso abaixo de 50 kg', { pesoKg: 49.9 }],
   ])('rejeita %s (FE04)', async (_, alteracao) => {
     const { service, prisma } = criarService();
@@ -89,7 +107,10 @@ describe('PacientesService.preCadastrar', () => {
 
   it.each([
     ['16 anos completos hoje', { dataNascimento: '2010-10-03' }],
-    ['69 anos com ciência da regra', { dataNascimento: '1957-10-03', cienteRegraAcimaDe60: true }],
+    [
+      '69 anos com ciência da regra',
+      { dataNascimento: '1957-10-03', cienteRegraAcimaDe60: true },
+    ],
     ['peso exatamente 50 kg', { pesoKg: 50 }],
   ])('aceita %s', async (_, alteracao) => {
     const { service } = criarService();
@@ -106,6 +127,8 @@ describe('PacientesService.preCadastrar', () => {
 
   it('rejeita versão de termo diferente da vigente', async () => {
     const { service } = criarService();
-    await expect(service.preCadastrar(dto({ versaoTermo: '0.9' }))).rejects.toThrow(/versão do termo/);
+    await expect(
+      service.preCadastrar(dto({ versaoTermo: '0.9' })),
+    ).rejects.toThrow(/versão do termo/);
   });
 });

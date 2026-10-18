@@ -12,5 +12,5 @@ export const preCadastroValido = () => ({
   cidade: 'Curitiba',
   estado: 'pr',
   aceiteTermo: true,
-  versaoTermo: '1.0',
+  versaoTermo: '1.1',
 });

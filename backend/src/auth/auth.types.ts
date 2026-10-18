@@ -21,19 +21,34 @@ export interface UsuarioAutenticado {
 
 /** Seleção do vínculo institucional de médicos e representantes. */
 export const SELECAO_INSTITUICAO = {
-  medico: { select: { hospital: { select: { ativo: true } } } },
+  medico: {
+    select: {
+      hospital: { select: { ativo: true } },
+      vinculos: {
+        where: { ativo: true },
+        select: { hospital: { select: { ativo: true } } },
+      },
+    },
+  },
   representante: { select: { hospital: { select: { ativo: true } } } },
 } as const;
 
 /** RN09: médico ou representante de banco de sangue desativado perde o acesso. */
 export function instituicaoDesativada(usuario: {
-  medico: { hospital: { ativo: boolean } } | null;
+  medico: {
+    hospital: { ativo: boolean };
+    vinculos?: { hospital: { ativo: boolean } }[];
+  } | null;
   representante: { hospital: { ativo: boolean } } | null;
 }): boolean {
+  if (usuario.medico?.vinculos?.some((v) => v.hospital.ativo)) return false;
   const hospital = usuario.medico?.hospital ?? usuario.representante?.hospital;
   return hospital !== undefined && !hospital.ativo;
 }
 
-export function papelDe(perfil: Perfil, situacao?: SituacaoPaciente | null): Papel {
+export function papelDe(
+  perfil: Perfil,
+  situacao?: SituacaoPaciente | null,
+): Papel {
   return perfil === 'PACIENTE' && situacao === 'APROVADO' ? 'DOADOR' : perfil;
 }
