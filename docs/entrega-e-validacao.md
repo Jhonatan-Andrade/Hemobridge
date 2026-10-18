@@ -40,6 +40,6 @@ Uma VM é uma forma de executar serviços; o código também pode usar container
 | Aplicativo | Finalizar cadastro nativo, edição completa do perfil, agendamento/reagendamento, envio de exames e formulários de estoque/agenda |
 | Distribuição | Android exige SDK e assinatura; iOS exige macOS/Xcode e assinatura. Não foi gerado APK/IPA |
 | Migração da VM | Inventariar separadamente dumps e objetos autorizados, verificar hashes e ensaiar restauração; não importar a carga de testes |
-| Jira | Atualização remota não confirmada: o conector apresentou falha de verificação da organização; não foram marcadas tarefas como concluídas |
+| Jira | Progresso registrado pela sessão do navegador em seis tarefas de identidade, prototipagem e testes; permanecem em Fazendo para revisão/aceite. A execução formal dos 23 casos, as seções finais do TCC e o manual/apresentação ainda precisam de consolidação |
 
 A base de código está estruturada para homologação e preparação de produção. A aprovação de código não substitui a conclusão dessas dependências operacionais e dos fluxos nativos pendentes.
