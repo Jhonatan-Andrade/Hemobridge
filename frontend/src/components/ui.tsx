@@ -30,6 +30,8 @@ const paths: Record<string, ReactNode> = {
   heart: <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8z" />,
   comment: <path d="M21 11a9 9 0 0 1-9 9 10 10 0 0 1-4-.8L3 21l1.8-5A9 9 0 1 1 21 11z" />,
   back: <path d="m14 5-7 7 7 7M7 12h14" />,
+  verified: <><circle cx="12" cy="12" r="9" /><path d="m8 12 3 3 5-6" /></>,
+  pin: <><path d="m16 3 5 5-4 2-3 7-7-7 7-3zM7 17l-4 4" /><path d="m7 10-2 2 7 7 2-2" /></>,
 }
 
 export function Icon({ name, filled = false }: { name: keyof typeof paths; filled?: boolean }) {

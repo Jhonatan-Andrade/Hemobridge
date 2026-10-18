@@ -7,7 +7,11 @@ import './styles/hemobridge-polish.css'
 import './styles/hemobridge-editorial.css'
 import './styles/production.css'
 import { ApiError, api, messageOf } from './services/api-client'
-import { expirePinnedPublications, nextPinExpiryDelay } from './services/feed-expiration'
+import {
+  expirePinnedPublications,
+  mergePublications,
+  nextPinExpiryDelay,
+} from './services/feed-expiration'
 import {
   loadVlibras,
   readFontScale,
@@ -118,7 +122,8 @@ function App() {
     const controller = new AbortController()
     api<Feed>('/comunidade/publicacoes?pagina=1', { signal: controller.signal })
       .then((result) => {
-        setFeed(result)
+        if (controller.signal.aborted) return
+        setFeed({ ...result, items: expirePinnedPublications(result.items, Date.now()) })
         commentPages.current = {}
         setFeedError(false)
         setLoadedRevision(feedRevision)
@@ -172,7 +177,14 @@ function App() {
       }))
       .then((post) => {
         commentPages.current[post.id] = 1
-        setFeed((f) => ({ ...f, items: [...f.items.filter((p) => p.id !== post.id), post] }))
+        setFeed((f) => ({
+          ...f,
+          items: mergePublications(
+            f.items.filter((p) => p.id !== post.id),
+            [post],
+            Date.now(),
+          ),
+        }))
       })
       .catch((e) => {
         if (!controller.signal.aborted) setError(messageOf(e))
@@ -299,7 +311,7 @@ function App() {
       const more = await api<Feed>(`/comunidade/publicacoes?pagina=${feed.page + 1}`)
       setFeed((f) => ({
         ...more,
-        items: [...f.items, ...more.items.filter((p) => !f.items.some((old) => old.id === p.id))],
+        items: mergePublications(f.items, more.items, Date.now()),
       }))
     } catch (e) {
       setError(messageOf(e))

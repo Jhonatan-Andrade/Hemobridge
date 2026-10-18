@@ -1,8 +1,9 @@
-import { useRef, useState } from 'react'
+import { useId, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { communityRoleLabels } from '../types/domain'
 import type { CommunityParticipantRole, Identity, Publication, RequestState } from '../types/domain'
 import { api, messageOf } from '../services/api-client'
+import { isInstitutionalPin, isVerifiedAuthor } from '../services/feed-expiration'
 import { Alert, Icon, Intro, RouteLink } from '../components/ui'
 import type { Navigate } from '../components/ui'
 export type CommunityProps = {
@@ -34,9 +35,11 @@ export type CommunityProps = {
   onTour: () => void
 }
 const dateOf = (date: string) =>
-  new Intl.DateTimeFormat('pt-BR', { dateStyle: 'medium', timeStyle: 'short' }).format(
-    new Date(date),
-  )
+  Number.isFinite(Date.parse(date))
+    ? new Intl.DateTimeFormat('pt-BR', { dateStyle: 'medium', timeStyle: 'short' }).format(
+        new Date(date),
+      )
+    : 'Data indisponível'
 export function PublicationCard({
   publication: post,
   full = false,
@@ -48,13 +51,26 @@ export function PublicationCard({
   onLike: CommunityProps['onLike']
   onOpenPost: CommunityProps['onOpenPost']
 }) {
+  const titleId = useId()
+  const verified = isVerifiedAuthor(post)
+  const pinned = isInstitutionalPin(post)
+  const verifiedDoctor = verified && post.role === 'doctor'
   return (
     <article
-      className={`post-card${full ? ' post-full' : ''}${post.verified ? ' post-verified' : ''}${post.pinned ? ' post-pinned' : ''}`}
+      className={`post-card${full ? ' post-full' : ''}${verified ? ' post-verified' : ''}${verifiedDoctor ? ' post-doctor' : ''}${pinned ? ' post-pinned' : ''}`}
       data-post={post.id}
+      aria-labelledby={titleId}
     >
-      {post.pinned && (
-        <p className="post-pinned-label">Aviso crítico · fixado até {dateOf(post.pinnedUntil!)}</p>
+      {pinned && (
+        <div className="post-pinned-label">
+          <Icon name="pin" />
+          <div>
+            <strong>Aviso crítico · fixado no topo</strong>
+            <span>
+              Até <time dateTime={post.pinnedUntil}>{dateOf(post.pinnedUntil!)}</time>
+            </span>
+          </div>
+        </div>
       )}
       <div className="post-meta">
         <span className="public-avatar" aria-hidden="true">
@@ -71,9 +87,22 @@ export function PublicationCard({
       </div>
       <div className="post-labels">
         <span className="post-role">{communityRoleLabels[post.role]}</span>
-        {post.verified && <span className="verified-badge">✓ Perfil Verificado</span>}
+        {verified && (
+          <span
+            className="verified-badge"
+            title={verifiedDoctor ? 'Registro profissional conferido' : 'Instituição verificada'}
+          >
+            <Icon name="verified" /> Perfil Verificado
+          </span>
+        )}
       </div>
-      {full ? <h1 tabIndex={-1}>{post.title}</h1> : <h3>{post.title}</h3>}
+      {full ? (
+        <h1 id={titleId} tabIndex={-1}>
+          {post.title}
+        </h1>
+      ) : (
+        <h3 id={titleId}>{post.title}</h3>
+      )}
       <p className="post-body">
         {full ? post.content : post.content.slice(0, 180) + (post.content.length > 180 ? '…' : '')}
       </p>
@@ -223,7 +252,7 @@ function CommunityComposer(p: CommunityProps) {
                     if (e.target.checked) setTopic('AVISO_INSTITUCIONAL')
                   }}
                 />
-                Aviso crítico da instituição
+                Aviso crítico ou urgência de estoque da instituição
               </label>
               {critical && (
                 <label>
@@ -254,6 +283,11 @@ function CommunityComposer(p: CommunityProps) {
   )
 }
 export function FeedPage(p: CommunityProps) {
+  const priority = p.publications.filter(isInstitutionalPin)
+  const recent = p.publications.filter((post) => !isInstitutionalPin(post))
+  const card = (post: Publication) => (
+    <PublicationCard key={post.id} publication={post} onLike={p.onLike} onOpenPost={p.onOpenPost} />
+  )
   return (
     <main className="community-page">
       <div className="community-intro">
@@ -276,7 +310,12 @@ export function FeedPage(p: CommunityProps) {
         Avisos críticos ativos aparecem primeiro. As demais publicações seguem da mais recente para
         a mais antiga.
       </p>
-      <button type="button" className="button secondary" onClick={p.onReload} disabled={p.response === 'loading'}>
+      <button
+        type="button"
+        className="button secondary"
+        onClick={p.onReload}
+        disabled={p.response === 'loading'}
+      >
         Atualizar publicações
       </button>
       {p.response === 'loading' ? (
@@ -290,16 +329,19 @@ export function FeedPage(p: CommunityProps) {
         </Alert>
       ) : p.publications.length ? (
         <>
-          <div className="feed-list">
-            {p.publications.map((post) => (
-              <PublicationCard
-                key={post.id}
-                publication={post}
-                onLike={p.onLike}
-                onOpenPost={p.onOpenPost}
-              />
-            ))}
-          </div>
+          {priority.length > 0 && (
+            <section className="feed-section feed-priority" aria-labelledby="priority-feed-title">
+              <h2 id="priority-feed-title">Avisos prioritários</h2>
+              <p>Avisos críticos e urgências de estoque de hospitais e hemocentros verificados.</p>
+              <div className="feed-list">{priority.map(card)}</div>
+            </section>
+          )}
+          {recent.length > 0 && (
+            <section className="feed-section" aria-labelledby="recent-feed-title">
+              <h2 id="recent-feed-title">Publicações recentes</h2>
+              <div className="feed-list">{recent.map(card)}</div>
+            </section>
+          )}
           {p.hasMore && (
             <button type="button" className="button secondary" onClick={p.onLoadMore}>
               Carregar mais publicações
