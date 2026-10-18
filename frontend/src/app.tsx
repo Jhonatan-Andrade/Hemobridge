@@ -7,6 +7,7 @@ import './styles/hemobridge-polish.css'
 import './styles/hemobridge-editorial.css'
 import './styles/production.css'
 import { ApiError, api, messageOf } from './services/api-client'
+import { expirePinnedPublications, nextPinExpiryDelay } from './services/feed-expiration'
 import {
   completeFirstAccess,
   loadVlibras,
@@ -136,6 +137,17 @@ function App() {
       })
     return () => controller.abort()
   }, [feedRevision])
+  useEffect(() => {
+    const delay = nextPinExpiryDelay(feed.items, Date.now())
+    if (delay === null) return
+    const timer = window.setTimeout(() => {
+      setFeed((current) => ({
+        ...current,
+        items: expirePinnedPublications(current.items, Date.now()),
+      }))
+    }, delay)
+    return () => window.clearTimeout(timer)
+  }, [feed.items])
   useEffect(() => {
     if (!user) return
     const controller = new AbortController()

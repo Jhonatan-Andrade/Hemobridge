@@ -12,7 +12,7 @@ O Figma concentra as interfaces oficiais em uma página. As versões anteriores 
 
 | Verificação | Resultado |
 |---|---|
-| Site | Compilação, lint e convenção de nomes aprovados |
+| Site | Compilação, lint e convenção de nomes aprovados; quatro testes de expiração e ordenação do feed |
 | API | Compilação e lint aprovados; 216 testes unitários e 58 de integração aprovados |
 | Banco | Nove migrações aplicadas em PostgreSQL/PostGIS descartável; SQL consolidado aplicado separadamente em banco vazio |
 | Autorização | Testes cobrem isolamento institucional, sessão, publicação por perfis, consentimento e operações de estoque |

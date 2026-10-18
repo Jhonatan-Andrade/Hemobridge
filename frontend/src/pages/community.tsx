@@ -276,6 +276,9 @@ export function FeedPage(p: CommunityProps) {
         Avisos críticos ativos aparecem primeiro. As demais publicações seguem da mais recente para
         a mais antiga.
       </p>
+      <button type="button" className="button secondary" onClick={p.onReload} disabled={p.response === 'loading'}>
+        Atualizar publicações
+      </button>
       {p.response === 'loading' ? (
         <p aria-busy="true">Carregando publicações…</p>
       ) : p.response === 'loadError' ? (
