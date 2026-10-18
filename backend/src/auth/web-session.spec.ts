@@ -54,4 +54,40 @@ describe('sessão web', () => {
       } as Request),
     ).not.toThrow();
   });
+  it('autoriza os dois endereços locais quando declarados explicitamente', () => {
+    vi.stubEnv('CORS_ORIGENS', 'http://localhost:5174,http://127.0.0.1:5174');
+    for (const origin of ['http://localhost:5174', 'http://127.0.0.1:5174']) {
+      expect(() => assertCookieOrigin({
+        method: 'POST', headers: { origin },
+      } as Request)).not.toThrow();
+    }
+    for (const origin of ['http://127.0.0.1:5175', 'https://outro.example']) {
+      expect(() => assertCookieOrigin({
+        method: 'POST', headers: { origin },
+      } as Request)).toThrow(ForbiddenException);
+    }
+  });
+  it('usa a mesma porta local do servidor quando não há origem configurada', () => {
+    vi.stubEnv('CORS_ORIGENS', undefined);
+    vi.stubEnv('FRONTEND_URL', undefined);
+    expect(() => assertCookieOrigin({
+      method: 'POST', headers: { origin: 'http://localhost:5174' },
+    } as Request)).not.toThrow();
+    expect(() => assertCookieOrigin({
+      method: 'POST', headers: { origin: 'http://localhost:5173' },
+    } as Request)).toThrow(ForbiddenException);
+  });
+  it('mantém origens locais e domínios semelhantes bloqueados na configuração de produção', () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    vi.stubEnv('CORS_ORIGENS', 'https://hemobridge.example');
+    for (const origin of [
+      'http://localhost:5174',
+      'http://127.0.0.1:5174',
+      'https://hemobridge.example.outro.example',
+    ]) {
+      expect(() => assertCookieOrigin({
+        method: 'POST', headers: { origin },
+      } as Request)).toThrow(ForbiddenException);
+    }
+  });
 });

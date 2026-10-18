@@ -29,6 +29,8 @@ npm run dev -- --host 127.0.0.1 --port 5174
 
 Abra `http://localhost:5174`. A API permanece aberta no primeiro terminal. Os e-mails de recuperação ficam na caixa local `http://localhost:8027`, sem envio a destinatários externos. O tour obrigatório termina somente na última etapa, grava a conclusão por conta no servidor e pode ser reaberto pelo menu. Utilize somente dados de testes ao experimentar cadastro, comentários e anexos.
 
+O preparador autoriza explicitamente `http://localhost:5174` e `http://127.0.0.1:5174`. Para uma configuração local já existente, ajuste `CORS_ORIGENS` no `backend/.env` para esses dois endereços e reinicie a API. A mensagem “Origem da requisição não autorizada” ao salvar uma ação indica que o endereço usado no navegador não consta nessa lista. Em produção, autorize somente os domínios HTTPS publicados.
+
 ## Contas e roteiro
 
 Senha das contas abaixo: `Teste2026hb`. São exclusivas do banco de testes e não acompanham uma instalação de produção.

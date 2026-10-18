@@ -36,7 +36,7 @@ export function assertCookieOrigin(req: Request) {
   const origins = (
     process.env.CORS_ORIGENS ??
     process.env.FRONTEND_URL ??
-    'http://localhost:5173'
+    'http://localhost:5174'
   )
     .split(',')
     .map((v) => v.trim());
