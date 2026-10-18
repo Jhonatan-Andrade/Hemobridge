@@ -1,22 +1,23 @@
 import 'dart:async';
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
+import 'ibge_localities.dart';
 
 class LocalityPicker extends StatefulWidget {
   final void Function(String uf, String city) onChanged;
-  const LocalityPicker({super.key, required this.onChanged});
+  final IbgeLocalities? localities;
+  const LocalityPicker({super.key, required this.onChanged, this.localities});
   @override
   State<LocalityPicker> createState() => _LocalityPickerState();
 }
 
 class _LocalityPickerState extends State<LocalityPicker> {
-  final client = http.Client();
-  List<dynamic> states = [], cities = [];
-  String? uf, city, error;
-  bool loading = false;
+  late final localities = widget.localities ?? IbgeLocalities();
+  List<IbgeState> states = [];
+  List<IbgeMunicipality> cities = [];
+  String? uf, city, stateError, cityError;
+  bool loadingStates = true, loadingCities = false;
   int requestId = 0;
   @override
   void initState() {
@@ -24,24 +25,20 @@ class _LocalityPickerState extends State<LocalityPicker> {
     loadStates();
   }
 
-  Future<List<dynamic>> load(String path) async {
-    final r = await client
-        .get(
-          Uri.parse('https://servicodados.ibge.gov.br/api/v1/localidades$path'),
-        )
-        .timeout(const Duration(seconds: 15));
-    if (r.statusCode != 200) throw Exception();
-    return jsonDecode(r.body) as List;
-  }
-
   Future<void> loadStates() async {
+    setState(() {
+      loadingStates = true;
+      stateError = null;
+    });
     try {
-      final list = await load('/estados?orderBy=nome');
+      final list = await localities.loadStates();
       if (mounted) setState(() => states = list);
     } catch (_) {
       if (mounted) {
-        setState(() => error = 'Estados indisponíveis. Tente novamente.');
+        setState(() => stateError = 'Estados indisponíveis. Tente novamente.');
       }
+    } finally {
+      if (mounted) setState(() => loadingStates = false);
     }
   }
 
@@ -52,26 +49,30 @@ class _LocalityPickerState extends State<LocalityPicker> {
       uf = value;
       city = null;
       cities = [];
-      loading = true;
-      error = null;
+      loadingCities = true;
+      cityError = null;
     });
     widget.onChanged(value, '');
     try {
-      final list = await load('/estados/$value/municipios?orderBy=nome');
+      final list = await localities.loadMunicipalities(value);
       if (mounted && current == requestId) setState(() => cities = list);
     } catch (_) {
       if (mounted && current == requestId) {
-        setState(() => error = 'Municípios indisponíveis. Tente novamente.');
+        setState(
+          () => cityError = 'Municípios indisponíveis. Tente novamente.',
+        );
       }
     } finally {
-      if (mounted && current == requestId) setState(() => loading = false);
+      if (mounted && current == requestId) {
+        setState(() => loadingCities = false);
+      }
     }
   }
 
   @override
   void dispose() {
     requestId++;
-    client.close();
+    if (widget.localities == null) localities.close();
     super.dispose();
   }
 
@@ -83,50 +84,72 @@ class _LocalityPickerState extends State<LocalityPicker> {
         key: ValueKey('state-$uf'),
         initialValue: uf,
         isExpanded: true,
-        decoration: const InputDecoration(labelText: 'Estado'),
+        decoration: InputDecoration(
+          labelText: loadingStates ? 'Carregando estados…' : 'Estado',
+        ),
+        hint: Text(
+          stateError != null
+              ? 'Estados indisponíveis'
+              : states.isEmpty && !loadingStates
+              ? 'Nenhum estado disponível'
+              : 'Selecione o estado',
+        ),
         items: states
             .map(
               (s) => DropdownMenuItem<String>(
-                value: s['sigla'] as String,
+                value: s.abbreviation,
                 child: Text(
-                  s['nome'] as String,
+                  '${s.name} (${s.abbreviation})',
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
             )
             .toList(),
-        onChanged: selectState,
+        onChanged: loadingStates || states.isEmpty ? null : selectState,
       ),
+      if (stateError != null) ...[
+        Semantics(liveRegion: true, child: Text(stateError!)),
+        TextButton(
+          onPressed: loadStates,
+          child: const Text('Tentar novamente'),
+        ),
+      ],
       const SizedBox(height: 16),
       DropdownButtonFormField<String>(
         key: ValueKey('city-$uf-$city'),
         initialValue: city,
         isExpanded: true,
         decoration: InputDecoration(
-          labelText: loading ? 'Carregando municípios…' : 'Município',
+          labelText: loadingCities ? 'Carregando municípios…' : 'Município',
+        ),
+        hint: Text(
+          uf == null
+              ? 'Escolha primeiro o estado'
+              : cityError != null
+              ? 'Municípios indisponíveis'
+              : cities.isEmpty && !loadingCities
+              ? 'Nenhum município disponível'
+              : 'Selecione o município',
         ),
         items: cities
             .map(
               (c) => DropdownMenuItem<String>(
-                value: c['nome'] as String,
-                child: Text(
-                  c['nome'] as String,
-                  overflow: TextOverflow.ellipsis,
-                ),
+                value: c.name,
+                child: Text(c.name, overflow: TextOverflow.ellipsis),
               ),
             )
             .toList(),
-        onChanged: uf == null || loading
+        onChanged: uf == null || loadingCities || cities.isEmpty
             ? null
             : (value) {
                 setState(() => city = value);
                 widget.onChanged(uf!, value ?? '');
               },
       ),
-      if (error != null) ...[
-        Text(error!),
+      if (cityError != null) ...[
+        Semantics(liveRegion: true, child: Text(cityError!)),
         TextButton(
-          onPressed: uf == null ? loadStates : () => selectState(uf),
+          onPressed: () => selectState(uf),
           child: const Text('Tentar novamente'),
         ),
       ],
@@ -134,94 +157,144 @@ class _LocalityPickerState extends State<LocalityPicker> {
   );
 }
 
+enum _LocationSettingsTarget { device, app }
+
 class LocationsPage extends StatefulWidget {
-  const LocationsPage({super.key});
+  final IbgeLocalities? localities;
+  const LocationsPage({super.key, this.localities});
   @override
   State<LocationsPage> createState() => _LocationsPageState();
 }
 
 class _LocationsPageState extends State<LocationsPage> {
-  StreamSubscription<Position>? subscription;
   Position? position;
   String uf = '', city = '', message = '';
-  bool locating = false;
+  bool locating = false, useGps = false;
+  int locationRequestId = 0;
+  _LocationSettingsTarget? settingsTarget;
+
   Future<void> locate() async {
-    setState(() => locating = true);
+    if (locating) return;
+    final request = ++locationRequestId;
+    setState(() {
+      locating = true;
+      position = null;
+      useGps = false;
+      message = '';
+      settingsTarget = null;
+    });
     try {
-      if (!await Geolocator.isLocationServiceEnabled()) {
-        throw Exception(
-          'Ative a localização do celular ou escolha estado e município.',
-        );
+      final enabled = await Geolocator.isLocationServiceEnabled();
+      if (!mounted || request != locationRequestId) return;
+      if (!enabled) {
+        setState(() {
+          message =
+              'Ative a localização do celular ou escolha estado e município.';
+          settingsTarget = _LocationSettingsTarget.device;
+        });
+        return;
       }
       var permission = await Geolocator.checkPermission();
+      if (!mounted || request != locationRequestId) return;
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
       }
-      if (permission == LocationPermission.denied ||
-          permission == LocationPermission.deniedForever) {
-        throw Exception(
-          'Localização não autorizada. A busca manual continua disponível.',
+      if (!mounted || request != locationRequestId) return;
+      if (permission == LocationPermission.deniedForever) {
+        setState(() {
+          message =
+              'Permita a localização nas configurações do aplicativo ou use a busca manual.';
+          settingsTarget = _LocationSettingsTarget.app;
+        });
+        return;
+      }
+      if (permission != LocationPermission.whileInUse &&
+          permission != LocationPermission.always) {
+        setState(
+          () => message =
+              'Localização não autorizada. A busca manual continua disponível.',
+        );
+        return;
+      }
+      final current = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.medium,
+          timeLimit: Duration(seconds: 15),
+        ),
+      );
+      if (!mounted || request != locationRequestId) return;
+      setState(() {
+        position = current;
+        useGps = true;
+        message = 'Localização obtida. As buscas usarão sua região aproximada.';
+      });
+    } on TimeoutException {
+      if (mounted && request == locationRequestId) {
+        setState(
+          () => message =
+              'A localização demorou para responder. Tente novamente ou use a busca manual.',
         );
       }
-      await subscription?.cancel();
-      subscription =
-          Geolocator.getPositionStream(
-            locationSettings: const LocationSettings(
-              accuracy: LocationAccuracy.medium,
-              distanceFilter: 50,
-            ),
-          ).listen(
-            (p) {
-              if (mounted) {
-                setState(() {
-                  position = p;
-                  message =
-                      'Localização ativa enquanto esta tela estiver aberta.';
-                  locating = false;
-                });
-              }
-            },
-            onError: (_) {
-              if (mounted) {
-                setState(() {
-                  message =
-                      'Não foi possível obter a localização. Use a busca manual.';
-                  locating = false;
-                });
-              }
-            },
-          );
-    } catch (e) {
-      if (mounted) {
+    } on LocationServiceDisabledException {
+      if (mounted && request == locationRequestId) {
         setState(() {
-          message = e.toString().replaceFirst('Exception: ', '');
-          locating = false;
+          message =
+              'A localização do celular foi desativada. Use a busca manual ou ative-a nas configurações.';
+          settingsTarget = _LocationSettingsTarget.device;
         });
+      }
+    } catch (_) {
+      if (mounted && request == locationRequestId) {
+        setState(
+          () => message =
+              'Não foi possível obter a localização. Tente novamente ou use a busca manual.',
+        );
+      }
+    } finally {
+      if (mounted) setState(() => locating = false);
+    }
+  }
+
+  Future<void> openSettings() async {
+    try {
+      final opened = settingsTarget == _LocationSettingsTarget.app
+          ? await Geolocator.openAppSettings()
+          : await Geolocator.openLocationSettings();
+      if (!opened && mounted) {
+        setState(
+          () => message =
+              'Abra as configurações do celular para permitir a localização.',
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(
+          () => message =
+              'Abra as configurações do celular para permitir a localização.',
+        );
       }
     }
   }
 
   Future<void> openMap(String service) async {
-    final place = city.isNotEmpty
-        ? '$city, $uf'
-        : position != null
+    final place = useGps && position != null
         ? '${position!.latitude.toStringAsFixed(2)},${position!.longitude.toStringAsFixed(2)}'
+        : city.isNotEmpty
+        ? '$city, $uf'
         : '';
     if (place.isEmpty) return;
     final url = Uri.https('www.google.com', '/maps/search/', {
       'api': '1',
       'query': '$service em $place',
     });
-    if (!await launchUrl(url, mode: LaunchMode.externalApplication) &&
-        mounted) {
-      setState(() => message = 'Não foi possível abrir o Maps.');
+    try {
+      if (!await launchUrl(url, mode: LaunchMode.externalApplication) &&
+          mounted) {
+        setState(() => message = 'Não foi possível abrir o Maps.');
+      }
+    } catch (_) {
+      if (mounted) setState(() => message = 'Não foi possível abrir o Maps.');
     }
-  }
-
-  @override
-  void dispose() {
-    subscription?.cancel();
-    super.dispose();
   }
 
   @override
@@ -244,22 +317,37 @@ class _LocationsPageState extends State<LocationsPage> {
       ),
       if (position != null)
         TextButton(
-          onPressed: () {
-            subscription?.cancel();
-            setState(() {
-              position = null;
-              message = 'Localização pausada.';
-            });
-          },
-          child: const Text('Pausar localização'),
+          onPressed: () => setState(() {
+            position = null;
+            useGps = false;
+            message =
+                'Localização removida. Escolha estado e município para buscar.';
+          }),
+          child: const Text('Limpar localização'),
         ),
       const SizedBox(height: 16),
-      Text(message),
+      Semantics(liveRegion: true, child: Text(message)),
+      if (settingsTarget != null)
+        TextButton(
+          onPressed: openSettings,
+          child: const Text('Abrir configurações'),
+        ),
       const SizedBox(height: 20),
+      Text(
+        'Ou escolha uma localidade',
+        style: Theme.of(context).textTheme.titleMedium,
+      ),
+      const SizedBox(height: 16),
       LocalityPicker(
+        localities: widget.localities,
         onChanged: (state, municipality) => setState(() {
+          locationRequestId++;
           uf = state;
           city = municipality;
+          useGps = false;
+          message = municipality.isEmpty
+              ? 'Selecione um município para buscar.'
+              : 'Busca em $municipality ($state).';
         }),
       ),
       const SizedBox(height: 20),
@@ -277,7 +365,8 @@ class _LocationsPageState extends State<LocationsPage> {
                 Text(service, style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 12),
                 OutlinedButton.icon(
-                  onPressed: city.isNotEmpty || position != null
+                  onPressed:
+                      !locating && (useGps ? position != null : city.isNotEmpty)
                       ? () => openMap(service)
                       : null,
                   icon: const Icon(Icons.open_in_new),
@@ -288,7 +377,7 @@ class _LocationsPageState extends State<LocationsPage> {
           ),
         ),
       const Text(
-        'O GPS é opcional, não é guardado pelo app e é encerrado ao sair desta tela. O Maps recebe a região aproximada somente quando você abre a busca.',
+        'O GPS é opcional e consultado somente ao tocar no botão, sem acompanhamento contínuo. A posição fica apenas na memória desta tela. O Maps recebe a região aproximada somente quando você abre a busca.',
       ),
     ],
   );

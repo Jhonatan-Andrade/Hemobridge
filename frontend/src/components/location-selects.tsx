@@ -1,6 +1,9 @@
 import { useEffect, useId, useState } from 'react'
 import { loadMunicipalities, loadStates } from '../services/ibge-localities'
 import type { Municipality, State } from '../services/ibge-localities'
+
+type Localities<T> = { items: T[]; status: 'loading' | 'ready' | 'error' }
+
 export function LocationSelects({
   state,
   city,
@@ -13,19 +16,22 @@ export function LocationSelects({
   required?: boolean
 }) {
   const id = useId()
-  const [states, setStates] = useState<State[]>([])
-  const [municipalities, setMunicipalities] = useState<{ uf: string; items: Municipality[] }>({
-    uf: '',
+  const [states, setStates] = useState<Localities<State>>({ items: [], status: 'loading' })
+  const [municipalities, setMunicipalities] = useState<Localities<Municipality> & { key: string }>({
+    key: '',
     items: [],
+    status: 'loading',
   })
-  const [error, setError] = useState('')
   const [attempt, setAttempt] = useState(0)
+  const key = `${state}:${attempt}`
   useEffect(() => {
     const controller = new AbortController()
     loadStates(controller.signal)
-      .then(setStates)
+      .then((items) => {
+        if (!controller.signal.aborted) setStates({ items, status: 'ready' })
+      })
       .catch(() => {
-        if (!controller.signal.aborted) setError('Estados indisponíveis. Tente novamente.')
+        if (!controller.signal.aborted) setStates({ items: [], status: 'error' })
       })
     return () => controller.abort()
   }, [attempt])
@@ -33,13 +39,24 @@ export function LocationSelects({
     if (!state) return
     const controller = new AbortController()
     loadMunicipalities(state, controller.signal)
-      .then((items) => setMunicipalities({ uf: state, items }))
+      .then((items) => {
+        if (!controller.signal.aborted) setMunicipalities({ key, items, status: 'ready' })
+      })
       .catch(() => {
-        if (!controller.signal.aborted) setError('Municípios indisponíveis. Tente novamente.')
+        if (!controller.signal.aborted) setMunicipalities({ key, items: [], status: 'error' })
       })
     return () => controller.abort()
-  }, [state, attempt])
-  const items = municipalities.uf === state ? municipalities.items : []
+  }, [state, key])
+  const current = municipalities.key === key ? municipalities : undefined
+  const items = current?.items ?? []
+  const cityLoading = !!state && (!current || current.status === 'loading')
+  const error =
+    states.status === 'error'
+      ? 'Estados indisponíveis. Tente novamente.'
+      : state && current?.status === 'error'
+        ? 'Municípios indisponíveis. Tente novamente.'
+        : ''
+  const errorId = error ? `${id}-error` : undefined
   return (
     <fieldset className="location-selects">
       <legend>Localidade</legend>
@@ -50,14 +67,21 @@ export function LocationSelects({
             id={`${id}-state`}
             required={required}
             value={state}
-            onChange={(e) => {
-              setError('')
-              onChange(e.target.value, '')
-            }}
-            aria-describedby={error ? `${id}-error` : undefined}
+            disabled={states.status !== 'ready' || !states.items.length}
+            aria-busy={states.status === 'loading'}
+            aria-describedby={errorId}
+            onChange={(e) => onChange(e.target.value, '')}
           >
-            <option value="">{states.length ? 'Selecione o estado' : 'Carregando estados…'}</option>
-            {states.map((item) => (
+            <option value="">
+              {states.status === 'loading'
+                ? 'Carregando estados…'
+                : states.status === 'error'
+                  ? 'Estados indisponíveis'
+                  : !states.items.length
+                    ? 'Nenhum estado disponível'
+                    : 'Selecione o estado'}
+            </option>
+            {states.items.map((item) => (
               <option key={item.id} value={item.sigla}>
                 {item.nome} ({item.sigla})
               </option>
@@ -70,15 +94,21 @@ export function LocationSelects({
             id={`${id}-city`}
             required={required}
             value={city}
-            disabled={!state || !items.length}
+            disabled={!state || cityLoading || !items.length}
+            aria-busy={cityLoading}
+            aria-describedby={errorId}
             onChange={(e) => onChange(state, e.target.value)}
           >
             <option value="">
               {!state
                 ? 'Escolha primeiro o estado'
-                : !items.length
+                : cityLoading
                   ? 'Carregando municípios…'
-                  : 'Selecione o município'}
+                  : current?.status === 'error'
+                    ? 'Municípios indisponíveis'
+                    : !items.length
+                      ? 'Nenhum município disponível'
+                      : 'Selecione o município'}
             </option>
             {items.map((item) => (
               <option key={item.id} value={item.nome}>
@@ -95,7 +125,7 @@ export function LocationSelects({
             type="button"
             className="text-button"
             onClick={() => {
-              setError('')
+              if (states.status === 'error') setStates({ items: [], status: 'loading' })
               setAttempt((v) => v + 1)
             }}
           >
