@@ -6,7 +6,7 @@ Aplicativo Flutter/Dart para Android e iOS, com Poppins, cores magenta e petról
 
 Instale o Flutter e os SDKs da plataforma. Execute flutter pub get, flutter analyze e flutter test. Use flutter run --dart-define=API_URL=https://seu-dominio/api com o endereço do ambiente autorizado. Em modo release, o cliente recusa API sem HTTPS. O endereço acima é apenas a forma de configuração; nenhum domínio foi provisionado por este projeto.
 
-O token permanece no armazenamento seguro do sistema operacional. A conclusão da apresentação inicial é uma preferência booleana por usuário, gravada apenas na última etapa. O GPS usa geolocator somente após acionamento e permissão, com uma captura pontual e limite de 15 segundos, sem acompanhamento contínuo. A posição fica somente na memória da tela. Estado e município pelo IBGE continuam disponíveis sem GPS. Consulte o [fluxo de geolocalização e roteiro de validação](../docs/geolocalizacao.md).
+O token permanece no armazenamento seguro do sistema operacional. A conclusão da apresentação inicial é gravada no servidor por conta, somente após a última etapa. Uma falha de gravação mantém o bloqueio e oferece nova tentativa; limpar os dados locais não redefine a conclusão no banco. O GPS usa geolocator somente após acionamento e permissão, com uma captura pontual e limite de 15 segundos, sem acompanhamento contínuo. A posição fica somente na memória da tela. Estado e município pelo IBGE continuam disponíveis sem GPS. Consulte o [fluxo de geolocalização e roteiro de validação](../docs/geolocalizacao.md).
 
 ## Escopo implementado
 

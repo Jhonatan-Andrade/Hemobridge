@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hemobridge/core/api_client.dart';
 import 'package:hemobridge/core/app_theme.dart';
 import 'package:hemobridge/core/session_controller.dart';
@@ -19,9 +18,22 @@ void main() {
   testWidgets('primeiro acesso só persiste a conclusão após a última etapa', (
     tester,
   ) async {
-    SharedPreferences.setMockInitialValues({});
-    final session = SessionController(ApiClient())
-      ..user = {'id': 'user-test', 'perfil': 'PACIENTE'};
+    var completions = 0;
+    final session = SessionController(
+      ApiClient(
+        baseUrl: 'https://api.example.invalid',
+        client: MockClient((request) async {
+          if (request.url.path.endsWith('/tour/conclusao')) {
+            completions++;
+            return http.Response(
+              '{"isFirstAccess":false,"tourVersion":1}',
+              200,
+            );
+          }
+          return http.Response('[]', 200);
+        }),
+      ),
+    )..user = {'id': 'user-test', 'perfil': 'PACIENTE', 'tourVersion': 1};
     await tester.pumpWidget(
       MaterialApp(
         theme: hemobridgeTheme(),
@@ -30,12 +42,7 @@ void main() {
     );
     expect(find.text('Etapa 1 de 4'), findsOneWidget);
     expect(find.text('Pular'), findsNothing);
-    expect(
-      (await SharedPreferences.getInstance()).getBool(
-        'isFirstAccess.user-test',
-      ),
-      isNull,
-    );
+    expect(completions, 0);
     for (var i = 0; i < 3; i++) {
       await tester.ensureVisible(find.text('Continuar'));
       await tester.tap(find.text('Continuar'));
@@ -45,12 +52,7 @@ void main() {
     await tester.tap(find.text('Concluir e acessar'));
     await tester.pumpAndSettle();
     expect(session.isFirstAccess, isFalse);
-    expect(
-      (await SharedPreferences.getInstance()).getBool(
-        'isFirstAccess.user-test',
-      ),
-      isFalse,
-    );
+    expect(completions, 1);
     expect(tester.takeException(), isNull);
     session.dispose();
   });
@@ -83,7 +85,6 @@ void main() {
   testWidgets('Voltar e tocar fora não encerram o tour obrigatório', (
     tester,
   ) async {
-    SharedPreferences.setMockInitialValues({});
     final session = SessionController(ApiClient())
       ..user = {'id': 'obrigatorio', 'perfil': 'MEDICO'};
     addTearDown(session.dispose);
@@ -115,27 +116,21 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(Dialog), findsOneWidget);
     expect(session.isFirstAccess, isTrue);
-    expect(
-      (await SharedPreferences.getInstance()).getBool(
-        'isFirstAccess.obrigatorio',
-      ),
-      isNull,
-    );
+    expect(session.isFirstAccess, isTrue);
     await tester.pumpWidget(const SizedBox());
-    expect(
-      (await SharedPreferences.getInstance()).getBool(
-        'isFirstAccess.obrigatorio',
-      ),
-      isNull,
-    );
+    expect(session.isFirstAccess, isTrue);
   });
 
   testWidgets('rever o tour pode ser fechado sem mudar a preferência', (
     tester,
   ) async {
-    SharedPreferences.setMockInitialValues({'isFirstAccess.revisao': false});
     final session = SessionController(ApiClient())
-      ..user = {'id': 'revisao', 'perfil': 'REPRESENTANTE'};
+      ..user = {
+        'id': 'revisao',
+        'perfil': 'REPRESENTANTE',
+        'isFirstAccess': false,
+      }
+      ..isFirstAccess = false;
     addTearDown(session.dispose);
     await tester.pumpWidget(
       MaterialApp(
@@ -163,10 +158,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(Dialog), findsNothing);
     expect(find.text('Ver tour'), findsOneWidget);
-    expect(
-      (await SharedPreferences.getInstance()).getBool('isFirstAccess.revisao'),
-      isFalse,
-    );
+    expect(session.isFirstAccess, isFalse);
   });
 
   testWidgets('prazos da API aparecem nas três fases sem bloquear a orientação', (

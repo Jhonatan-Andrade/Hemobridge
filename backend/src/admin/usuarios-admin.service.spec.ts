@@ -1,21 +1,40 @@
-import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 import { SenhaProvisoriaService } from '../contas/senha-provisoria.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { UsuariosAdminService } from './usuarios-admin.service.js';
 
 function montar(status: string | null = 'ATIVO') {
   const prisma = {
+    $transaction: vi.fn(),
+    consulta: { updateManyAndReturn: vi.fn().mockResolvedValue([]) },
     usuario: {
       findUnique: vi.fn().mockResolvedValue(status ? { status } : null),
       findFirst: vi.fn().mockResolvedValue(null),
       findMany: vi.fn().mockResolvedValue([]),
       count: vi.fn().mockResolvedValue(0),
       update: vi.fn().mockResolvedValue({}),
-      create: vi.fn().mockResolvedValue({ id: 'a2', nome: 'Novo', email: 'novo@h.com', perfil: 'ADMINISTRADOR' }),
+      create: vi
+        .fn()
+        .mockResolvedValue({
+          id: 'a2',
+          nome: 'Novo',
+          email: 'novo@h.com',
+          perfil: 'ADMINISTRADOR',
+        }),
     },
   };
+  prisma.$transaction.mockImplementation((fn) => fn(prisma));
   const senhaProvisoria = {
-    gerar: vi.fn().mockResolvedValue({ senha: 'Prov1234abcd', dados: { senhaHash: 'h', senhaProvisoria: true } }),
+    gerar: vi
+      .fn()
+      .mockResolvedValue({
+        senha: 'Prov1234abcd',
+        dados: { senhaHash: 'h', senhaProvisoria: true },
+      }),
     enviar: vi.fn().mockResolvedValue(true),
   };
   const service = new UsuariosAdminService(
@@ -30,34 +49,73 @@ describe('UsuariosAdminService', () => {
     const { service, prisma } = montar();
     prisma.usuario.findMany.mockResolvedValue([
       {
-        id: 'p1', nome: 'Maria', email: 'm@x.com', cpf: '52998224725', perfil: 'PACIENTE', status: 'ATIVO',
-        senhaProvisoria: false, criadoEm: new Date(), paciente: { situacao: 'APROVADO' }, medico: null, representante: null,
+        id: 'p1',
+        nome: 'Maria',
+        email: 'm@x.com',
+        cpf: '52998224725',
+        perfil: 'PACIENTE',
+        status: 'ATIVO',
+        senhaProvisoria: false,
+        criadoEm: new Date(),
+        paciente: { situacao: 'APROVADO' },
+        medico: null,
+        representante: null,
       },
       {
-        id: 'm1', nome: 'Dr. João', email: 'j@h.com', cpf: '11144477735', perfil: 'MEDICO', status: 'ATIVO',
-        senhaProvisoria: true, criadoEm: new Date(), paciente: null, medico: { hospital: { nome: 'Hospital X' } }, representante: null,
+        id: 'm1',
+        nome: 'Dr. João',
+        email: 'j@h.com',
+        cpf: '11144477735',
+        perfil: 'MEDICO',
+        status: 'ATIVO',
+        senhaProvisoria: true,
+        criadoEm: new Date(),
+        paciente: null,
+        medico: { hospital: { nome: 'Hospital X' } },
+        representante: null,
       },
     ]);
     prisma.usuario.count.mockResolvedValue(2);
 
-    const r = await service.listar({ busca: '529.982', pagina: 1, tamanhoPagina: 20 });
+    const r = await service.listar({
+      busca: '529.982',
+      pagina: 1,
+      tamanhoPagina: 20,
+    });
 
     expect(r.itens).toMatchObject([
-      { cpf: '***.982.247-**', papel: 'DOADOR', hospital: null, primeiroAcessoPendente: false },
-      { cpf: '***.444.777-**', papel: 'MEDICO', hospital: 'Hospital X', primeiroAcessoPendente: true },
+      {
+        cpf: '***.982.247-**',
+        papel: 'DOADOR',
+        hospital: null,
+        primeiroAcessoPendente: false,
+      },
+      {
+        cpf: '***.444.777-**',
+        papel: 'MEDICO',
+        hospital: 'Hospital X',
+        primeiroAcessoPendente: true,
+      },
     ]);
-    expect(prisma.usuario.findMany.mock.calls[0][0].where.OR).toContainEqual({ cpf: { contains: '529982' } });
+    expect(prisma.usuario.findMany.mock.calls[0][0].where.OR).toContainEqual({
+      cpf: { contains: '529982' },
+    });
   });
 
   it('impede o administrador de desativar a própria conta (FE02)', async () => {
     const { service, prisma } = montar();
-    await expect(service.desativar('a1', 'a1')).rejects.toThrow(/própria conta/);
+    await expect(service.desativar('a1', 'a1')).rejects.toThrow(
+      /própria conta/,
+    );
     expect(prisma.usuario.update).not.toHaveBeenCalled();
   });
 
   it('desativa outra conta e encerra as sessões', async () => {
     const { service, prisma } = montar();
-    await expect(service.desativar('u1', 'a1')).resolves.toEqual({ id: 'u1', status: 'INATIVO' });
+    await expect(service.desativar('u1', 'a1')).resolves.toEqual({
+      id: 'u1',
+      status: 'INATIVO',
+    });
     expect(prisma.usuario.update).toHaveBeenCalledWith({
       where: { id: 'u1' },
       data: { status: 'INATIVO', versaoSessao: { increment: 1 } },
@@ -80,13 +138,19 @@ describe('UsuariosAdminService', () => {
   it('recusa e-mail que já pertence a outro usuário', async () => {
     const { service, prisma } = montar();
     prisma.usuario.findFirst.mockResolvedValue({ id: 'outro' });
-    await expect(service.atualizar('u1', { email: 'usado@x.com' })).rejects.toBeInstanceOf(ConflictException);
+    await expect(
+      service.atualizar('u1', { email: 'usado@x.com' }),
+    ).rejects.toBeInstanceOf(ConflictException);
   });
 
   it('cria administrador com senha provisória (FA01)', async () => {
     const { service, prisma, senhaProvisoria } = montar();
 
-    const r = await service.criarAdministrador({ nome: 'Novo', cpf: '11144477735', email: 'novo@h.com' });
+    const r = await service.criarAdministrador({
+      nome: 'Novo',
+      cpf: '11144477735',
+      email: 'novo@h.com',
+    });
 
     expect(prisma.usuario.create.mock.calls[0][0].data).toMatchObject({
       perfil: 'ADMINISTRADOR',

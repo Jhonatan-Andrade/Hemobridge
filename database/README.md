@@ -15,6 +15,9 @@ Para atualizar um ambiente existente, execute `prisma migrate deploy` com identi
 | Comunidade | Publicações por assunto, comentários, reações únicas por usuário, denúncias e situação de moderação |
 | Avisos críticos | Apenas representante ativo de instituição verificada; expiração de até sete dias; fixação calculada no servidor |
 | Prazos | Estimativas de etapas por instituição, duração em minutos, fonte e atualização |
+| Apresentação inicial | Flag booleana por conta, versão e instante de conclusão; validação pela sessão autenticada |
+| Entrega de avisos | Evento crítico na transação do estoque, processamento coordenado pelo PostgreSQL, reserva de e-mail com prazo e tentativas limitadas |
+| Encerramento | Decisão administrativa fundamentada, revogação, cancelamentos e identificação cifrada quando necessária à retenção |
 
 Necessidade qualitativa e quantidade de bolsas são informações diferentes. O mapa administrativo considera declarações recentes de instituições verificadas, com janela de 24 horas. Ausência de informação não significa estoque adequado. A aplicação não infere escassez nacional a partir de endereços ou de uma instituição isolada.
 

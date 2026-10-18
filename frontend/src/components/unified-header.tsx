@@ -32,6 +32,7 @@ const professionalSections: Record<ProfessionalRole, NavigationItem[]> = {
   administrator: [
     { to: 'professional/admin', label: 'Mapa regional', icon: 'map' },
     { to: 'professional/moderation', label: 'Moderação', icon: 'community' },
+    { to: 'professional/privacy', label: 'Privacidade', icon: 'profile' },
   ],
 }
 
@@ -180,6 +181,18 @@ export function UnifiedHeader({
           <div className="hb-unified-rail-group hb-unified-rail-more">
             <p className="hb-unified-rail-group-title">Mais opções</p>
             <nav className="hb-unified-rail-nav" aria-label="Mais opções">
+              {identity !== 'visitor' && (
+                <RouteLink
+                  to="notifications"
+                  navigate={navigate}
+                  aria-label="Notificações"
+                  aria-current={route === 'notifications' ? 'page' : undefined}
+                  onClick={followRoute}
+                >
+                  <Icon name="activity" />
+                  <span className="hb-unified-rail-label">Notificações</span>
+                </RouteLink>
+              )}
               <RouteLink
                 to="accessibility"
                 navigate={navigate}
@@ -319,6 +332,17 @@ export function UnifiedHeader({
           )}
           <p className="hb-unified-menu-group-title">Mais opções</p>
           <div className="hb-unified-menu-links">
+            {identity !== 'visitor' && (
+              <RouteLink
+                to="notifications"
+                navigate={navigate}
+                aria-current={route === 'notifications' ? 'page' : undefined}
+                onClick={followRoute}
+              >
+                <Icon name="activity" />
+                <span>Notificações</span>
+              </RouteLink>
+            )}
             {identity === 'visitor' && (
               <RouteLink
                 to="register"

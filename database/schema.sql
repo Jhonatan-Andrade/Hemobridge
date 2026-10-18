@@ -1088,4 +1088,99 @@ END;$$;
 CREATE TRIGGER bolsa_validar_transicao BEFORE INSERT OR UPDATE ON bolsa_sangue FOR EACH ROW EXECUTE FUNCTION validar_transicao_bolsa();
 CREATE INDEX publicacao_avisos_ativos_idx ON publicacao(criado_em DESC,id DESC) WHERE tipo='AVISO_CRITICO' AND status='PUBLICADO';
 
+
+ALTER TABLE usuario
+ ADD COLUMN is_first_access boolean NOT NULL DEFAULT true,
+ ADD COLUMN tour_versao integer NOT NULL DEFAULT 0,
+ ADD COLUMN tour_concluido_em timestamptz(3),
+ ADD CONSTRAINT usuario_tour_conclusao_chk CHECK (is_first_access OR (tour_versao > 0 AND tour_concluido_em IS NOT NULL));
+
+ALTER TABLE notificacao
+ ADD COLUMN email_reserva_token uuid,
+ ADD COLUMN email_reservado_ate timestamptz(3),
+ ADD COLUMN email_proxima_tentativa_em timestamptz(3) NOT NULL DEFAULT now();
+CREATE INDEX notificacao_fila_email_idx ON notificacao(email_proxima_tentativa_em)
+ WHERE email_solicitado AND email_enviado_em IS NULL;
+
+CREATE TABLE evento_necessidade_critica (
+ id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+ hospital_id uuid NOT NULL REFERENCES hospital(id) ON DELETE RESTRICT,
+ tipos text[] NOT NULL CHECK (cardinality(tipos) BETWEEN 1 AND 8),
+ criado_em timestamptz(3) NOT NULL DEFAULT now(),
+ processado_em timestamptz(3)
+);
+CREATE INDEX evento_necessidade_critica_processado_em_criado_em_idx ON evento_necessidade_critica(processado_em,criado_em);
+
+CREATE TABLE identidade_retida (
+ usuario_id uuid PRIMARY KEY REFERENCES usuario(id) ON DELETE RESTRICT,
+ conteudo bytea NOT NULL,
+ finalidade varchar(500) NOT NULL CHECK (length(trim(finalidade)) >= 20),
+ reavaliar_em timestamptz(3) NOT NULL,
+ criado_em timestamptz(3) NOT NULL DEFAULT now()
+);
+
+-- A gravação de um novo agendamento coordena-se com desativações de contas,
+-- instituições e vínculos. O lock dura até o commit, inclusive entre réplicas.
+CREATE FUNCTION consulta_validar_acesso_ativo() RETURNS trigger LANGUAGE plpgsql AS $$
+DECLARE v_hospital uuid; v_ativo boolean; v_status status_usuario;
+BEGIN
+ IF NEW.status <> 'AGENDADA' THEN RETURN NEW; END IF;
+ SELECT COALESCE(d.hospital_id,m.hospital_id) INTO v_hospital
+ FROM disponibilidade_medico d JOIN medico m ON m.usuario_id=d.medico_id
+ WHERE d.id=NEW.disponibilidade_id;
+ SELECT ativo INTO v_ativo FROM hospital WHERE id=v_hospital FOR SHARE;
+ IF NOT COALESCE(v_ativo,false) THEN RAISE EXCEPTION 'Instituição indisponível' USING ERRCODE='23514'; END IF;
+ PERFORM id FROM usuario WHERE id IN (NEW.paciente_id,NEW.medico_id) ORDER BY id FOR SHARE;
+ IF EXISTS (SELECT 1 FROM usuario WHERE id IN (NEW.paciente_id,NEW.medico_id) AND status<>'ATIVO') THEN
+   RAISE EXCEPTION 'Conta indisponível' USING ERRCODE='23514';
+ END IF;
+ PERFORM usuario_id FROM medico WHERE usuario_id=NEW.medico_id FOR SHARE;
+ IF EXISTS (SELECT 1 FROM medico_hospital WHERE medico_id=NEW.medico_id) AND NOT EXISTS
+   (SELECT 1 FROM medico_hospital WHERE medico_id=NEW.medico_id AND hospital_id=v_hospital AND ativo) THEN
+   RAISE EXCEPTION 'Vínculo indisponível' USING ERRCODE='23514';
+ END IF;
+ RETURN NEW;
+END; $$;
+CREATE TRIGGER consulta_validar_acesso_ativo BEFORE INSERT OR UPDATE OF status,disponibilidade_id ON consulta
+ FOR EACH ROW EXECUTE FUNCTION consulta_validar_acesso_ativo();
+
+
+-- Vínculos explícitos prevalecem sobre o hospital legado do médico.
+CREATE OR REPLACE FUNCTION validar_vinculo_horario() RETURNS trigger LANGUAGE plpgsql AS $$
+DECLARE v_principal uuid; v_ativo boolean;
+BEGIN
+ SELECT hospital_id INTO v_principal FROM medico WHERE usuario_id=NEW.medico_id FOR SHARE;
+ IF NEW.hospital_id IS NULL THEN NEW.hospital_id:=v_principal; END IF;
+ SELECT ativo INTO v_ativo FROM hospital WHERE id=NEW.hospital_id FOR SHARE;
+ IF NOT COALESCE(v_ativo,false) OR
+   (EXISTS(SELECT 1 FROM medico_hospital WHERE medico_id=NEW.medico_id) AND NOT EXISTS
+     (SELECT 1 FROM medico_hospital WHERE medico_id=NEW.medico_id AND hospital_id=NEW.hospital_id AND ativo)) OR
+   (NOT EXISTS(SELECT 1 FROM medico_hospital WHERE medico_id=NEW.medico_id) AND NEW.hospital_id<>v_principal) THEN
+   RAISE EXCEPTION 'Horário exige vínculo médico ativo com a instituição' USING ERRCODE='23514';
+ END IF;
+ RETURN NEW;
+END; $$;
+
+ALTER TABLE evento_necessidade_critica DROP CONSTRAINT evento_necessidade_critica_hospital_id_fkey;
+ALTER TABLE evento_necessidade_critica ADD CONSTRAINT evento_necessidade_critica_hospital_id_fkey
+ FOREIGN KEY(hospital_id) REFERENCES hospital(id) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE identidade_retida DROP CONSTRAINT identidade_retida_usuario_id_fkey;
+ALTER TABLE identidade_retida ADD CONSTRAINT identidade_retida_usuario_id_fkey
+ FOREIGN KEY(usuario_id) REFERENCES usuario(id) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+
+-- O encerramento não pode ser desfeito por uma ativação concorrente ou por um
+-- fluxo administrativo antigo. A revisão de retenção não reabre a conta.
+CREATE FUNCTION usuario_proteger_encerramento() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+ IF OLD.status='ENCERRADO' AND (
+   NEW.status<>'ENCERRADO' OR NEW.nome IS DISTINCT FROM OLD.nome OR
+   NEW.email IS DISTINCT FROM OLD.email OR NEW.cpf IS DISTINCT FROM OLD.cpf OR
+   NEW.telefone IS DISTINCT FROM OLD.telefone OR NEW.senha_hash IS DISTINCT FROM OLD.senha_hash
+ ) THEN RAISE EXCEPTION 'Conta encerrada não pode ser reativada nem ter identidade restaurada' USING ERRCODE='23514'; END IF;
+ RETURN NEW;
+END; $$;
+CREATE TRIGGER usuario_proteger_encerramento BEFORE UPDATE ON usuario
+ FOR EACH ROW EXECUTE FUNCTION usuario_proteger_encerramento();
+
 COMMIT;

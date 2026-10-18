@@ -18,6 +18,8 @@ export interface SessionUser {
   perfil: UserRole
   papel: UserRole | 'DOADOR'
   senhaProvisoria: boolean
+  isFirstAccess?: boolean
+  tourVersion?: number
 }
 export interface UserProfile {
   name: string

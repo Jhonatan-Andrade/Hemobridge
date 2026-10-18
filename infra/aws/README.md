@@ -74,3 +74,13 @@ Meta inicial de operação: RPO de 24 horas e RTO de 4 horas, sujeitos à valida
 Antes da publicação, registrar: responsável jurídico e canal de privacidade reais; domínio e certificados; conta/região AWS; segredos próprios; restauração aprovada; teste de carga concorrente; validação dos fluxos clínicos e revisão do código. No iOS são necessários macOS/Xcode, assinatura e conta de distribuição. No Android, a chave de assinatura fica fora do repositório. Nenhuma destas credenciais acompanha o pacote de código.
 
 A API também exige LEGAL_ENTITY_NAME e PRIVACY_CONTACT no ambiente de produção. Esses valores devem coincidir com a identificação publicada no site e no aplicativo. O controle de requisições na borda deve ser compartilhado pelo WAF; o limite em memória da API funciona por tarefa e não substitui esse controle ao escalar horizontalmente.
+
+## Processamento durável e concorrência
+
+O evento de necessidade crítica é gravado na mesma transação que muda o nível de estoque. As tarefas da API recuperam eventos pendentes na inicialização e periodicamente. `FOR UPDATE SKIP LOCKED` coordena eventos e um advisory lock transacional por instituição protege a janela móvel de sete dias da RN20 entre tarefas Fargate. O registro das notificações e a conclusão do evento são atômicos. Uma necessidade que deixou de ser crítica não gera alerta atrasado.
+
+E-mails possuem reserva condicional no PostgreSQL, token de processamento, prazo de cinco minutos, incremento de tentativa antes do envio e espera crescente entre falhas. A busca inclui mensagens nunca tentadas e reservas expiradas; limita-se a cinco tentativas. Configure `NOTIFICACOES_REENVIO_MINUTOS` com valor positivo na operação. Monitore eventos antigos sem processamento, reservas expiradas e mensagens que atingiram o limite; uma falha permanente exige análise e reprocessamento autorizado.
+
+Essa coordenação evita envios simultâneos, mas SMTP não garante entrega exatamente uma vez: se o provedor aceitar a mensagem e a tarefa parar antes da confirmação no banco, uma repetição posterior pode entregar cópia. E-mails usam assunto e texto genéricos, sem tipo sanguíneo, resultado de exame, mensagem clínica ou link com identificador de prontuário. Detalhes exigem autenticação na plataforma.
+
+O tour é consultado por conta no RDS e não depende da memória de uma tarefa nem do armazenamento do navegador. Migrações devem preceder a nova imagem. Faça backup e restauração de ensaio; as novas tabelas guardam também a identificação cifrada necessária ao encerramento com retenção. Consulte [encerramento e retenção](../../docs/encerramento-e-retencao.md). Não habilite descarte de objetos ou bancos como consequência automática de um pedido de encerramento.

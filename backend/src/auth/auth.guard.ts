@@ -22,6 +22,7 @@ import {
   type RequestAutenticada,
 } from './decorators.js';
 import { assertCookieOrigin, readSessionCookie } from './web-session.js';
+import { TOUR_VERSION } from './onboarding.service.js';
 
 /**
  * Guard global: toda rota exige token, salvo as marcadas com @Publico().
@@ -62,6 +63,8 @@ export class AuthGuard implements CanActivate {
         status: true,
         senhaProvisoria: true,
         versaoSessao: true,
+        isFirstAccess: true,
+        tourVersao: true,
         paciente: { select: { situacao: true } },
         ...SELECAO_INSTITUICAO,
       },
@@ -104,6 +107,9 @@ export class AuthGuard implements CanActivate {
       perfil: usuario.perfil,
       papel: papelDe(usuario.perfil, usuario.paciente?.situacao),
       senhaProvisoria: usuario.senhaProvisoria,
+      isFirstAccess:
+        usuario.isFirstAccess !== false || usuario.tourVersao < TOUR_VERSION,
+      tourVersion: TOUR_VERSION,
     };
     return true;
   }

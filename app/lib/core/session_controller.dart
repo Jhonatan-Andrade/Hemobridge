@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'api_client.dart';
 
 class SessionController extends ChangeNotifier {
@@ -15,7 +14,7 @@ class SessionController extends ChangeNotifier {
       api.token = await storage.read(key: 'sessionToken');
       if (api.token != null) {
         user = Map<String, dynamic>.from(await api.request('/auth/me'));
-        await _readFirstAccess();
+        _readFirstAccess();
       }
     } on ApiException catch (e) {
       if (e.status == 401) {
@@ -41,7 +40,7 @@ class SessionController extends ChangeNotifier {
     await storage.write(key: 'sessionToken', value: api.token);
     user = Map<String, dynamic>.from(await api.request('/auth/me'));
     error = null;
-    await _readFirstAccess();
+    _readFirstAccess();
     notifyListeners();
   }
 
@@ -63,20 +62,32 @@ class SessionController extends ChangeNotifier {
     api.token = result['accessToken'];
     await storage.write(key: 'sessionToken', value: api.token);
     user = Map<String, dynamic>.from(await api.request('/auth/me'));
+    _readFirstAccess();
     notifyListeners();
   }
 
-  Future<void> _readFirstAccess() async {
-    final prefs = await SharedPreferences.getInstance();
-    isFirstAccess = prefs.getBool('isFirstAccess.${user!['id']}') ?? true;
+  void _readFirstAccess() {
+    isFirstAccess = user?['isFirstAccess'] != false;
   }
 
   Future<void> completeTour() async {
     final userId = user?['id'];
     if (userId is! String) throw StateError('Sessão indisponível.');
-    final prefs = await SharedPreferences.getInstance();
-    final saved = await prefs.setBool('isFirstAccess.$userId', false);
-    if (!saved) throw StateError('Não foi possível salvar a conclusão.');
+    final result = await api.request(
+      '/auth/tour/conclusao',
+      method: 'POST',
+      body: {'versao': user?['tourVersion']},
+    );
+    if (result['isFirstAccess'] != false) {
+      throw StateError(
+        'Não foi possível confirmar a conclusão. Tente novamente.',
+      );
+    }
+    user = {
+      ...user!,
+      'isFirstAccess': false,
+      'tourVersion': result['tourVersion'],
+    };
     isFirstAccess = false;
     notifyListeners();
   }

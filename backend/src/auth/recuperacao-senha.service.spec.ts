@@ -4,7 +4,10 @@ import { hashToken } from '../common/token.js';
 import { EmailService } from '../email/email.service.js';
 import { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { MENSAGEM_SOLICITACAO, RecuperacaoSenhaService } from './recuperacao-senha.service.js';
+import {
+  MENSAGEM_SOLICITACAO,
+  RecuperacaoSenhaService,
+} from './recuperacao-senha.service.js';
 
 const AGORA = new Date('2026-10-03T12:00:00Z');
 
@@ -55,7 +58,9 @@ describe('RecuperacaoSenhaService', () => {
       const mensagem = email.enviar.mock.calls[0][0];
       expect(mensagem.para).toBe('maria@email.com');
       const token = decodeURIComponent(
-        /http:\/\/front\.test\/redefinir-senha\?token=([^\s"]+)/.exec(mensagem.texto)![1],
+        /http:\/\/front\.test\/#reset\?token=([^\s"]+)/.exec(
+          mensagem.texto,
+        )![1],
       );
       expect(token).toHaveLength(43);
       expect(data.senhaResetTokenHash).toBe(hashToken(token));
@@ -67,28 +72,37 @@ describe('RecuperacaoSenhaService', () => {
       ['conta desativada', usuarioAtivo({ status: 'INATIVO' })],
       ['conta encerrada', usuarioAtivo({ status: 'ENCERRADO' })],
       ['conta com senha provisória', usuarioAtivo({ senhaProvisoria: true })],
-    ])('não envia nada para %s, mas responde a mesma mensagem', async (_, usuario) => {
-      const { service, prisma, email } = montar(usuario);
+    ])(
+      'não envia nada para %s, mas responde a mesma mensagem',
+      async (_, usuario) => {
+        const { service, prisma, email } = montar(usuario);
 
-      expect(await service.solicitar({ email: 'x@email.com' })).toEqual({
-        mensagem: MENSAGEM_SOLICITACAO,
-      });
-      expect(prisma.usuario.update).not.toHaveBeenCalled();
-      expect(email.enviar).not.toHaveBeenCalled();
-    });
+        expect(await service.solicitar({ email: 'x@email.com' })).toEqual({
+          mensagem: MENSAGEM_SOLICITACAO,
+        });
+        expect(prisma.usuario.update).not.toHaveBeenCalled();
+        expect(email.enviar).not.toHaveBeenCalled();
+      },
+    );
 
     it('não falha a requisição se o envio do e-mail falhar', async () => {
       const { service, email } = montar(usuarioAtivo());
       email.enviar.mockRejectedValue(new Error('SMTP fora do ar'));
 
-      await expect(service.solicitar({ email: 'maria@email.com' })).resolves.toEqual({
+      await expect(
+        service.solicitar({ email: 'maria@email.com' }),
+      ).resolves.toEqual({
         mensagem: MENSAGEM_SOLICITACAO,
       });
     });
   });
 
   describe('redefinir', () => {
-    const dto = { token: 'token-recebido', novaSenha: 'NovaSenha9', confirmacaoSenha: 'NovaSenha9' };
+    const dto = {
+      token: 'token-recebido',
+      novaSenha: 'NovaSenha9',
+      confirmacaoSenha: 'NovaSenha9',
+    };
     const comLink = (expiraEm: string | null, status = 'ATIVO') => ({
       id: 'u1',
       status,
@@ -103,10 +117,15 @@ describe('RecuperacaoSenhaService', () => {
       });
 
       expect(prisma.usuario.findUnique).toHaveBeenCalledWith(
-        expect.objectContaining({ where: { senhaResetTokenHash: hashToken('token-recebido') } }),
+        expect.objectContaining({
+          where: { senhaResetTokenHash: hashToken('token-recebido') },
+        }),
       );
       const { where, data } = prisma.usuario.update.mock.calls[0][0];
-      expect(where).toEqual({ id: 'u1', senhaResetTokenHash: hashToken('token-recebido') });
+      expect(where).toEqual({
+        id: 'u1',
+        senhaResetTokenHash: hashToken('token-recebido'),
+      });
       expect(data).toMatchObject({
         senhaResetTokenHash: null,
         senhaResetExpiraEm: null,
@@ -132,10 +151,15 @@ describe('RecuperacaoSenhaService', () => {
     it('recusa o segundo uso concorrente do mesmo link', async () => {
       const { service, prisma } = montar(comLink('2026-10-03T12:10:00Z'));
       prisma.usuario.update.mockRejectedValue(
-        new Prisma.PrismaClientKnownRequestError('not found', { code: 'P2025', clientVersion: 'x' }),
+        new Prisma.PrismaClientKnownRequestError('not found', {
+          code: 'P2025',
+          clientVersion: 'x',
+        }),
       );
 
-      await expect(service.redefinir(dto)).rejects.toBeInstanceOf(BadRequestException);
+      await expect(service.redefinir(dto)).rejects.toBeInstanceOf(
+        BadRequestException,
+      );
     });
   });
 });

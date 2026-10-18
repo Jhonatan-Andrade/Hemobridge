@@ -16,7 +16,7 @@ Publicações, nome de exibição, papel profissional e comentários são visív
 
 Estado e município são selecionados a partir do catálogo do IBGE. A localização do dispositivo é opcional e só é solicitada após acionamento. O app encerra a captura ao sair da página. A busca externa é aberta no Google Maps após clique; o site também incorpora OpenStreetMap. Esses fornecedores podem receber dados técnicos e a região da busca conforme suas políticas. Permissão de GPS não substitui os requisitos da LGPD.
 
-O site usa cookie de sessão HttpOnly e preferências locais de leitura, acessibilidade e conclusão da apresentação inicial. O app usa armazenamento seguro para o token e preferências para a apresentação. Conteúdos da comunidade são persistidos no servidor. Quando ativado, o VLibras carrega recursos do domínio oficial. Não utilizamos dados de saúde para publicidade.
+O site usa cookie de sessão HttpOnly e preferências locais de leitura e acessibilidade. O app usa armazenamento seguro para o token. A conclusão da apresentação inicial é salva por conta no servidor, assim como os conteúdos da comunidade. Quando ativado, o VLibras carrega recursos do domínio oficial. Não utilizamos dados de saúde para publicidade.
 
 ## Acesso, proteção e guarda
 
@@ -27,5 +27,7 @@ O operador deve manter tabela de retenção por categoria e informar os forneced
 ## Direitos
 
 Pelo canal de privacidade é possível solicitar confirmação e acesso, correção, informações sobre compartilhamento, anonimização, bloqueio ou eliminação quando cabível, portabilidade conforme regulamentação, revogação de consentimento e revisão de decisão exclusivamente automatizada que afete interesses. A identidade do solicitante pode ser verificada de forma proporcional. Pedidos de exclusão são registrados e analisados diante das hipóteses legais de conservação. Também é possível peticionar à ANPD.
+
+O encerramento aprovado revoga as sessões, cancela os agendamentos futuros e retira os conteúdos públicos da conta. Contatos e credenciais são removidos ou inutilizados. Quando houver registros sujeitos a conservação, a identificação necessária à sua vinculação é protegida por cifra, com fundamentação e data de revisão da guarda. Isso é pseudonimização, não anonimização irreversível. Registros clínicos e auditoria não são apagados automaticamente ao encerrar a conta.
 
 O cadastro admite adolescentes de 16 e 17 anos conforme as condições do serviço. O tratamento deve observar seu melhor interesse, informação adequada à idade e autorização do responsável quando exigida para o ato clínico. Salvaguardas de idade e moderação devem estar operacionais antes da abertura pública a esse público.

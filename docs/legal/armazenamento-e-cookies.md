@@ -1,16 +1,17 @@
-# Armazenamento local e cookies — versão de avaliação
+# Armazenamento local e cookies
 
-**Inventário limitado ao código React inspecionado em 15/10/2026.** Antes de usar domínio público, verificar no navegador real os cabeçalhos, cookies, serviços de hospedagem e recursos externos. Este texto não deve afirmar que o site inteiro está livre de cookies.
+Inventário do código integrado, atualizado em 18/10/2026. Os cookies e serviços do domínio publicado devem ser conferidos no ambiente efetivo; este inventário não certifica tecnologias de terceiros.
 
 | Chave ou recurso | Tecnologia e finalidade | Duração observada no código | Escolha do usuário |
 | --- | --- | --- | --- |
-| `hemobridge.demo.fontScale` | `localStorage` próprio; memoriza tamanho de texto escolhido | Sem expiração programada; permanece até ser alterado ou removido pelo navegador | Controle de tamanho de texto na página de acessibilidade |
-| `hemobridge.demo.vlibrasAuto` | `localStorage` próprio; memoriza se o VLibras deve carregar automaticamente | Sem expiração programada; removido ao desativar a opção | Controle de VLibras na página de acessibilidade |
-| `hemobridge.demo.tourSeen.<perfil>` | `localStorage` próprio; evita reabrir o tour automaticamente para o perfil já visto | Sem expiração programada; pode ser apagado pelo navegador | O tour continua disponível para reabertura; não há controle de limpeza dessa chave na interface inspecionada |
+| `hemobridge.fontScale` | `localStorage`; memoriza o tamanho de texto escolhido | Permanece até alteração ou limpeza do navegador | Controle de tamanho de texto em Acessibilidade |
+| `hemobridge.vlibrasAuto` | `localStorage`; memoriza a ativação automática do VLibras | Removido ao desativar a opção ou limpar o navegador | Controle de VLibras em Acessibilidade |
+| `__Host-hb_session` | Cookie de autenticação HttpOnly, Secure e SameSite=Lax em produção; emitido pelo servidor | Validade do token configurada na API; padrão de 15 minutos | Criado ao entrar e removido ao sair; o logout também revoga as sessões no servidor |
+| `hb_session` | Nome do cookie de sessão utilizado somente no ambiente local | Mesma validade da sessão | Não é o nome usado na publicação HTTPS |
 | `https://vlibras.gov.br/app/vlibras-plugin.js` | Script externo do VLibras carregado quando ativado | Política de armazenamento do fornecedor externo não auditada nesta revisão | A opção de carregamento automático é configurável; verificar também eventual ativação manual do widget no ambiente final |
 
-Não foi encontrado uso de `document.cookie` nem serviço próprio de análise ou publicidade no frontend. Isso **não equivale** a auditoria de cookies do provedor de hospedagem, do navegador ou do VLibras. O protótipo usa a memória da página para dados de formulário, perfil e comentários simulados; o código próprio não os grava nas três chaves acima.
+O JavaScript não lê o cookie HttpOnly. O token do app permanece no armazenamento seguro do sistema operacional. A conclusão versionada do tour é salva no PostgreSQL por conta, não nas preferências do dispositivo. Dados de conta, conteúdo da comunidade e informações clínicas são persistidos pela API segundo sua finalidade e autorização; não são armazenados nas chaves de acessibilidade.
 
-**Texto curto para a interface:** “Guardamos no seu navegador as preferências de acessibilidade e a indicação de tour já visto. Se você ativar o VLibras, carregaremos um recurso externo. Conheça os detalhes e limpe essas preferências nas configurações do navegador.”
+**Texto curto para a interface:** “Usamos um cookie necessário para sua sessão e guardamos suas preferências de acessibilidade no navegador. Ao ativar o VLibras, carregamos um recurso externo. A conclusão da apresentação é salva na sua conta.”
 
-No serviço real, inventariar cada tecnologia não necessária, responsável, finalidade, duração e base legal. Se a escolha depender de consentimento, permitir aceitar e recusar em condições equivalentes, sem pré-seleção e com revisão posterior. Referência: [Guia Orientativo de Cookies da ANPD](https://www.gov.br/anpd/pt-br/centrais-de-conteudo/materiais-educativos-e-publicacoes/guia-orientativo-cookies-e-protecao-de-dados-pessoais.pdf).
+Antes de ativar tecnologias adicionais, registrar responsável, finalidade, duração e base legal. Quando dependerem de consentimento, permitir aceitar e recusar em condições equivalentes, sem pré-seleção e com revisão posterior. Referência: [Guia Orientativo de Cookies da ANPD](https://www.gov.br/anpd/pt-br/centrais-de-conteudo/materiais-educativos-e-publicacoes/guia-orientativo-cookies-e-protecao-de-dados-pessoais.pdf).

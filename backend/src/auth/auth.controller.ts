@@ -32,12 +32,15 @@ import {
 } from './dto/recuperacao-senha.dto.js';
 import { RecuperacaoSenhaService } from './recuperacao-senha.service.js';
 import { Auditar } from '../auditoria/auditar.decorator.js';
+import { OnboardingService } from './onboarding.service.js';
+import { ConcluirTourDto } from './dto/concluir-tour.dto.js';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly recuperacaoSenha: RecuperacaoSenhaService,
+    private readonly onboarding: OnboardingService,
   ) {}
 
   @Publico()
@@ -107,6 +110,16 @@ export class AuthController {
   @Get('me')
   me(@UsuarioAtual() usuario: UsuarioAutenticado) {
     return usuario;
+  }
+
+  @Post('tour/conclusao')
+  @HttpCode(HttpStatus.OK)
+  @Auditar({ acao: 'CONCLUIR_APRESENTACAO', entidade: 'usuario' })
+  concluirTour(
+    @UsuarioAtual() usuario: UsuarioAutenticado,
+    @Body() body: ConcluirTourDto,
+  ) {
+    return this.onboarding.concluir(usuario.id, body.versao);
   }
 
   // Contas de pacientes nunca recebem senha provisória (RN04/RN15).

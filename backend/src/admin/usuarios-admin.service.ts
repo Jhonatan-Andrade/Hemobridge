@@ -5,17 +5,29 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { papelDe } from '../auth/auth.types.js';
-import {mascararCpf, normalizarCpf } from '../common/cpf.js';
+import { cancelarConsultasFuturas } from '../consultas/cancelamento-operacional.js';
+import { mascararCpf, normalizarCpf } from '../common/cpf.js';
 import { SenhaProvisoriaService } from '../contas/senha-provisoria.service.js';
 import { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { AtualizarUsuarioDto, ListarUsuariosDto, NovoAdministradorDto } from './dto/usuario.dto.js';
-
+import {
+  AtualizarUsuarioDto,
+  ListarUsuariosDto,
+  NovoAdministradorDto,
+} from './dto/usuario.dto.js';
 
 const SELECAO_VINCULO = {
   paciente: { select: { situacao: true, cidade: true, estado: true } },
-  medico: { select: { crm: true, ufCrm: true, hospital: { select: { id: true, nome: true } } } },
-  representante: { select: { cargo: true, hospital: { select: { id: true, nome: true } } } },
+  medico: {
+    select: {
+      crm: true,
+      ufCrm: true,
+      hospital: { select: { id: true, nome: true } },
+    },
+  },
+  representante: {
+    select: { cargo: true, hospital: { select: { id: true, nome: true } } },
+  },
 } satisfies Prisma.UsuarioSelect;
 
 // UC26 – Gerenciar Usuários. Listagens administrativas não expõem dados clínicos.
@@ -26,7 +38,13 @@ export class UsuariosAdminService {
     private readonly senhaProvisoria: SenhaProvisoriaService,
   ) {}
 
-  async listar({ perfil, status, busca, pagina, tamanhoPagina }: ListarUsuariosDto) {
+  async listar({
+    perfil,
+    status,
+    busca,
+    pagina,
+    tamanhoPagina,
+  }: ListarUsuariosDto) {
     const cpf = busca ? normalizarCpf(busca) : '';
     const where: Prisma.UsuarioWhereInput = {
       perfil,
@@ -110,8 +128,15 @@ export class UsuariosAdminService {
       primeiroAcessoPendente: senhaProvisoria,
       // Situação do processo e localidade; peso, exames e tipagem não são exibidos (RNF02).
       paciente,
-      medico: medico && { crm: medico.crm, ufCrm: medico.ufCrm, hospital: medico.hospital },
-      representante: representante && { cargo: representante.cargo, hospital: representante.hospital },
+      medico: medico && {
+        crm: medico.crm,
+        ufCrm: medico.ufCrm,
+        hospital: medico.hospital,
+      },
+      representante: representante && {
+        cargo: representante.cargo,
+        hospital: representante.hospital,
+      },
     };
   }
 
@@ -122,13 +147,17 @@ export class UsuariosAdminService {
         where: { email: dto.email, NOT: { id } },
         select: { id: true },
       });
-      if (outro) throw new ConflictException('Já existe um usuário com este e-mail.');
+      if (outro)
+        throw new ConflictException('Já existe um usuário com este e-mail.');
     }
 
     try {
       await this.prisma.usuario.update({ where: { id }, data: dto });
     } catch (e) {
-      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
+      if (
+        e instanceof Prisma.PrismaClientKnownRequestError &&
+        e.code === 'P2002'
+      ) {
         throw new ConflictException('Já existe um usuário com este e-mail.');
       }
       throw e;
@@ -138,7 +167,7 @@ export class UsuariosAdminService {
 
   /**
    * Desativa a conta e encerra as sessões abertas.
-   * TODO(etapa 8): cancelar consultas futuras do paciente ou do médico desativado.
+   * As consultas futuras são canceladas e seus participantes notificados atomicamente.
    */
   async desativar(id: string, administradorId: string) {
     // FE02
@@ -150,9 +179,17 @@ export class UsuariosAdminService {
       throw new BadRequestException('Conta encerrada não pode ser alterada.');
     }
 
-    await this.prisma.usuario.update({
-      where: { id },
-      data: { status: 'INATIVO', versaoSessao: { increment: 1 } },
+    await this.prisma.$transaction(async (tx) => {
+      await tx.usuario.update({
+        where: { id },
+        data: { status: 'INATIVO', versaoSessao: { increment: 1 } },
+      });
+      await cancelarConsultasFuturas(
+        tx,
+        { OR: [{ pacienteId: id }, { medicoId: id }] },
+        'Conta desativada pela administração',
+        administradorId,
+      );
     });
     return { id, status: 'INATIVO' as const };
   }
@@ -163,7 +200,10 @@ export class UsuariosAdminService {
       throw new BadRequestException('Conta encerrada não pode ser reativada.');
     }
 
-    await this.prisma.usuario.update({ where: { id }, data: { status: 'ATIVO' } });
+    await this.prisma.usuario.update({
+      where: { id },
+      data: { status: 'ATIVO' },
+    });
     return { id, status: 'ATIVO' as const };
   }
 
@@ -174,8 +214,12 @@ export class UsuariosAdminService {
       select: { cpf: true, email: true },
     });
     const conflitos = [
-      ...(existentes.some((u) => u.cpf === dto.cpf) ? ['Já existe um usuário com este CPF.'] : []),
-      ...(existentes.some((u) => u.email === dto.email) ? ['Já existe um usuário com este e-mail.'] : []),
+      ...(existentes.some((u) => u.cpf === dto.cpf)
+        ? ['Já existe um usuário com este CPF.']
+        : []),
+      ...(existentes.some((u) => u.email === dto.email)
+        ? ['Já existe um usuário com este e-mail.']
+        : []),
     ];
     if (conflitos.length) throw new ConflictException(conflitos);
 
@@ -194,20 +238,30 @@ export class UsuariosAdminService {
         select: { id: true, nome: true, email: true, perfil: true },
       });
     } catch (e) {
-      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
+      if (
+        e instanceof Prisma.PrismaClientKnownRequestError &&
+        e.code === 'P2002'
+      ) {
         throw new ConflictException('CPF ou e-mail já cadastrado.');
       }
       throw e;
     }
 
     return {
-      administrador: { id: usuario.id, nome: usuario.nome, email: usuario.email },
+      administrador: {
+        id: usuario.id,
+        nome: usuario.nome,
+        email: usuario.email,
+      },
       senhaProvisoriaEnviada: await this.senhaProvisoria.enviar(usuario, senha),
     };
   }
 
   private async garantirExistencia(id: string) {
-    const usuario = await this.prisma.usuario.findUnique({ where: { id }, select: { status: true } });
+    const usuario = await this.prisma.usuario.findUnique({
+      where: { id },
+      select: { status: true },
+    });
     if (!usuario) throw new NotFoundException('Usuário não encontrado.');
     return usuario;
   }

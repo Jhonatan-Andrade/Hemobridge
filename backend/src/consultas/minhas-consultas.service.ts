@@ -93,7 +93,7 @@ export class MinhasConsultasService {
           select: {
             usuarioId: true,
             hospitalId: true,
-            vinculos: { where: { ativo: true }, select: { hospitalId: true } },
+            vinculos: { select: { hospitalId: true, ativo: true } },
             usuario: { select: { nome: true } },
             hospital: { select: { nome: true, cidade: true, estado: true } },
           },
@@ -211,7 +211,7 @@ export class MinhasConsultasService {
         medico: {
           select: {
             hospitalId: true,
-            vinculos: { where: { ativo: true }, select: { hospitalId: true } },
+            vinculos: { select: { hospitalId: true, ativo: true } },
           },
         },
       },

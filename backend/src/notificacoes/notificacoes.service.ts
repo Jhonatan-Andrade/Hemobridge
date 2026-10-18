@@ -1,5 +1,11 @@
-import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnModuleDestroy,
+  OnModuleInit,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { randomUUID } from 'node:crypto';
 import type { Prisma } from '../generated/prisma/client.js';
 import { EmailService } from '../email/email.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -39,14 +45,22 @@ export class NotificacoesService implements OnModuleInit, OnModuleDestroy {
     private readonly email: EmailService,
     config: ConfigService,
   ) {
-    this.frontendUrl = config.get<string>('FRONTEND_URL', 'http://localhost:5173').replace(/\/+$/, '');
-    this.minutosReenvio = Number(config.get('NOTIFICACOES_REENVIO_MINUTOS', 10));
+    this.frontendUrl = config
+      .get<string>('FRONTEND_URL', 'http://localhost:5173')
+      .replace(/\/+$/, '');
+    this.minutosReenvio = Number(
+      config.get('NOTIFICACOES_REENVIO_MINUTOS', 10),
+    );
   }
 
   onModuleInit() {
     if (this.minutosReenvio > 0) {
-      this.timer = setInterval(() => void this.reenviarPendentes(), this.minutosReenvio * 60_000);
+      this.timer = setInterval(
+        () => void this.reenviarPendentes(),
+        this.minutosReenvio * 60_000,
+      );
       this.timer.unref();
+      void this.reenviarPendentes();
     }
   }
 
@@ -55,7 +69,9 @@ export class NotificacoesService implements OnModuleInit, OnModuleDestroy {
   }
 
   /** Cria uma ou mais notificações e envia os e-mails solicitados. */
-  async notificar(notificacoes: NovaNotificacao | NovaNotificacao[]): Promise<string[]> {
+  async notificar(
+    notificacoes: NovaNotificacao | NovaNotificacao[],
+  ): Promise<string[]> {
     const ids = await this.registrarEm(this.prisma, notificacoes);
     await this.despacharEmails(ids);
     return ids;
@@ -65,7 +81,10 @@ export class NotificacoesService implements OnModuleInit, OnModuleDestroy {
    * Registra dentro de uma transação. Chame despacharEmails(ids) DEPOIS do
    * commit, para não enviar e-mail de uma operação que foi desfeita.
    */
-  async registrarEm(tx: ClienteNotificacao, notificacoes: NovaNotificacao | NovaNotificacao[]): Promise<string[]> {
+  async registrarEm(
+    tx: ClienteNotificacao,
+    notificacoes: NovaNotificacao | NovaNotificacao[],
+  ): Promise<string[]> {
     const lista = Array.isArray(notificacoes) ? notificacoes : [notificacoes];
     if (!lista.length) return [];
     const criadas = await tx.notificacao.createManyAndReturn({
@@ -83,7 +102,9 @@ export class NotificacoesService implements OnModuleInit, OnModuleDestroy {
   }
 
   /** Envia os e-mails pendentes das notificações informadas. */
-  async despacharEmails(ids: string[]): Promise<{ enviados: number; falhas: number }> {
+  async despacharEmails(
+    ids: string[],
+  ): Promise<{ enviados: number; falhas: number }> {
     if (!ids.length) return { enviados: 0, falhas: 0 };
     const pendentes = await this.prisma.notificacao.findMany({
       where: { id: { in: ids }, emailSolicitado: true, emailEnviadoEm: null },
@@ -99,7 +120,12 @@ export class NotificacoesService implements OnModuleInit, OnModuleDestroy {
         where: {
           emailSolicitado: true,
           emailEnviadoEm: null,
-          emailTentativas: { gt: 0, lt: MAX_TENTATIVAS_EMAIL },
+          emailTentativas: { lt: MAX_TENTATIVAS_EMAIL },
+          emailProximaTentativaEm: { lte: new Date() },
+          OR: [
+            { emailReservadoAte: null },
+            { emailReservadoAte: { lt: new Date() } },
+          ],
           usuario: { status: 'ATIVO' },
         },
         select: SELECAO_ENVIO,
@@ -107,8 +133,8 @@ export class NotificacoesService implements OnModuleInit, OnModuleDestroy {
         take: LOTE_REENVIO,
       });
       return await this.enviar(pendentes);
-    } catch (erro) {
-      this.logger.error(`Falha no reenvio de e-mails pendentes: ${String(erro)}`);
+    } catch {
+      this.logger.error('Falha no reenvio de e-mails pendentes.');
       return { enviados: 0, falhas: 0 };
     }
   }
@@ -117,24 +143,59 @@ export class NotificacoesService implements OnModuleInit, OnModuleDestroy {
     let enviados = 0;
     let falhas = 0;
     for (const n of pendentes) {
+      const token = randomUUID();
+      const agora = new Date();
+      const claim = await this.prisma.notificacao.updateMany({
+        where: {
+          id: n.id,
+          emailSolicitado: true,
+          emailEnviadoEm: null,
+          emailTentativas: { lt: MAX_TENTATIVAS_EMAIL },
+          emailProximaTentativaEm: { lte: agora },
+          usuario: { status: 'ATIVO' },
+          OR: [
+            { emailReservadoAte: null },
+            { emailReservadoAte: { lt: agora } },
+          ],
+        },
+        data: {
+          emailReservaToken: token,
+          emailReservadoAte: new Date(agora.getTime() + 300_000),
+          emailTentativas: { increment: 1 },
+        },
+      });
+      if (!claim.count) continue;
       try {
         await this.email.enviar({
           para: n.usuario.email,
-          assunto: `Hemobridge – ${n.titulo}`,
+          assunto: 'HemoBridge – atualização na sua conta',
           texto: this.textoEmail(n),
         });
-        await this.prisma.notificacao.update({
-          where: { id: n.id },
-          data: { emailEnviadoEm: new Date(), emailTentativas: { increment: 1 }, emailUltimoErro: null },
+        await this.prisma.notificacao.updateMany({
+          where: { id: n.id, emailReservaToken: token },
+          data: {
+            emailEnviadoEm: new Date(),
+            emailUltimoErro: null,
+            emailReservaToken: null,
+            emailReservadoAte: null,
+          },
         });
         enviados++;
-      } catch (erro) {
+      } catch {
         falhas++;
-        this.logger.error(`Falha ao enviar e-mail da notificação ${n.id}: ${String(erro)}`);
+        this.logger.error(`Falha ao enviar e-mail da notificação ${n.id}.`);
         await this.prisma.notificacao
-          .update({
-            where: { id: n.id },
-            data: { emailTentativas: { increment: 1 }, emailUltimoErro: String(erro).slice(0, 500) },
+          .updateMany({
+            where: { id: n.id, emailReservaToken: token },
+            data: {
+              emailUltimoErro: 'Falha de entrega; nova tentativa programada.',
+              emailReservaToken: null,
+              emailReservadoAte: null,
+              emailProximaTentativaEm: new Date(
+                Date.now() +
+                  Math.min(3_600_000, 30_000 * 2 ** n.emailTentativas),
+              ),
+            },
           })
           .catch(() => undefined);
       }
@@ -144,15 +205,24 @@ export class NotificacoesService implements OnModuleInit, OnModuleDestroy {
 
   private textoEmail(n: Pendente): string {
     const primeiroNome = n.usuario.nome.split(' ')[0];
-    const linhas = [`Olá, ${primeiroNome}.`, '', n.mensagem];
-    if (n.link) linhas.push('', `Acesse: ${this.frontendUrl}${n.link.startsWith('/') ? '' : '/'}${n.link}`);
-    linhas.push('', 'Você também encontra este aviso em Notificações, na plataforma.');
+    const linhas = [
+      `Olá, ${primeiroNome}.`,
+      '',
+      'Há uma atualização disponível na sua conta. Consulte os detalhes na área privada.',
+      '',
+      `Acesse: ${this.frontendUrl}/#notifications`,
+    ];
+    linhas.push(
+      '',
+      'Você também encontra este aviso em Notificações, na plataforma.',
+    );
     return linhas.join('\n');
   }
 }
 
 const SELECAO_ENVIO = {
   id: true,
+  emailTentativas: true,
   titulo: true,
   mensagem: true,
   link: true,
@@ -161,6 +231,7 @@ const SELECAO_ENVIO = {
 
 type Pendente = {
   id: string;
+  emailTentativas: number;
   titulo: string;
   mensagem: string;
   link: string | null;

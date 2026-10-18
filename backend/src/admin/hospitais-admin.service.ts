@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { SenhaProvisoriaService } from '../contas/senha-provisoria.service.js';
+import { cancelarConsultasFuturas } from '../consultas/cancelamento-operacional.js';
 import { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import {
@@ -23,7 +24,13 @@ export class HospitaisAdminService {
   ) {}
 
   // Passo 2: todos os bancos, inclusive desativados, com a situação de cada um.
-  async listar({ busca, estado, ativo, pagina, tamanhoPagina }: ListarHospitaisAdminDto) {
+  async listar({
+    busca,
+    estado,
+    ativo,
+    pagina,
+    tamanhoPagina,
+  }: ListarHospitaisAdminDto) {
     const digitos = busca?.replace(/\D/g, '');
     const where: Prisma.HospitalWhereInput = {
       ativo,
@@ -107,7 +114,8 @@ export class HospitaisAdminService {
         _count: { select: { medicos: true } },
       },
     });
-    if (!hospital) throw new NotFoundException('Banco de sangue não encontrado.');
+    if (!hospital)
+      throw new NotFoundException('Banco de sangue não encontrado.');
 
     const { representantes, _count, ...dados } = hospital;
     return {
@@ -142,10 +150,21 @@ export class HospitaisAdminService {
       this.prisma.$transaction(async (tx) => {
         const hospital = await tx.hospital.create({
           data: dadosHospital,
-          select: { id: true, nome: true, cnpj: true, cidade: true, estado: true, ativo: true },
+          select: {
+            id: true,
+            nome: true,
+            cnpj: true,
+            cidade: true,
+            estado: true,
+            ativo: true,
+          },
         });
         const usuario = await tx.usuario.create({
-          data: this.dadosRepresentante(representante, hospital.id, credenciais),
+          data: this.dadosRepresentante(
+            representante,
+            hospital.id,
+            credenciais,
+          ),
           select: { id: true, nome: true, email: true, perfil: true },
         });
         return { hospital, usuario };
@@ -154,18 +173,28 @@ export class HospitaisAdminService {
 
     return {
       hospital,
-      representante: { id: usuario.id, nome: usuario.nome, email: usuario.email },
+      representante: {
+        id: usuario.id,
+        nome: usuario.nome,
+        email: usuario.email,
+      },
       senhaProvisoriaEnviada: await this.senhaProvisoria.enviar(usuario, senha),
     };
   }
 
   // FA01
   async atualizar(id: string, dto: AtualizarHospitalDto) {
-    const atual = await this.prisma.hospital.findUnique({ where: { id }, select: { cnpj: true } });
+    const atual = await this.prisma.hospital.findUnique({
+      where: { id },
+      select: { cnpj: true },
+    });
     if (!atual) throw new NotFoundException('Banco de sangue não encontrado.');
-    if (dto.cnpj && dto.cnpj !== atual.cnpj) await this.verificarConflitos({ cnpj: dto.cnpj });
+    if (dto.cnpj && dto.cnpj !== atual.cnpj)
+      await this.verificarConflitos({ cnpj: dto.cnpj });
 
-    await this.comConflitoTratado(() => this.prisma.hospital.update({ where: { id }, data: dto }));
+    await this.comConflitoTratado(() =>
+      this.prisma.hospital.update({ where: { id }, data: dto }),
+    );
     return this.detalhar(id);
   }
 
@@ -173,13 +202,44 @@ export class HospitaisAdminService {
    * FA02 / RN09: o banco some das consultas públicas e seus representantes e
    * médicos perdem o acesso (o guard confere a instituição a cada requisição;
    * as sessões abertas são encerradas aqui).
-   * TODO(etapa 8): cancelar as consultas futuras e notificar os pacientes.
+   * Cancela somente as consultas desta instituição, preservando os demais vínculos.
    */
   async desativar(id: string) {
-    await this.alterarSituacao(id, false);
-    await this.prisma.usuario.updateMany({
-      where: { OR: [{ medico: { hospitalId: id } }, { representante: { hospitalId: id } }] },
-      data: { versaoSessao: { increment: 1 } },
+    await this.prisma.$transaction(async (tx) => {
+      const { count } = await tx.hospital.updateMany({
+        where: { id },
+        data: { ativo: false },
+      });
+      if (!count)
+        throw new NotFoundException('Banco de sangue não encontrado.');
+      await tx.usuario.updateMany({
+        where: {
+          OR: [
+            {
+              medico: {
+                OR: [
+                  { hospitalId: id },
+                  { vinculos: { some: { hospitalId: id } } },
+                ],
+              },
+            },
+            { representante: { hospitalId: id } },
+          ],
+        },
+        data: { versaoSessao: { increment: 1 } },
+      });
+      await cancelarConsultasFuturas(
+        tx,
+        {
+          disponibilidade: {
+            OR: [
+              { hospitalId: id },
+              { hospitalId: null, medico: { hospitalId: id } },
+            ],
+          },
+        },
+        'Instituição desativada',
+      );
     });
     return { id, ativo: false };
   }
@@ -195,9 +255,12 @@ export class HospitaisAdminService {
       where: { id: hospitalId },
       select: { ativo: true },
     });
-    if (!hospital) throw new NotFoundException('Banco de sangue não encontrado.');
+    if (!hospital)
+      throw new NotFoundException('Banco de sangue não encontrado.');
     if (!hospital.ativo) {
-      throw new BadRequestException('Reative o banco de sangue antes de cadastrar representantes.');
+      throw new BadRequestException(
+        'Reative o banco de sangue antes de cadastrar representantes.',
+      );
     }
     await this.verificarConflitos({ cpf: dto.cpf, email: dto.email });
 
@@ -210,7 +273,11 @@ export class HospitaisAdminService {
     );
 
     return {
-      representante: { id: usuario.id, nome: usuario.nome, email: usuario.email },
+      representante: {
+        id: usuario.id,
+        nome: usuario.nome,
+        email: usuario.email,
+      },
       senhaProvisoriaEnviada: await this.senhaProvisoria.enviar(usuario, senha),
     };
   }
@@ -224,22 +291,42 @@ export class HospitaisAdminService {
       ...dto,
       ...credenciais,
       perfil: 'REPRESENTANTE',
-      representante: { create: { hospital: { connect: { id: hospitalId } }, cargo } },
+      representante: {
+        create: { hospital: { connect: { id: hospitalId } }, cargo },
+      },
     };
   }
 
   private async alterarSituacao(id: string, ativo: boolean) {
-    const { count } = await this.prisma.hospital.updateMany({ where: { id }, data: { ativo } });
+    const { count } = await this.prisma.hospital.updateMany({
+      where: { id },
+      data: { ativo },
+    });
     if (!count) throw new NotFoundException('Banco de sangue não encontrado.');
   }
 
   // FE01: informa exatamente qual dado já está cadastrado.
-  private async verificarConflitos({ cnpj, cpf, email }: { cnpj?: string; cpf?: string; email?: string }) {
+  private async verificarConflitos({
+    cnpj,
+    cpf,
+    email,
+  }: {
+    cnpj?: string;
+    cpf?: string;
+    email?: string;
+  }) {
     const [hospital, usuarios] = await Promise.all([
-      cnpj ? this.prisma.hospital.findUnique({ where: { cnpj }, select: { id: true } }) : null,
+      cnpj
+        ? this.prisma.hospital.findUnique({
+            where: { cnpj },
+            select: { id: true },
+          })
+        : null,
       cpf || email
         ? this.prisma.usuario.findMany({
-            where: { OR: [...(cpf ? [{ cpf }] : []), ...(email ? [{ email }] : [])] },
+            where: {
+              OR: [...(cpf ? [{ cpf }] : []), ...(email ? [{ email }] : [])],
+            },
             select: { cpf: true, email: true },
           })
         : [],
@@ -247,8 +334,10 @@ export class HospitaisAdminService {
 
     const conflitos: string[] = [];
     if (hospital) conflitos.push('Já existe um banco de sangue com este CNPJ.');
-    if (usuarios.some((u) => u.cpf === cpf)) conflitos.push('Já existe um usuário com este CPF.');
-    if (usuarios.some((u) => u.email === email)) conflitos.push('Já existe um usuário com este e-mail.');
+    if (usuarios.some((u) => u.cpf === cpf))
+      conflitos.push('Já existe um usuário com este CPF.');
+    if (usuarios.some((u) => u.email === email))
+      conflitos.push('Já existe um usuário com este e-mail.');
     if (conflitos.length) throw new ConflictException(conflitos);
   }
 
@@ -257,7 +346,10 @@ export class HospitaisAdminService {
     try {
       return await operacao();
     } catch (e) {
-      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
+      if (
+        e instanceof Prisma.PrismaClientKnownRequestError &&
+        e.code === 'P2002'
+      ) {
         throw new ConflictException('CNPJ, CPF ou e-mail já cadastrado.');
       }
       throw e;

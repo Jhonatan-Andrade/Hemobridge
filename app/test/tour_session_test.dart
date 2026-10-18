@@ -3,7 +3,6 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hemobridge/core/api_client.dart';
 import 'package:hemobridge/core/session_controller.dart';
 import 'package:hemobridge/features/onboarding/tour_content.dart';
@@ -13,14 +12,28 @@ void main() {
   test(
     'a conclusão restaura após reiniciar e não libera outra conta',
     () async {
-      SharedPreferences.setMockInitialValues({'isFirstAccess.conta-a': false});
       FlutterSecureStorage.setMockInitialValues({});
       var account = 'conta-a';
+      final completed = {'conta-a'};
       ApiClient client() => ApiClient(
         baseUrl: 'https://api.example.invalid',
         client: MockClient((request) async {
+          if (request.url.path.endsWith('/tour/conclusao')) {
+            expect(jsonDecode(request.body), {'versao': 1});
+            completed.add(account);
+            return http.Response(
+              jsonEncode({'isFirstAccess': false, 'tourVersion': 1}),
+              200,
+            );
+          }
           final value = request.url.path.endsWith('/me')
-              ? {'id': account, 'perfil': 'PACIENTE', 'senhaProvisoria': false}
+              ? {
+                  'id': account,
+                  'perfil': 'PACIENTE',
+                  'senhaProvisoria': false,
+                  'isFirstAccess': !completed.contains(account),
+                  'tourVersion': 1,
+                }
               : {'accessToken': 'token-de-teste'};
           return http.Response(jsonEncode(value), 200);
         }),

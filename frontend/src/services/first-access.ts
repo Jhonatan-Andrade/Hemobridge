@@ -1,20 +1,19 @@
-const prefix = 'hemobridge.isFirstAccess'
-const completedInTab = new Set<string>()
+import { api } from './api-client.ts'
 
-export function readFirstAccess(userId: string): boolean {
-  if (completedInTab.has(userId)) return false
-  try {
-    return window.localStorage.getItem(`${prefix}.${userId}`) !== 'false'
-  } catch {
-    return true
-  }
+type TourAccount = { isFirstAccess?: boolean; tourVersion?: number }
+export function readFirstAccess(account: TourAccount): boolean {
+  return account.isFirstAccess !== false
 }
 
-export function completeFirstAccess(userId: string) {
-  completedInTab.add(userId)
-  try {
-    window.localStorage.setItem(`${prefix}.${userId}`, 'false')
-  } catch {
-    // A conclusão continua válida nesta aba quando o armazenamento está indisponível.
-  }
+export async function completeFirstAccess(account: TourAccount) {
+  const result = await api<{ isFirstAccess: boolean; tourVersion: number }>(
+    '/auth/tour/conclusao',
+    {
+      method: 'POST',
+      body: { versao: account.tourVersion },
+    },
+  )
+  if (result.isFirstAccess !== false)
+    throw new Error('Não foi possível confirmar a conclusão. Tente novamente.')
+  return result
 }

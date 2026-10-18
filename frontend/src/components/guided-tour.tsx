@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef, useState } from 'react'
 import type { SessionUser } from '../types/domain'
 import { useResource } from '../services/use-resource'
 import { journeyTimings, tourRoleLabels, tourSteps } from '../services/tour-content'
+import { messageOf } from '../services/api-client'
 
 function InstitutionTimes({
   estimates,
@@ -76,13 +77,27 @@ export function GuidedTour({
 }: {
   user: SessionUser | null
   mandatory: boolean
-  onComplete: () => void
+  onComplete: () => void | Promise<void>
   onClose: () => void
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null)
   const headingRef = useRef<HTMLHeadingElement>(null)
   const opener = useRef<HTMLElement | null>(null)
   const [index, setIndex] = useState(0)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+  async function finish() {
+    if (saving) return
+    setSaving(true)
+    setError('')
+    try {
+      await onComplete()
+    } catch (error) {
+      setError(messageOf(error))
+    } finally {
+      setSaving(false)
+    }
+  }
   const steps = tourSteps(user?.perfil)
   const step = steps[index]
   useLayoutEffect(() => {
@@ -91,10 +106,19 @@ export function GuidedTour({
     opener.current = document.activeElement as HTMLElement
     document.body.style.overflow = 'hidden'
     dialog?.showModal()
+    const keepFocusInside = (event: FocusEvent) => {
+      if (dialog?.open && !dialog.contains(event.target as Node)) headingRef.current?.focus()
+    }
+    document.addEventListener('focusin', keepFocusInside)
     return () => {
+      document.removeEventListener('focusin', keepFocusInside)
       dialog?.close()
       document.body.style.overflow = previousOverflow
-      opener.current?.focus()
+      const target =
+        opener.current?.isConnected && opener.current !== document.body
+          ? opener.current
+          : document.querySelector<HTMLElement>('main h1')
+      target?.focus({ preventScroll: true })
     }
   }, [])
   useLayoutEffect(() => {
@@ -107,6 +131,23 @@ export function GuidedTour({
       aria-modal="true"
       aria-labelledby="tour-title"
       aria-describedby="tour-description"
+      onKeyDown={(event) => {
+        if (event.key !== 'Tab') return
+        const elements = [
+          ...event.currentTarget.querySelectorAll<HTMLElement>(
+            'button:not(:disabled), a[href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), summary, [tabindex="0"]',
+          ),
+        ].filter((node) => node.getClientRects().length > 0 && node.tabIndex >= 0)
+        event.preventDefault()
+        const current = elements.indexOf(document.activeElement as HTMLElement)
+        const next = event.shiftKey
+          ? current <= 0
+            ? elements.length - 1
+            : current - 1
+          : (current + 1) % elements.length
+        if (elements[next]) elements[next].focus()
+        else headingRef.current?.focus()
+      }}
       onCancel={(e) => {
         e.preventDefault()
         if (!mandatory) onClose()
@@ -129,19 +170,26 @@ export function GuidedTour({
         {step.journey && user && <JourneyTimes />}
       </div>
       <div className="onboarding-footer">
+        {error && <p role="alert">{error}</p>}
         <div className="actions">
           {index > 0 && (
             <button
               type="button"
               className="button secondary"
+              disabled={saving}
               onClick={() => setIndex((v) => v - 1)}
             >
               Voltar
             </button>
           )}
           {index === steps.length - 1 ? (
-            <button type="button" className="button" onClick={onComplete}>
-              Concluir e acessar
+            <button
+              type="button"
+              className="button"
+              disabled={saving}
+              onClick={() => void finish()}
+            >
+              {saving ? 'Salvando…' : 'Concluir e acessar'}
             </button>
           ) : (
             <button type="button" className="button" onClick={() => setIndex((v) => v + 1)}>

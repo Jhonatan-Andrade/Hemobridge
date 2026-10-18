@@ -20,7 +20,8 @@ import {
   saveVlibrasAuto,
 } from './services/accessibility-preferences'
 import { completeFirstAccess, readFirstAccess } from './services/first-access'
-import { savedRoute } from './services/saved-routes'
+import { postContext, routeFromLocation } from './services/saved-routes'
+import type { PostContext } from './services/saved-routes'
 import type { FontScale } from './services/accessibility-preferences'
 import { entryRouteOf, professionalRoleOf } from './types/domain'
 import type {
@@ -38,19 +39,18 @@ import { HomePage } from './pages/home'
 import { FeedPage, PostPage } from './pages/community'
 import { AuthPage } from './pages/auth'
 import { PatientPage } from './pages/patient'
-import { PatientJourneyPage } from './pages/patient-journey'
+import { Notifications, PatientJourneyPage } from './pages/patient-journey'
+import { PrivacyRequestsPage } from './pages/privacy-requests'
 import { ProfessionalPage } from './pages/professional'
 import { ProfessionalProfilePage } from './pages/professional-profile'
 import { LocalDiscovery } from './pages/local-discovery'
 import { AccessibilityPage } from './pages/accessibility'
 import { LegalContent, LegalPage } from './pages/legal'
-const routeFromHash = () => {
-  const route = decodeURIComponent(location.hash.slice(1).split('?')[0] || 'home')
-  return savedRoute(route)
-}
+const routeFromHash = () => routeFromLocation(location)
 const protectedRoute = (r: string) =>
   r === 'dashboard' ||
   r === 'profile' ||
+  r === 'notifications' ||
   r.startsWith('professional') ||
   (r.startsWith('external-') && r !== 'external-locations') ||
   r === 'first' ||
@@ -68,7 +68,9 @@ function App() {
     [feedError, setFeedError] = useState(false),
     [drafts, setDrafts] = useState<Record<string, string>>({}),
     [tourRequested, setTourRequested] = useState(false),
-    [tourAccess, setTourAccess] = useState({ userId: '', isFirstAccess: true }),
+    [postOrigin, setPostOrigin] = useState<'home' | 'community'>(
+      () => postContext(history.state?.postContext)?.origin ?? 'community',
+    ),
     [legalOpen, setLegalOpen] = useState(false)
   const [fontScale, setFontScale] = useState<FontScale>(readFontScale),
     [vlibrasAuto, setVlibrasAuto] = useState(readVlibrasAuto),
@@ -78,7 +80,9 @@ function App() {
     opener = useRef<HTMLElement | null>(null),
     feedBusy = useRef(false),
     commentPages = useRef<Record<string, number>>({}),
-    commentsBusy = useRef(new Set<string>())
+    commentsBusy = useRef(new Set<string>()),
+    publicationContext = useRef<PostContext | null>(postContext(history.state?.postContext)),
+    loginReturn = useRef<string | null>(null)
   const role = professionalRoleOf(user),
     identity: Identity = !user
       ? 'visitor'
@@ -87,13 +91,21 @@ function App() {
         : 'professional',
     participantRole: CommunityParticipantRole = identity === 'professional' ? role : 'patient'
   const navigate: Navigate = (next, options) => {
-    if (options?.replace) history.replaceState(null, '', `#${next}`)
-    else if (route !== next) history.pushState(null, '', `#${next}`)
+    if (next === 'login' && (protectedRoute(route) || route.startsWith('post/')))
+      loginReturn.current = route
+    const state = { postContext: publicationContext.current }
+    if (options?.replace) history.replaceState(state, '', `#${next}`)
+    else if (route !== next) history.pushState(state, '', `#${next}`)
     setRoute(next)
     window.scrollTo(0, 0)
   }
   useEffect(() => {
-    const onHistory = () => setRoute(routeFromHash())
+    const onHistory = () => {
+      publicationContext.current =
+        postContext(history.state?.postContext) ?? publicationContext.current
+      setPostOrigin(publicationContext.current?.origin ?? 'community')
+      setRoute(routeFromHash())
+    }
     window.addEventListener('popstate', onHistory)
     window.addEventListener('hashchange', onHistory)
     return () => {
@@ -106,7 +118,6 @@ function App() {
     api<SessionUser>('/auth/me', { signal: controller.signal })
       .then((u) => {
         if (controller.signal.aborted) return
-        setTourAccess({ userId: u.id, isFirstAccess: readFirstAccess(u.id) })
         setUser(u)
         setSessionReady(true)
       })
@@ -193,6 +204,14 @@ function App() {
   }, [route, user])
   useEffect(() => {
     const frame = requestAnimationFrame(() => {
+      const context = publicationContext.current
+      if (context?.origin === route) {
+        document
+          .querySelector<HTMLElement>(`[data-post="${context.postId}"] .post-read`)
+          ?.focus({ preventScroll: true })
+        window.scrollTo(0, context.scroll)
+        return
+      }
       const target = route.endsWith('/comments')
         ? document.querySelector<HTMLElement>('#comments h2')
         : document.querySelector<HTMLElement>('main h1')
@@ -242,9 +261,9 @@ function App() {
   async function authDone(kind: string) {
     if (kind === 'login' || kind === 'first') {
       const u = await api<SessionUser>('/auth/me')
-      setTourAccess({ userId: u.id, isFirstAccess: readFirstAccess(u.id) })
       setUser(u)
-      navigate(entryRouteOf(u))
+      navigate(u.senhaProvisoria ? 'first' : (loginReturn.current ?? entryRouteOf(u)))
+      loginReturn.current = null
       setSessionRevision((v) => v + 1)
     } else
       navigate(
@@ -366,18 +385,28 @@ function App() {
     onLoadMore: () => void morePosts(),
     onReload: () => setFeedRevision((v) => v + 1),
     onLike: (id: string) => void like(id),
-    onOpenPost: (id: string, comments = false) =>
-      navigate(`post/${id}${comments ? '/comments' : ''}`),
+    onOpenPost: (id: string, comments = false) => {
+      if (!route.startsWith('post/')) {
+        publicationContext.current = {
+          origin: route === 'home' ? 'home' : 'community',
+          scroll: window.scrollY,
+          postId: id,
+        }
+        setPostOrigin(publicationContext.current.origin)
+        history.replaceState({ postContext: publicationContext.current }, '')
+      }
+      navigate(`post/${id}${comments ? '/comments' : ''}`)
+    },
     onInvite: invite,
     onSendComment: sendComment,
     onMoreComments: moreComments,
     onCreatePublication: createPublication,
     drafts,
     onDraft: (id: string, value: string) => setDrafts((d) => ({ ...d, [id]: value })),
-    postOrigin: 'community' as const,
+    postOrigin,
     onTour: () => setTourRequested(true),
   }
-  const isFirstAccess = !!user && (tourAccess.userId !== user.id || tourAccess.isFirstAccess)
+  const isFirstAccess = !!user && readFirstAccess(user)
   const mandatory = !!user && !user.senhaProvisoria && isFirstAccess
   const denied =
     user &&
@@ -471,6 +500,12 @@ function App() {
             navigate={navigate}
             onLogout={() => void logout()}
           />
+        ) : route === 'notifications' ? (
+          <main className="community-page">
+            <Notifications />
+          </main>
+        ) : route === 'professional/privacy' && role === 'administrator' ? (
+          <PrivacyRequestsPage />
         ) : route === 'professional/profile' ? (
           <ProfessionalProfilePage navigate={navigate} />
         ) : route.startsWith('professional') ? (
@@ -520,10 +555,10 @@ function App() {
           key={user?.id ?? 'visitor'}
           user={user}
           mandatory={mandatory}
-          onComplete={() => {
-            if (user) {
-              completeFirstAccess(user.id)
-              setTourAccess({ userId: user.id, isFirstAccess: false })
+          onComplete={async () => {
+            if (user && mandatory) {
+              const result = await completeFirstAccess(user)
+              setUser({ ...user, ...result })
             }
             setTourRequested(false)
           }}

@@ -6,6 +6,7 @@ import { AuthController } from './auth.controller.js';
 import { AuthGuard } from './auth.guard.js';
 import { AuthService } from './auth.service.js';
 import { RecuperacaoSenhaService } from './recuperacao-senha.service.js';
+import { OnboardingService } from './onboarding.service.js';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { RecuperacaoSenhaService } from './recuperacao-senha.service.js';
   providers: [
     AuthService,
     RecuperacaoSenhaService,
+    OnboardingService,
     { provide: APP_GUARD, useClass: AuthGuard },
   ],
 })

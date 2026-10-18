@@ -18,34 +18,34 @@ function storage(t, values = new Map()) {
   return values
 }
 
-test('a ausência da preferência e valores inválidos exigem o primeiro acesso', (t) => {
-  storage(t, new Map([['hemobridge.isFirstAccess.invalido', 'outro-valor']]))
-  assert.equal(readFirstAccess('novo'), true)
-  assert.equal(readFirstAccess('invalido'), true)
+test('apenas a confirmação booleana do servidor libera o primeiro acesso', (t) => {
+  storage(t, new Map([['hemobridge.isFirstAccess.conta', 'false']]))
+  assert.equal(readFirstAccess({}), true)
+  assert.equal(readFirstAccess({ isFirstAccess: 'false' }), true)
+  assert.equal(readFirstAccess({ isFirstAccess: false }), false)
 })
 
-test('concluir persiste um booleano por usuário e não libera outra conta', (t) => {
-  const values = storage(t)
-  completeFirstAccess('concluido')
-  assert.equal(JSON.parse(values.get('hemobridge.isFirstAccess.concluido')), false)
-  assert.equal(readFirstAccess('concluido'), false)
-  assert.equal(readFirstAccess('outra-conta'), true)
-  values.set('hemobridge.isFirstAccess.ja-concluiu', 'false')
-  assert.equal(readFirstAccess('ja-concluiu'), false)
+test('concluir envia a versão à sessão autenticada sem aceitar id de outra conta', async (t) => {
+  const previous = globalThis.fetch
+  t.after(() => { globalThis.fetch = previous })
+  globalThis.fetch = async (url, options) => {
+    assert.equal(url, '/api/auth/tour/conclusao')
+    assert.equal(options.credentials, 'include')
+    assert.deepEqual(JSON.parse(options.body), { versao: 1 })
+    return Response.json({ isFirstAccess: false, tourVersion: 1 })
+  }
+  assert.equal((await completeFirstAccess({ id: 'outro-id-ignorado', tourVersion: 1 })).isFirstAccess, false)
 })
 
-test('sem armazenamento, o tour continua obrigatório e a conclusão vale nesta aba', (t) => {
-  storage(t)
-  globalThis.window.localStorage.getItem = () => {
-    throw new Error('indisponível')
-  }
-  globalThis.window.localStorage.setItem = () => {
-    throw new Error('indisponível')
-  }
-  assert.equal(readFirstAccess('sem-storage'), true)
-  assert.doesNotThrow(() => completeFirstAccess('sem-storage'))
-  assert.equal(readFirstAccess('sem-storage'), false)
-  assert.equal(readFirstAccess('outro-sem-storage'), true)
+test('erro de gravação não libera o tour e pode ser tentado novamente', async (t) => {
+  const previous = globalThis.fetch
+  t.after(() => { globalThis.fetch = previous })
+  const account = { isFirstAccess: true, tourVersion: 1 }
+  globalThis.fetch = async () => Response.json({ message: 'Serviço indisponível' }, { status: 503 })
+  await assert.rejects(completeFirstAccess(account), /Serviço indisponível/)
+  assert.equal(readFirstAccess(account), true)
+  globalThis.fetch = async () => Response.json({ isFirstAccess: true })
+  await assert.rejects(completeFirstAccess(account), /confirmar/)
 })
 
 test('cada perfil apresenta o processo, suas áreas e o perfil sem instruções de inputs', () => {

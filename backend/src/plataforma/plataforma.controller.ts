@@ -14,6 +14,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Prisma } from '../generated/prisma/client.js';
+import { vinculoDaAgendaAtivo } from '../consultas/instituicao-agenda.js';
 import { Perfis, UsuarioAtual } from '../auth/decorators.js';
 import type { UsuarioAutenticado } from '../auth/auth.types.js';
 import { Auditar } from '../auditoria/auditar.decorator.js';
@@ -143,17 +144,23 @@ export class PlataformaController {
     @Body() dto: SenhaAtualDto,
   ) {
     await this.confirmarSenha(u.id, dto.senhaAtual);
-    const existente = await this.prisma.solicitacaoExclusao.findFirst({
-      where: { usuarioId: u.id, status: { in: ['PENDENTE', 'EM_ANDAMENTO'] } },
-      select: { id: true, status: true },
-    });
-    return (
-      existente ??
-      this.prisma.solicitacaoExclusao.create({
-        data: { usuarioId: u.id },
+    return this.prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT id FROM usuario WHERE id=${u.id}::uuid FOR UPDATE`;
+      const existente = await tx.solicitacaoExclusao.findFirst({
+        where: {
+          usuarioId: u.id,
+          status: { in: ['PENDENTE', 'EM_ANDAMENTO'] },
+        },
         select: { id: true, status: true },
-      })
-    );
+      });
+      return (
+        existente ??
+        tx.solicitacaoExclusao.create({
+          data: { usuarioId: u.id },
+          select: { id: true, status: true },
+        })
+      );
+    });
   }
   @Get('jornada/estimativas') estimativas() {
     return this.prisma.estimativaEtapa.findMany({
@@ -190,17 +197,13 @@ export class PlataformaController {
         medico: {
           select: {
             hospitalId: true,
-            vinculos: { where: { ativo: true }, select: { hospitalId: true } },
+            vinculos: { select: { hospitalId: true, ativo: true } },
           },
         },
       },
     });
     if (!h) throw new BadRequestException('Horário indisponível.');
-    if (
-      h.hospitalId &&
-      h.hospitalId !== h.medico.hospitalId &&
-      !h.medico.vinculos.some((v) => v.hospitalId === h.hospitalId)
-    )
+    if (!vinculoDaAgendaAtivo(h))
       throw new BadRequestException('Horário indisponível.');
     try {
       return await this.prisma.$transaction(async (tx) => {
@@ -239,7 +242,7 @@ export class PlataformaController {
       where: {
         ativo: true,
         OR: [
-          { medicos: { some: { usuarioId: u.id } } },
+          { medicos: { some: { usuarioId: u.id, vinculos: { none: {} } } } },
           { vinculosMedicos: { some: { medicoId: u.id, ativo: true } } },
         ],
       },

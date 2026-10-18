@@ -35,10 +35,14 @@ export class NecessidadesService {
       }),
     ]);
 
-    const datas = necessidades.flatMap((n) => (n.atualizadoEm ? [n.atualizadoEm.getTime()] : []));
+    const datas = necessidades.flatMap((n) =>
+      n.atualizadoEm ? [n.atualizadoEm.getTime()] : [],
+    );
     return {
       hospital,
-      ultimaAtualizacao: datas.length ? new Date(Math.max(...datas)).toISOString() : null,
+      ultimaAtualizacao: datas.length
+        ? new Date(Math.max(...datas)).toISOString()
+        : null,
       necessidades: necessidades.map((n) => ({
         tipo: n.tipoSanguineo.sigla,
         nivel: n.nivel,
@@ -49,58 +53,84 @@ export class NecessidadesService {
   }
 
   // Passos 3–6. O histórico (RN03) é gravado pelo trigger do banco.
-  async atualizar(hospitalId: string, representanteId: string, { niveis }: AtualizarNecessidadesDto) {
+  async atualizar(
+    hospitalId: string,
+    representanteId: string,
+    { niveis }: AtualizarNecessidadesDto,
+  ) {
     const tipos = niveis.map((n) => n.tipo);
     if (new Set(tipos).size !== tipos.length) {
-      throw new BadRequestException('Cada tipo sanguíneo deve aparecer uma única vez.');
+      throw new BadRequestException(
+        'Cada tipo sanguíneo deve aparecer uma única vez.',
+      );
     }
 
-    const atuais = await this.prisma.necessidadeEstoque.findMany({
-      where: { hospitalId, tipoSanguineo: { sigla: { in: tipos } } },
-      select: { id: true, nivel: true, tipoSanguineo: { select: { sigla: true } } },
-    });
-    const porTipo = new Map(atuais.map((a) => [a.tipoSanguineo.sigla, a]));
+    const { alteracoes, eventoId } = await this.prisma.$transaction(
+      async (tx) => {
+        await tx.$queryRaw`SELECT id FROM hospital WHERE id=${hospitalId}::uuid FOR UPDATE`;
+        const atuais = await tx.necessidadeEstoque.findMany({
+          where: { hospitalId, tipoSanguineo: { sigla: { in: tipos } } },
+          select: {
+            id: true,
+            nivel: true,
+            tipoSanguineo: { select: { sigla: true } },
+          },
+        });
+        const porTipo = new Map(atuais.map((a) => [a.tipoSanguineo.sigla, a]));
 
-    const alteracoes = niveis.flatMap(({ tipo, nivel }) => {
-      const atual = porTipo.get(tipo);
-      return atual && atual.nivel !== nivel ? [{ id: atual.id, tipo, de: atual.nivel, para: nivel }] : [];
-    });
+        const alteracoes = niveis.flatMap(({ tipo, nivel }) => {
+          const atual = porTipo.get(tipo);
+          return atual && atual.nivel !== nivel
+            ? [{ id: atual.id, tipo, de: atual.nivel, para: nivel }]
+            : [];
+        });
 
-    // FA01
-    if (!alteracoes.length) {
-      return {
-        mensagem: 'Não há alterações a salvar.',
-        alteracoes: [],
-        passaramACritico: [],
-        doadoresNotificados: 0,
-        ...(await this.listar(hospitalId)),
-      };
-    }
-
-    const agora = new Date();
-    await this.prisma.$transaction(
-      alteracoes.map(({ id, para }) =>
-        this.prisma.necessidadeEstoque.update({
-          where: { id },
-          data: { nivel: para, atualizadoPorId: representanteId, atualizadoEm: agora },
-        }),
-      ),
+        const agora = new Date();
+        for (const { id, para } of alteracoes) {
+          await tx.necessidadeEstoque.update({
+            where: { id },
+            data: {
+              nivel: para,
+              atualizadoPorId: representanteId,
+              atualizadoEm: agora,
+            },
+          });
+        }
+        const tiposCriticos = alteracoes
+          .filter((a) => a.para === 'CRITICO')
+          .map((a) => a.tipo);
+        const evento = tiposCriticos.length
+          ? await tx.eventoNecessidadeCritica.create({
+              data: { hospitalId, tipos: tiposCriticos },
+              select: { id: true },
+            })
+          : null;
+        return { alteracoes, eventoId: evento?.id };
+      },
     );
 
     // UC18 passo 5: ponto de extensão "Nível crítico" → UC19. Uma falha ao
     // notificar não desfaz a atualização já gravada.
-    const passaramACritico = alteracoes.filter((a) => a.para === 'CRITICO').map((a) => a.tipo);
+    const passaramACritico = alteracoes
+      .filter((a) => a.para === 'CRITICO')
+      .map((a) => a.tipo);
     let doadoresNotificados = 0;
-    if (passaramACritico.length) {
+    if (eventoId) {
       try {
-        ({ doadoresNotificados } = await this.necessidadeCritica.notificarDoadores(hospitalId, passaramACritico));
-      } catch (erro) {
-        this.logger.error(`Falha ao notificar doadores (UC19): ${String(erro)}`);
+        const resultado =
+          await this.necessidadeCritica.processarEvento(eventoId);
+        doadoresNotificados = resultado?.doadoresNotificados ?? 0;
+      } catch {
+        this.logger.error(
+          `O evento crítico ${eventoId} permanece salvo para reprocessamento.`,
+        );
       }
     }
 
     return {
-      mensagem: 'Necessidades atualizadas.',
+      mensagem: alteracoes.length
+        ? 'Necessidades atualizadas.'
+        : 'Não há alterações a salvar.',
       alteracoes: alteracoes.map(({ tipo, de, para }) => ({ tipo, de, para })),
       passaramACritico,
       doadoresNotificados,
@@ -109,10 +139,19 @@ export class NecessidadesService {
   }
 
   // RN03: evolução das necessidades do próprio hospital.
-  async historico(hospitalId: string, { tipo, de, ate, pagina, tamanhoPagina }: HistoricoNecessidadesDto) {
+  async historico(
+    hospitalId: string,
+    { tipo, de, ate, pagina, tamanhoPagina }: HistoricoNecessidadesDto,
+  ) {
     const where = {
-      necessidade: { hospitalId, ...(tipo ? { tipoSanguineo: { sigla: tipo } } : {}) },
-      alteradoEm: { gte: de ? new Date(de) : undefined, lte: ate ? new Date(ate) : undefined },
+      necessidade: {
+        hospitalId,
+        ...(tipo ? { tipoSanguineo: { sigla: tipo } } : {}),
+      },
+      alteradoEm: {
+        gte: de ? new Date(de) : undefined,
+        lte: ate ? new Date(ate) : undefined,
+      },
     };
 
     const [registros, total] = await Promise.all([
@@ -123,7 +162,9 @@ export class NecessidadesService {
           nivelNovo: true,
           alteradoEm: true,
           alteradoPor: { select: { nome: true } },
-          necessidade: { select: { tipoSanguineo: { select: { sigla: true } } } },
+          necessidade: {
+            select: { tipoSanguineo: { select: { sigla: true } } },
+          },
         },
         orderBy: { alteradoEm: 'desc' },
         skip: (pagina - 1) * tamanhoPagina,

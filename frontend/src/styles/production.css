@@ -448,3 +448,6 @@ form .button {
     transition: none;
   }
 }
+.privacy-requests { display: grid; gap: 1.5rem; }
+.privacy-requests form { display: grid; gap: 1rem; }
+.privacy-requests textarea { min-height: 8rem; resize: vertical; }

@@ -1,10 +1,10 @@
-# Entrega e validação — 17 de outubro de 2026
+# Entrega e validação — 18 de outubro de 2026
 
 ## Resultado implementado
 
 O site consulta a API para autenticação, cadastro, perfil, jornada clínica, instituições, necessidades, estoque e comunidade. Os dados deixaram de depender de alterações em memória no navegador. As permissões são verificadas no servidor por usuário e instituição. Publicações e comentários são paginados, avisos institucionais verificados têm fixação com expiração e selos são determinados pelo cadastro profissional.
 
-O front-end usa nomes de arquivo em kebab-case, componentes React com convenção de tipos e funções/variáveis em camelCase. Os seletores encadeados consultam Estados e Municípios do IBGE. O tour de primeiro acesso bloqueia a interface, distingue os quatro perfis e persiste a conclusão local por usuário. O Flutter compartilha identidade visual, contratos e estrutura de navegação, com GPS mediante permissão e alternativa manual pelo IBGE.
+O front-end usa nomes de arquivo em kebab-case, componentes React com convenção de tipos e funções/variáveis em camelCase. Os seletores encadeados consultam Estados e Municípios do IBGE. O tour de primeiro acesso bloqueia a interface, distingue os quatro perfis e persiste a conclusão versionada por conta no servidor. O Flutter compartilha identidade visual, contratos e estrutura de navegação, com GPS mediante permissão e alternativa manual pelo IBGE.
 
 O Figma concentra as interfaces oficiais em uma página. As versões anteriores foram retiradas do arquivo ativo. As interfaces usam Poppins, magenta, petróleo e cantos arredondados. Há navegação lateral no desktop, acionador de menu na web mobile e quatro destinos inferiores por perfil no aplicativo. As publicações compartilhadas preservam o contexto de navegação. A auditoria estrutural não encontrou destinos removidos, siglas internas de páginas ou textos de apresentação local; os tours não têm transições automáticas em ciclo. Os fluxos principais também foram conferidos em Present; essa inspeção é distinta dos testes de integração do produto.
 
@@ -12,13 +12,13 @@ O Figma concentra as interfaces oficiais em uma página. As versões anteriores 
 
 | Verificação | Resultado |
 |---|---|
-| Site | Compilação, lint e convenção de nomes aprovados; quatro testes de expiração e ordenação do feed |
-| API | Compilação e lint aprovados; 216 testes unitários e 58 de integração aprovados |
-| Banco | Nove migrações aplicadas em PostgreSQL/PostGIS descartável; SQL consolidado aplicado separadamente em banco vazio |
+| Site | Compilação, lint e convenção de nomes; 24 testes de feed, IBGE, tour e rotas |
+| API | 216 testes unitários e bateria de integração ampliada com nove regressões da auditoria; evidências da revisão em `correcoes-da-auditoria.md` |
+| Banco | Doze migrações versionadas e SQL consolidado; aplicação somente em PostgreSQL/PostGIS descartável nesta revisão |
 | Autorização | Testes cobrem isolamento institucional, sessão, publicação por perfis, consentimento e operações de estoque |
 | Arquivos | Envio e recuperação de exames validados com armazenamento S3 local e cifra da aplicação |
 | Imagens Docker | API e site compilados e executados localmente com usuário não root e sistema de arquivos somente leitura |
-| Aplicativo | Análise do Dart sem problemas e dois testes aprovados, incluindo apresentação obrigatória e tela de 360 px com texto ampliado |
+| Aplicativo | Análise do Dart sem problemas e 22 testes aprovados, incluindo IBGE, GPS controlado, tour por conta e tela de 360 px com texto ampliado |
 | Navegador | Layouts em 360 e 1440 px sem rolagem horizontal; IBGE, primeiro acesso, menu e apresentação de comunidade conferidos |
 
 Os testes foram executados em ambientes locais descartáveis. Não houve alteração de banco compartilhado da VM, uso da chave SSH ou provisionamento na AWS. A configuração de integração contínua acompanha o repositório; o resultado remoto deve ser conferido no pull request.
@@ -43,3 +43,5 @@ Uma VM é uma forma de executar serviços; o código também pode usar container
 | Jira | Progresso registrado pela sessão do navegador em seis tarefas de identidade, prototipagem e testes; permanecem em Fazendo para revisão/aceite. A execução formal dos 23 casos, as seções finais do TCC e o manual/apresentação ainda precisam de consolidação |
 
 A base de código está estruturada para homologação e preparação de produção. A aprovação de código não substitui a conclusão dessas dependências operacionais e dos fluxos nativos pendentes.
+
+As correções desta revisão estão descritas em [correções da auditoria](correcoes-da-auditoria.md), incluindo a fila durável de avisos críticos, a reserva de envio de e-mails, os cancelamentos institucionais e o atendimento administrativo de encerramento. A matriz dos casos do trabalho acadêmico está em [rastreabilidade dos testes](rastreabilidade-de-testes.md); cobertura automatizada não equivale ao aceite formal dos 23 casos.

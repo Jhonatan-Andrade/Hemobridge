@@ -300,7 +300,7 @@ function Exams() {
     </>
   )
 }
-function Notifications() {
+export function Notifications() {
   const [page, setPage] = useState(1),
     resource = useResource<{
       itens: { id: string; titulo: string; mensagem: string; lida: boolean; enviadaEm: string }[]

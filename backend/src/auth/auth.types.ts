@@ -17,6 +17,8 @@ export interface UsuarioAutenticado {
   perfil: Perfil;
   papel: Papel;
   senhaProvisoria: boolean;
+  isFirstAccess?: boolean;
+  tourVersion?: number;
 }
 
 /** Seleção do vínculo institucional de médicos e representantes. */
@@ -25,8 +27,7 @@ export const SELECAO_INSTITUICAO = {
     select: {
       hospital: { select: { ativo: true } },
       vinculos: {
-        where: { ativo: true },
-        select: { hospital: { select: { ativo: true } } },
+        select: { ativo: true, hospital: { select: { ativo: true } } },
       },
     },
   },
@@ -37,11 +38,14 @@ export const SELECAO_INSTITUICAO = {
 export function instituicaoDesativada(usuario: {
   medico: {
     hospital: { ativo: boolean };
-    vinculos?: { hospital: { ativo: boolean } }[];
+    vinculos?: { ativo?: boolean; hospital: { ativo: boolean } }[];
   } | null;
   representante: { hospital: { ativo: boolean } } | null;
 }): boolean {
-  if (usuario.medico?.vinculos?.some((v) => v.hospital.ativo)) return false;
+  if (usuario.medico?.vinculos?.length)
+    return !usuario.medico.vinculos.some(
+      (v) => v.ativo !== false && v.hospital.ativo,
+    );
   const hospital = usuario.medico?.hospital ?? usuario.representante?.hospital;
   return hospital !== undefined && !hospital.ativo;
 }

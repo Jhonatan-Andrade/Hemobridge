@@ -409,7 +409,7 @@ export function PostPage(p: CommunityProps) {
   return (
     <main className="publication-page">
       <RouteLink className="back-link" to={p.postOrigin} navigate={p.navigate}>
-        ← Voltar à comunidade
+        ← {p.postOrigin === 'home' ? 'Voltar ao início' : 'Voltar à comunidade'}
       </RouteLink>
       <PublicationCard publication={post} full onLike={p.onLike} onOpenPost={p.onOpenPost} />
       <section id="comments" className="comments-section">

@@ -1,12 +1,12 @@
 # Apresentação inicial e linguagem das interfaces
 
-Cada conta possui uma preferência booleana `isFirstAccess`, inicialmente verdadeira quando não existe registro local. A Web persiste a conclusão em `localStorage`, na chave `hemobridge.isFirstAccess.<usuarioId>`. O app usa `SharedPreferences`, na chave `isFirstAccess.<usuarioId>`. A conclusão de uma conta não libera outra. Limpar os dados locais ou trocar de dispositivo faz a apresentação reaparecer.
+Cada conta possui a flag booleana `isFirstAccess`, inicialmente verdadeira no PostgreSQL. A API devolve a flag e a versão vigente em `GET /auth/me`. A Web e o app registram a conclusão em `POST /auth/tour/conclusao`, enviando somente a versão; a conta é determinada pela sessão autenticada. A conclusão é idempotente e grava versão e instante. Trocar de dispositivo ou limpar as preferências do navegador não desfaz a conclusão. Uma nova versão obrigatória volta a exigir a apresentação.
 
 O tour obrigatório começa após o login e, quando aplicável, depois da troca da senha provisória. São quatro etapas por perfil: a jornada da doação, as áreas de trabalho ou acompanhamento, Comunidade e serviços relacionados, e Perfil/privacidade. A Web explica os destinos do menu; o app explica suas quatro abas inferiores. O conteúdo evita instruções de preenchimento de campos.
 
-Na Web, um diálogo modal nativo bloqueia o restante da página e mantém o foco no tour. Escape, clique no fundo, mudança de rota e recarregamento não registram conclusão. No Flutter, um `Dialog` é apresentado antes da montagem da área principal; `PopScope` bloqueia o retorno durante o primeiro acesso. O botão de conclusão só aparece na última etapa. O app só libera a área principal após salvar a preferência; uma falha permite tentar novamente. A Web mantém a conclusão na aba se o armazenamento local estiver indisponível, reapresentando o tour após abrir uma nova aba ou sessão sem persistência.
+Na Web, um diálogo modal nativo bloqueia o restante da página, cicla Tab/Shift+Tab entre controles e recupera o foco se houver tentativa de saída. Escape, clique no fundo, mudança de rota e recarregamento não registram conclusão. No Flutter, um `Dialog` é apresentado antes da montagem da área principal; `PopScope` bloqueia o retorno durante o primeiro acesso. O botão de conclusão só aparece na última etapa. Ambos aguardam a confirmação do servidor; falha de rede ou gravação mantém o bloqueio e permite tentar novamente. Nenhuma preferência local pode liberar uma conta.
 
-Após concluir, a orientação pode ser revista pelo menu da Web ou pelo Perfil do app. Nessa revisão, fechar ou voltar é permitido e não redefine o primeiro acesso. A preferência local é um controle de experiência; as permissões e a autenticação continuam sendo aplicadas pela API.
+Após concluir, a orientação pode ser revista pelo menu da Web ou pelo Perfil do app. Nessa revisão, fechar ou voltar é permitido e não redefine o primeiro acesso. A flag controla a experiência dos clientes; a API aplica autorização independentemente do tour e não usa essa flag como permissão clínica.
 
 ## Tempos das etapas
 

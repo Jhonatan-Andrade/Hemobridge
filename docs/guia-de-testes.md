@@ -27,7 +27,7 @@ npm ci
 npm run dev -- --host 127.0.0.1 --port 5174
 ```
 
-Abra `http://localhost:5174`. A API permanece aberta no primeiro terminal. Os e-mails de recuperação ficam na caixa local `http://localhost:8027`, sem envio a destinatários externos. O tour obrigatório termina somente na última etapa e pode ser reaberto pelo menu. Utilize somente dados de testes ao experimentar cadastro, comentários e anexos.
+Abra `http://localhost:5174`. A API permanece aberta no primeiro terminal. Os e-mails de recuperação ficam na caixa local `http://localhost:8027`, sem envio a destinatários externos. O tour obrigatório termina somente na última etapa, grava a conclusão por conta no servidor e pode ser reaberto pelo menu. Utilize somente dados de testes ao experimentar cadastro, comentários e anexos.
 
 ## Contas e roteiro
 
@@ -40,6 +40,8 @@ Senha das contas abaixo: `Teste2026hb`. São exclusivas do banco de testes e nã
 | Médico | medico.teste@hemobridge.local | Agenda, instituição, atendimentos atribuídos, exames e comunidade |
 | Representante de Hospital | representante.teste@hemobridge.local | Necessidades, estoque e avisos da comunidade |
 | Administrador | admin.teste@hemobridge.local | Mapa regional, informações verificadas, moderação e comunidade |
+
+Para conferir as correções: abra uma publicação a partir do Início e volte à mesma origem; repita na Comunidade. Conclua o tour, recarregue e entre na mesma conta em outro navegador. Abra a recuperação pela mensagem da caixa local e confira a tela de nova senha. Notificações devem ter e-mails genéricos; detalhes ficam na área autenticada. No menu administrativo, Privacidade reúne solicitações de encerramento com fundamentação e revisão de guarda. Teste esse encerramento somente com uma conta descartável própria, pois ele revoga seu acesso. A execução automatizada equivalente está em `backend/test/audit-remediation.e2e-spec.ts`.
 
 Teste o site com janela larga e estreita: desktop com barra lateral; web mobile com ícone para abrir o menu. Na comunidade, confira o aviso fixado, os selos, os comentários e o carregamento de mais publicações. Publique uma mensagem geral sobre doação, recarregue e confirme a persistência. Exames e operações clínicas seguem as permissões e a situação de cada conta.
 

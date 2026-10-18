@@ -10,11 +10,13 @@ export const INSTITUICAO_ATIVA: Prisma.DisponibilidadeMedicoWhereInput = {
 
 export function vinculoDaAgendaAtivo(h: {
   hospitalId: string | null;
-  medico: { hospitalId: string; vinculos: { hospitalId: string }[] };
+  medico: {
+    hospitalId: string;
+    vinculos: { hospitalId: string; ativo?: boolean }[];
+  };
 }) {
-  return (
-    !h.hospitalId ||
-    h.hospitalId === h.medico.hospitalId ||
-    h.medico.vinculos.some((v) => v.hospitalId === h.hospitalId)
-  );
+  const id = h.hospitalId ?? h.medico.hospitalId;
+  return h.medico.vinculos.length
+    ? h.medico.vinculos.some((v) => v.hospitalId === id && v.ativo !== false)
+    : id === h.medico.hospitalId;
 }

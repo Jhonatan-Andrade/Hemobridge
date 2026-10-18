@@ -48,7 +48,7 @@ export function LegalContent({ kind = 'privacy' }: { kind?: string }) {
             conta não elimina automaticamente esses registros.
           </p>
           <p>
-            O navegador mantém preferências de leitura e a conclusão da apresentação inicial. A
+            O navegador mantém preferências de leitura. A conclusão da apresentação inicial é salva na conta, no servidor. A
             sessão web utiliza cookie protegido, inacessível ao JavaScript. O serviço não utiliza
             dados de saúde em publicidade.
           </p>
