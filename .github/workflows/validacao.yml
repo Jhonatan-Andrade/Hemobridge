@@ -80,11 +80,16 @@ jobs:
       - run: npm audit --omit=dev --audit-level=high
   aplicativo:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     defaults:
       run:
         working-directory: app
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.41.5'
@@ -92,3 +97,12 @@ jobs:
           cache: true
       - run: flutter pub get
       - run: flutter analyze && flutter test
+      - name: Compilar APK de teste Android
+        run: flutter build apk --debug --target-platform android-arm64,android-x64 --dart-define=API_URL=http://127.0.0.1:3000
+      - name: Disponibilizar APK para homologação
+        uses: actions/upload-artifact@v4
+        with:
+          name: hemobridge-android-debug-${{ github.sha }}
+          path: app/build/app/outputs/flutter-apk/app-debug.apk
+          if-no-files-found: error
+          retention-days: 7
