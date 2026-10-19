@@ -14,7 +14,9 @@ Cadastro com termo vigente, login, recuperação e troca da senha inicial; apres
 
 A agenda usa Próximos/Histórico e páginas de 30. Trocar instituição ou período invalida respostas antigas. O paciente não altera a tipagem validada; decisões médicas exigem autorização do servidor e confirmação explícita. Sair da conta remove também as telas privadas abertas. A administração completa de contas/instituições permanece no site.
 
-A análise Dart e os 71 testes de serviço/widget passaram em 19/10/2026. A compilação Android de testes usa JDK 21 e SDK 36; o fluxo de integração contínua compila o APK debug para ARM64 e x64 e publica o artefato identificado pelo commit por sete dias, somente quando a compilação passa. GPS, seleção de arquivos, PDF e integrações externas precisam de validação em aparelhos reais. Consulte a [preparação e execução Android](../docs/preparacao-android.md) e a [homologação dos fluxos nativos](../docs/homologacao-fluxos-nativos.md).
+A análise Dart e os 76 testes de serviço/widget passaram em 19/10/2026. O APK da base anterior foi instalado em Android 16, com entrada nos cinco cenários de conta e captura pontual do GPS. A homologação física revelou um PDF inválido na carga de testes; o gerador e a apresentação de erros foram corrigidos, mas os arquivos antigos armazenados permanecem intactos. O [relatório Android](../docs/homologacao-android-2026-10-19.md) distingue o que foi observado no aparelho das correções verificadas por testes.
+
+A compilação Android de testes usa JDK 21 e SDK 36; o fluxo de integração contínua compila o APK debug para ARM64 e x64 e publica o artefato identificado pelo commit por sete dias, somente quando a compilação passa. Seleção e envio de arquivos, abertura do PDF corrigido, cenários adicionais de permissão e integrações externas ainda precisam de validação física. Consulte a [preparação e execução Android](../docs/preparacao-android.md) e a [homologação dos fluxos nativos](../docs/homologacao-fluxos-nativos.md).
 
 ## Distribuição
 

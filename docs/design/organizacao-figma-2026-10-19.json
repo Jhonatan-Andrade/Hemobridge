@@ -1,0 +1,148 @@
+{
+  "date": "2026-10-19",
+  "fileKey": "7aKvXrajoLmEGpaYsn0dQ1",
+  "pageId": "0:1",
+  "originalScreenCount": 519,
+  "rootSections": [
+    {
+      "id": "858:9704",
+      "name": "Web desktop",
+      "groups": 6
+    },
+    {
+      "id": "858:9711",
+      "name": "Web mobile",
+      "groups": 6
+    },
+    {
+      "id": "858:9718",
+      "name": "Aplicativo",
+      "groups": 6
+    },
+    {
+      "id": "858:9725",
+      "name": "Biblioteca · componentes e identidade",
+      "groups": 62
+    }
+  ],
+  "flows": [
+    {
+      "nodeId": "43:1340",
+      "name": "Web desktop · Início"
+    },
+    {
+      "nodeId": "8:1746",
+      "name": "Web desktop · Paciente/Doador"
+    },
+    {
+      "nodeId": "101:3115",
+      "name": "Web desktop · Médico"
+    },
+    {
+      "nodeId": "101:3114",
+      "name": "Web desktop · Representante de Hospital"
+    },
+    {
+      "nodeId": "705:7037",
+      "name": "Web desktop · Administrador"
+    },
+    {
+      "nodeId": "660:7571",
+      "name": "Web mobile · Início"
+    },
+    {
+      "nodeId": "660:6547",
+      "name": "Web mobile · Paciente/Doador"
+    },
+    {
+      "nodeId": "660:11338",
+      "name": "Web mobile · Médico"
+    },
+    {
+      "nodeId": "660:11362",
+      "name": "Web mobile · Representante de Hospital"
+    },
+    {
+      "nodeId": "708:7087",
+      "name": "Web mobile · Administrador"
+    },
+    {
+      "nodeId": "43:1309",
+      "name": "Aplicativo · Início"
+    },
+    {
+      "nodeId": "8:518",
+      "name": "Aplicativo · Paciente/Doador"
+    },
+    {
+      "nodeId": "226:5074",
+      "name": "Aplicativo · Médico"
+    },
+    {
+      "nodeId": "226:5092",
+      "name": "Aplicativo · Representante de Hospital"
+    },
+    {
+      "nodeId": "706:7061",
+      "name": "Aplicativo · Administrador"
+    },
+    {
+      "nodeId": "203:5085",
+      "name": "Web desktop · Boas-vindas · Paciente/Doador"
+    },
+    {
+      "nodeId": "203:5449",
+      "name": "Web desktop · Boas-vindas · Médico"
+    },
+    {
+      "nodeId": "730:8451",
+      "name": "Web desktop · Boas-vindas · Representante de Hospital"
+    },
+    {
+      "nodeId": "730:8460",
+      "name": "Web desktop · Boas-vindas · Administrador"
+    },
+    {
+      "nodeId": "660:10580",
+      "name": "Web mobile · Boas-vindas · Paciente/Doador"
+    },
+    {
+      "nodeId": "660:10780",
+      "name": "Web mobile · Boas-vindas · Médico"
+    },
+    {
+      "nodeId": "730:8454",
+      "name": "Web mobile · Boas-vindas · Representante de Hospital"
+    },
+    {
+      "nodeId": "730:8463",
+      "name": "Web mobile · Boas-vindas · Administrador"
+    },
+    {
+      "nodeId": "203:4831",
+      "name": "Aplicativo · Boas-vindas · Paciente/Doador"
+    },
+    {
+      "nodeId": "203:5330",
+      "name": "Aplicativo · Boas-vindas · Médico"
+    },
+    {
+      "nodeId": "730:8448",
+      "name": "Aplicativo · Boas-vindas · Representante de Hospital"
+    },
+    {
+      "nodeId": "730:8457",
+      "name": "Aplicativo · Boas-vindas · Administrador"
+    }
+  ],
+  "counts": {
+    "reactions": 3357,
+    "destinations": 3438,
+    "broken": 0,
+    "crossVersion": 0,
+    "automaticTransitions": 40,
+    "automaticCycles": 0
+  },
+  "broken": [],
+  "notes": "Validação estrutural das conexões, incluindo ações condicionais; não equivale a um ensaio manual de todos os caminhos no Present."
+}

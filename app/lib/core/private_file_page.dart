@@ -34,12 +34,41 @@ class PrivateFilePage extends StatefulWidget {
 
 class _PrivateFilePageState extends State<PrivateFilePage> {
   late Future<Uint8List> future;
-  final String sourceName = UniqueKey().toString();
+  String sourceName = UniqueKey().toString();
   @override
   void initState() {
     super.initState();
     future = widget.api.getFile(widget.path);
   }
+
+  void retry() => setState(() {
+    sourceName = UniqueKey().toString();
+    future = widget.api.getFile(widget.path);
+  });
+
+  Widget fileError(String message) => Center(
+    child: SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Semantics(
+            liveRegion: true,
+            child: Text(message, textAlign: TextAlign.center),
+          ),
+          const SizedBox(height: 16),
+          OutlinedButton(
+            onPressed: retry,
+            child: const Text('Tentar novamente'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).maybePop(),
+            child: const Text('Voltar'),
+          ),
+        ],
+      ),
+    ),
+  );
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -54,31 +83,23 @@ class _PrivateFilePageState extends State<PrivateFilePage> {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(snapshot.error.toString()),
-                    const SizedBox(height: 16),
-                    OutlinedButton(
-                      onPressed: () => setState(() {
-                        future = widget.api.getFile(widget.path);
-                      }),
-                      child: const Text('Tentar novamente'),
-                    ),
-                  ],
-                ),
-              ),
+            return fileError(
+              snapshot.error is ApiException
+                  ? (snapshot.error as ApiException).message
+                  : 'Não foi possível carregar o arquivo. Tente novamente.',
             );
           }
           final bytes = snapshot.data!;
           return switch (privateFileFormat(bytes)) {
             PrivateFileFormat.pdf => PdfViewer.data(
               bytes,
+              key: ValueKey(sourceName),
               sourceName: sourceName,
-              params: const PdfViewerParams(),
+              params: PdfViewerParams(
+                errorBannerBuilder: (_, _, _, _) => fileError(
+                  'Não foi possível abrir este PDF. O arquivo pode estar incompleto ou danificado. Tente novamente ou solicite um novo envio à equipe.',
+                ),
+              ),
             ),
             PrivateFileFormat.image => InteractiveViewer(
               maxScale: 5,

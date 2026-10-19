@@ -61,6 +61,7 @@ class _CommunityPageState extends State<CommunityPage> {
   Future<void> compose() async {
     final result = await showDialog<bool>(
       context: context,
+      barrierDismissible: false,
       builder: (context) => ComposeDialog(api: widget.api, role: widget.role),
     );
     if (result == true) load(reset: true);
@@ -201,7 +202,10 @@ class _ComposeDialogState extends State<ComposeDialog> {
 
   Future<void> send() async {
     if (!consent || !form.currentState!.validate() || busy) return;
-    setState(() => busy = true);
+    setState(() {
+      busy = true;
+      error = null;
+    });
     try {
       await widget.api.request(
         '/comunidade/publicacoes',
@@ -229,77 +233,81 @@ class _ComposeDialogState extends State<ComposeDialog> {
   }
 
   @override
-  Widget build(BuildContext context) => AlertDialog(
-    title: const Text('Criar publicação'),
-    content: SingleChildScrollView(
-      child: Form(
-        key: form,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextFormField(
-              controller: title,
-              maxLength: 120,
-              decoration: const InputDecoration(labelText: 'Título'),
-              validator: (v) => (v?.trim().length ?? 0) >= 8
-                  ? null
-                  : 'Use ao menos oito caracteres.',
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: content,
-              maxLength: 2000,
-              maxLines: 5,
-              decoration: const InputDecoration(labelText: 'Texto'),
-              validator: (v) => (v?.trim().length ?? 0) >= 20
-                  ? null
-                  : 'Use ao menos 20 caracteres.',
-            ),
-            DropdownButtonFormField<String>(
-              initialValue: topic,
-              items: const [
-                DropdownMenuItem(
-                  value: 'DOACAO',
-                  child: Text('Doação de sangue'),
+  Widget build(BuildContext context) => PopScope(
+    canPop: !busy,
+    child: AlertDialog(
+      title: const Text('Criar publicação'),
+      content: SingleChildScrollView(
+        child: Form(
+          key: form,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                controller: title,
+                maxLength: 120,
+                decoration: const InputDecoration(labelText: 'Título'),
+                validator: (v) => (v?.trim().length ?? 0) >= 8
+                    ? null
+                    : 'Use ao menos oito caracteres.',
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: content,
+                maxLength: 2000,
+                maxLines: 5,
+                decoration: const InputDecoration(labelText: 'Texto'),
+                validator: (v) => (v?.trim().length ?? 0) >= 20
+                    ? null
+                    : 'Use ao menos 20 caracteres.',
+              ),
+              DropdownButtonFormField<String>(
+                initialValue: topic,
+                isExpanded: true,
+                items: const [
+                  DropdownMenuItem(
+                    value: 'DOACAO',
+                    child: Text('Doação de sangue'),
+                  ),
+                  DropdownMenuItem(value: 'SAUDE', child: Text('Saúde')),
+                  DropdownMenuItem(
+                    value: 'AVISO_INSTITUCIONAL',
+                    child: Text('Aviso institucional'),
+                  ),
+                ],
+                onChanged: (v) => setState(() => topic = v ?? 'DOACAO'),
+              ),
+              if (widget.role == 'REPRESENTANTE')
+                CheckboxListTile(
+                  value: critical,
+                  onChanged: (v) => setState(() => critical = v ?? false),
+                  title: const Text('Aviso crítico por 24 horas'),
+                  subtitle: const Text('Exclusivo de instituição verificada.'),
                 ),
-                DropdownMenuItem(value: 'SAUDE', child: Text('Saúde')),
-                DropdownMenuItem(
-                  value: 'AVISO_INSTITUCIONAL',
-                  child: Text('Aviso institucional'),
-                ),
-              ],
-              onChanged: (v) => setState(() => topic = v ?? 'DOACAO'),
-            ),
-            if (widget.role == 'REPRESENTANTE')
               CheckboxListTile(
-                value: critical,
-                onChanged: (v) => setState(() => critical = v ?? false),
-                title: const Text('Aviso crítico por 24 horas'),
-                subtitle: const Text('Exclusivo de instituição verificada.'),
+                value: consent,
+                onChanged: (v) => setState(() => consent = v ?? false),
+                title: const Text('Concordo com as normas da comunidade.'),
+                subtitle: const Text(
+                  'Apenas saúde e doação, sem dados pessoais, diagnósticos individuais, discriminação ou publicidade enganosa.',
+                ),
               ),
-            CheckboxListTile(
-              value: consent,
-              onChanged: (v) => setState(() => consent = v ?? false),
-              title: const Text('Concordo com as normas da comunidade.'),
-              subtitle: const Text(
-                'Apenas saúde e doação, sem dados pessoais, diagnósticos individuais, discriminação ou publicidade enganosa.',
-              ),
-            ),
-            if (error != null) Text(error!),
-          ],
+              if (error != null) Text(error!),
+            ],
+          ),
         ),
       ),
+      actions: [
+        TextButton(
+          onPressed: busy ? null : () => Navigator.pop(context),
+          child: const Text('Cancelar'),
+        ),
+        FilledButton(
+          onPressed: busy || !consent ? null : send,
+          child: Text(busy ? 'Publicando…' : 'Publicar'),
+        ),
+      ],
     ),
-    actions: [
-      TextButton(
-        onPressed: busy ? null : () => Navigator.pop(context),
-        child: const Text('Cancelar'),
-      ),
-      FilledButton(
-        onPressed: busy || !consent ? null : send,
-        child: Text(busy ? 'Publicando…' : 'Publicar'),
-      ),
-    ],
   );
 }
 
@@ -315,7 +323,7 @@ class _CommentsPageState extends State<CommentsPage> {
   final text = TextEditingController();
   Map<String, dynamic>? post;
   String? error;
-  bool consent = false, busy = false;
+  bool consent = false, busy = false, loadingMore = false, hasMore = false;
   int page = 1;
   @override
   void initState() {
@@ -334,24 +342,14 @@ class _CommentsPageState extends State<CommentsPage> {
       final value = await widget.api.request(
         '/comunidade/publicacoes/${widget.id}',
       );
-      if (mounted) setState(() => post = Map<String, dynamic>.from(value));
-    } catch (e) {
-      if (mounted) setState(() => error = e.toString());
-    }
-  }
-
-  Future<void> more() async {
-    try {
-      final data = await widget.api.request(
-        '/comunidade/publicacoes/${widget.id}/comentarios?pagina=${page + 1}',
-      );
       if (mounted) {
         setState(() {
-          post!['comments'] = [
-            ...post!['comments'] as List,
-            ...data['items'] as List,
-          ];
-          page++;
+          post = Map<String, dynamic>.from(value);
+          page = 1;
+          hasMore =
+              (post!['comments'] as List).length <
+              (post!['commentsTotal'] as num);
+          error = null;
         });
       }
     } catch (e) {
@@ -359,9 +357,45 @@ class _CommentsPageState extends State<CommentsPage> {
     }
   }
 
+  Future<void> more() async {
+    if (loadingMore || busy || post == null || !hasMore) return;
+    final nextPage = page + 1;
+    setState(() {
+      loadingMore = true;
+      error = null;
+    });
+    try {
+      final data = await widget.api.request(
+        '/comunidade/publicacoes/${widget.id}/comentarios?pagina=$nextPage',
+      );
+      if (mounted) {
+        setState(() {
+          final seen = (post!['comments'] as List)
+              .map((comment) => comment['id'])
+              .toSet();
+          post!['comments'] = [
+            ...post!['comments'] as List,
+            ...(data['items'] as List).where(
+              (comment) => seen.add(comment['id']),
+            ),
+          ];
+          page = nextPage;
+          hasMore = data['hasMore'] == true;
+        });
+      }
+    } catch (e) {
+      if (mounted) setState(() => error = e.toString());
+    } finally {
+      if (mounted) setState(() => loadingMore = false);
+    }
+  }
+
   Future<void> send() async {
-    if (!consent || text.text.trim().isEmpty || busy) return;
-    setState(() => busy = true);
+    if (!consent || text.text.trim().isEmpty || busy || loadingMore) return;
+    setState(() {
+      busy = true;
+      error = null;
+    });
     try {
       await widget.api.request(
         '/comunidade/publicacoes/${widget.id}/comentarios',
@@ -372,10 +406,10 @@ class _CommentsPageState extends State<CommentsPage> {
           'versaoNormas': '2026-10',
         },
       );
+      if (!mounted) return;
       text.clear();
-      if (mounted) setState(() => consent = false);
+      setState(() => consent = false);
       await load();
-      page = 1;
     } catch (e) {
       if (mounted) setState(() => error = e.toString());
     } finally {
@@ -391,8 +425,13 @@ class _CommentsPageState extends State<CommentsPage> {
         padding: const EdgeInsets.all(24),
         children: [
           if (error != null) Text(error!),
-          if (post == null)
+          if (post == null && error == null)
             const Center(child: CircularProgressIndicator())
+          else if (post == null)
+            OutlinedButton(
+              onPressed: load,
+              child: const Text('Tentar novamente'),
+            )
           else ...[
             PostCard(post: post!, onOpen: () {}),
             Text(
@@ -406,11 +445,14 @@ class _CommentsPageState extends State<CommentsPage> {
                   subtitle: Text(c['text'] as String),
                 ),
               ),
-            if ((post!['comments'] as List).length <
-                (post!['commentsTotal'] as num))
+            if (hasMore)
               OutlinedButton(
-                onPressed: more,
-                child: const Text('Mostrar mais comentários'),
+                onPressed: busy || loadingMore ? null : more,
+                child: Text(
+                  loadingMore
+                      ? 'Carregando comentários…'
+                      : 'Mostrar mais comentários',
+                ),
               ),
             TextField(
               controller: text,
@@ -431,7 +473,7 @@ class _CommentsPageState extends State<CommentsPage> {
               ),
             ),
             FilledButton(
-              onPressed: busy || !consent ? null : send,
+              onPressed: busy || loadingMore || !consent ? null : send,
               child: Text(busy ? 'Enviando…' : 'Enviar comentário'),
             ),
           ],

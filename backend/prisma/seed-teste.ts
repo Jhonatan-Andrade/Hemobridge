@@ -14,6 +14,7 @@ import { S3ArmazenamentoService } from '../src/armazenamento/s3-armazenamento.se
 import { gerarHashSenha } from '../src/common/senha.js';
 import { SIGLAS_TIPOS } from '../src/common/tipos-sanguineos.js';
 import { criarAdapterPg } from '../src/prisma/adapter.js';
+import { criarPdfTeste } from './pdf-teste.js';
 
 if (process.env['NODE_ENV'] === 'production') {
   throw new Error('seed-teste não pode rodar em produção.');
@@ -218,7 +219,7 @@ async function main() {
 
   // --- Fluxo clínico coerente com a situação de cada paciente ----------------------
   const armazenamento = criarArmazenamento();
-  const pdfExemplo = Buffer.from('%PDF-1.4\n% Resultado de exame sintético para validação\n%%EOF\n');
+  const pdfExemplo = await criarPdfTeste();
   let exames = 0;
   // Horários sem sobreposição: cada médico recebe um dia diferente por consulta.
   const passadas = new Map<string, number>();
