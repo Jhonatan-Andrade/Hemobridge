@@ -51,7 +51,9 @@ class _RoleWorkspaceState extends State<RoleWorkspace> {
   }
 
   Future<void> reload() async {
-    setState(() => future = load());
+    setState(() {
+      future = load();
+    });
     await future;
   }
 

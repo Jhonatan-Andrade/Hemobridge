@@ -78,10 +78,20 @@ type DoctorSlot = {
   id: string
   inicio: string
   fim: string
+  linkVideochamada?: string | null
   consultas: { id: string; status: string; paciente: { usuario: { nome: string } } }[]
 }
 function DoctorAgenda({ hospitalId, attendance }: { hospitalId: string; attendance: boolean }) {
-  const resource = useResource<DoctorSlot[]>(`/medico/agenda?hospitalId=${hospitalId}`)
+  const [period, setPeriod] = useState<'proximos' | 'historico'>('proximos')
+  const [page, setPage] = useState(1)
+  const query = new URLSearchParams({
+    hospitalId,
+    incluirRealizadas: 'true',
+    periodo: period,
+    pagina: String(page),
+    tamanhoPagina: '30',
+  })
+  const resource = useResource<DoctorSlot[]>(`/medico/agenda?${query}`)
   const [feedback, setFeedback] = useState(''),
     [busy, setBusy] = useState(false)
   async function publish(e: FormEvent<HTMLFormElement>) {
@@ -101,6 +111,8 @@ function DoctorAgenda({ hospitalId, attendance }: { hospitalId: string; attendan
         },
       })
       form.reset()
+      setPeriod('proximos')
+      setPage(1)
       resource.reload()
       setFeedback('Horário publicado.')
     } catch (error) {
@@ -113,31 +125,60 @@ function DoctorAgenda({ hospitalId, attendance }: { hospitalId: string; attendan
     <div className="hb-pro-agenda-grid">
       <section className="hb-pro-card">
         <h2>{attendance ? 'Atendimentos atribuídos' : 'Minha agenda'}</h2>
+        <label className="hb-pro-agenda-filter">
+          Período da agenda
+          <select
+            value={period}
+            onChange={(event) => {
+              setPeriod(event.target.value as 'proximos' | 'historico')
+              setPage(1)
+            }}
+          >
+            <option value="proximos">Próximos</option>
+            <option value="historico">Histórico</option>
+          </select>
+        </label>
         {resource.loading ? (
           <p>Carregando agenda…</p>
         ) : resource.error ? (
           <Failure message={resource.error} retry={resource.reload} />
         ) : resource.data?.length ? (
           resource.data.map((s) => (
-            <article className="schedule-item" key={s.id}>
-              <h3>{when(s.inicio)}</h3>
-              <p>Até {when(s.fim)}</p>
-              {s.consultas.length ? (
-                s.consultas.map((c) => (
-                  <div key={c.id}>
-                    <strong>{c.paciente.usuario.nome}</strong>
-                    <p>{c.status}</p>
-                    {attendance && <AttendanceActions id={c.id} onUpdated={resource.reload} />}
-                  </div>
-                ))
-              ) : (
-                <p>Horário disponível</p>
-              )}
-            </article>
+            <DoctorScheduleItem
+              key={s.id}
+              slot={s}
+              attendance={attendance}
+              onUpdated={resource.reload}
+            />
           ))
         ) : (
-          <p>Nenhum horário publicado.</p>
+          <p>
+            {page > 1
+              ? 'Nenhum horário nesta página. Volte à página anterior.'
+              : period === 'proximos'
+                ? 'Nenhum horário futuro nesta instituição.'
+                : 'Nenhum horário no histórico desta instituição.'}
+          </p>
         )}
+        <nav className="actions" aria-label="Páginas da agenda">
+          <button
+            className="button secondary"
+            disabled={resource.loading || page === 1}
+            onClick={() => setPage((value) => Math.max(1, value - 1))}
+          >
+            Anterior
+          </button>
+          <span role="status">Página {page}</span>
+          <button
+            className="button secondary"
+            disabled={
+              resource.loading || !!resource.error || resource.data?.length !== 30 || page >= 10000
+            }
+            onClick={() => setPage((value) => value + 1)}
+          >
+            Próxima
+          </button>
+        </nav>
       </section>
       {!attendance && (
         <section className="hb-pro-card">
@@ -165,15 +206,93 @@ function DoctorAgenda({ hospitalId, attendance }: { hospitalId: string; attendan
     </div>
   )
 }
-function AttendanceActions({ id, onUpdated }: { id: string; onUpdated: () => void }) {
+
+function safeConsultationLink(value?: string | null) {
+  if (!value) return null
+  try {
+    const url = new URL(value)
+    return url.protocol === 'https:' && url.host && !url.username && !url.password ? url.href : null
+  } catch {
+    return null
+  }
+}
+
+export function DoctorScheduleItem({
+  slot,
+  attendance,
+  onUpdated,
+}: {
+  slot: DoctorSlot
+  attendance: boolean
+  onUpdated: () => void
+}) {
+  const [now] = useState(() => Date.now())
+  const future = new Date(slot.inicio).getTime() > now
+  const link = safeConsultationLink(slot.linkVideochamada)
+  return (
+    <article className="schedule-item">
+      <h3>{when(slot.inicio)}</h3>
+      <p>Até {when(slot.fim)}</p>
+      {slot.consultas.length ? (
+        slot.consultas.map((consultation) => (
+          <div key={consultation.id}>
+            <strong>{consultation.paciente.usuario.nome}</strong>
+            <p>
+              {consultation.status === 'REALIZADA'
+                ? 'Realizada'
+                : consultation.status === 'AGENDADA'
+                  ? 'Agendada'
+                  : 'Atendimento encerrado'}
+            </p>
+            {consultation.status === 'AGENDADA' && link && (
+              <p>
+                <a
+                  className="button secondary"
+                  href={link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Entrar na consulta ↗
+                </a>
+              </p>
+            )}
+            {attendance && (
+              <AttendanceActions
+                id={consultation.id}
+                status={consultation.status}
+                canStart={!future}
+                onUpdated={onUpdated}
+              />
+            )}
+          </div>
+        ))
+      ) : (
+        <p>{future ? 'Horário disponível' : 'Sem consulta agendada'}</p>
+      )}
+    </article>
+  )
+}
+
+function AttendanceActions({
+  id,
+  status,
+  canStart,
+  onUpdated,
+}: {
+  id: string
+  status: string
+  canStart: boolean
+  onUpdated: () => void
+}) {
   const [exams, setExams] = useState(''),
     [instructions, setInstructions] = useState(''),
     [feedback, setFeedback] = useState(''),
     [busy, setBusy] = useState(false)
-  async function save(status: string) {
+  async function save(decision: string) {
+    if (busy || !canStart || status !== 'AGENDADA') return
     setBusy(true)
     try {
-      await api(`/medico/consultas/${id}`, { method: 'PATCH', body: { status } })
+      await api(`/medico/consultas/${id}`, { method: 'PATCH', body: { status: decision } })
       setFeedback('Atendimento registrado.')
       onUpdated()
     } catch (error) {
@@ -184,6 +303,7 @@ function AttendanceActions({ id, onUpdated }: { id: string; onUpdated: () => voi
   }
   async function request(e: FormEvent) {
     e.preventDefault()
+    if (busy || !canStart || !['AGENDADA', 'REALIZADA'].includes(status)) return
     setBusy(true)
     try {
       await api(`/medico/consultas/${id}/solicitar-exames`, {
@@ -198,42 +318,53 @@ function AttendanceActions({ id, onUpdated }: { id: string; onUpdated: () => voi
       setBusy(false)
     }
   }
+  if (!['AGENDADA', 'REALIZADA'].includes(status)) return null
   return (
     <details>
-      <summary>Abrir atendimento</summary>
-      <div className="actions">
-        <button className="button" disabled={busy} onClick={() => void save('REALIZADA')}>
-          Registrar como realizado
-        </button>
-        <button
-          className="button secondary"
-          disabled={busy}
-          onClick={() => void save('NAO_COMPARECEU')}
-        >
-          Registrar ausência
-        </button>
-      </div>
+      <summary>{status === 'REALIZADA' ? 'Retomar atendimento' : 'Abrir atendimento'}</summary>
+      {!canStart && <p>O atendimento poderá ser registrado a partir do início agendado.</p>}
+      {status === 'AGENDADA' && (
+        <div className="actions">
+          <button
+            className="button"
+            disabled={busy || !canStart}
+            onClick={() => void save('REALIZADA')}
+          >
+            Registrar como realizado
+          </button>
+          <button
+            className="button secondary"
+            disabled={busy || !canStart}
+            onClick={() => void save('NAO_COMPARECEU')}
+          >
+            Registrar ausência
+          </button>
+        </div>
+      )}
       <form onSubmit={request}>
-        <label>
-          Exames solicitados (um por linha)
-          <textarea
-            value={exams}
-            onChange={(e) => setExams(e.target.value)}
-            required
-            maxLength={1000}
-          />
-        </label>
-        <label>
-          Orientações
-          <textarea
-            value={instructions}
-            onChange={(e) => setInstructions(e.target.value)}
-            maxLength={2000}
-          />
-        </label>
-        <button className="button" disabled={busy}>
-          Solicitar exames
-        </button>
+        <fieldset className="exam-review-fields" disabled={busy || !canStart}>
+          <legend>Solicitar exames ao paciente</legend>
+          <label>
+            Exames solicitados (um por linha)
+            <textarea
+              value={exams}
+              onChange={(e) => setExams(e.target.value)}
+              required
+              maxLength={1000}
+            />
+          </label>
+          <label>
+            Orientações
+            <textarea
+              value={instructions}
+              onChange={(e) => setInstructions(e.target.value)}
+              maxLength={2000}
+            />
+          </label>
+          <button className="button" disabled={busy || !canStart}>
+            Solicitar exames
+          </button>
+        </fieldset>
       </form>
       {feedback && <p role="status">{feedback}</p>}
     </details>

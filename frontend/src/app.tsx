@@ -7,6 +7,7 @@ import './styles/hemobridge-polish.css'
 import './styles/hemobridge-editorial.css'
 import './styles/production.css'
 import { ApiError, api, messageOf } from './services/api-client'
+import { endSession } from './services/session'
 import {
   expirePinnedPublications,
   mergePublications,
@@ -251,7 +252,7 @@ function App() {
   }, [legalOpen])
   async function logout() {
     try {
-      await api('/auth/logout', { method: 'POST' })
+      await endSession()
       setUser(null)
       navigate('home')
     } catch (e) {

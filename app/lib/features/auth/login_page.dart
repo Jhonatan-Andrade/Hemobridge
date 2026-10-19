@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/app_theme.dart';
 import '../../core/session_controller.dart';
+import '../account/registration_page.dart';
 
 class LoginPage extends StatefulWidget {
   final SessionController session;
@@ -73,8 +74,10 @@ class _LoginPageState extends State<LoginPage> {
     } catch (e) {
       if (mounted) setState(() => feedback = e.toString());
     } finally {
-      password.clear();
-      if (mounted) setState(() => busy = false);
+      if (mounted) {
+        password.clear();
+        setState(() => busy = false);
+      }
     }
   }
 
@@ -219,6 +222,29 @@ class _LoginPageState extends State<LoginPage> {
                     TextButton(
                       onPressed: busy ? null : recover,
                       child: const Text('Esqueci minha senha'),
+                    ),
+                  if (!widget.firstPassword)
+                    OutlinedButton(
+                      onPressed: busy
+                          ? null
+                          : () async {
+                              final registered = await Navigator.of(context)
+                                  .push<String>(
+                                    MaterialPageRoute(
+                                      builder: (_) => RegistrationPage(
+                                        api: widget.session.api,
+                                      ),
+                                    ),
+                                  );
+                              if (mounted && registered != null) {
+                                setState(() {
+                                  email.text = registered;
+                                  feedback =
+                                      'Pré-cadastro concluído. Entre com sua senha para continuar.';
+                                });
+                              }
+                            },
+                      child: const Text('Quero me cadastrar'),
                     ),
                 ],
               ),

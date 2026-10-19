@@ -30,6 +30,8 @@ Revisão de 18/10/2026. Esta matriz relaciona os 23 casos do documento acadêmic
 
 ## Como registrar o aceite
 
+Adendo de 19/10/2026: os formulários Flutter, a agenda paginada e o encerramento de sessão possuem evidências adicionais em [homologação dos fluxos nativos](homologacao-fluxos-nativos.md). São 71 testes de serviço/widget Flutter, 35 web, 219 unitários da API e 78 de integração. A compilação Android e os ensaios em aparelhos físicos continuam pendentes; estes números não encerram os casos formais.
+
 Para cada caso, anexar o roteiro e suas pré-condições, ambiente/commit, entrada sem dados reais, resultado esperado e observado, evidência de execução e responsável pelo aceite. Quando falhar, registrar o defeito e a nova execução após a correção. As quantidades de testes automatizados não correspondem uma a uma aos casos formais: um caso pode depender de vários testes e de homologação física.
 
 As tarefas de prototipagem e testes permanecem aguardando revisão/aceite no Jira. Merge é responsabilidade do Jhonatan. A aprovação do pull request, a homologação operacional e a aprovação acadêmica são registros separados.

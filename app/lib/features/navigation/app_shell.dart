@@ -6,6 +6,12 @@ import '../community/community_page.dart';
 import '../locations/locations_page.dart';
 import '../onboarding/onboarding_page.dart';
 import '../workspace/role_workspace.dart';
+import '../patient/patient_workspace.dart';
+import '../professional/doctor_agenda_page.dart';
+import '../professional/doctor_exams_page.dart';
+import '../professional/representative_needs_page.dart';
+import '../professional/representative_stock_page.dart';
+import '../account/patient_profile_page.dart';
 
 class AppShell extends StatefulWidget {
   final SessionController session;
@@ -64,6 +70,16 @@ class _AppShellState extends State<AppShell> {
         ? const LocationsPage()
         : index == 3
         ? ProfilePage(session: widget.session)
+        : patient
+        ? PatientWorkspace(api: widget.session.api)
+        : doctor
+        ? index == 2
+              ? DoctorExamsPage(api: widget.session.api)
+              : DoctorAgendaPage(api: widget.session.api)
+        : representative
+        ? index == 2
+              ? RepresentativeStockPage(api: widget.session.api)
+              : RepresentativeNeedsPage(api: widget.session.api)
         : RoleWorkspace(
             key: ValueKey('$role-$index'),
             api: widget.session.api,
@@ -75,7 +91,9 @@ class _AppShellState extends State<AppShell> {
       body: SafeArea(child: body),
       bottomNavigationBar: NavigationBar(
         selectedIndex: index,
-        onDestinationSelected: (value) => setState(() => index = value),
+        onDestinationSelected: widget.session.signingOut
+            ? null
+            : (value) => setState(() => index = value),
         destinations: List.generate(
           4,
           (i) => NavigationDestination(icon: Icon(icons[i]), label: labels[i]),
@@ -116,29 +134,51 @@ class ProfilePage extends StatelessWidget {
           ),
         ),
       ),
-      OutlinedButton.icon(
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => OnboardingPage(session: session, optional: true),
-          ),
+      if (session.user!['perfil'] == 'PACIENTE')
+        OutlinedButton.icon(
+          onPressed: session.signingOut
+              ? null
+              : () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => Scaffold(
+                      appBar: AppBar(title: const Text('Editar perfil')),
+                      body: SafeArea(
+                        child: PatientProfilePage(api: session.api),
+                      ),
+                    ),
+                  ),
+                ),
+          icon: const Icon(Icons.edit_outlined),
+          label: const Text('Editar meus dados'),
         ),
+      OutlinedButton.icon(
+        onPressed: session.signingOut
+            ? null
+            : () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) =>
+                      OnboardingPage(session: session, optional: true),
+                ),
+              ),
         icon: const Icon(Icons.help_outline),
         label: const Text('Ver apresentação'),
       ),
       FilledButton(
-        onPressed: () async {
-          try {
-            await session.logout();
-          } on ApiException catch (e) {
-            if (context.mounted) {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text(e.message)));
-            }
-          }
-        },
-        child: const Text('Sair'),
+        onPressed: session.signingOut
+            ? null
+            : () async {
+                try {
+                  await session.logout();
+                } on ApiException catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text(e.message)));
+                  }
+                }
+              },
+        child: Text(session.signingOut ? 'Saindo…' : 'Sair'),
       ),
     ],
   );

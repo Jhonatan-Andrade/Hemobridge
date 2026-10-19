@@ -22,7 +22,7 @@ ThemeData hemobridgeTheme() => ThemeData(
     elevation: 0,
     margin: const EdgeInsets.symmetric(vertical: 8),
     shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(22),
       side: const BorderSide(color: Color(0xffdedbd6)),
     ),
   ),
@@ -34,7 +34,7 @@ ThemeData hemobridgeTheme() => ThemeData(
   filledButtonTheme: FilledButtonThemeData(
     style: FilledButton.styleFrom(
       minimumSize: const Size(48, 48),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      shape: const StadiumBorder(),
     ),
   ),
   navigationBarTheme: const NavigationBarThemeData(

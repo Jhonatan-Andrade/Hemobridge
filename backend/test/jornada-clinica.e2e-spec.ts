@@ -50,11 +50,41 @@ describe('Jornada clínica completa e avaliação de exames', () => {
       return r.body.exame.id as string;
     };
     const avaliar = (id: string, body: Record<string, unknown>) => m.patch(`/medico/exames/${id}/avaliacao`).send(body);
-    return { m, p, paciente, medico, consultaId, pedir, enviar, avaliar };
+    return { m, p, paciente, medico, hospital, horarioId: horario.body.id as string, consultaId, pedir, enviar, avaliar };
   }
+
+  it('separa próximos horários do histórico e pagina sem ocultar consultas recentes após cem horários antigos', async () => {
+    const c = await cenario();
+    await db.disponibilidadeMedico.createMany({ data: Array.from({ length: 110 }, (_, i) => {
+      const inicio = new Date(Date.now() - (200 - i) * 86_400_000);
+      return { medicoId: c.medico.id, hospitalId: c.hospital.id, inicio,
+        fim: new Date(inicio.getTime() + 1_800_000), linkVideochamada: 'https://meet.teste.local/historico' };
+    }) });
+    const inicio = new Date(Date.now() + 72 * 3_600_000);
+    const futuro = await c.m.post('/medico/agenda').send({
+      hospitalId: c.hospital.id, inicio: inicio.toISOString(),
+      fim: new Date(inicio.getTime() + 1_800_000).toISOString(),
+      linkVideochamada: 'https://meet.teste.local/proximo',
+    }).expect(201);
+    const proximos = await c.m.get('/medico/agenda?periodo=proximos&pagina=1&tamanhoPagina=1&incluirRealizadas=true').expect(200);
+    expect(proximos.body.map((v: { id: string }) => v.id)).toEqual([futuro.body.id]);
+    const passado = await c.m.get('/medico/agenda?periodo=historico&pagina=1&tamanhoPagina=1&incluirRealizadas=true').expect(200);
+    expect(passado.body[0]).toMatchObject({ id: c.horarioId, consultas: [{ id: c.consultaId, status: 'REALIZADA' }] });
+    const seguinte = await c.m.get('/medico/agenda?periodo=historico&pagina=2&tamanhoPagina=1').expect(200);
+    expect(seguinte.body).toHaveLength(1);
+    expect(seguinte.body[0].id).not.toBe(c.horarioId);
+    for (const query of ['periodo=invalido', 'pagina=0', 'tamanhoPagina=101', 'pagina=1.5']) {
+      await c.m.get('/medico/agenda?' + query).expect(400);
+    }
+  });
 
   it('publica agenda, reserva, atende, solicita, envia e valida resultado, atualizando painel e trilha', async () => {
     const c = await cenario();
+    const agendaAtual = await c.m.get('/medico/agenda').expect(200);
+    expect(agendaAtual.body.flatMap((s: { consultas: { id: string }[] }) => s.consultas).some((v: { id: string }) => v.id === c.consultaId)).toBe(false);
+    const historico = await c.m.get('/medico/agenda?incluirRealizadas=true').expect(200);
+    expect(historico.body.flatMap((s: { consultas: { id: string; status: string }[] }) => s.consultas))
+      .toContainEqual(expect.objectContaining({ id: c.consultaId, status: 'REALIZADA' }));
     const solicitacaoId = await c.pedir();
     const exameId = await c.enviar(solicitacaoId);
     for (const [cliente, path] of [

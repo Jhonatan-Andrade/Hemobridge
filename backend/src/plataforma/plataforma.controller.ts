@@ -27,10 +27,10 @@ import { dataParaIso, estimarElegibilidade } from '../common/elegibilidade.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import {
   AgendarDto,
+  AgendaQueryDto,
   AtendimentoDto,
   BolsaDto,
   DisponibilidadeDto,
-  HospitalQueryDto,
   MovimentoBolsaDto,
   PerfilPacienteDto,
   SenhaAtualDto,
@@ -255,13 +255,15 @@ export class PlataformaController {
   }
   @Perfis('MEDICO') @Get('medico/agenda') async agenda(
     @UsuarioAtual() u: UsuarioAutenticado,
-    @Query() q: HospitalQueryDto,
+    @Query() q: AgendaQueryDto,
   ) {
     if (q.hospitalId) await this.validarVinculo(u, q.hospitalId);
     return this.prisma.disponibilidadeMedico.findMany({
       where: {
         AND: [
           horarioComVinculoClinicoAtivo(u.id),
+          ...(q.periodo === 'proximos' ? [{ fim: { gte: new Date() } }] : []),
+          ...(q.periodo === 'historico' ? [{ fim: { lt: new Date() } }] : []),
           ...(q.hospitalId
             ? [
                 {
@@ -274,16 +276,18 @@ export class PlataformaController {
             : []),
         ],
       },
-      orderBy: { inicio: 'asc' },
-      take: 100,
+      orderBy: [{ inicio: q.periodo === 'historico' ? 'desc' : 'asc' }, { id: q.periodo === 'historico' ? 'desc' : 'asc' }],
+      take: q.tamanhoPagina ?? 100,
+      skip: ((q.pagina ?? 1) - 1) * (q.tamanhoPagina ?? 100),
       select: {
         id: true,
         inicio: true,
         fim: true,
         hospitalId: true,
+        linkVideochamada: true,
         consultas: {
           where: {
-            status: 'AGENDADA',
+            status: q.incluirRealizadas === 'true' ? { in: ['AGENDADA', 'REALIZADA'] } : 'AGENDADA',
             paciente: { usuario: { status: 'ATIVO' } },
           },
           select: {

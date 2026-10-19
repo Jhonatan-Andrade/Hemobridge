@@ -17,13 +17,16 @@ class HemoBridgeApp extends StatelessWidget {
   final SessionController session;
   const HemoBridgeApp({super.key, required this.session});
   @override
-  Widget build(BuildContext context) => MaterialApp(
-    title: 'HemoBridge',
-    debugShowCheckedModeBanner: false,
-    theme: hemobridgeTheme(),
-    home: ListenableBuilder(
-      listenable: session,
-      builder: (context, _) => !session.ready
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: session,
+    builder: (context, _) => MaterialApp(
+      key: ValueKey(
+        '${session.user?['id']}:${session.user?['perfil']}:${session.user?['senhaProvisoria'] == true}',
+      ),
+      title: 'HemoBridge',
+      debugShowCheckedModeBanner: false,
+      theme: hemobridgeTheme(),
+      home: !session.ready
           ? const Scaffold(body: Center(child: CircularProgressIndicator()))
           : session.user == null || session.user!['senhaProvisoria'] == true
           ? LoginPage(session: session, firstPassword: session.user != null)

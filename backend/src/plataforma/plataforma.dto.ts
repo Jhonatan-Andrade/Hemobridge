@@ -14,6 +14,7 @@ import {
 } from 'class-validator';
 import { IsIgualA, IsSenhaValida } from '../common/validators.js';
 import { UFS } from '../common/uf.js';
+import { Type } from 'class-transformer';
 export class PerfilPacienteDto {
   @IsString() @Length(10, 20) telefone: string;
   @IsNumber({ maxDecimalPlaces: 2 }) @Min(1) @Max(400) pesoKg: number;
@@ -33,6 +34,12 @@ export class AgendarDto {
 }
 export class HospitalQueryDto {
   @IsOptional() @IsUUID() hospitalId?: string;
+}
+export class AgendaQueryDto extends HospitalQueryDto {
+  @IsOptional() @IsIn(['true', 'false']) incluirRealizadas?: string;
+  @IsOptional() @IsIn(['proximos', 'historico']) periodo?: 'proximos' | 'historico';
+  @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(10000) pagina?: number;
+  @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(100) tamanhoPagina?: number;
 }
 export class DisponibilidadeDto {
   @IsUUID() hospitalId: string;

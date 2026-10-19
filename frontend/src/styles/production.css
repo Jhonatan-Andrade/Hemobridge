@@ -95,13 +95,15 @@ h3 {
 .auth-card .intro h1 {
   font-size: 2rem;
 }
-form label:not(.checkbox-row) {
+form label:not(.checkbox-row),
+.hb-pro-agenda-filter {
   display: grid;
   gap: 8px;
   font-weight: 500;
 }
 form input:not([type='checkbox']):not([type='radio']),
 form select,
+.hb-pro-agenda-filter select,
 form textarea {
   width: 100%;
   min-width: 0;
@@ -112,6 +114,9 @@ form textarea {
   background: var(--surface);
   color: var(--ink);
   font: inherit;
+}
+.hb-pro-agenda-filter {
+  margin-bottom: 20px;
 }
 form input[type='file'] {
   white-space: normal;

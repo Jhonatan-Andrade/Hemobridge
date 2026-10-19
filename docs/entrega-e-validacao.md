@@ -12,13 +12,13 @@ O Figma concentra as interfaces oficiais em uma página. As versões anteriores 
 
 | Verificação | Resultado |
 |---|---|
-| Site | Compilação, lint e convenção de nomes; 29 testes de feed, IBGE, tour, rotas e avaliação de exames |
-| API | 219 testes unitários e 77 de integração; jornada clínica e permissões descritas em `homologacao-clinica.md` |
+| Site | Compilação, lint e convenção de nomes; 35 testes de feed, IBGE, tour, rotas, avaliação, agenda e encerramento de sessão |
+| API | 219 testes unitários e 78 de integração; jornada clínica, permissões e agenda paginada descritas nos relatórios de homologação |
 | Banco | Treze migrações e SQL consolidado; homologação em PostgreSQL/PostGIS descartável e atualização conferida do banco local de testes |
 | Autorização | Testes cobrem isolamento institucional, sessão, publicação por perfis, consentimento e operações de estoque |
 | Arquivos | Envio e recuperação de exames validados com armazenamento S3 local e cifra da aplicação |
 | Imagens Docker | API e site compilados e executados localmente com usuário não root e sistema de arquivos somente leitura |
-| Aplicativo | Análise do Dart sem problemas e 22 testes aprovados, incluindo IBGE, GPS controlado, tour por conta e tela de 360 px com texto ampliado |
+| Aplicativo | Análise do Dart sem problemas e 71 testes de serviço/widget aprovados, incluindo formulários, arquivos privados, conflitos, sessão e navegação de cinco contas em 360 px |
 | Navegador | Layouts em 360 e 1440 px sem rolagem horizontal; IBGE, primeiro acesso, menu e apresentação de comunidade conferidos |
 
 Os testes foram executados em ambientes locais descartáveis. Não houve alteração de banco compartilhado da VM, uso da chave SSH ou provisionamento na AWS. A configuração de integração contínua acompanha o repositório; o resultado remoto deve ser conferido no pull request.
@@ -37,11 +37,11 @@ Uma VM é uma forma de executar serviços; o código também pode usar container
 | Infraestrutura | Provisionar AWS, domínio, certificados, segredos e contas operacionais; validar carga, restauração e monitoramento |
 | Operação e privacidade | Informar responsável jurídico e canal de privacidade reais, formalizar tratamento/guarda dos dados e revisar os textos com profissional habilitado |
 | Cadastros institucionais | Verificar instituições, vínculos e registros profissionais antes de aceitar dados reais |
-| Aplicativo | Finalizar cadastro nativo, edição completa do perfil, agendamento/reagendamento, envio de exames e formulários de estoque/agenda |
+| Aplicativo | Homologar em Android/iOS reais os formulários nativos concluídos, GPS, seletor/visualizador de arquivos e abertura de aplicativos externos; administração completa de contas e instituições permanece no site |
 | Distribuição | Android exige SDK e assinatura; iOS exige macOS/Xcode e assinatura. Não foi gerado APK/IPA |
 | Migração da VM | Inventariar separadamente dumps e objetos autorizados, verificar hashes e ensaiar restauração; não importar a carga de testes |
 | Jira | Progresso registrado pela sessão do navegador em seis tarefas de identidade, prototipagem e testes; permanecem em Fazendo para revisão/aceite. A execução formal dos 23 casos, as seções finais do TCC e o manual/apresentação ainda precisam de consolidação |
 
-A base de código está estruturada para homologação e preparação de produção. A aprovação de código não substitui a conclusão dessas dependências operacionais e dos fluxos nativos pendentes.
+A base de código está estruturada para homologação e preparação de produção. A aprovação de código não substitui essas dependências operacionais. Os formulários e os limites de validação desta fase estão em [homologação dos fluxos nativos](homologacao-fluxos-nativos.md); a compilação Android encontrou ausência do SDK e não gerou APK.
 
 As correções desta revisão estão descritas em [correções da auditoria](correcoes-da-auditoria.md), incluindo a fila durável de avisos críticos, a reserva de envio de e-mails, os cancelamentos institucionais e o atendimento administrativo de encerramento. A matriz dos casos do trabalho acadêmico está em [rastreabilidade dos testes](rastreabilidade-de-testes.md); cobertura automatizada não equivale ao aceite formal dos 23 casos.

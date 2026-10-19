@@ -51,7 +51,7 @@ O estoque começa sem bolsas cadastradas, sem simular disponibilidade. Registre 
 
 ## Aplicativo e Figma
 
-O app está em `app/`. Exige Flutter e os SDKs da plataforma; siga o README dessa pasta para configurar a URL HTTPS da API. A navegação é inferior. A lista de operações nativas ainda pendentes está documentada nesse README. O ZIP não inclui APK nem assinatura de distribuição.
+O app está em `app/`. Exige Flutter e os SDKs da plataforma; siga o README dessa pasta para configurar a URL HTTPS da API. A navegação é inferior. Cadastro, perfil do paciente, consultas, envio de exames, agenda/atendimento/avaliação médica e necessidades/estoque possuem formulários nativos ligados à API. Confira o [roteiro e os limites da homologação nativa](homologacao-fluxos-nativos.md). O ZIP contém código; não inclui APK nem assinatura de distribuição. A compilação Android aguarda a instalação do SDK.
 
 No [Figma oficial](https://www.figma.com/design/7aKvXrajoLmEGpaYsn0dQ1/Hemobridge), escolha o fluxo de desktop, web mobile ou aplicativo e o perfil correspondente. O Figma apresenta layouts e interações; persistência, autenticação e GPS são executados pelo código.
 

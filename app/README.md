@@ -10,9 +10,11 @@ O token permanece no armazenamento seguro do sistema operacional. A conclusão d
 
 ## Escopo implementado
 
-Login, recuperação e troca da senha inicial; apresentação por perfil; comunidade com publicações e comentários; localização com IBGE/GPS e abertura do Maps; leitura das agendas e instituições do médico, exames, necessidades, estoque, mapa administrativo com cartografia real e moderação. O aplicativo usa dados da API e apresenta estados de carregamento, vazio e falha.
+Cadastro com termo vigente, login, recuperação e troca da senha inicial; apresentação por perfil; perfil do paciente com IBGE; consultas, reserva, cancelamento e reagendamento; seleção/envio e visualização privada de exames; agenda por instituição e histórico, atendimento e avaliação médica; necessidades e operações de estoque; comunidade, IBGE/GPS, Maps, mapa administrativo com cartografia real e moderação. O aplicativo usa os contratos da API e apresenta carregamento, vazio, erro, confirmação e recuperação de conflitos.
 
-O site possui formulários clínicos e administrativos adicionais. A paridade integral dessas operações no app ainda exige implementar e homologar cadastro nativo, edição completa do perfil, agendamento/reagendamento, envio de exames e formulários de estoque/agenda. Não publique o app como substituto integral do site enquanto estes fluxos não estiverem concluídos.
+A agenda usa Próximos/Histórico e páginas de 30. Trocar instituição ou período invalida respostas antigas. O paciente não altera a tipagem validada; decisões médicas exigem autorização do servidor e confirmação explícita. Sair da conta remove também as telas privadas abertas. A administração completa de contas/instituições permanece no site.
+
+A análise Dart e os 71 testes de serviço/widget passaram em 19/10/2026. A compilação Android está pendente por ausência do Android SDK no ambiente; nenhum APK/IPA foi gerado. GPS, seleção de arquivos, PDF e integrações externas precisam de validação em aparelhos reais. Consulte a [homologação dos fluxos nativos](../docs/homologacao-fluxos-nativos.md).
 
 ## Distribuição
 

@@ -7,6 +7,7 @@ class SessionController extends ChangeNotifier {
   final FlutterSecureStorage storage;
   Map<String, dynamic>? user;
   bool ready = false, isFirstAccess = true;
+  bool signingOut = false;
   String? error;
   SessionController(this.api, {this.storage = const FlutterSecureStorage()});
   Future<void> initialize() async {
@@ -93,14 +94,21 @@ class SessionController extends ChangeNotifier {
   }
 
   Future<void> logout() async {
+    if (signingOut) return;
+    signingOut = true;
+    notifyListeners();
     try {
       await api.request('/auth/logout', method: 'POST');
     } finally {
-      await storage.delete(key: 'sessionToken');
-      api.token = null;
-      user = null;
-      isFirstAccess = true;
-      notifyListeners();
+      try {
+        await storage.delete(key: 'sessionToken');
+      } finally {
+        api.token = null;
+        user = null;
+        isFirstAccess = true;
+        signingOut = false;
+        notifyListeners();
+      }
     }
   }
 
