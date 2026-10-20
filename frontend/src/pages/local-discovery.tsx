@@ -102,7 +102,7 @@ export function LocalDiscovery() {
   }
 
   return (
-    <div className="hb-locals">
+    <main className="hb-locals">
       <Intro
         title="Encontrar locais"
         description="Explore sua região e procure onde realizar exames ou doar sangue."
@@ -228,6 +228,6 @@ export function LocalDiscovery() {
           Consultar lista do Ministério da Saúde ↗
         </a>
       </aside>
-    </div>
+    </main>
   )
 }
