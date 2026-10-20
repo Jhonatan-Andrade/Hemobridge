@@ -164,7 +164,7 @@ export function GuidedTour({
         </p>
         <progress value={index + 1} max={steps.length} aria-label="Progresso da orientação" />
         <h2 ref={headingRef} tabIndex={-1} id="tour-title">
-          {step.title}
+          {!user ? <><span className="brand-phrase-accent">A ponte que</span> conecta vidas</> : step.title}
         </h2>
         <p id="tour-description">{step.text}</p>
         {step.journey && user && <JourneyTimes />}

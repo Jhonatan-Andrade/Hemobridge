@@ -66,6 +66,10 @@ flutter:
     - assets/brand/
     - assets/maps/
   fonts:
+    - family: Fraunces
+      fonts:
+        - asset: assets/fonts/fraunces-italic.ttf
+          style: italic
     - family: Poppins
       fonts:
         - asset: assets/fonts/Poppins-Regular.ttf

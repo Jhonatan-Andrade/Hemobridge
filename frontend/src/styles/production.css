@@ -1,3 +1,11 @@
+@font-face {
+  font-family: 'Fraunces';
+  src: url('/hemobridge/fonts/fraunces-italic.ttf') format('truetype');
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+}
+
 :root {
   --hb-display: Poppins, sans-serif;
   --hb-rail-top: 0px;
@@ -39,8 +47,7 @@ select,
 textarea,
 h1,
 h2,
-h3,
-.hero-title-journey {
+h3 {
   font-family: Poppins, sans-serif;
 }
 h1,
@@ -48,9 +55,13 @@ h2,
 h3 {
   overflow-wrap: anywhere;
 }
+.hero-title-journey,
+.brand-phrase-accent {
+  font-family: 'Fraunces', Georgia, 'Times New Roman', serif;
+  font-style: italic;
+  font-weight: 400;
+}
 .hero-title-journey {
-  font-style: normal;
-  font-weight: 500;
   color: #f7e9ed;
 }
 .app-footer {

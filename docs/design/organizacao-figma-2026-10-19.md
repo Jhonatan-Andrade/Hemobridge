@@ -18,3 +18,7 @@ Foram corrigidas quatro rotas dos menus de mapas e 91 referências da comunidade
 - Nenhum ciclo nas quarenta ações automáticas analisadas.
 
 A imagem geral do canvas foi inspecionada após a reorganização. A análise de conexões é estrutural; não constitui execução manual de todos os caminhos no Present. O [registro estruturado](organizacao-figma-2026-10-19.json) contém os pontos de início e as contagens verificadas.
+
+## Escrita editorial restaurada
+
+O trecho “A ponte que” voltou ao estilo itálico da identidade anterior, aprovado pela referência visual de 14/10. Sete textos existentes foram ajustados no Figma, incluindo as três páginas iniciais, as três entradas de acesso e a prancha de identidade. Os títulos das páginas iniciais receberam as quebras “HemoBridge: / A ponte que / conecta vidas.”, mantendo os identificadores e as conexões. A fonte Fraunces Italic é distribuída localmente na web e no aplicativo com a licença SIL OFL e sua procedência. Poppins permanece nos demais textos e controles. A imagem do símbolo da ponte e do logotipo horizontal permanece a original.

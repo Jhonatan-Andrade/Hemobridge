@@ -117,12 +117,29 @@ class _LoginPageState extends State<LoginPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(
-                    widget.firstPassword
-                        ? 'Primeiro acesso'
-                        : 'A ponte que conecta vidas.',
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  ),
+                  if (widget.firstPassword)
+                    Text(
+                      'Primeiro acesso',
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    )
+                  else
+                    Text.rich(
+                      TextSpan(
+                        children: [
+                          const TextSpan(
+                            text: 'A ponte que\n',
+                            style: TextStyle(
+                              fontFamily: 'Fraunces',
+                              fontStyle: FontStyle.italic,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                          const TextSpan(text: 'conecta vidas.'),
+                        ],
+                      ),
+                      style: Theme.of(context).textTheme.headlineMedium
+                          ?.copyWith(fontWeight: FontWeight.w700, height: 1.2),
+                    ),
                   const SizedBox(height: 16),
                   Text(
                     widget.firstPassword
