@@ -1,4 +1,4 @@
-import { ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import type { NestExpressApplication } from '@nestjs/platform-express';
@@ -39,6 +39,8 @@ async function bootstrap() {
   );
   app.enableShutdownHooks();
 
-  await app.listen(process.env.PORT ?? 3000);
+  const porta = process.env.PORT ?? 3000;
+  await app.listen(porta, '0.0.0.0');
+  Logger.log(`API rodando na porta ${porta}`, 'Bootstrap');
 }
 await bootstrap();
