@@ -4,3 +4,6 @@ dist/
 
 # Prisma Client gerado
 src/generated/
+
+# Cache de build incremental do TypeScript
+*.tsbuildinfo
