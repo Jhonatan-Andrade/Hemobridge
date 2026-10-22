@@ -1,0 +1,742 @@
+{
+  "permanentScreens": [
+    {
+      "id": "906:9795",
+      "name": "Aplicativo / Paciente/Doador / Locais / Recomendações",
+      "w": 390,
+      "h": 844,
+      "children": [
+        {
+          "id": "906:9796",
+          "name": "Viewport rolável",
+          "type": "FRAME",
+          "visible": true,
+          "x": 0,
+          "y": 0,
+          "w": 390,
+          "h": 751,
+          "overflow": "VERTICAL"
+        },
+        {
+          "id": "906:9810",
+          "name": "Barra inferior / Visitante",
+          "type": "FRAME",
+          "visible": false,
+          "x": 0,
+          "y": 751,
+          "w": 390,
+          "h": 93,
+          "overflow": "NONE"
+        },
+        {
+          "id": "906:9814",
+          "name": "Barra inferior / Paciente",
+          "type": "FRAME",
+          "visible": true,
+          "x": 0,
+          "y": 751,
+          "w": 390,
+          "h": 93,
+          "overflow": "NONE"
+        },
+        {
+          "id": "906:9819",
+          "name": "Rail reconciliado / Paciente / Mobile",
+          "type": "INSTANCE",
+          "visible": false,
+          "x": 0,
+          "y": 0,
+          "w": 60,
+          "h": 844,
+          "overflow": "NONE"
+        }
+      ],
+      "chrome": [
+        {
+          "id": "906:9814",
+          "name": "Barra inferior / Paciente",
+          "visible": true,
+          "x": 0,
+          "y": 751,
+          "w": 390,
+          "h": 93,
+          "parent": "906:9795",
+          "relative": "ABSOLUTE",
+          "reactions": 0
+        }
+      ],
+      "labels": [
+        {
+          "id": "I906:9815;49:13014",
+          "text": "Início"
+        },
+        {
+          "id": "I906:9816;49:13014",
+          "text": "Comunidade"
+        },
+        {
+          "id": "I906:9817;49:13019",
+          "text": "Meu painel"
+        },
+        {
+          "id": "I906:9818;49:13014",
+          "text": "Perfil"
+        }
+      ]
+    },
+    {
+      "id": "906:9862",
+      "name": "Web mobile / Paciente/Doador / Locais / Recomendações",
+      "w": 390,
+      "h": 844,
+      "children": [
+        {
+          "id": "906:9863",
+          "name": "Viewport rolável",
+          "type": "FRAME",
+          "visible": true,
+          "x": 0,
+          "y": 0,
+          "w": 390,
+          "h": 844,
+          "overflow": "VERTICAL"
+        },
+        {
+          "id": "906:9878",
+          "name": "Barra inferior / Visitante",
+          "type": "FRAME",
+          "visible": false,
+          "x": 0,
+          "y": 751,
+          "w": 390,
+          "h": 93,
+          "overflow": "NONE"
+        },
+        {
+          "id": "906:9882",
+          "name": "Barra inferior / Paciente",
+          "type": "FRAME",
+          "visible": false,
+          "x": 0,
+          "y": 751,
+          "w": 390,
+          "h": 93,
+          "overflow": "NONE"
+        },
+        {
+          "id": "906:9887",
+          "name": "Rail reconciliado / Paciente / Mobile",
+          "type": "INSTANCE",
+          "visible": false,
+          "x": 0,
+          "y": 0,
+          "w": 60,
+          "h": 844,
+          "overflow": "NONE"
+        }
+      ],
+      "chrome": [
+        {
+          "id": "906:9882",
+          "name": "Barra inferior / Paciente",
+          "visible": false,
+          "x": 0,
+          "y": 751,
+          "w": 390,
+          "h": 93,
+          "parent": "906:9862",
+          "relative": "ABSOLUTE",
+          "reactions": 0
+        }
+      ],
+      "labels": []
+    },
+    {
+      "id": "906:9914",
+      "name": "Web desktop / Paciente/Doador / Locais / Recomendações",
+      "w": 1440,
+      "h": 1000,
+      "children": [
+        {
+          "id": "906:9915",
+          "name": "Viewport rolável",
+          "type": "FRAME",
+          "visible": true,
+          "x": 76,
+          "y": 0,
+          "w": 1364,
+          "h": 1000,
+          "overflow": "VERTICAL"
+        },
+        {
+          "id": "906:9939",
+          "name": "Rail / Paciente / Desktop",
+          "type": "INSTANCE",
+          "visible": true,
+          "x": 0,
+          "y": 0,
+          "w": 76,
+          "h": 1000,
+          "overflow": "NONE"
+        }
+      ],
+      "chrome": [
+        {
+          "id": "906:9939",
+          "name": "Rail / Paciente / Desktop",
+          "visible": true,
+          "x": 0,
+          "y": 0,
+          "w": 76,
+          "h": 1000,
+          "parent": "906:9914",
+          "relative": "ABSOLUTE",
+          "reactions": 0
+        }
+      ],
+      "labels": []
+    },
+    {
+      "id": "910:9870",
+      "name": "Web desktop / Representante de Hospital / Indicadores / Preenchido",
+      "w": 1440,
+      "h": 1000,
+      "children": [
+        {
+          "id": "910:9871",
+          "name": "Viewport rolável",
+          "type": "FRAME",
+          "visible": true,
+          "x": 76,
+          "y": 0,
+          "w": 1364,
+          "h": 1000,
+          "overflow": "VERTICAL"
+        },
+        {
+          "id": "910:9878",
+          "name": "Navegação lateral / Hospital / Fechado",
+          "type": "INSTANCE",
+          "visible": true,
+          "x": 0,
+          "y": 0,
+          "w": 76,
+          "h": 1000,
+          "overflow": "NONE"
+        }
+      ],
+      "chrome": [
+        {
+          "id": "910:9878",
+          "name": "Navegação lateral / Hospital / Fechado",
+          "visible": true,
+          "x": 0,
+          "y": 0,
+          "w": 76,
+          "h": 1000,
+          "parent": "910:9870",
+          "relative": "AUTO",
+          "reactions": 0
+        }
+      ],
+      "labels": []
+    },
+    {
+      "id": "910:9977",
+      "name": "Web desktop / Administrador / Indicadores / Preenchido",
+      "w": 1440,
+      "h": 1000,
+      "children": [
+        {
+          "id": "910:9978",
+          "name": "Viewport rolável",
+          "type": "FRAME",
+          "visible": true,
+          "x": 76,
+          "y": 0,
+          "w": 1364,
+          "h": 1000,
+          "overflow": "VERTICAL"
+        },
+        {
+          "id": "910:9985",
+          "name": "Navegação lateral / Administrador / Fechado",
+          "type": "INSTANCE",
+          "visible": true,
+          "x": 0,
+          "y": 0,
+          "w": 76,
+          "h": 1000,
+          "overflow": "NONE"
+        }
+      ],
+      "chrome": [
+        {
+          "id": "910:9985",
+          "name": "Navegação lateral / Administrador / Fechado",
+          "visible": true,
+          "x": 0,
+          "y": 0,
+          "w": 76,
+          "h": 1000,
+          "parent": "910:9977",
+          "relative": "AUTO",
+          "reactions": 0
+        }
+      ],
+      "labels": []
+    },
+    {
+      "id": "910:10093",
+      "name": "Web mobile / Representante de Hospital / Indicadores / Preenchido",
+      "w": 360,
+      "h": 844,
+      "children": [
+        {
+          "id": "910:10094",
+          "name": "Viewport rolável",
+          "type": "FRAME",
+          "visible": true,
+          "x": 0,
+          "y": 0,
+          "w": 360,
+          "h": 844,
+          "overflow": "VERTICAL"
+        }
+      ],
+      "chrome": [
+        {
+          "id": "910:10099",
+          "name": "Acionador do menu oficial",
+          "visible": true,
+          "x": 16,
+          "y": 16,
+          "w": 48,
+          "h": 48,
+          "parent": "910:10096",
+          "relative": "AUTO",
+          "reactions": 1
+        }
+      ],
+      "labels": []
+    },
+    {
+      "id": "910:10172",
+      "name": "Web mobile / Representante de Hospital / Indicadores / Sem registros",
+      "w": 360,
+      "h": 844,
+      "children": [
+        {
+          "id": "910:10173",
+          "name": "Viewport rolável",
+          "type": "FRAME",
+          "visible": true,
+          "x": 0,
+          "y": 0,
+          "w": 360,
+          "h": 844,
+          "overflow": "VERTICAL"
+        }
+      ],
+      "chrome": [
+        {
+          "id": "910:10178",
+          "name": "Acionador do menu oficial",
+          "visible": true,
+          "x": 16,
+          "y": 16,
+          "w": 48,
+          "h": 48,
+          "parent": "910:10175",
+          "relative": "AUTO",
+          "reactions": 1
+        }
+      ],
+      "labels": []
+    },
+    {
+      "id": "910:10201",
+      "name": "Web mobile / Administrador / Indicadores / Preenchido",
+      "w": 360,
+      "h": 844,
+      "children": [
+        {
+          "id": "910:10202",
+          "name": "Viewport rolável",
+          "type": "FRAME",
+          "visible": true,
+          "x": 0,
+          "y": 0,
+          "w": 360,
+          "h": 844,
+          "overflow": "VERTICAL"
+        }
+      ],
+      "chrome": [
+        {
+          "id": "910:10207",
+          "name": "Acionador do menu oficial",
+          "visible": true,
+          "x": 16,
+          "y": 16,
+          "w": 48,
+          "h": 48,
+          "parent": "910:10204",
+          "relative": "AUTO",
+          "reactions": 1
+        }
+      ],
+      "labels": []
+    },
+    {
+      "id": "910:10293",
+      "name": "Web mobile / Administrador / Indicadores / Sem registros",
+      "w": 360,
+      "h": 844,
+      "children": [
+        {
+          "id": "910:10294",
+          "name": "Viewport rolável",
+          "type": "FRAME",
+          "visible": true,
+          "x": 0,
+          "y": 0,
+          "w": 360,
+          "h": 844,
+          "overflow": "VERTICAL"
+        }
+      ],
+      "chrome": [
+        {
+          "id": "910:10299",
+          "name": "Acionador do menu oficial",
+          "visible": true,
+          "x": 16,
+          "y": 16,
+          "w": 48,
+          "h": 48,
+          "parent": "910:10296",
+          "relative": "AUTO",
+          "reactions": 1
+        }
+      ],
+      "labels": []
+    },
+    {
+      "id": "910:10322",
+      "name": "Aplicativo / Representante de Hospital / Indicadores / Preenchido",
+      "w": 390,
+      "h": 844,
+      "children": [
+        {
+          "id": "910:10323",
+          "name": "Viewport rolável",
+          "type": "FRAME",
+          "visible": true,
+          "x": 0,
+          "y": 0,
+          "w": 390,
+          "h": 756,
+          "overflow": "VERTICAL"
+        },
+        {
+          "id": "910:10328",
+          "name": "Navegação inferior oficial",
+          "type": "INSTANCE",
+          "visible": true,
+          "x": 0,
+          "y": 756,
+          "w": 390,
+          "h": 88,
+          "overflow": "NONE"
+        }
+      ],
+      "chrome": [
+        {
+          "id": "910:10328",
+          "name": "Navegação inferior oficial",
+          "visible": true,
+          "x": 0,
+          "y": 756,
+          "w": 390,
+          "h": 88,
+          "parent": "910:10322",
+          "relative": "AUTO",
+          "reactions": 0
+        }
+      ],
+      "labels": [
+        {
+          "id": "I910:10328;750:7936",
+          "text": "Necessidades"
+        },
+        {
+          "id": "I910:10328;750:7941",
+          "text": "Comunidade"
+        },
+        {
+          "id": "I910:10328;750:7947",
+          "text": "Estoque"
+        },
+        {
+          "id": "I910:10328;750:7953",
+          "text": "Perfil"
+        }
+      ]
+    },
+    {
+      "id": "910:10418",
+      "name": "Aplicativo / Representante de Hospital / Indicadores / Sem registros",
+      "w": 390,
+      "h": 844,
+      "children": [
+        {
+          "id": "910:10419",
+          "name": "Viewport rolável",
+          "type": "FRAME",
+          "visible": true,
+          "x": 0,
+          "y": 0,
+          "w": 390,
+          "h": 756,
+          "overflow": "VERTICAL"
+        },
+        {
+          "id": "910:10424",
+          "name": "Navegação inferior oficial",
+          "type": "INSTANCE",
+          "visible": true,
+          "x": 0,
+          "y": 756,
+          "w": 390,
+          "h": 88,
+          "overflow": "NONE"
+        }
+      ],
+      "chrome": [
+        {
+          "id": "910:10424",
+          "name": "Navegação inferior oficial",
+          "visible": true,
+          "x": 0,
+          "y": 756,
+          "w": 390,
+          "h": 88,
+          "parent": "910:10418",
+          "relative": "AUTO",
+          "reactions": 0
+        }
+      ],
+      "labels": [
+        {
+          "id": "I910:10424;750:7936",
+          "text": "Necessidades"
+        },
+        {
+          "id": "I910:10424;750:7941",
+          "text": "Comunidade"
+        },
+        {
+          "id": "I910:10424;750:7947",
+          "text": "Estoque"
+        },
+        {
+          "id": "I910:10424;750:7953",
+          "text": "Perfil"
+        }
+      ]
+    },
+    {
+      "id": "910:10464",
+      "name": "Aplicativo / Administrador / Indicadores / Preenchido",
+      "w": 390,
+      "h": 844,
+      "children": [
+        {
+          "id": "910:10465",
+          "name": "Viewport rolável",
+          "type": "FRAME",
+          "visible": true,
+          "x": 0,
+          "y": 0,
+          "w": 390,
+          "h": 756,
+          "overflow": "VERTICAL"
+        },
+        {
+          "id": "910:10470",
+          "name": "Navegação inferior oficial",
+          "type": "INSTANCE",
+          "visible": true,
+          "x": 0,
+          "y": 756,
+          "w": 390,
+          "h": 88,
+          "overflow": "NONE"
+        }
+      ],
+      "chrome": [
+        {
+          "id": "910:10470",
+          "name": "Navegação inferior oficial",
+          "visible": true,
+          "x": 0,
+          "y": 756,
+          "w": 390,
+          "h": 88,
+          "parent": "910:10464",
+          "relative": "AUTO",
+          "reactions": 0
+        }
+      ],
+      "labels": [
+        {
+          "id": "I910:10470;750:8032",
+          "text": "Mapa"
+        },
+        {
+          "id": "I910:10470;750:8037",
+          "text": "Comunidade"
+        },
+        {
+          "id": "I910:10470;750:8043",
+          "text": "Moderação"
+        },
+        {
+          "id": "I910:10470;750:8049",
+          "text": "Perfil"
+        }
+      ]
+    },
+    {
+      "id": "910:10573",
+      "name": "Aplicativo / Administrador / Indicadores / Sem registros",
+      "w": 390,
+      "h": 844,
+      "children": [
+        {
+          "id": "910:10574",
+          "name": "Viewport rolável",
+          "type": "FRAME",
+          "visible": true,
+          "x": 0,
+          "y": 0,
+          "w": 390,
+          "h": 756,
+          "overflow": "VERTICAL"
+        },
+        {
+          "id": "910:10579",
+          "name": "Navegação inferior oficial",
+          "type": "INSTANCE",
+          "visible": true,
+          "x": 0,
+          "y": 756,
+          "w": 390,
+          "h": 88,
+          "overflow": "NONE"
+        }
+      ],
+      "chrome": [
+        {
+          "id": "910:10579",
+          "name": "Navegação inferior oficial",
+          "visible": true,
+          "x": 0,
+          "y": 756,
+          "w": 390,
+          "h": 88,
+          "parent": "910:10573",
+          "relative": "AUTO",
+          "reactions": 0
+        }
+      ],
+      "labels": [
+        {
+          "id": "I910:10579;750:8032",
+          "text": "Mapa"
+        },
+        {
+          "id": "I910:10579;750:8037",
+          "text": "Comunidade"
+        },
+        {
+          "id": "I910:10579;750:8043",
+          "text": "Moderação"
+        },
+        {
+          "id": "I910:10579;750:8049",
+          "text": "Perfil"
+        }
+      ]
+    }
+  ],
+  "mutatedNodeIds": [],
+  "note": "Somente leitura das telas permanentes; as capturas anteriores de Conteúdo integral isolado excluem deliberadamente o chrome que é irmão do viewport.",
+  "webLocaisMenu": {
+    "root": "906:9862",
+    "menu": [
+      {
+        "id": "906:9866",
+        "name": "Menu trigger / Web mobile",
+        "type": "INSTANCE",
+        "parent": "906:9865",
+        "reactions": [
+          {
+            "action": {
+              "type": "NODE",
+              "destinationId": "660:11320",
+              "navigation": "OVERLAY",
+              "transition": {
+                "type": "MOVE_IN",
+                "direction": "RIGHT",
+                "matchLayers": false,
+                "easing": {
+                  "type": "EASE_OUT"
+                },
+                "duration": 0.20000000298023224
+              },
+              "resetVideoPosition": false
+            },
+            "actions": [
+              {
+                "type": "NODE",
+                "destinationId": "660:11320",
+                "navigation": "OVERLAY",
+                "transition": {
+                  "type": "MOVE_IN",
+                  "direction": "RIGHT",
+                  "matchLayers": false,
+                  "easing": {
+                    "type": "EASE_OUT"
+                  },
+                  "duration": 0.20000000298023224
+                },
+                "resetVideoPosition": false
+              }
+            ],
+            "trigger": {
+              "type": "ON_CLICK"
+            }
+          }
+        ]
+      },
+      {
+        "id": "I906:9866;467:5121",
+        "name": "Ícone / menu / três linhas",
+        "type": "FRAME",
+        "parent": "906:9866",
+        "reactions": []
+      }
+    ],
+    "mutatedNodeIds": []
+  },
+  "date": "2026-10-22",
+  "verdict": "Navegação presente nas telas permanentes. Não houve mutação para este complemento de evidências.",
+  "screenshots": [
+    "viewport-admin-desktop.png",
+    "viewport-hospital-app.png",
+    "viewport-admin-app.png",
+    "viewport-locais-app.png"
+  ]
+}

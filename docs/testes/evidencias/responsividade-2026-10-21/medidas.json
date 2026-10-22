@@ -1,0 +1,715 @@
+{
+  "executionDate": "2026-10-21",
+  "consolidationDate": "2026-10-22",
+  "sourceCommit": "1b64f929",
+  "executor": "Codex, navegador real controlado pela interface",
+  "method": "Leitura de geometria DOM e foco, captura PNG, navegação por controles visíveis. Valores transcritos das observações retornadas pelo navegador durante a execução, sem reconstituir estado de aplicação.",
+  "scope": "Inspeção web de apresentação/navegação. Não é homologação física Flutter nem exercício completo de todos os formulários, aplicativos externos ou ações clínicas.",
+  "rows": [
+    {
+      "label": "inicio",
+      "route": "#home",
+      "heading": "HemoBridge: A ponte que conecta vidas.",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clientWidth": 1425,
+      "scrollWidth": 1425,
+      "focus": "H1",
+      "horizontalOverflow": false,
+      "file": "inicio-1440.jpg",
+      "sha256": "80207476efa79b9ae6f826f154e6d0cc9317accc35f6188f675deb09e83c18c6"
+    },
+    {
+      "label": "inicio",
+      "route": "#home",
+      "heading": "HemoBridge: A ponte que conecta vidas.",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "clientWidth": 753,
+      "scrollWidth": 753,
+      "focus": "H1",
+      "horizontalOverflow": false,
+      "file": "inicio-768.jpg",
+      "sha256": "10d7d5d14caf1eb6c9a5eb5d44fd4036eadfd6aa741e2c475e2772df36cfa33e"
+    },
+    {
+      "label": "inicio",
+      "route": "#home",
+      "heading": "HemoBridge: A ponte que conecta vidas.",
+      "viewport": {
+        "width": 360,
+        "height": 800
+      },
+      "clientWidth": 345,
+      "scrollWidth": 345,
+      "focus": "H1",
+      "horizontalOverflow": false,
+      "file": "inicio-360.jpg",
+      "sha256": "a5687ee982077502ffbd0712ae70e050cc0a5ffb02ece11ce32e861cfa885beb"
+    },
+    {
+      "label": "pre-cadastro",
+      "route": "#register",
+      "heading": "Fazer pré-cadastro",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clientWidth": 1425,
+      "scrollWidth": 1425,
+      "focus": "H1",
+      "horizontalOverflow": false,
+      "file": "pre-cadastro-1440.jpg",
+      "sha256": "bbba01e3ea4d99451b345d9d3c097a0b51f2c711ddeaed1c8b63bff00cdedff1"
+    },
+    {
+      "label": "pre-cadastro",
+      "route": "#register",
+      "heading": "Fazer pré-cadastro",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "clientWidth": 753,
+      "scrollWidth": 753,
+      "focus": "H1",
+      "horizontalOverflow": false,
+      "file": "pre-cadastro-768.jpg",
+      "sha256": "310e4360bcd18be730bc0d3efdeb80815320493444631127c281a289ab121576"
+    },
+    {
+      "label": "pre-cadastro",
+      "route": "#register",
+      "heading": "Fazer pré-cadastro",
+      "viewport": {
+        "width": 360,
+        "height": 800
+      },
+      "clientWidth": 345,
+      "scrollWidth": 345,
+      "focus": "H1",
+      "horizontalOverflow": false,
+      "file": "pre-cadastro-360.jpg",
+      "sha256": "0eb9ff5ba2d8e29c806a3b6d7b1697eae8d7c4f62ed4dd29206ab6d1e80563f1"
+    },
+    {
+      "label": "locais",
+      "route": "#external-locations",
+      "heading": "Encontrar locais",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clientWidth": 1425,
+      "scrollWidth": 1425,
+      "focus": "H1",
+      "horizontalOverflow": false,
+      "file": "locais-1440.jpg",
+      "sha256": "2198aed42a4021cdb06fbb440165b2b85a9e45358577afc34c3874a36553d01d"
+    },
+    {
+      "label": "locais",
+      "route": "#external-locations",
+      "heading": "Encontrar locais",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "clientWidth": 753,
+      "scrollWidth": 753,
+      "focus": "H1",
+      "horizontalOverflow": false,
+      "file": "locais-768.jpg",
+      "sha256": "f45cb0d97a50ad3a9975b4910589b1c24cb1dde4e73e0c5242b7796c187245df"
+    },
+    {
+      "label": "locais",
+      "route": "#external-locations",
+      "heading": "Encontrar locais",
+      "viewport": {
+        "width": 360,
+        "height": 800
+      },
+      "clientWidth": 345,
+      "scrollWidth": 345,
+      "focus": "H1",
+      "horizontalOverflow": false,
+      "file": "locais-360.jpg",
+      "sha256": "9026be74487730d0b99ceb3b8a864493de212b52b296b6ded4ca222145029f2b"
+    },
+    {
+      "label": "perfil-paciente",
+      "route": "#profile",
+      "heading": "Meu perfil e privacidade",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clientWidth": 1425,
+      "scrollWidth": 1425,
+      "focus": "H1",
+      "horizontalOverflow": false,
+      "file": "perfil-paciente-1440.jpg",
+      "sha256": "2f09bb75b66fe173cf3efd489afc829408b37befe44b4c4097fa3a47ef0f0e97"
+    },
+    {
+      "label": "perfil-paciente",
+      "route": "#profile",
+      "heading": "Meu perfil e privacidade",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "clientWidth": 753,
+      "scrollWidth": 753,
+      "focus": "H1",
+      "horizontalOverflow": false,
+      "file": "perfil-paciente-768.jpg",
+      "sha256": "674065795ccedb88d5c61d15bb8084c814dd64c557e29c4a9e1d027bfa1af066"
+    },
+    {
+      "label": "perfil-paciente",
+      "route": "#profile",
+      "heading": "Meu perfil e privacidade",
+      "viewport": {
+        "width": 360,
+        "height": 800
+      },
+      "clientWidth": 345,
+      "scrollWidth": 345,
+      "focus": "H1",
+      "horizontalOverflow": false,
+      "file": "perfil-paciente-360.jpg",
+      "sha256": "796bd3300b6230af2f9ec5bf27d4f33c7b7c26bbd0560187d37a70bbfe2b586a"
+    },
+    {
+      "label": "comunidade",
+      "route": "#community",
+      "heading": "Comunidade HemoBridge",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clientWidth": 1425,
+      "scrollWidth": 1425,
+      "focus": "H1",
+      "horizontalOverflow": false,
+      "file": "comunidade-1440.jpg",
+      "sha256": "d08f8fc6520953eb1983d286b6ef3ef11868c921b063ec615b38d1b0c79ecc9a"
+    },
+    {
+      "label": "comunidade",
+      "route": "#community",
+      "heading": "Comunidade HemoBridge",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "clientWidth": 753,
+      "scrollWidth": 753,
+      "focus": "H1",
+      "horizontalOverflow": false,
+      "file": "comunidade-768.jpg",
+      "sha256": "daaa4183e353010adf614bf9f3e24a1f90b749676a74a1b241229b6ee2be8de2"
+    },
+    {
+      "label": "comunidade",
+      "route": "#community",
+      "heading": "Comunidade HemoBridge",
+      "viewport": {
+        "width": 360,
+        "height": 800
+      },
+      "clientWidth": 345,
+      "scrollWidth": 345,
+      "focus": "H1",
+      "horizontalOverflow": false,
+      "file": "comunidade-360.jpg",
+      "sha256": "0cf9c92aed89e864948f936802e576d6957a2f41be3e9f40e3fc7403c46ddcea"
+    },
+    {
+      "label": "comentarios",
+      "route": "#post/:id/comments",
+      "heading": "Aviso institucional — teste de navegação",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clientWidth": 1425,
+      "scrollWidth": 1425,
+      "focus": "H2",
+      "horizontalOverflow": false,
+      "file": "comentarios-1440.jpg",
+      "sha256": "c42ee70a9bd06101e5167016b3e80584060c8d40cccbaa91600a08bae96e178b"
+    },
+    {
+      "label": "comentarios",
+      "route": "#post/:id/comments",
+      "heading": "Aviso institucional — teste de navegação",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "clientWidth": 753,
+      "scrollWidth": 753,
+      "focus": "H2",
+      "horizontalOverflow": false,
+      "file": "comentarios-768.jpg",
+      "sha256": "ceaa1b738ce5b6bfb02da8752f751824d581a16d3c7c7292611136bd448bd454"
+    },
+    {
+      "label": "comentarios",
+      "route": "#post/:id/comments",
+      "heading": "Aviso institucional — teste de navegação",
+      "viewport": {
+        "width": 360,
+        "height": 800
+      },
+      "clientWidth": 345,
+      "scrollWidth": 345,
+      "focus": "H2",
+      "horizontalOverflow": false,
+      "file": "comentarios-360.jpg",
+      "sha256": "9775181cc0a9517df801b819c79282911ca67f6aa70a4b2c88d42e66ab249f67"
+    },
+    {
+      "label": "doador",
+      "route": "#dashboard",
+      "heading": "Olá, Felipe",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clientWidth": 1425,
+      "scrollWidth": 1425,
+      "focus": "H1",
+      "horizontalOverflow": false,
+      "file": "doador-1440.jpg",
+      "sha256": "95d03a430ffc5a052b87970997e1c1adb60db43be64bbf62fe0c4c798bc49bde"
+    },
+    {
+      "label": "doador",
+      "route": "#dashboard",
+      "heading": "Olá, Felipe",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "clientWidth": 768,
+      "scrollWidth": 768,
+      "focus": "H1",
+      "horizontalOverflow": false,
+      "file": "doador-768.jpg",
+      "sha256": "426d27a5b043c80da9d768966e7886b1f8f60b2dc7eec87d62ed6d700aeb3b41"
+    },
+    {
+      "label": "doador",
+      "route": "#dashboard",
+      "heading": "Olá, Felipe",
+      "viewport": {
+        "width": 360,
+        "height": 800
+      },
+      "clientWidth": 345,
+      "scrollWidth": 345,
+      "focus": "H1",
+      "horizontalOverflow": false,
+      "file": "doador-360.jpg",
+      "sha256": "f6eab660599076a447c8a8af61ed4c356b11c249c416b7865dc22e183c7a7218"
+    },
+    {
+      "label": "medico-agenda",
+      "route": "#professional",
+      "heading": "Minha agenda",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clientWidth": 1425,
+      "scrollWidth": 1425,
+      "focus": "H1",
+      "horizontalOverflow": false,
+      "file": "medico-agenda-1440.jpg",
+      "sha256": "f84c1a3a7c425256ffa0551fd176f66d4fe106dbf804f373cd121c5c54e4a088"
+    },
+    {
+      "label": "medico-agenda",
+      "route": "#professional",
+      "heading": "Minha agenda",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "clientWidth": 753,
+      "scrollWidth": 753,
+      "focus": "H1",
+      "horizontalOverflow": false,
+      "file": "medico-agenda-768.jpg",
+      "sha256": "2e0599704f403441a9e5eac8c0a068d233baf1f2e18280594f19611f44a8865a"
+    },
+    {
+      "label": "medico-agenda",
+      "route": "#professional",
+      "heading": "Minha agenda",
+      "viewport": {
+        "width": 360,
+        "height": 800
+      },
+      "clientWidth": 345,
+      "scrollWidth": 345,
+      "focus": "H1",
+      "horizontalOverflow": false,
+      "file": "medico-agenda-360.jpg",
+      "sha256": "8e397e3b829d5807c122d98cb4260f8bfc8eda87eac39e3d03b204558ec2e8de"
+    },
+    {
+      "label": "medico-atendimento",
+      "route": "#professional/attendance",
+      "heading": "Atendimento",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clientWidth": 1425,
+      "scrollWidth": 1425,
+      "focus": "H1",
+      "horizontalOverflow": false,
+      "file": "medico-atendimento-1440.jpg",
+      "sha256": "b75debfef134c326e57a0ecd23781d16fd581d940104cb9c5c0fad1ddc8064d0"
+    },
+    {
+      "label": "medico-atendimento",
+      "route": "#professional/attendance",
+      "heading": "Atendimento",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "clientWidth": 753,
+      "scrollWidth": 753,
+      "focus": "H1",
+      "horizontalOverflow": false,
+      "file": "medico-atendimento-768.jpg",
+      "sha256": "f9975e14c589dbf05e1d4dc486fa433b0e246844d616a50111711b86331f9057"
+    },
+    {
+      "label": "medico-atendimento",
+      "route": "#professional/attendance",
+      "heading": "Atendimento",
+      "viewport": {
+        "width": 360,
+        "height": 800
+      },
+      "clientWidth": 345,
+      "scrollWidth": 345,
+      "focus": "H1",
+      "horizontalOverflow": false,
+      "file": "medico-atendimento-360.jpg",
+      "sha256": "c3eeadc75aa069617cae2e4dc9f08622079497dd8ed0068ff7073e3b4fa69013"
+    },
+    {
+      "label": "medico-exames",
+      "route": "#professional/exams",
+      "heading": "Exames",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clientWidth": 1425,
+      "scrollWidth": 1425,
+      "focus": "H1",
+      "horizontalOverflow": false,
+      "file": "medico-exames-1440.jpg",
+      "sha256": "996b38fb1aacc0cf1318c4ea80417f82b047a2e99a7c12bad6e3f47fadbc4fd5"
+    },
+    {
+      "label": "medico-exames",
+      "route": "#professional/exams",
+      "heading": "Exames",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "clientWidth": 753,
+      "scrollWidth": 753,
+      "focus": "H1",
+      "horizontalOverflow": false,
+      "file": "medico-exames-768.jpg",
+      "sha256": "4c713f22a06e417b98fccd3b6fff0b639ea81b8ca6fdc3d005f45416546233b1"
+    },
+    {
+      "label": "medico-exames",
+      "route": "#professional/exams",
+      "heading": "Exames",
+      "viewport": {
+        "width": 360,
+        "height": 800
+      },
+      "clientWidth": 345,
+      "scrollWidth": 345,
+      "focus": "H1",
+      "horizontalOverflow": false,
+      "file": "medico-exames-360.jpg",
+      "sha256": "704ff958f7e45ede668b0400144c62261ae36f74d39bbabf257019a5c62c7350"
+    },
+    {
+      "label": "representante-necessidades",
+      "route": "#professional/needs",
+      "heading": "Necessidades da instituição",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clientWidth": 1425,
+      "scrollWidth": 1425,
+      "focus": "H1",
+      "horizontalOverflow": false,
+      "file": "representante-necessidades-1440.jpg",
+      "sha256": "e912c324946b62a3f198227141dee95d3baf180ac7347a72ed59dda10433417c"
+    },
+    {
+      "label": "representante-necessidades",
+      "route": "#professional/needs",
+      "heading": "Necessidades da instituição",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "clientWidth": 753,
+      "scrollWidth": 753,
+      "focus": "H1",
+      "horizontalOverflow": false,
+      "file": "representante-necessidades-768.jpg",
+      "sha256": "f078579ccbf61cc7f104299ffad7f230e6b3c36da4f5170981ee1190b5cf7fbf"
+    },
+    {
+      "label": "representante-necessidades",
+      "route": "#professional/needs",
+      "heading": "Necessidades da instituição",
+      "viewport": {
+        "width": 360,
+        "height": 800
+      },
+      "clientWidth": 345,
+      "scrollWidth": 345,
+      "focus": "H1",
+      "horizontalOverflow": false,
+      "file": "representante-necessidades-360.jpg",
+      "sha256": "db39701b066363e4dd7a89d9482711a91a391c2a77acea9c51c242f99d6ffcd6"
+    },
+    {
+      "label": "representante-estoque",
+      "route": "#professional/stock",
+      "heading": "Estoque de bolsas",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clientWidth": 1425,
+      "scrollWidth": 1425,
+      "focus": "H1",
+      "horizontalOverflow": false,
+      "file": "representante-estoque-1440.jpg",
+      "sha256": "54b35942bfa9efa471abcffb14c1b535d36fc2cb8f2417dc0259f5a1eb30e175"
+    },
+    {
+      "label": "representante-estoque",
+      "route": "#professional/stock",
+      "heading": "Estoque de bolsas",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "clientWidth": 753,
+      "scrollWidth": 753,
+      "focus": "H1",
+      "horizontalOverflow": false,
+      "file": "representante-estoque-768.jpg",
+      "sha256": "486143fe438ecad07b39379e569a0e57009ad1071a39f28e826d24001e59f320"
+    },
+    {
+      "label": "representante-estoque",
+      "route": "#professional/stock",
+      "heading": "Estoque de bolsas",
+      "viewport": {
+        "width": 360,
+        "height": 800
+      },
+      "clientWidth": 345,
+      "scrollWidth": 345,
+      "focus": "H1",
+      "horizontalOverflow": false,
+      "file": "representante-estoque-360.jpg",
+      "sha256": "ed342e9228e7a4cbcf29b893f95056c18fed35cea5d12ccac3844d26d8be7ef1"
+    },
+    {
+      "label": "administrador-mapa",
+      "route": "#professional/admin",
+      "heading": "Mapa de necessidades",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clientWidth": 1425,
+      "scrollWidth": 1425,
+      "focus": "H1",
+      "horizontalOverflow": false,
+      "file": "administrador-mapa-1440.jpg",
+      "sha256": "694587208084ca49ba34d4e1ff890c8323c18412e1549d8eb12482c2cc4c283a"
+    },
+    {
+      "label": "administrador-mapa",
+      "route": "#professional/admin",
+      "heading": "Mapa de necessidades",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "clientWidth": 753,
+      "scrollWidth": 753,
+      "focus": "H1",
+      "horizontalOverflow": false,
+      "file": "administrador-mapa-768.jpg",
+      "sha256": "d564d0571ac5ee56cff05f77d61097ff27f23d44790ef503819db7bd306077ce"
+    },
+    {
+      "label": "administrador-mapa",
+      "route": "#professional/admin",
+      "heading": "Mapa de necessidades",
+      "viewport": {
+        "width": 360,
+        "height": 800
+      },
+      "clientWidth": 345,
+      "scrollWidth": 345,
+      "focus": "H1",
+      "horizontalOverflow": false,
+      "file": "administrador-mapa-360.jpg",
+      "sha256": "314191841b0a15314d31e3d0f3253ad19d35653fcfbbceca4a355b3cead3f4cd"
+    },
+    {
+      "label": "administrador-moderacao",
+      "route": "#professional/moderation",
+      "heading": "Moderação da comunidade",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clientWidth": 1425,
+      "scrollWidth": 1425,
+      "focus": "H1",
+      "horizontalOverflow": false,
+      "file": "administrador-moderacao-1440.jpg",
+      "sha256": "4d648b8c7c05e1afbe9f8a2349dbf49f4d5d98d6e04aa1d548c891ba1aac9290"
+    },
+    {
+      "label": "administrador-moderacao",
+      "route": "#professional/moderation",
+      "heading": "Moderação da comunidade",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "clientWidth": 753,
+      "scrollWidth": 753,
+      "focus": "H1",
+      "horizontalOverflow": false,
+      "file": "administrador-moderacao-768.jpg",
+      "sha256": "29b3f5089a2a8e468885348156a2a2dfed03f0fffe1b7d28c4a9abd1f879e3be"
+    },
+    {
+      "label": "administrador-moderacao",
+      "route": "#professional/moderation",
+      "heading": "Moderação da comunidade",
+      "viewport": {
+        "width": 360,
+        "height": 800
+      },
+      "clientWidth": 345,
+      "scrollWidth": 345,
+      "focus": "H1",
+      "horizontalOverflow": false,
+      "file": "administrador-moderacao-360.jpg",
+      "sha256": "e8f90c770ed070f2baf9806b924284d491d16fedce9c61dce5826e84c745f967"
+    },
+    {
+      "label": "administrador-privacidade",
+      "route": "#professional/privacy",
+      "heading": "Solicitações de privacidade",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clientWidth": 1440,
+      "scrollWidth": 1440,
+      "focus": "H1",
+      "horizontalOverflow": false,
+      "file": "administrador-privacidade-1440.jpg",
+      "sha256": "e4c17087bdf1d4d1c61ee58b27498a3523939137debc91ef95f84130ab9e78f4"
+    },
+    {
+      "label": "administrador-privacidade",
+      "route": "#professional/privacy",
+      "heading": "Solicitações de privacidade",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "clientWidth": 768,
+      "scrollWidth": 768,
+      "focus": "H1",
+      "horizontalOverflow": false,
+      "file": "administrador-privacidade-768.jpg",
+      "sha256": "8c44f0faac507fdb9e189c13b39b518c694a0d4a85f0cfdad4603cfe57a329ce"
+    },
+    {
+      "label": "administrador-privacidade",
+      "route": "#professional/privacy",
+      "heading": "Solicitações de privacidade",
+      "viewport": {
+        "width": 360,
+        "height": 800
+      },
+      "clientWidth": 360,
+      "scrollWidth": 360,
+      "focus": "H1",
+      "horizontalOverflow": false,
+      "file": "administrador-privacidade-360.jpg",
+      "sha256": "18cc12903078683fedba0d67cb1802df1af40093655da00aafc3381ed32664a9"
+    },
+    {
+      "label": "painel-paciente",
+      "route": "#dashboard",
+      "heading": "Olá, Paula",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clientWidth": 1425,
+      "scrollWidth": 1425,
+      "focus": "H1",
+      "horizontalOverflow": false,
+      "file": "paciente-desktop-1440.jpg",
+      "sha256": "aff8c414fb4b5c9f27b397904da9cfa0b3f55c0631729d63aefcffcdbc775fc1"
+    },
+    {
+      "label": "painel-paciente",
+      "route": "#dashboard",
+      "heading": "Olá, Paula",
+      "viewport": {
+        "width": 360,
+        "height": 800
+      },
+      "clientWidth": 345,
+      "scrollWidth": 345,
+      "focus": "H1",
+      "horizontalOverflow": false,
+      "file": "paciente-mobile-360.jpg",
+      "sha256": "3f9256a6d28e80b1d28376849fe8640f0bd0d3b439517ada1059311118b96a26"
+    }
+  ]
+}

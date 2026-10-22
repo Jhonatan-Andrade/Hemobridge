@@ -1,6 +1,6 @@
 # Adendo técnico para consolidação do TCC
 
-Data: 18/10/2026. Este texto descreve o código integrado atual e deve ser incorporado às seções de implementação, persistência e validação do trabalho final. Não substitui a revisão editorial nem altera o documento de referência original.
+Consolidação: 21/10/2026. Este texto descreve o código integrado e deve ser incorporado às seções de implementação, persistência e validação do trabalho final. Não substitui a revisão editorial nem altera o documento de referência original.
 
 ## Implementação atual
 
@@ -24,4 +24,6 @@ As baterias automatizadas verificam código e serviços locais descartáveis; a 
 
 O plano AWS inclui RDS privado cifrado, API em ECS/Fargate, S3 privado, credenciais no Secrets Manager, HTTPS e cache desabilitado nas rotas autenticadas. Esses recursos estão documentados e preparados como configuração, sem comprovação de implantação ou operação nesta entrega. Carga representativa, restauração de backup, gestão das chaves, canal jurídico real e homologação clínica continuam necessários antes de dados reais.
 
-O app ainda precisa de paridade operacional em cadastro nativo, edição integral de perfil, agendamento/reagendamento, anexação de exames e formulários de estoque/agenda, conforme seu README. GPS e permissões devem ser homologados em Android/iOS físicos; não há APK/IPA assinado nesta entrega. Essas limitações devem constar no trabalho, no manual e no plano de implantação.
+Os formulários nativos de cadastro, edição dos campos autorizados do perfil, consultas, envio de exames, agenda, avaliação médica e estoque foram implementados. O APK debug foi compilado e uma base anterior às últimas correções foi instalada em Android real. Permanece a homologação física da versão corrigida, incluindo arquivos, permissões, operações completas e sessões. Não há IPA nem assinatura de distribuição. Consulte o [registro Android](homologacao-android-2026-10-19.md).
+
+A API contém contratos administrativos, registro de doação e relatórios que não possuem todos os seus formulários expostos no candidato web. Aprovação dos protótipos não comprova a implementação dessas páginas. O manual distingue os destinos atualmente acessíveis das lacunas do roteiro completo. As seções finais devem registrar essas limitações, o estado dos [casos formais](rastreabilidade-de-testes.md) e a separação entre preparação e implantação efetiva na AWS.

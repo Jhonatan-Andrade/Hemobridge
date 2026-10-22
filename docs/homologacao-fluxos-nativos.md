@@ -49,11 +49,11 @@ Evidências resumidas: [registro estruturado](evidencias/fluxos-nativos-2026-10-
 
 ## Limites de compilação e homologação física
 
-O projeto Flutter tem alvos Android/iOS. Uma tentativa de compilação do pacote Android encontrou **Android SDK ausente**; nenhum APK/IPA foi gerado e não se declara compilação nativa aprovada. O alvo Flutter Web não está configurado e não foi adicionado: o site continua sendo o frontend React.
+O projeto Flutter tem alvos Android/iOS. A primeira tentativa local encontrou Android SDK ausente. Essa preparação foi concluída em 19/10: o SDK foi instalado, a integração contínua compilou o APK debug e a base `609b4cb7` foi instalada e exercitada parcialmente em Android real. O [relatório Android](homologacao-android-2026-10-19.md) registra os perfis conferidos, a captura pontual de GPS e as correções posteriores ainda não homologadas fisicamente. Não foi gerado IPA ou pacote de distribuição assinado. O site continua sendo o frontend React.
 
 Para a próxima homologação:
 
-1. Preparar Android SDK, ferramentas de compilação e licenças; configurar emulador/aparelho e um endereço acessível da API de homologação.
+1. Instalar no aparelho um APK da versão corrigida e conferir um endereço acessível da API de homologação. Em 21/10, a usuária informou que conectará o Android em outra oportunidade.
 2. Validar em Android e iOS reais a permissão negada/permanente, GPS desligado, timeout, seleção de PDF/JPG/PNG, visualização de PDF e abertura de Maps/teleconsulta.
 3. Repetir a jornada completa com as cinco contas de teste e anexar evidências de aparelho, versão e resultado, incluindo a expiração de sessão.
 4. Configurar identificadores, assinatura e distribuição interna. Para iOS, usar macOS/Xcode e a conta de assinatura da organização.
