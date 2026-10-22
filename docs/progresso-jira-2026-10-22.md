@@ -13,7 +13,7 @@ Consolidação de 22/10/2026. Responsável no Jira: Thaiza dos Santos. A aprova�
 | [HEM-55](https://jhonatanjaqstudy.atlassian.net/browse/HEM-55) | Feito | Indicadores preenchidos nas três versões, relatórios e estrutura do PDF |
 | [HEM-2](https://jhonatanjaqstudy.atlassian.net/browse/HEM-2) | Fazendo | Conferência conjunta dos estados complementares antes de encerrar o épico |
 | [HEM-57](https://jhonatanjaqstudy.atlassian.net/browse/HEM-57) | Fazendo | Registros PT01–PT23, execução técnica e medição atual preparados; completar roteiros parciais e validação dos resultados |
-| [HEM-58](https://jhonatanjaqstudy.atlassian.net/browse/HEM-58) | Fazendo | Incorporar e conferir capítulos 10–12 na base editável localizada; Quadro42, figuras, referências e limites precisam corresponder às evidências |
+| [HEM-58](https://jhonatanjaqstudy.atlassian.net/browse/HEM-58) | Fazendo | Cópia editável atualizada com capítulos 10–12, Quadros41/42 e capturas reais; conferir normas UTP, diagramas legados e adotar a versão única pela equipe |
 | [HEM-59](https://jhonatanjaqstudy.atlassian.net/browse/HEM-59) | Fazendo | Manual, dez slides e roteiro preparados; falta ensaio coletivo e cadeia completa da versão de entrega |
 | [HEM-79](https://jhonatanjaqstudy.atlassian.net/browse/HEM-79) | Fazendo | Defeito de reserva concorrente corrigido e retestado; código em revisão, sem merge/publicação |
 
@@ -31,7 +31,9 @@ Os prazos originais não foram alterados para esconder atrasos. “Feito” nas 
 
 A busca encontrou `C:\Users\email\Downloads\Hemobridge - Projeto Lógico - Revisão Mínima Final.docx`, SHA-256 `61F0CCDC3F2374E7E3392F9DCD9C35933B46665D73190591F531F591BB6E6207`. Seu conteúdo corresponde fortemente ao PDF parcial de referência, com capítulos 10, 11 e 12 e Quadros41/42. É a base de setembro, com resultados ainda planejados, não uma versão final de outubro já atualizada.
 
-O outro arquivo `Hemobridge - TCC.docx` é um rascunho anterior com seções finais vazias. Não foi escolhido como base. O original e os arquivos sincronizados de `sources/` permanecem preservados. A revisão em cópia de trabalho deve registrar fonte, alterações e limites antes de a equipe adotar uma versão final única.
+O outro arquivo `Hemobridge - TCC.docx` é um rascunho anterior com seções finais vazias. Não foi escolhido como base. O original e os arquivos sincronizados de `sources/` permanecem preservados.
+
+A [cópia editável atualizada](tcc/hemobridge-tcc-atualizado.docx) incorpora os capítulos 10–12, resultados observados no Quadro42 e quatro figuras atuais, com atualização do sumário e conferência de paginação. A revisão distingue resultados técnicos de aceite formal e identifica diagramas antigos que ainda precisam ser reconciliados. A equipe deve conferir as normas UTP e adotar uma versão única; não houve declaração de aprovação acadêmica final.
 
 ## Ordem de conclusão
 
