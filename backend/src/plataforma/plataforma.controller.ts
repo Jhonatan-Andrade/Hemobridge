@@ -15,6 +15,7 @@ import {
 } from '@nestjs/common';
 import { Prisma } from '../generated/prisma/client.js';
 import { vinculoDaAgendaAtivo } from '../consultas/instituicao-agenda.js';
+import { ehConflitoDeAgendamento } from '../consultas/conflito-agendamento.js';
 import {
   consultaComVinculoClinicoAtivo,
   horarioComVinculoClinicoAtivo,
@@ -231,10 +232,7 @@ export class PlataformaController {
         });
       });
     } catch (e) {
-      if (
-        e instanceof Prisma.PrismaClientKnownRequestError &&
-        ['P2002', 'P2004'].includes(e.code)
-      )
+      if (ehConflitoDeAgendamento(e))
         throw new ConflictException('Horário ocupado. Escolha outro.');
       throw e;
     }
