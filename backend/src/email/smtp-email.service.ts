@@ -16,12 +16,26 @@ export class SmtpEmailService extends EmailService {
       host: config.get<string>('SMTP_HOST', 'localhost'),
       port: Number(config.get('SMTP_PORTA', 1025)),
       secure: config.get('SMTP_SEGURO') === 'true',
-      auth: usuario ? { user: usuario, pass: config.get<string>('SMTP_SENHA') } : undefined,
+      connectionTimeout: 15_000,
+      greetingTimeout: 15_000,
+      socketTimeout: 30_000,
+      auth: usuario
+        ? { user: usuario, pass: config.get<string>('SMTP_SENHA') }
+        : undefined,
     });
-    this.remetente = config.get<string>('EMAIL_REMETENTE', 'Hemobridge <nao-responda@hemobridge.local>');
+    this.remetente = config.get<string>(
+      'EMAIL_REMETENTE',
+      'Hemobridge <nao-responda@hemobridge.local>',
+    );
   }
 
   async enviar({ para, assunto, texto, html }: MensagemEmail): Promise<void> {
-    await this.transporter.sendMail({ from: this.remetente, to: para, subject: assunto, text: texto, html });
+    await this.transporter.sendMail({
+      from: this.remetente,
+      to: para,
+      subject: assunto,
+      text: texto,
+      html,
+    });
   }
 }

@@ -15,6 +15,7 @@ import { Perfis, UsuarioAtual } from '../auth/decorators.js';
 import { AtualizarMedicoDto, ListarMedicosDto, NovoMedicoDto } from './dto/medico.dto.js';
 import { HospitalDoRepresentanteService } from './hospital-do-representante.service.js';
 import { MedicosService } from './medicos.service.js';
+import { Auditar } from '../auditoria/auditar.decorator.js';
 
 // UC22 – Gerenciar Médicos (RF13)
 @Perfis('REPRESENTANTE')
@@ -30,6 +31,7 @@ export class MedicosController {
     return this.medicos.listar(await this.hospital.obterId(rep.id), filtros);
   }
 
+  @Auditar({ acao: 'CRIAR_MEDICO', entidade: 'medico' })
   @Post()
   async criar(@UsuarioAtual() rep: UsuarioAutenticado, @Body() dto: NovoMedicoDto) {
     return this.medicos.criar(await this.hospital.obterId(rep.id), rep.id, dto);
@@ -40,6 +42,7 @@ export class MedicosController {
     return this.medicos.detalhar(await this.hospital.obterId(rep.id), id);
   }
 
+  @Auditar({ acao: 'ATUALIZAR_MEDICO', entidade: 'medico' })
   @Patch(':id')
   async atualizar(
     @UsuarioAtual() rep: UsuarioAutenticado,
@@ -49,18 +52,21 @@ export class MedicosController {
     return this.medicos.atualizar(await this.hospital.obterId(rep.id), id, dto);
   }
 
+  @Auditar({ acao: 'DESATIVAR_MEDICO', entidade: 'medico' })
   @Post(':id/desativar')
   @HttpCode(HttpStatus.OK)
   async desativar(@UsuarioAtual() rep: UsuarioAutenticado, @Param('id', ParseUUIDPipe) id: string) {
     return this.medicos.desativar(await this.hospital.obterId(rep.id), id);
   }
 
+  @Auditar({ acao: 'ATIVAR_MEDICO', entidade: 'medico' })
   @Post(':id/ativar')
   @HttpCode(HttpStatus.OK)
   async ativar(@UsuarioAtual() rep: UsuarioAutenticado, @Param('id', ParseUUIDPipe) id: string) {
     return this.medicos.ativar(await this.hospital.obterId(rep.id), id);
   }
 
+  @Auditar({ acao: 'REENVIAR_SENHA_PROVISORIA', entidade: 'medico' })
   @Post(':id/reenviar-senha-provisoria')
   @HttpCode(HttpStatus.OK)
   async reenviarSenhaProvisoria(

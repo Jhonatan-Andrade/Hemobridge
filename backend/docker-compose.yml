@@ -8,7 +8,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}
       POSTGRES_DB: ${POSTGRES_DB:-hemobridge}
     ports:
-      - '${POSTGRES_PORT:-5434}:5432'
+      - '127.0.0.1:${POSTGRES_PORT:-5434}:5432'
     volumes:
       - hemobridge-pgdata:/var/lib/postgresql/data
       - ./docker/postgres-init/20-remove-extensoes-extras.sql:/docker-entrypoint-initdb.d/20-remove-extensoes-extras.sql:ro
@@ -18,14 +18,27 @@ services:
       timeout: 5s
       retries: 10
 
+  # Armazenamento S3 dos arquivos de exame no desenvolvimento.
+  s3:
+    image: chrislusf/seaweedfs:4.47
+    container_name: hemobridge-s3
+    restart: unless-stopped
+    command: server -dir=/data -ip.bind=0.0.0.0 -s3 -s3.port=8333 -s3.config=/etc/seaweedfs/s3.json -master.volumeSizeLimitMB=256 -volume.max=50
+    ports:
+      - '127.0.0.1:${S3_PORTA:-8333}:8333'
+    volumes:
+      - hemobridge-s3data:/data
+      - ./docker/seaweedfs/s3.dev.json:/etc/seaweedfs/s3.json:ro
+
   # Captura os e-mails enviados em desenvolvimento: http://localhost:8025
   mail:
     image: axllent/mailpit:latest
     container_name: hemobridge-mailpit
     restart: unless-stopped
     ports:
-      - '${MAILPIT_SMTP_PORT:-1025}:1025'
-      - '${MAILPIT_UI_PORT:-8025}:8025'
+      - '127.0.0.1:${MAILPIT_SMTP_PORT:-1025}:1025'
+      - '127.0.0.1:${MAILPIT_UI_PORT:-8025}:8025'
 
 volumes:
   hemobridge-pgdata:
+  hemobridge-s3data:

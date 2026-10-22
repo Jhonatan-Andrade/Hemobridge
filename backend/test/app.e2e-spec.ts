@@ -1,29 +1,20 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { App } from 'supertest/types.js';
-import { AppModule } from './../src/app.module.js';
+import type { App } from 'supertest/types.js';
+import { subirApp } from './apoio/app.js';
 
-describe('AppController (e2e)', () => {
+describe('disponibilidade da API', () => {
   let app: INestApplication<App>;
 
-  beforeEach(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
+  beforeAll(async () => { app = await subirApp(); });
 
-    app = moduleFixture.createNestApplication();
-    await app.init();
+  it('expõe prontidão do banco sem informações privadas', async () => {
+    await request(app.getHttpServer()).get('/health/ready').expect(200);
+    const response = await request(app.getHttpServer()).get('/').expect(200);
+    expect(response.body.service).toBe('HemoBridge');
   });
-
-  it('/ (GET)', () => {
-    return request(app.getHttpServer())
-      .get('/')
-      .expect(200)
-      .expect('Hello World!');
+  it('encerra a rota antiga de publicações locais', async () => {
+    await request(app.getHttpServer()).get('/post').expect(410);
   });
-
-  afterEach(async () => {
-    await app.close();
-  });
+  afterAll(async () => { await app?.close(); });
 });

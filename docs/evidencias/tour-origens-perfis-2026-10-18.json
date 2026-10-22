@@ -1,0 +1,242 @@
+{
+  "executadoEm": "2026-10-18T13:02:23.488Z",
+  "api": "http://127.0.0.1:3000",
+  "perfis": [
+    {
+      "conta": "paciente",
+      "login": {
+        "status": 200,
+        "perfilCorreto": true
+      },
+      "tour": [
+        {
+          "origem": "http://127.0.0.1:5174",
+          "status": 200,
+          "isFirstAccess": false,
+          "tourVersion": 1
+        },
+        {
+          "origem": "http://localhost:5174",
+          "status": 200,
+          "isFirstAccess": false,
+          "tourVersion": 1
+        }
+      ],
+      "persistencia": {
+        "status": 200,
+        "isFirstAccess": false,
+        "tourVersion": 1
+      },
+      "origemExterna": {
+        "status": 403,
+        "bloqueada": true
+      },
+      "leituras": [
+        {
+          "rota": "/comunidade/minhas-reacoes",
+          "status": 200
+        },
+        {
+          "rota": "/paciente/perfil",
+          "status": 200
+        },
+        {
+          "rota": "/paciente/consultas",
+          "status": 200
+        }
+      ],
+      "aprovado": true
+    },
+    {
+      "conta": "doador",
+      "login": {
+        "status": 200,
+        "perfilCorreto": true
+      },
+      "tour": [
+        {
+          "origem": "http://127.0.0.1:5174",
+          "status": 200,
+          "isFirstAccess": false,
+          "tourVersion": 1
+        },
+        {
+          "origem": "http://localhost:5174",
+          "status": 200,
+          "isFirstAccess": false,
+          "tourVersion": 1
+        }
+      ],
+      "persistencia": {
+        "status": 200,
+        "isFirstAccess": false,
+        "tourVersion": 1
+      },
+      "origemExterna": {
+        "status": 403,
+        "bloqueada": true
+      },
+      "leituras": [
+        {
+          "rota": "/comunidade/minhas-reacoes",
+          "status": 200
+        },
+        {
+          "rota": "/paciente/orientacoes-doacao",
+          "status": 200
+        },
+        {
+          "rota": "/notificacoes/nao-lidas",
+          "status": 200
+        }
+      ],
+      "aprovado": true
+    },
+    {
+      "conta": "medico",
+      "login": {
+        "status": 200,
+        "perfilCorreto": true
+      },
+      "tour": [
+        {
+          "origem": "http://127.0.0.1:5174",
+          "status": 200,
+          "isFirstAccess": false,
+          "tourVersion": 1
+        },
+        {
+          "origem": "http://localhost:5174",
+          "status": 200,
+          "isFirstAccess": false,
+          "tourVersion": 1
+        }
+      ],
+      "persistencia": {
+        "status": 200,
+        "isFirstAccess": false,
+        "tourVersion": 1
+      },
+      "origemExterna": {
+        "status": 403,
+        "bloqueada": true
+      },
+      "leituras": [
+        {
+          "rota": "/comunidade/minhas-reacoes",
+          "status": 200
+        },
+        {
+          "rota": "/medico/hospitais",
+          "status": 200
+        },
+        {
+          "rota": "/medico/agenda",
+          "status": 200
+        },
+        {
+          "rota": "/medico/exames",
+          "status": 200
+        }
+      ],
+      "aprovado": true
+    },
+    {
+      "conta": "representante",
+      "login": {
+        "status": 200,
+        "perfilCorreto": true
+      },
+      "tour": [
+        {
+          "origem": "http://127.0.0.1:5174",
+          "status": 200,
+          "isFirstAccess": false,
+          "tourVersion": 1
+        },
+        {
+          "origem": "http://localhost:5174",
+          "status": 200,
+          "isFirstAccess": false,
+          "tourVersion": 1
+        }
+      ],
+      "persistencia": {
+        "status": 200,
+        "isFirstAccess": false,
+        "tourVersion": 1
+      },
+      "origemExterna": {
+        "status": 403,
+        "bloqueada": true
+      },
+      "leituras": [
+        {
+          "rota": "/comunidade/minhas-reacoes",
+          "status": 200
+        },
+        {
+          "rota": "/representante/necessidades",
+          "status": 200
+        },
+        {
+          "rota": "/representante/estoque",
+          "status": 200
+        }
+      ],
+      "aprovado": true
+    },
+    {
+      "conta": "admin",
+      "login": {
+        "status": 200,
+        "perfilCorreto": true
+      },
+      "tour": [
+        {
+          "origem": "http://127.0.0.1:5174",
+          "status": 200,
+          "isFirstAccess": false,
+          "tourVersion": 1
+        },
+        {
+          "origem": "http://localhost:5174",
+          "status": 200,
+          "isFirstAccess": false,
+          "tourVersion": 1
+        }
+      ],
+      "persistencia": {
+        "status": 200,
+        "isFirstAccess": false,
+        "tourVersion": 1
+      },
+      "origemExterna": {
+        "status": 403,
+        "bloqueada": true
+      },
+      "leituras": [
+        {
+          "rota": "/comunidade/minhas-reacoes",
+          "status": 200
+        },
+        {
+          "rota": "/admin/mapa-necessidades",
+          "status": 200
+        },
+        {
+          "rota": "/admin/indicadores",
+          "status": 200
+        },
+        {
+          "rota": "/comunidade/denuncias",
+          "status": 200
+        }
+      ],
+      "aprovado": true
+    }
+  ],
+  "aprovados": 5,
+  "total": 5,
+  "nota": "Cookies, tokens e dados pessoais não foram gravados. Não houve logout, seed ou redefinição de flags. Somente a conclusão autorizada do tour foi repetida nas requisições bem-sucedidas."
+}

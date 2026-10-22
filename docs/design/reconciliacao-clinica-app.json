@@ -1,0 +1,1245 @@
+{
+  "checkedAt": "2026-10-19",
+  "page": "0:1",
+  "totalRootFrames": 519,
+  "reconciledFrames": 113,
+  "groupCounts": [
+    {
+      "prefix": "Aplicativo / Paciente-Doador / Cadastro",
+      "frames": 9
+    },
+    {
+      "prefix": "Aplicativo / Paciente-Doador / Perfil",
+      "frames": 7
+    },
+    {
+      "prefix": "Aplicativo / Paciente-Doador / Consultas",
+      "frames": 15
+    },
+    {
+      "prefix": "Aplicativo / Paciente-Doador / Exames",
+      "frames": 11
+    },
+    {
+      "prefix": "Aplicativo / Representante de Hospital / Estoque",
+      "frames": 12
+    },
+    {
+      "prefix": "Aplicativo / Representante de Hospital / Necessidades",
+      "frames": 5
+    },
+    {
+      "prefix": "Aplicativo / Médico / Publicação de horário",
+      "frames": 4
+    },
+    {
+      "prefix": "Aplicativo / Médico / Atendimento",
+      "frames": 8
+    },
+    {
+      "prefix": "Aplicativo / Médico / Exames",
+      "frames": 12
+    },
+    {
+      "prefix": "Web mobile / Médico / Exames",
+      "frames": 12
+    },
+    {
+      "prefix": "Web desktop / Médico / Exames",
+      "frames": 12
+    },
+    {
+      "prefix": "Aplicativo / Médico / Agenda",
+      "frames": 2
+    },
+    {
+      "prefix": "Web mobile / Médico / Agenda",
+      "frames": 2
+    },
+    {
+      "prefix": "Web desktop / Médico / Agenda",
+      "frames": 2
+    }
+  ],
+  "directDestinations": 2911,
+  "recursiveDestinations": 3438,
+  "brokenDestinations": [],
+  "automaticCycles": [],
+  "afterTimeoutNodes": 24,
+  "reconciledAfterTimeoutNodes": [],
+  "badText": [],
+  "physicalHorizontalOverflow": [],
+  "instanceHorizontalOverflow": [
+    {
+      "root": "8:29",
+      "id": "I835:9445;732:7838",
+      "name": "Logo PNG original",
+      "x": 0,
+      "width": 184,
+      "parentWidth": 165
+    },
+    {
+      "root": "8:107",
+      "id": "I835:9519;732:7838",
+      "name": "Logo PNG original",
+      "x": 0,
+      "width": 184,
+      "parentWidth": 165
+    },
+    {
+      "root": "8:185",
+      "id": "I835:9732;732:7838",
+      "name": "Logo PNG original",
+      "x": 0,
+      "width": 184,
+      "parentWidth": 165
+    },
+    {
+      "root": "8:265",
+      "id": "I835:9805;732:7838",
+      "name": "Logo PNG original",
+      "x": 0,
+      "width": 184,
+      "parentWidth": 165
+    },
+    {
+      "root": "8:343",
+      "id": "I835:9813;732:7838",
+      "name": "Logo PNG original",
+      "x": 0,
+      "width": 184,
+      "parentWidth": 165
+    },
+    {
+      "root": "8:751",
+      "id": "I848:9818;732:7838",
+      "name": "Logo PNG original",
+      "x": 0,
+      "width": 184,
+      "parentWidth": 165
+    },
+    {
+      "root": "8:1133",
+      "id": "I835:9821;732:7838",
+      "name": "Logo PNG original",
+      "x": 0,
+      "width": 184,
+      "parentWidth": 165
+    },
+    {
+      "root": "226:5074",
+      "id": "I754:8038;732:7838",
+      "name": "Logo PNG original",
+      "x": 0,
+      "width": 184,
+      "parentWidth": 165
+    },
+    {
+      "root": "226:5074",
+      "id": "I832:9600;3:63",
+      "name": "Continuar",
+      "x": -8,
+      "width": 180,
+      "parentWidth": 164
+    },
+    {
+      "root": "226:5074",
+      "id": "I832:9602;3:73",
+      "name": "Continuar",
+      "x": -7,
+      "width": 180,
+      "parentWidth": 166
+    },
+    {
+      "root": "226:5092",
+      "id": "I838:10056;732:7838",
+      "name": "Logo PNG original",
+      "x": 0,
+      "width": 184,
+      "parentWidth": 165
+    },
+    {
+      "root": "232:5126",
+      "id": "I754:8053;732:7838",
+      "name": "Logo PNG original",
+      "x": 0,
+      "width": 184,
+      "parentWidth": 165
+    },
+    {
+      "root": "660:11338",
+      "id": "I832:9706;3:63",
+      "name": "Continuar",
+      "x": -8,
+      "width": 180,
+      "parentWidth": 164
+    },
+    {
+      "root": "660:11338",
+      "id": "I832:9708;3:73",
+      "name": "Continuar",
+      "x": -7,
+      "width": 180,
+      "parentWidth": 166
+    },
+    {
+      "root": "660:11338",
+      "id": "I761:8475;732:7838",
+      "name": "Logo PNG original",
+      "x": 0,
+      "width": 184,
+      "parentWidth": 174
+    },
+    {
+      "root": "660:11448",
+      "id": "I761:8481;732:7838",
+      "name": "Logo PNG original",
+      "x": 0,
+      "width": 184,
+      "parentWidth": 174
+    },
+    {
+      "root": "747:7641",
+      "id": "I838:9459;732:7838",
+      "name": "Logo PNG original",
+      "x": 0,
+      "width": 184,
+      "parentWidth": 165
+    },
+    {
+      "root": "824:9135",
+      "id": "I824:9138;732:7838",
+      "name": "Logo PNG original",
+      "x": 0,
+      "width": 184,
+      "parentWidth": 165
+    },
+    {
+      "root": "824:9135",
+      "id": "I824:9448;3:149",
+      "name": "Label",
+      "x": 4,
+      "width": 300,
+      "parentWidth": 292
+    },
+    {
+      "root": "824:9135",
+      "id": "I824:9448;3:150",
+      "name": "Control",
+      "x": 4,
+      "width": 300,
+      "parentWidth": 292
+    }
+  ],
+  "instanceHorizontalOverflowCount": 131,
+  "duplicates": [],
+  "frames": [
+    {
+      "id": "8:29",
+      "name": "Aplicativo / Paciente-Doador / Cadastro / Inicial",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "8:107",
+      "name": "Aplicativo / Paciente-Doador / Cadastro / Preenchido",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "8:185",
+      "name": "Aplicativo / Paciente-Doador / Cadastro / Erro",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "8:265",
+      "name": "Aplicativo / Paciente-Doador / Cadastro / Enviando",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "8:343",
+      "name": "Aplicativo / Paciente-Doador / Cadastro / Concluído",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "8:1133",
+      "name": "Aplicativo / Paciente-Doador / Cadastro / Termo vigente",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "8:1221",
+      "name": "Aplicativo / Paciente-Doador / Consultas / Minhas consultas",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "8:1233",
+      "name": "Aplicativo / Paciente-Doador / Exames / Meus exames",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "101:3115",
+      "name": "Web desktop / Médico / Agenda / Próximos",
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "id": "154:3753",
+      "name": "Web desktop / Médico / Exames / Lista",
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "id": "160:3857",
+      "name": "Aplicativo / Paciente-Doador / Consultas / Vazio",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "160:3883",
+      "name": "Aplicativo / Paciente-Doador / Consultas / Carregando",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "160:3910",
+      "name": "Aplicativo / Paciente-Doador / Consultas / Erro",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "160:3938",
+      "name": "Aplicativo / Paciente-Doador / Exames / Vazio",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "160:3964",
+      "name": "Aplicativo / Paciente-Doador / Exames / Carregando",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "160:3991",
+      "name": "Aplicativo / Paciente-Doador / Exames / Erro",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "226:5074",
+      "name": "Aplicativo / Médico / Agenda / Próximos",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "226:5092",
+      "name": "Aplicativo / Representante de Hospital / Necessidades / Necessidades",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "232:5109",
+      "name": "Aplicativo / Médico / Atendimento / Realizado",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "232:5126",
+      "name": "Aplicativo / Médico / Exames / Lista",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "660:11338",
+      "name": "Web mobile / Médico / Agenda / Próximos",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "660:11448",
+      "name": "Web mobile / Médico / Exames / Lista",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "747:7641",
+      "name": "Aplicativo / Representante de Hospital / Estoque / Estoque",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "824:9135",
+      "name": "Aplicativo / Médico / Exames / Escolher decisão",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "824:9146",
+      "name": "Aplicativo / Médico / Exames / Validar · revisar",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "824:9157",
+      "name": "Aplicativo / Médico / Exames / Validar · confirmar",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "824:9168",
+      "name": "Aplicativo / Médico / Exames / Novo envio · orientar",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "824:9179",
+      "name": "Aplicativo / Médico / Exames / Novo envio · confirmar",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "824:9190",
+      "name": "Aplicativo / Médico / Exames / Avaliação registrada",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "824:9201",
+      "name": "Aplicativo / Médico / Exames / Novo envio solicitado",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "824:9212",
+      "name": "Aplicativo / Médico / Exames / Conflito de atualização",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "824:9223",
+      "name": "Aplicativo / Médico / Exames / Resultado privado",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "824:9615",
+      "name": "Web mobile / Médico / Exames / Escolher decisão",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "824:9643",
+      "name": "Web mobile / Médico / Exames / Validar · revisar",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "824:9671",
+      "name": "Web mobile / Médico / Exames / Validar · confirmar",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "824:9699",
+      "name": "Web mobile / Médico / Exames / Novo envio · orientar",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "824:9727",
+      "name": "Web mobile / Médico / Exames / Novo envio · confirmar",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "824:9755",
+      "name": "Web mobile / Médico / Exames / Avaliação registrada",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "824:9783",
+      "name": "Web mobile / Médico / Exames / Novo envio solicitado",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "824:9811",
+      "name": "Web mobile / Médico / Exames / Conflito de atualização",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "824:9839",
+      "name": "Web mobile / Médico / Exames / Resultado privado",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "824:10086",
+      "name": "Web desktop / Médico / Exames / Escolher decisão",
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "id": "824:10121",
+      "name": "Web desktop / Médico / Exames / Validar · revisar",
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "id": "824:10156",
+      "name": "Web desktop / Médico / Exames / Validar · confirmar",
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "id": "824:10191",
+      "name": "Web desktop / Médico / Exames / Novo envio · orientar",
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "id": "824:10226",
+      "name": "Web desktop / Médico / Exames / Novo envio · confirmar",
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "id": "824:10261",
+      "name": "Web desktop / Médico / Exames / Avaliação registrada",
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "id": "824:10296",
+      "name": "Web desktop / Médico / Exames / Novo envio solicitado",
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "id": "824:10331",
+      "name": "Web desktop / Médico / Exames / Conflito de atualização",
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "id": "824:10366",
+      "name": "Web desktop / Médico / Exames / Resultado privado",
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "id": "825:9173",
+      "name": "Aplicativo / Médico / Exames / Validar · selecionar tipo",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "825:9187",
+      "name": "Aplicativo / Médico / Exames / Escolher tipo sanguíneo",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "825:9253",
+      "name": "Web mobile / Médico / Exames / Validar · selecionar tipo",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "825:9270",
+      "name": "Web mobile / Médico / Exames / Escolher tipo sanguíneo",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "825:9338",
+      "name": "Web desktop / Médico / Exames / Validar · selecionar tipo",
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "id": "825:9357",
+      "name": "Web desktop / Médico / Exames / Escolher tipo sanguíneo",
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "id": "832:9579",
+      "name": "Aplicativo / Médico / Agenda / Histórico",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "832:9669",
+      "name": "Web mobile / Médico / Agenda / Histórico",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "832:9757",
+      "name": "Web desktop / Médico / Agenda / Histórico",
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "id": "835:9360",
+      "name": "Aplicativo / Paciente-Doador / Cadastro / Consentimento confirmado",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "835:9388",
+      "name": "Aplicativo / Paciente-Doador / Cadastro / Estado selecionado",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "835:9416",
+      "name": "Aplicativo / Paciente-Doador / Cadastro / Localidades indisponíveis",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "836:9446",
+      "name": "Aplicativo / Paciente-Doador / Consultas / Agendar",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "836:9471",
+      "name": "Aplicativo / Paciente-Doador / Consultas / Aceite",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "836:9496",
+      "name": "Aplicativo / Paciente-Doador / Consultas / Confirmar agendamento",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "836:9521",
+      "name": "Aplicativo / Paciente-Doador / Consultas / Termos do atendimento",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "836:9546",
+      "name": "Aplicativo / Paciente-Doador / Consultas / Agendada",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "836:9571",
+      "name": "Aplicativo / Paciente-Doador / Consultas / Conflito",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "836:9596",
+      "name": "Aplicativo / Paciente-Doador / Consultas / Reagendar",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "836:9621",
+      "name": "Aplicativo / Paciente-Doador / Consultas / Reagendar escolhido",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "836:9646",
+      "name": "Aplicativo / Paciente-Doador / Consultas / Reagendada",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "836:9671",
+      "name": "Aplicativo / Paciente-Doador / Consultas / Cancelar",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "836:9696",
+      "name": "Aplicativo / Paciente-Doador / Consultas / Cancelada",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "837:9406",
+      "name": "Aplicativo / Paciente-Doador / Exames / Selecionar arquivo",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "837:9431",
+      "name": "Aplicativo / Paciente-Doador / Exames / Arquivo selecionado",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "837:9456",
+      "name": "Aplicativo / Paciente-Doador / Exames / Em análise",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "837:9481",
+      "name": "Aplicativo / Paciente-Doador / Exames / Reenvio",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "837:9506",
+      "name": "Aplicativo / Paciente-Doador / Exames / Arquivo inválido",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "837:9531",
+      "name": "Aplicativo / Paciente-Doador / Exames / Conflito de envio",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "837:9556",
+      "name": "Aplicativo / Paciente-Doador / Exames / Arquivo privado",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "838:9337",
+      "name": "Aplicativo / Representante de Hospital / Estoque / Registrar",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "838:9348",
+      "name": "Aplicativo / Representante de Hospital / Estoque / Registro preenchido",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "838:9359",
+      "name": "Aplicativo / Representante de Hospital / Estoque / Registro confirmado",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "838:9370",
+      "name": "Aplicativo / Representante de Hospital / Estoque / Registrada",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "838:9381",
+      "name": "Aplicativo / Representante de Hospital / Estoque / Movimentar",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "838:9392",
+      "name": "Aplicativo / Representante de Hospital / Estoque / Liberação preenchida",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "838:9403",
+      "name": "Aplicativo / Representante de Hospital / Estoque / Liberação confirmada",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "838:9414",
+      "name": "Aplicativo / Representante de Hospital / Estoque / Movimentada",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "838:9425",
+      "name": "Aplicativo / Representante de Hospital / Estoque / Conflito",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "838:9436",
+      "name": "Aplicativo / Representante de Hospital / Estoque / Bolsa vencida",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "838:9447",
+      "name": "Aplicativo / Representante de Hospital / Estoque / Erro no registro",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "838:9967",
+      "name": "Aplicativo / Representante de Hospital / Necessidades / Alterado",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "838:9989",
+      "name": "Aplicativo / Representante de Hospital / Necessidades / Confirmado",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "838:10011",
+      "name": "Aplicativo / Representante de Hospital / Necessidades / Salvo",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "838:10033",
+      "name": "Aplicativo / Representante de Hospital / Necessidades / Erro",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "840:9742",
+      "name": "Aplicativo / Médico / Publicação de horário / Publicar",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "840:9764",
+      "name": "Aplicativo / Médico / Publicação de horário / Preenchido",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "840:9786",
+      "name": "Aplicativo / Médico / Publicação de horário / Publicado",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "840:9808",
+      "name": "Aplicativo / Médico / Publicação de horário / Conflito",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "840:9989",
+      "name": "Aplicativo / Médico / Atendimento / Solicitação preenchida",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "840:10012",
+      "name": "Aplicativo / Médico / Atendimento / Solicitação enviada",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "840:10035",
+      "name": "Aplicativo / Médico / Atendimento / Agendado",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "840:10058",
+      "name": "Aplicativo / Médico / Atendimento / Confirmar atendimento",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "840:10081",
+      "name": "Aplicativo / Médico / Atendimento / Confirmar ausência",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "840:10104",
+      "name": "Aplicativo / Médico / Atendimento / Ausência registrada",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "840:10127",
+      "name": "Aplicativo / Médico / Atendimento / Falha de atualização",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "8:751",
+      "name": "Aplicativo / Paciente-Doador / Perfil / Meu perfil",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "8:825",
+      "name": "Aplicativo / Paciente-Doador / Perfil / Salvo",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "8:901",
+      "name": "Aplicativo / Paciente-Doador / Perfil / Erro",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "835:9922",
+      "name": "Aplicativo / Paciente-Doador / Perfil / Preenchido",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "835:9956",
+      "name": "Aplicativo / Paciente-Doador / Perfil / Estado alterado",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "835:9990",
+      "name": "Aplicativo / Paciente-Doador / Perfil / Municípios indisponíveis",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "848:9800",
+      "name": "Aplicativo / Paciente-Doador / Perfil / Editar inicial",
+      "width": 390,
+      "height": 844
+    }
+  ],
+  "fileKey": "7aKvXrajoLmEGpaYsn0dQ1",
+  "scope": "36 estados clínicos e 6 de agenda nas três versões; 71 estados dos formulários nativos desta fase.",
+  "newFrames": 87,
+  "preservedRootFrames": 26,
+  "artboardHorizontalOverflow": [],
+  "navigationByContext": [
+    {
+      "id": "8:29",
+      "role": "Aplicativo / Paciente-Doador / Cadastro / Inicial",
+      "navigation": []
+    },
+    {
+      "id": "8:1221",
+      "role": "Aplicativo / Paciente-Doador / Consultas / Minhas consultas",
+      "navigation": []
+    },
+    {
+      "id": "8:1233",
+      "role": "Aplicativo / Paciente-Doador / Exames / Meus exames",
+      "navigation": []
+    },
+    {
+      "id": "747:7641",
+      "role": "Aplicativo / Representante de Hospital / Estoque / Estoque",
+      "navigation": [
+        "Navegação inferior oficial"
+      ]
+    },
+    {
+      "id": "226:5092",
+      "role": "Aplicativo / Representante de Hospital / Necessidades / Necessidades",
+      "navigation": [
+        "Navegação inferior oficial"
+      ]
+    },
+    {
+      "id": "232:5109",
+      "role": "Aplicativo / Médico / Atendimento / Realizado",
+      "navigation": []
+    },
+    {
+      "id": "8:751",
+      "role": "Aplicativo / Paciente-Doador / Perfil / Meu perfil",
+      "navigation": [
+        "Navegação inferior oficial"
+      ]
+    },
+    {
+      "id": "848:9800",
+      "role": "Aplicativo / Paciente-Doador / Perfil / Editar inicial",
+      "navigation": []
+    }
+  ],
+  "screenshots": [
+    {
+      "path": "evidencias/figma-clinica-app-selecionar-tipo.png",
+      "nodeId": "825:9173",
+      "sha256": "7ef102d4524d2e0f650592c4959f9c8137426aa1e68b63b1497e814a7cf459b8"
+    },
+    {
+      "path": "evidencias/figma-clinica-web-mobile-lista.png",
+      "nodeId": "660:11448",
+      "sha256": "eff82462490c83a6a65cbe87d23038217654edf463170e8982a3d77003a2cf76"
+    },
+    {
+      "path": "evidencias/figma-clinica-desktop-confirmar.png",
+      "nodeId": "824:10156",
+      "sha256": "eae6390fa6ff4cff6d601e604189198da4a857fbb0f327312d416f38054071f7"
+    },
+    {
+      "path": "evidencias/figma-app-cadastro-confirmado.png",
+      "nodeId": "835:9360",
+      "sha256": "490963d6526e91c6e13a36766097edb671c50b37ff573364358920f26f4e1ddd"
+    },
+    {
+      "path": "evidencias/figma-app-perfil-municipio-pendente.png",
+      "nodeId": "835:9956",
+      "sha256": "1729732c11d8167ada52b8033bf894bca95afb0f0445ca93ae44c04913c34270"
+    },
+    {
+      "path": "evidencias/figma-app-consulta-confirmar.png",
+      "nodeId": "836:9496",
+      "sha256": "2a822b95eb058867ed50f8977d30acf2ad34def2e97a35066eebd8a0ba13fd60"
+    },
+    {
+      "path": "evidencias/figma-app-exame-confirmar.png",
+      "nodeId": "837:9431",
+      "sha256": "a3b40cff7d97c44370afdf27b90150c37e6f297b0a619ae5b0e9f349225238d1"
+    },
+    {
+      "path": "evidencias/figma-app-estoque-liberacao.png",
+      "nodeId": "838:9403",
+      "sha256": "d0afeaa3f0b9f81a7e3199d993d928ed76c4181ee2f71e903028bdeed853bb53"
+    },
+    {
+      "path": "evidencias/figma-app-necessidades-critico.png",
+      "nodeId": "838:9989",
+      "sha256": "cc10d7dc5946e652b0ce1f9e11c1178aeb289a44aee886d2740e312c51809c32"
+    },
+    {
+      "path": "evidencias/figma-app-perfil-resumo.png",
+      "nodeId": "8:751",
+      "sha256": "1dcf4684030fb1161c22d694a638b84830a24d7a36469774377d20b710f561fd"
+    },
+    {
+      "path": "evidencias/figma-app-perfil-editar.png",
+      "nodeId": "848:9800",
+      "sha256": "0749d02d84b273a76959e792bbe51012331dd90adae728bbf237c6bb60759993"
+    }
+  ],
+  "nativeGroups": {
+    "cadastro": {
+      "Inicial": "8:29",
+      "Preenchido": "8:107",
+      "Consentimento confirmado": "835:9360",
+      "Estado selecionado": "835:9388",
+      "Erro": "8:185",
+      "Enviando": "8:265",
+      "Concluído": "8:343",
+      "Termo vigente": "8:1133",
+      "Localidades indisponíveis": "835:9416"
+    },
+    "perfil": {
+      "Meu perfil": "8:751",
+      "Editar inicial": "848:9800",
+      "Preenchido": "835:9922",
+      "Estado alterado": "835:9956",
+      "Salvo": "8:825",
+      "Erro": "8:901",
+      "Municípios indisponíveis": "835:9990"
+    },
+    "consultas": {
+      "Minhas consultas": "8:1221",
+      "Agendar": "836:9446",
+      "Aceite": "836:9471",
+      "Confirmar agendamento": "836:9496",
+      "Termos do atendimento": "836:9521",
+      "Agendada": "836:9546",
+      "Conflito": "836:9571",
+      "Reagendar": "836:9596",
+      "Reagendar escolhido": "836:9621",
+      "Reagendada": "836:9646",
+      "Cancelar": "836:9671",
+      "Cancelada": "836:9696",
+      "Vazio": "160:3857",
+      "Carregando": "160:3883",
+      "Erro": "160:3910"
+    },
+    "exames": {
+      "Meus exames": "8:1233",
+      "Selecionar arquivo": "837:9406",
+      "Arquivo selecionado": "837:9431",
+      "Em análise": "837:9456",
+      "Reenvio": "837:9481",
+      "Arquivo inválido": "837:9506",
+      "Conflito de envio": "837:9531",
+      "Arquivo privado": "837:9556",
+      "Vazio": "160:3938",
+      "Carregando": "160:3964",
+      "Erro": "160:3991"
+    },
+    "estoque": {
+      "Estoque": "747:7641",
+      "Registrar": "838:9337",
+      "Registro preenchido": "838:9348",
+      "Registro confirmado": "838:9359",
+      "Registrada": "838:9370",
+      "Movimentar": "838:9381",
+      "Liberação preenchida": "838:9392",
+      "Liberação confirmada": "838:9403",
+      "Movimentada": "838:9414",
+      "Conflito": "838:9425",
+      "Bolsa vencida": "838:9436",
+      "Erro no registro": "838:9447"
+    },
+    "necessidades": {
+      "Necessidades": "226:5092",
+      "Alterado": "838:9967",
+      "Confirmado": "838:9989",
+      "Salvo": "838:10011",
+      "Erro": "838:10033"
+    },
+    "horarios": {
+      "Publicar": "840:9742",
+      "Preenchido": "840:9764",
+      "Publicado": "840:9786",
+      "Conflito": "840:9808"
+    },
+    "atendimentos": {
+      "Realizado": "232:5109",
+      "Solicitação preenchida": "840:9989",
+      "Solicitação enviada": "840:10012",
+      "Agendado": "840:10035",
+      "Confirmar atendimento": "840:10058",
+      "Confirmar ausência": "840:10081",
+      "Ausência registrada": "840:10104",
+      "Falha de atualização": "840:10127"
+    }
+  },
+  "agendaGroups": {
+    "app": {
+      "proximos": "226:5074",
+      "historico": "832:9579"
+    },
+    "webMobile": {
+      "proximos": "660:11338",
+      "historico": "832:9669"
+    },
+    "desktop": {
+      "proximos": "101:3115",
+      "historico": "832:9757"
+    }
+  },
+  "limitations": [
+    "Protótipo não executa APIs, autenticação, envio/download ou validação clínica real.",
+    "Estados preenchidos representam cenários finitos; não substituem entrada livre, todas as respostas do IBGE nem testes de validação.",
+    "As 113 telas desta fase foram reconciliadas; as demais telas do arquivo não recebem certificação global nesta revisão.",
+    "131 limites internos herdados de instâncias ultrapassam o próprio contêiner de componente, sem ultrapassar a largura dos artboards; não equivalem a rolagem horizontal de página.",
+    "Abertura operacional de teleconsulta e GPS em aparelhos reais dependem de homologação do aplicativo."
+  ],
+  "profileNavigationAudit": [
+    {
+      "id": "8:751",
+      "name": "Aplicativo / Paciente-Doador / Perfil / Meu perfil",
+      "width": 390,
+      "height": 844,
+      "navigation": [
+        "751:7789"
+      ],
+      "backActions": [],
+      "bodyHeight": 520.6300048828125
+    },
+    {
+      "id": "8:825",
+      "name": "Aplicativo / Paciente-Doador / Perfil / Salvo",
+      "width": 390,
+      "height": 844,
+      "navigation": [],
+      "backActions": [
+        {
+          "id": "848:9949",
+          "to": [
+            "8:751"
+          ]
+        }
+      ],
+      "bodyHeight": 1180
+    },
+    {
+      "id": "8:901",
+      "name": "Aplicativo / Paciente-Doador / Perfil / Erro",
+      "width": 390,
+      "height": 844,
+      "navigation": [],
+      "backActions": [
+        {
+          "id": "848:9984",
+          "to": [
+            "8:751"
+          ]
+        }
+      ],
+      "bodyHeight": 1180
+    },
+    {
+      "id": "835:9922",
+      "name": "Aplicativo / Paciente-Doador / Perfil / Preenchido",
+      "width": 390,
+      "height": 844,
+      "navigation": [],
+      "backActions": [
+        {
+          "id": "848:9884",
+          "to": [
+            "8:751"
+          ]
+        }
+      ],
+      "bodyHeight": 1024
+    },
+    {
+      "id": "835:9956",
+      "name": "Aplicativo / Paciente-Doador / Perfil / Estado alterado",
+      "width": 390,
+      "height": 844,
+      "navigation": [],
+      "backActions": [
+        {
+          "id": "848:9916",
+          "to": [
+            "8:751"
+          ]
+        }
+      ],
+      "bodyHeight": 1024
+    },
+    {
+      "id": "835:9990",
+      "name": "Aplicativo / Paciente-Doador / Perfil / Municípios indisponíveis",
+      "width": 390,
+      "height": 844,
+      "navigation": [],
+      "backActions": [
+        {
+          "id": "848:10019",
+          "to": [
+            "8:751"
+          ]
+        }
+      ],
+      "bodyHeight": 1184
+    },
+    {
+      "id": "848:9800",
+      "name": "Aplicativo / Paciente-Doador / Perfil / Editar inicial",
+      "width": 390,
+      "height": 844,
+      "navigation": [],
+      "backActions": [
+        {
+          "id": "848:9852",
+          "to": [
+            "8:751"
+          ]
+        }
+      ],
+      "bodyHeight": 1024
+    }
+  ]
+}

@@ -1,0 +1,89 @@
+{
+  "checkedAt": "2026-10-19",
+  "scope": "Formulários nativos Flutter, agenda web/API e encerramento de sessão",
+  "pullRequest": "https://github.com/Jhonatan-Andrade/Hemobridge/pull/3",
+  "tests": {
+    "flutter": {
+      "passed": 71,
+      "failed": 0,
+      "analysis": "No issues found",
+      "type": "Serviço/widget; plugins e transporte controlados"
+    },
+    "web": {
+      "passed": 35,
+      "failed": 0,
+      "lint": true,
+      "naming": true,
+      "build": true
+    },
+    "apiUnit": {
+      "passed": 219,
+      "failed": 0,
+      "report": "api-app-unit-2026-10-19.json"
+    },
+    "apiIntegration": {
+      "passed": 78,
+      "failed": 0,
+      "report": "api-app-flows-2026-10-19.json",
+      "environment": "PostgreSQL/PostGIS e S3 locais descartáveis"
+    }
+  },
+  "browser": {
+    "viewports": [
+      {
+        "width": 1440,
+        "height": 900,
+        "horizontalOverflow": false
+      },
+      {
+        "width": 360,
+        "height": 800,
+        "horizontalOverflow": false
+      }
+    ],
+    "checks": [
+      "Próximos/Histórico",
+      "Retomar atendimento realizado",
+      "Solicitação privada de exames",
+      "Ícone de menu na web mobile"
+    ]
+  },
+  "nativeBuild": {
+    "passed": false,
+    "reason": "Android SDK ausente",
+    "apkGenerated": false,
+    "ipaGenerated": false,
+    "flutterWebConfigured": false
+  },
+  "physicalHomologation": {
+    "gps": false,
+    "filePicker": false,
+    "pdfViewer": false,
+    "externalApps": false
+  },
+  "figmaReport": "../design/reconciliacao-clinica-app.json",
+  "archivePolicy": {
+    "trackedCodeOnly": true,
+    "noOperationalEnv": true,
+    "noSshKeys": true,
+    "noDatabaseDumps": true,
+    "noRealExams": true
+  },
+  "dependencies": {
+    "file_selector": {
+      "version": "1.1.0",
+      "source": "https://pub.dev/packages/file_selector"
+    },
+    "pdfrx": {
+      "version": "2.4.7",
+      "constraint": ">=2.4.7 <2.5.0",
+      "reason": "Compatível com Dart 3.11.3 / Flutter 3.41.5",
+      "source": "https://pub.dev/packages/pdfrx/versions/2.4.7"
+    }
+  },
+  "limitations": [
+    "Sem aceite formal dos 23 casos acadêmicos.",
+    "Administração completa de contas/instituições permanece no site.",
+    "Sem provisionamento AWS ou merge automático."
+  ]
+}
