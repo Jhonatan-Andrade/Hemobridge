@@ -11,6 +11,7 @@ import {
   Max,
   Min,
   IsNumber,
+  MaxLength,
 } from 'class-validator';
 import { IsIgualA, IsSenhaValida } from '../common/validators.js';
 import { UFS } from '../common/uf.js';
@@ -30,6 +31,7 @@ export class TrocarSenhaDto extends SenhaAtualDto {
 }
 export class AgendarDto {
   @IsUUID() disponibilidadeId: string;
+  @IsUUID() preTriagemId: string;
   @Equals(true) aceiteTelemedicina: boolean;
 }
 export class HospitalQueryDto {
@@ -50,6 +52,12 @@ export class DisponibilidadeDto {
 }
 export class AtendimentoDto {
   @IsIn(['REALIZADA', 'NAO_COMPARECEU']) status: 'REALIZADA' | 'NAO_COMPARECEU';
+  @IsOptional() @IsString() @MaxLength(10000) observacoes?: string;
+  @IsOptional() @IsIn(['SOLICITAR_EXAMES', 'REPROVAR']) decisao?: 'SOLICITAR_EXAMES' | 'REPROVAR';
+  @IsOptional() @IsString() @Length(5, 2000) motivoReprovacao?: string;
+}
+export class CancelarConsultaMedicoDto {
+  @IsString() @Length(5, 500) motivo: string;
 }
 export class BolsaDto {
   @IsString() @Length(1, 100) codigo: string;

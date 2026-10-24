@@ -69,6 +69,9 @@ describe('Minhas consultas (integração)', () => {
     expect(gravada).toMatchObject({ status: 'CANCELADA', motivoCancelamento: 'Imprevisto', canceladaPorId: paciente.id });
     expect((await prisma.paciente.findUniqueOrThrow({ where: { usuarioId: paciente.id } })).situacao).toBe('PRE_CADASTRADO');
 
+    // A consulta criada diretamente pelo fixture é legada e não tem pré-triagem.
+    await api('post', '/paciente/pre-triagem').send({ versao: '2026-10-23', pesoKg: 70,
+      doouAntes: false, condicaoSaudeRequerAvaliacao: false }).expect(201);
     const livres = await api('get', `/paciente/consultas/horarios-disponiveis?medicoId=${medicoId}`).expect(200);
     expect(livres.body.itens.map((h: { disponibilidadeId: string }) => h.disponibilidadeId)).toContain(horario.id);
     expect(await prisma.logAuditoria.count({ where: { acao: 'CANCELAR_CONSULTA', entidadeId: consulta.id } })).toBe(1);

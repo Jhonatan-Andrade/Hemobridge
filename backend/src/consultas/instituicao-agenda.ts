@@ -1,6 +1,7 @@
 import type { Prisma } from '../generated/prisma/client.js';
 
 export const INSTITUICAO_ATIVA: Prisma.DisponibilidadeMedicoWhereInput = {
+  canceladaEm: null,
   medico: { usuario: { status: 'ATIVO' } },
   OR: [
     { hospital: { ativo: true } },

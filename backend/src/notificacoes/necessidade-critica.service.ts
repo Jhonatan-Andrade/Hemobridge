@@ -193,7 +193,7 @@ export class NecessidadeCriticaService
           dataNascimento: true,
           sexo: true,
           pesoKg: true,
-          doacoes: { select: { dataColeta: true } },
+          doacoes: { select: { dataColeta: true, doouAntesDos60Confirmado: true } },
           tipoSanguineo: {
             select: {
               sigla: true,
@@ -217,6 +217,9 @@ export class NecessidadeCriticaService
             sexo: c.sexo,
             pesoKg: c.pesoKg.toNumber(),
             doacoes: c.doacoes.map((d) => dataParaIso(d.dataColeta)),
+            doouAntesDos60Confirmado: c.doacoes.some(
+              (doacao) => doacao.doouAntesDos60Confirmado === true,
+            ),
           },
           hoje,
         ).elegivel,

@@ -308,10 +308,13 @@ model PreTriagem {
   resultado           ResultadoPreTriagem
   respondidaEm        DateTime            @default(now()) @map("respondida_em") @db.Timestamptz(3)
   proximaDataPossivel DateTime?           @map("proxima_data_possivel") @db.Date
+  versaoQuestionario  String?             @map("versao_questionario") @db.VarChar(30)
 
   paciente  Paciente             @relation(fields: [pacienteId], references: [usuarioId], onDelete: Restrict)
   respostas RespostaPreTriagem[]
+  consultas Consulta[]
 
+  @@unique([id, pacienteId], map: "pre_triagem_id_paciente_key")
   @@index([pacienteId, respondidaEm])
   @@map("pre_triagem")
 }
@@ -339,12 +342,14 @@ model DisponibilidadeMedico {
   fim              DateTime @db.Timestamptz(3)
   linkVideochamada String   @map("link_videochamada") @db.VarChar(500)
   criadoEm         DateTime @default(now()) @map("criado_em") @db.Timestamptz(3)
+  canceladaEm      DateTime? @map("cancelada_em") @db.Timestamptz(3)
 
   medico    Medico     @relation(fields: [medicoId], references: [usuarioId], onDelete: Restrict)
   hospital  Hospital?  @relation(fields: [hospitalId], references: [id], onDelete: Restrict)
   consultas Consulta[]
 
-  @@unique([medicoId, inicio, fim])
+  // Unicidade e exclusão parciais dos horários ativos são definidas em SQL.
+  @@index([medicoId, inicio, fim])
   @@index([inicio])
   @@map("disponibilidade_medico")
 }
@@ -357,10 +362,12 @@ model Consulta {
   medicoId                  String           @map("medico_id") @db.Uuid
   disponibilidadeId         String           @map("disponibilidade_id") @db.Uuid
   consultaOrigemId          String?          @map("consulta_origem_id") @db.Uuid
+  preTriagemId              String?          @map("pre_triagem_id") @db.Uuid
   status                    SituacaoConsulta @default(AGENDADA)
   linkVideochamada          String           @map("link_videochamada") @db.VarChar(500)
   termoTelemedicinaAceitoEm DateTime         @map("termo_telemedicina_aceito_em") @db.Timestamptz(3)
   observacoes               String?          @db.Text
+  motivoReprovacao           String?          @map("motivo_reprovacao") @db.VarChar(2000)
   motivoCancelamento        String?          @map("motivo_cancelamento") @db.VarChar(500)
   canceladaPorId            String?          @map("cancelada_por") @db.Uuid
   canceladaEm               DateTime?        @map("cancelada_em") @db.Timestamptz(3)
@@ -374,10 +381,12 @@ model Consulta {
   reagendamentos  Consulta[]            @relation("Reagendamento")
   canceladaPor    Usuario?              @relation("ConsultaCanceladaPor", fields: [canceladaPorId], references: [id], onDelete: Restrict)
   solicitacoes    SolicitacaoExame[]
+  preTriagem      PreTriagem?            @relation(fields: [preTriagemId], references: [id], onDelete: Restrict)
 
   @@index([pacienteId, status])
   @@index([medicoId, status])
   @@index([disponibilidadeId])
+  @@index([preTriagemId])
   @@map("consulta")
 }
 
@@ -558,6 +567,8 @@ model Doacao {
   dataColeta      DateTime @map("data_coleta") @db.Date
   // Aferido na triagem; obrigatório para doação vinculada (UC21).
   pesoAferido     Decimal? @map("peso_aferido") @db.Decimal(5, 2)
+  // Declaração expressa da triagem; legado e ausência de confirmação permanecem nulos.
+  doouAntesDos60Confirmado Boolean? @map("doou_antes_dos60_confirmado")
   registradoPorId String   @map("registrado_por") @db.Uuid
   registradaEm    DateTime @default(now()) @map("registrada_em") @db.Timestamptz(3)
 

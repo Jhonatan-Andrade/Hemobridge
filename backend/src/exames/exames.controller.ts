@@ -20,6 +20,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import type { Response } from 'express';
 import type { UsuarioAutenticado } from '../auth/auth.types.js';
 import { Perfis, UsuarioAtual } from '../auth/decorators.js';
+import { Auditar } from '../auditoria/auditar.decorator.js';
 import { MENSAGEM_ARQUIVO_INVALIDO, TAMANHO_MAXIMO_EXAME } from '../armazenamento/arquivo-exame.js';
 import { AvaliarExameDto, SolicitarExamesDto } from './dto/exame.dto.js';
 import { type ArquivoParaDownload, type ArquivoRecebido, ExamesService } from './exames.service.js';
@@ -50,6 +51,7 @@ export class MeusExamesController {
   constructor(private readonly exames: ExamesService) {}
 
   @Get()
+  @Auditar({ acao: 'LISTAR_MEUS_EXAMES', entidade: 'exame' })
   listar(@UsuarioAtual() paciente: UsuarioAutenticado) {
     return this.exames.meusExames(paciente.id);
   }

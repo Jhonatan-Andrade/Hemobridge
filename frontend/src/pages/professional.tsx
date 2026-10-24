@@ -5,6 +5,8 @@ import { api, messageOf } from '../services/api-client'
 import { useResource } from '../services/use-resource'
 import { Alert, Intro, RouteLink } from '../components/ui'
 import type { Navigate } from '../components/ui'
+import { DoctorAttendanceForm } from '../components/doctor-attendance-form'
+import { DonationRegistration } from '../components/donation-registration'
 import { ExamReview } from '../components/exam-review'
 import type { ReviewableExam } from '../components/exam-review'
 import { BrazilRegionsMap } from './brazil-regions-map'
@@ -257,10 +259,8 @@ export function DoctorScheduleItem({
               </p>
             )}
             {attendance && (
-              <AttendanceActions
+              <DoctorAttendanceForm
                 id={consultation.id}
-                status={consultation.status}
-                canStart={!future}
                 onUpdated={onUpdated}
               />
             )}
@@ -273,103 +273,6 @@ export function DoctorScheduleItem({
   )
 }
 
-function AttendanceActions({
-  id,
-  status,
-  canStart,
-  onUpdated,
-}: {
-  id: string
-  status: string
-  canStart: boolean
-  onUpdated: () => void
-}) {
-  const [exams, setExams] = useState(''),
-    [instructions, setInstructions] = useState(''),
-    [feedback, setFeedback] = useState(''),
-    [busy, setBusy] = useState(false)
-  async function save(decision: string) {
-    if (busy || !canStart || status !== 'AGENDADA') return
-    setBusy(true)
-    try {
-      await api(`/medico/consultas/${id}`, { method: 'PATCH', body: { status: decision } })
-      setFeedback('Atendimento registrado.')
-      onUpdated()
-    } catch (error) {
-      setFeedback(messageOf(error))
-    } finally {
-      setBusy(false)
-    }
-  }
-  async function request(e: FormEvent) {
-    e.preventDefault()
-    if (busy || !canStart || !['AGENDADA', 'REALIZADA'].includes(status)) return
-    setBusy(true)
-    try {
-      await api(`/medico/consultas/${id}/solicitar-exames`, {
-        method: 'POST',
-        body: { exames: exams.split('\n').filter((v) => v.trim()), orientacoes: instructions },
-      })
-      setFeedback('Solicitação enviada ao paciente.')
-      setExams('')
-    } catch (error) {
-      setFeedback(messageOf(error))
-    } finally {
-      setBusy(false)
-    }
-  }
-  if (!['AGENDADA', 'REALIZADA'].includes(status)) return null
-  return (
-    <details>
-      <summary>{status === 'REALIZADA' ? 'Retomar atendimento' : 'Abrir atendimento'}</summary>
-      {!canStart && <p>O atendimento poderá ser registrado a partir do início agendado.</p>}
-      {status === 'AGENDADA' && (
-        <div className="actions">
-          <button
-            className="button"
-            disabled={busy || !canStart}
-            onClick={() => void save('REALIZADA')}
-          >
-            Registrar como realizado
-          </button>
-          <button
-            className="button secondary"
-            disabled={busy || !canStart}
-            onClick={() => void save('NAO_COMPARECEU')}
-          >
-            Registrar ausência
-          </button>
-        </div>
-      )}
-      <form onSubmit={request}>
-        <fieldset className="exam-review-fields" disabled={busy || !canStart}>
-          <legend>Solicitar exames ao paciente</legend>
-          <label>
-            Exames solicitados (um por linha)
-            <textarea
-              value={exams}
-              onChange={(e) => setExams(e.target.value)}
-              required
-              maxLength={1000}
-            />
-          </label>
-          <label>
-            Orientações
-            <textarea
-              value={instructions}
-              onChange={(e) => setInstructions(e.target.value)}
-              maxLength={2000}
-            />
-          </label>
-          <button className="button" disabled={busy || !canStart}>
-            Solicitar exames
-          </button>
-        </fieldset>
-      </form>
-      {feedback && <p role="status">{feedback}</p>}
-    </details>
-  )
-}
 type ClinicalExam = {
   id: string
   descricao: string
@@ -791,7 +694,9 @@ export function ProfessionalPage({
                   ? 'Atendimento'
                   : 'Minha agenda'
               : role === 'representative'
-                ? route.endsWith('/stock')
+                ? route.endsWith('/donations')
+                  ? 'Registrar doação'
+                  : route.endsWith('/stock')
                   ? 'Estoque de bolsas'
                   : 'Necessidades da instituição'
                 : route.endsWith('/moderation')
@@ -812,6 +717,7 @@ export function ProfessionalPage({
               <RouteLink to="professional/stock" navigate={navigate}>
                 Estoque
               </RouteLink>
+              <RouteLink to="professional/donations" navigate={navigate}>Registrar doação</RouteLink>
             </>
           )}
           {role === 'administrator' && (
@@ -828,7 +734,9 @@ export function ProfessionalPage({
         {role === 'doctor' ? (
           <Doctor route={route} />
         ) : role === 'representative' ? (
-          route.endsWith('/stock') ? (
+          route.endsWith('/donations') ? (
+            <DonationRegistration />
+          ) : route.endsWith('/stock') ? (
             <Stock />
           ) : (
             <RepresentativeNeeds />

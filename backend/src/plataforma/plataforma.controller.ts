@@ -14,8 +14,9 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Prisma } from '../generated/prisma/client.js';
-import { vinculoDaAgendaAtivo } from '../consultas/instituicao-agenda.js';
-import { ehConflitoDeAgendamento } from '../consultas/conflito-agendamento.js';
+import { AgendamentoService } from '../consultas/agendamento.service.js';
+import { AtendimentoService } from '../consultas/atendimento.service.js';
+import { ConsultasModule } from '../consultas/consultas.module.js';
 import {
   consultaComVinculoClinicoAtivo,
   horarioComVinculoClinicoAtivo,
@@ -30,6 +31,7 @@ import {
   AgendarDto,
   AgendaQueryDto,
   AtendimentoDto,
+  CancelarConsultaMedicoDto,
   BolsaDto,
   DisponibilidadeDto,
   MovimentoBolsaDto,
@@ -41,7 +43,8 @@ import {
 
 @Controller()
 export class PlataformaController {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService, private readonly agendamentos: AgendamentoService,
+    private readonly atendimentos: AtendimentoService) {}
   @Perfis('ADMINISTRADOR') @Get('admin/mapa-necessidades') async mapa() {
     const linhas = await this.prisma.$queryRaw<
       {
@@ -62,22 +65,27 @@ export class PlataformaController {
       geradoEm: new Date(),
     };
   }
-  @Perfis('PACIENTE') @Get('paciente/orientacoes-doacao') async orientacoes(
+  @Perfis('PACIENTE') @Get('paciente/orientacoes-doacao')
+  @Auditar({ acao: 'VISUALIZAR_ORIENTACOES_DOACAO', entidade: 'paciente' })
+  async orientacoes(
     @UsuarioAtual() u: UsuarioAutenticado,
   ) {
     const p = await this.prisma.paciente.findUniqueOrThrow({
       where: { usuarioId: u.id },
-      include: { doacoes: { select: { dataColeta: true } } },
+      include: { doacoes: { select: { dataColeta: true, doouAntesDos60Confirmado: true } } },
     });
     return estimarElegibilidade({
       dataNascimento: dataParaIso(p.dataNascimento),
       sexo: p.sexo,
       pesoKg: Number(p.pesoKg),
       doacoes: p.doacoes.map((d) => dataParaIso(d.dataColeta)),
+      doouAntesDos60Confirmado: p.doacoes.some((d) => d.doouAntesDos60Confirmado === true),
     });
   }
 
-  @Perfis('PACIENTE') @Get('paciente/perfil') async perfil(
+  @Perfis('PACIENTE') @Get('paciente/perfil')
+  @Auditar({ acao: 'VISUALIZAR_PERFIL', entidade: 'paciente' })
+  async perfil(
     @UsuarioAtual() u: UsuarioAutenticado,
   ) {
     const p = await this.prisma.paciente.findUniqueOrThrow({
@@ -188,54 +196,7 @@ export class PlataformaController {
     @UsuarioAtual() u: UsuarioAutenticado,
     @Body() dto: AgendarDto,
   ) {
-    const h = await this.prisma.disponibilidadeMedico.findFirst({
-      where: {
-        id: dto.disponibilidadeId,
-        inicio: { gt: new Date(), lte: new Date(Date.now() + 30 * 86400000) },
-        medico: { usuario: { status: 'ATIVO' } },
-        OR: [
-          { hospitalId: null, medico: { hospital: { ativo: true } } },
-          { hospital: { ativo: true } },
-        ],
-      },
-      include: {
-        medico: {
-          select: {
-            hospitalId: true,
-            vinculos: { select: { hospitalId: true, ativo: true } },
-          },
-        },
-      },
-    });
-    if (!h) throw new BadRequestException('Horário indisponível.');
-    if (!vinculoDaAgendaAtivo(h))
-      throw new BadRequestException('Horário indisponível.');
-    try {
-      return await this.prisma.$transaction(async (tx) => {
-        const p = await tx.paciente.updateMany({
-          where: { usuarioId: u.id, situacao: 'PRE_CADASTRADO' },
-          data: { situacao: 'CONSULTA_AGENDADA' },
-        });
-        if (!p.count)
-          throw new ConflictException(
-            'Sua situação atual não permite outro agendamento.',
-          );
-        return tx.consulta.create({
-          data: {
-            pacienteId: u.id,
-            medicoId: h.medicoId,
-            disponibilidadeId: h.id,
-            linkVideochamada: h.linkVideochamada,
-            termoTelemedicinaAceitoEm: new Date(),
-          },
-          select: { id: true, status: true },
-        });
-      });
-    } catch (e) {
-      if (ehConflitoDeAgendamento(e))
-        throw new ConflictException('Horário ocupado. Escolha outro.');
-      throw e;
-    }
+    return this.agendamentos.agendar(u.id, dto);
   }
   @Perfis('MEDICO') @Get('medico/hospitais') async hospitais(
     @UsuarioAtual() u: UsuarioAutenticado,
@@ -251,7 +212,9 @@ export class PlataformaController {
       select: { id: true, nome: true, cidade: true, estado: true },
     });
   }
-  @Perfis('MEDICO') @Get('medico/agenda') async agenda(
+  @Perfis('MEDICO') @Get('medico/agenda')
+  @Auditar({ acao: 'VISUALIZAR_AGENDA_CLINICA', entidade: 'consulta' })
+  async agenda(
     @UsuarioAtual() u: UsuarioAutenticado,
     @Query() q: AgendaQueryDto,
   ) {
@@ -260,8 +223,9 @@ export class PlataformaController {
       where: {
         AND: [
           horarioComVinculoClinicoAtivo(u.id),
+          ...(q.periodo === 'historico' || (!q.periodo && q.incluirRealizadas === 'true') ? [] : [{ canceladaEm: null }]),
           ...(q.periodo === 'proximos' ? [{ fim: { gte: new Date() } }] : []),
-          ...(q.periodo === 'historico' ? [{ fim: { lt: new Date() } }] : []),
+          ...(q.periodo === 'historico' ? [{ OR: [{ fim: { lt: new Date() } }, { canceladaEm: { not: null } }] }] : []),
           ...(q.hospitalId
             ? [
                 {
@@ -282,10 +246,11 @@ export class PlataformaController {
         inicio: true,
         fim: true,
         hospitalId: true,
+        canceladaEm: true,
         linkVideochamada: true,
         consultas: {
           where: {
-            status: q.incluirRealizadas === 'true' ? { in: ['AGENDADA', 'REALIZADA'] } : 'AGENDADA',
+            status: q.incluirRealizadas === 'true' ? { in: ['AGENDADA', 'REALIZADA', 'NAO_COMPARECEU', 'CANCELADA'] } : 'AGENDADA',
             paciente: { usuario: { status: 'ATIVO' } },
           },
           select: {
@@ -334,47 +299,26 @@ export class PlataformaController {
   }
   @Perfis('MEDICO')
   @Patch('medico/consultas/:id')
-  @Auditar({ acao: 'REGISTRAR_ATENDIMENTO', entidade: 'consulta' })
   async atendimento(
     @UsuarioAtual() u: UsuarioAutenticado,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: AtendimentoDto,
   ) {
-    const consulta = await this.prisma.consulta.findFirst({
-      where: { id, ...consultaComVinculoClinicoAtivo(u.id) },
-      select: { pacienteId: true },
-    });
-    if (!consulta)
-      throw new ConflictException('Atendimento indisponível para atualização.');
-    await this.prisma.$transaction(async (tx) => {
-      await tx.$queryRaw`SELECT usuario_id FROM paciente WHERE usuario_id=${consulta.pacienteId}::uuid FOR UPDATE`;
-      const result = await tx.consulta.updateMany({
-        where: {
-          id,
-          ...consultaComVinculoClinicoAtivo(u.id),
-          status: 'AGENDADA',
-          AND: [{ disponibilidade: { inicio: { lte: new Date() } } }],
-        },
-        data: { status: dto.status },
-      });
-      if (!result.count)
-        throw new ConflictException(
-          'Atendimento indisponível para atualização.',
-        );
-      if (dto.status === 'NAO_COMPARECEU') {
-        await tx.paciente.updateMany({
-          where: {
-            usuarioId: consulta.pacienteId,
-            situacao: 'CONSULTA_AGENDADA',
-            consultas: { none: { status: 'AGENDADA' } },
-          },
-          data: { situacao: 'PRE_CADASTRADO' },
-        });
-      }
-    });
-    return { mensagem: 'Atendimento registrado.' };
+    return this.atendimentos.registrar(u.id, id, dto);
   }
-  @Perfis('MEDICO') @Get('medico/exames') async exames(
+  @Perfis('MEDICO') @Get('medico/consultas/:id')
+  @Auditar({ acao: 'VISUALIZAR_ATENDIMENTO', entidade: 'consulta' })
+  detalhesAtendimento(@UsuarioAtual() u: UsuarioAutenticado, @Param('id', ParseUUIDPipe) id: string) {
+    return this.atendimentos.detalhes(u.id, id);
+  }
+  @Perfis('MEDICO') @Post('medico/consultas/:id/cancelar')
+  cancelarAtendimento(@UsuarioAtual() u: UsuarioAutenticado, @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: CancelarConsultaMedicoDto) {
+    return this.atendimentos.cancelar(u.id, id, dto.motivo);
+  }
+  @Perfis('MEDICO') @Get('medico/exames')
+  @Auditar({ acao: 'LISTAR_EXAMES_CLINICOS', entidade: 'exame' })
+  async exames(
     @UsuarioAtual() u: UsuarioAutenticado,
   ) {
     const solicitacoes = await this.prisma.solicitacaoExame.findMany({
@@ -387,7 +331,9 @@ export class PlataformaController {
           select: {
             id: true,
             status: true,
-            paciente: { select: { usuario: { select: { nome: true } } } },
+            motivoReprovacao: true,
+            paciente: { select: { usuario: { select: { nome: true } },
+              consultas: { orderBy: [{ criadoEm: 'desc' }, { id: 'desc' }], take: 1, select: { id: true } } } },
           },
         },
         exames: {
@@ -408,12 +354,16 @@ export class PlataformaController {
     });
     return solicitacoes.map((s) => ({
       ...s,
+      consulta: { ...s.consulta,
+        paciente: { usuario: s.consulta.paciente.usuario },
+        cicloAtual: s.consulta.paciente.consultas[0]?.id === s.consulta.id },
       exames: s.exames.map((e, index) => ({
         ...e,
         podeAvaliar:
           index === 0 &&
           e.situacao === 'EM_ANALISE' &&
-          s.consulta.status === 'REALIZADA',
+          s.consulta.status === 'REALIZADA' && !s.consulta.motivoReprovacao &&
+          s.consulta.paciente.consultas[0]?.id === s.consulta.id,
       })),
     }));
   }
@@ -558,5 +508,5 @@ export class PlataformaController {
       throw new ForbiddenException('Instituição não vinculada ao seu perfil.');
   }
 }
-@Module({ controllers: [PlataformaController] })
+@Module({ imports: [ConsultasModule], controllers: [PlataformaController] })
 export class PlataformaModule {}

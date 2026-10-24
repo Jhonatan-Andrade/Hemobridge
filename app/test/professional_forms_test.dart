@@ -44,7 +44,9 @@ Future<void> openPage(WidgetTester tester, Widget page) async {
 }
 
 Future<void> tapVisible(WidgetTester tester, Finder finder) async {
+  await tester.pumpAndSettle();
   await tester.ensureVisible(finder);
+  await tester.pumpAndSettle();
   await tester.tap(finder);
   await tester.pumpAndSettle();
 }
@@ -264,6 +266,14 @@ void main() {
           sent = jsonDecode(request.body) as Map<String, dynamic>;
           return jsonResponse({});
         }
+        if (request.url.path == '/medico/consultas/consulta-realizada') {
+          return jsonResponse({
+            'status': 'REALIZADA',
+            'podeAtender': true,
+            'podeCancelar': false,
+            'cicloAtual': true,
+          });
+        }
         if (request.url.path == '/medico/hospitais') {
           return jsonResponse([
             {'id': 'hospital-1', 'nome': 'Hospital Aurora'},
@@ -303,11 +313,11 @@ void main() {
       expect(find.text('Registrar como realizado'), findsNothing);
       expect(find.text('Registrar ausência'), findsNothing);
       await tester.enterText(
-        find.byType(TextFormField).first,
+        find.byKey(const ValueKey('requested-exams')),
         'Tipagem sanguínea',
       );
       await tester.enterText(
-        find.byType(TextFormField).last,
+        find.byKey(const ValueKey('exam-instructions')),
         'Compareça ao laboratório indicado.',
       );
       await tapVisible(tester, find.text('Enviar solicitação'));
@@ -779,12 +789,22 @@ void main() {
     'atendimento exige confirmação e solicitação envia exames em linhas separadas',
     (tester) async {
       final sent = <Map<String, dynamic>>[];
+      var status = 'AGENDADA';
       final api = apiFor((request) async {
+        if (request.method == 'GET') {
+          return jsonResponse({
+            'status': status,
+            'podeAtender': true,
+            'podeCancelar': false,
+            'cicloAtual': true,
+          });
+        }
         sent.add({
           'path': request.url.path,
           'method': request.method,
           'body': jsonDecode(request.body),
         });
+        if (request.method == 'PATCH') status = 'REALIZADA';
         return jsonResponse({});
       });
       addTearDown(api.close);
@@ -803,14 +823,14 @@ void main() {
       expect(sent.first, {
         'path': '/medico/consultas/consulta-1',
         'method': 'PATCH',
-        'body': {'status': 'REALIZADA'},
+        'body': {'status': 'REALIZADA', 'observacoes': ''},
       });
       await tester.enterText(
-        find.byType(TextFormField).first,
+        find.byKey(const ValueKey('requested-exams')),
         ' Hemograma \n\n Tipagem sanguínea ',
       );
       await tester.enterText(
-        find.byType(TextFormField).last,
+        find.byKey(const ValueKey('exam-instructions')),
         'Compareça ao laboratório indicado.',
       );
       await tapVisible(tester, find.text('Enviar solicitação'));

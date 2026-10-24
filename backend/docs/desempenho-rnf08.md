@@ -4,7 +4,7 @@ Executado em 09/10/2026, 11:50 com `npm run desempenho` (200 execuções sequenc
 
 **Meta (RNF08):** responder em até 3 s em pelo menos 95% das execuções.
 
-**Resultado: APROVADO.**
+**Resultado histórico: APROVADO para os cinco cenários HTTP públicos medidos.** O sexto cenário foi uma consulta SQL exploratória de recomendação, sem autenticação nem execução da rota completa; seus números não aprovam o endpoint personalizado de doação.
 
 | Cenário | p50 (ms) | p95 (ms) | Máximo (ms) | ≤ 3 s |
 | --- | ---: | ---: | ---: | ---: |
@@ -31,5 +31,6 @@ Executado em 09/10/2026, 11:50 com `npm run desempenho` (200 execuções sequenc
 | doadoresAprovados | 1412 |
 | doacoes | 2899 |
 
-O tempo medido inclui a requisição HTTP completa (rota, validação, consulta e serialização),
-exceto em "Locais recomendados", que mede a consulta SQL prevista enquanto o endpoint do UC17 () não existe.
+Nos cinco cenários públicos, o tempo medido inclui a requisição HTTP completa (rota, validação, consulta e serialização). Em "Locais recomendados", esta execução de 09/10/2026 mediu apenas o SQL previsto naquela data.
+
+O executor atualizado em 23/10/2026 usa `GET /paciente/locais-recomendados` com autenticação real de contas aprovadas da base descartável, incluindo validação de sessão, estimativa de elegibilidade e auditoria de leitura. A [medição HTTP de 24/10](../../docs/testes/desempenho-uc17-2026-10-24.md) possui seu próprio relatório, com 1.200 requisições e p95 de 52,8 ms para UC17, na versão com 16 migrações. A [medição de 23/10](../../docs/testes/desempenho-uc17-2026-10-23.md), p95 de 59,8 ms e 15 migrações, foi preservada. Os valores históricos da tabela acima não representam o endpoint autenticado nem uma execução atual.

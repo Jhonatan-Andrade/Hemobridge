@@ -9,6 +9,7 @@ import { AppModule } from '../src/app.module.js';
 import { ArmazenamentoService } from '../src/armazenamento/armazenamento.service.js';
 import { EmailService } from '../src/email/email.service.js';
 import { entrar, prismaTeste } from './apoio/app.js';
+import { responderPreTriagemTeste } from './apoio/pre-triagem.js';
 import {
   criarDisponibilidade,
   criarHospital,
@@ -268,12 +269,13 @@ describe('Contratos formais: permissões, histórico, concorrência e proximidad
       patients.map((patient) => entrar(app, patient.email)),
     );
     const slot = await criarDisponibilidade(db, doctor.id, 48);
+    const triagens = await Promise.all(tokens.map(token => responderPreTriagemTeste(app, token)));
     const results = await Promise.all(
-      tokens.map((token) =>
+      tokens.map((token, index) =>
         api()
           .post('/paciente/agendamentos')
           .auth(token, { type: 'bearer' })
-          .send({ disponibilidadeId: slot.id, aceiteTelemedicina: true })
+          .send({ disponibilidadeId: slot.id, aceiteTelemedicina: true, preTriagemId: triagens[index] })
           .then((response) => response),
       ),
     );

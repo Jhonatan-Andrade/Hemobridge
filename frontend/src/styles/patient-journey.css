@@ -257,3 +257,21 @@
     max-width: 100%;
   }
 }
+.pre-triage-fields {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-inline-size: 0;
+  display: grid;
+  gap: 18px;
+}
+.pre-triage-fields label {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+.pre-triage-fields input,
+.pre-triage-fields select {
+  max-width: 100%;
+  min-width: 0;
+}

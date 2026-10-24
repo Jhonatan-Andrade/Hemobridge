@@ -1,5 +1,16 @@
 import { Transform, Type } from 'class-transformer';
-import { IsIn, IsInt, IsISO8601, IsOptional, Matches, Max, Min } from 'class-validator';
+import {
+  IsBoolean,
+  IsIn,
+  IsInt,
+  IsISO8601,
+  IsNumber,
+  IsOptional,
+  IsUUID,
+  Matches,
+  Max,
+  Min,
+} from 'class-validator';
 import { SIGLAS_TIPOS } from '../../common/tipos-sanguineos.js';
 import { maiusculas, somenteDigitos } from '../../common/transformacoes.js';
 import { IsCpf } from '../../common/validators.js';
@@ -23,6 +34,32 @@ export class DoacaoAvulsaDto {
   @Transform(maiusculas)
   @IsIn(SIGLAS_TIPOS, { message: 'Tipo sanguíneo inválido' })
   tipo: string;
+}
+
+/** Coleta de doador identificado: tipagem, hospital e responsável são resolvidos no servidor. */
+export class DoacaoVinculadaDto {
+  @IsUUID()
+  pacienteId: string;
+
+  @IsISO8601({ strict: true }, { message: 'Data da coleta inválida' })
+  @Matches(DATA, { message: 'Data da coleta deve estar no formato AAAA-MM-DD' })
+  dataColeta: string;
+
+  @IsNumber(
+    { maxDecimalPlaces: 2 },
+    { message: 'Informe o peso aferido na triagem, em kg' },
+  )
+  @Min(1)
+  @Max(400)
+  pesoAferido: number;
+
+  @IsOptional()
+  @IsBoolean()
+  autorizacaoResponsavelConfirmada?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  doouAntesDos60Confirmado?: boolean;
 }
 
 export class ListarDoacoesDto {

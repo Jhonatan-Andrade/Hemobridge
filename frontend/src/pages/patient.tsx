@@ -64,17 +64,21 @@ export function PatientPage({
               <section className="surface card next-step">
                 <span className="eyebrow">Próximo passo</span>
                 <h2>
-                  {profile.data.status === 'PRE_CADASTRADO'
+                  {profile.data.status === 'APROVADO'
+                    ? 'Encontrar onde doar'
+                    : ['PRE_CADASTRADO', 'REPROVADO'].includes(profile.data.status)
                     ? 'Agendar consulta'
                     : profile.data.status === 'AGUARDANDO_EXAME'
                       ? 'Enviar exame'
                       : 'Acompanhar atendimento'}
                 </h2>
-                <p>Consulte os horários, solicitações e orientações disponíveis para você.</p>
+                <p>{profile.data.status === 'APROVADO' ? 'Veja instituições com necessidades compatíveis com seu tipo sanguíneo e as orientações para doar.' : 'Consulte os horários, solicitações e orientações disponíveis para você.'}</p>
                 <RouteLink
                   className="button"
                   to={
-                    profile.data.status === 'PRE_CADASTRADO'
+                    profile.data.status === 'APROVADO'
+                      ? 'external-locations'
+                      : ['PRE_CADASTRADO', 'REPROVADO'].includes(profile.data.status)
                       ? 'external-booking'
                       : profile.data.status === 'AGUARDANDO_EXAME'
                         ? 'external-exams'

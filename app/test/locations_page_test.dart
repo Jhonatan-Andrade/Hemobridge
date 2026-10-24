@@ -6,6 +6,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:hemobridge/core/app_theme.dart';
+import 'package:hemobridge/core/api_client.dart';
 import 'package:hemobridge/features/locations/ibge_localities.dart';
 import 'package:hemobridge/features/locations/locations_page.dart';
 
@@ -375,6 +376,171 @@ void main() {
       pendingPermission.complete(LocationPermission.whileInUse);
       await tester.pumpAndSettle();
       expect(gps.readings, 0);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  Map<String, dynamic> recommendations({
+    List<Map<String, dynamic>> items = const [],
+  }) => {
+    'tipoDoador': 'O-',
+    'referencia': {'cidade': 'Curitiba', 'estado': 'PR'},
+    'elegibilidade': {
+      'elegivel': false,
+      'mensagem': 'É preciso aguardar o intervalo entre doações.',
+      'exigeAutorizacaoResponsavel': false,
+    },
+    'dataEstimadaElegibilidade': '2026-11-30',
+    'orientacao': 'A triagem presencial confirma se você pode doar.',
+    'itens': items,
+  };
+
+  testWidgets(
+    'recomendações exibem o tipo necessário, a atualização e a data estimada sem reordenar o servidor',
+    (tester) async {
+      tester.view.physicalSize = const Size(360, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final api = ApiClient(
+        baseUrl: 'https://api.hemobridge.test',
+        client: MockClient(
+          (request) async => jsonResponse(
+            recommendations(
+              items: [
+                {
+                  'id': 'critico',
+                  'nivel': 'CRITICO',
+                  'tipoNecessitado': 'A+',
+                  'atualizadoEm': '2026-10-23T15:00:00Z',
+                  'distanciaKm': 8.5,
+                  'hospital': {
+                    'nome': 'Hemocentro Regional',
+                    'endereco': 'Rua Central, 10',
+                    'cidade': 'Curitiba',
+                    'estado': 'PR',
+                    'horarioFuncionamento': '8h às 17h',
+                  },
+                },
+              ],
+            ),
+          ),
+        ),
+      );
+      addTearDown(api.close);
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: hemobridgeTheme(),
+          home: Scaffold(
+            body: LocationsPage(
+              api: api,
+              patient: true,
+              localities: testLocalities(),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.text('Crítico · precisa de A+'),
+        180,
+      );
+      expect(find.textContaining('Tipo validado: O-'), findsOneWidget);
+      expect(find.text('Data estimada para doar: 30/11/2026.'), findsOneWidget);
+      expect(
+        find.text('Necessidade atualizada em 23/10/2026.'),
+        findsOneWidget,
+      );
+      expect(
+        find.text('Distância aproximada em linha reta: 8.5 km.'),
+        findsOneWidget,
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'paciente não aprovado mantém busca manual e recebe orientação da API',
+    (tester) async {
+      final api = ApiClient(
+        baseUrl: 'https://api.hemobridge.test',
+        client: MockClient(
+          (request) async => http.Response(
+            jsonEncode({
+              'message': 'Recomendações disponíveis após a aprovação.',
+            }),
+            403,
+          ),
+        ),
+      );
+      addTearDown(api.close);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: LocationsPage(
+              api: api,
+              patient: true,
+              localities: testLocalities(),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.text('Recomendações disponíveis após a aprovação.'),
+        findsOneWidget,
+      );
+      expect(find.text('Tentar recomendações novamente'), findsNothing);
+      await tester.scrollUntilVisible(find.byType(LocalityPicker), 180);
+      await selectState(tester, 'Paraná (PR)');
+      expect(
+        tester
+            .widget<DropdownButtonFormField<String>>(
+              find.byType(DropdownButtonFormField<String>).last,
+            )
+            .onChanged,
+        isNotNull,
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'consulta inicial dispensa GPS e somente o toque envia a posição aproximada sem tipo do cliente',
+    (tester) async {
+      final requests = <Uri>[];
+      final api = ApiClient(
+        baseUrl: 'https://api.hemobridge.test',
+        client: MockClient((request) async {
+          requests.add(request.url);
+          return jsonResponse(recommendations());
+        }),
+      );
+      addTearDown(api.close);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: LocationsPage(
+              api: api,
+              patient: true,
+              localities: testLocalities(),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(requests.single.path, '/paciente/locais-recomendados');
+      expect(requests.single.queryParameters, isEmpty);
+      expect(gps.readings, 0);
+      await tester.tap(find.text('Usar minha localização'));
+      await tester.pumpAndSettle();
+      expect(gps.readings, 1);
+      expect(requests.last.queryParameters, {'lat': '-25.43', 'lng': '-49.27'});
+      await tester.pump(const Duration(minutes: 1));
+      expect(gps.readings, 1);
+      await tester.tap(find.text('Limpar localização'));
+      await tester.pumpAndSettle();
+      expect(requests.last.queryParameters, isEmpty);
       expect(tester.takeException(), isNull);
     },
   );

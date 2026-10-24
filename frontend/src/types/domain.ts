@@ -102,7 +102,7 @@ export function loginRouteOf(user: SessionUser, requested: string | null): strin
   if (user.perfil === 'PACIENTE') return patient.includes(requested) ? requested : entryRouteOf(user)
   const professional = ['professional', 'professional/profile']
   const areas = user.perfil === 'MEDICO' ? ['professional/attendance', 'professional/exams']
-    : user.perfil === 'REPRESENTANTE' ? ['professional/needs', 'professional/stock']
+    : user.perfil === 'REPRESENTANTE' ? ['professional/needs', 'professional/stock', 'professional/donations']
       : ['professional/admin', 'professional/moderation', 'professional/privacy']
   return [...professional, ...areas].includes(requested) ? requested : entryRouteOf(user)
 }

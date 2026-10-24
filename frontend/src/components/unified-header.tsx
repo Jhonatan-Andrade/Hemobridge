@@ -28,6 +28,7 @@ const professionalSections: Record<ProfessionalRole, NavigationItem[]> = {
   representative: [
     { to: 'professional/needs', label: 'Necessidades', icon: 'activity' },
     { to: 'professional/stock', label: 'Estoque', icon: 'activity' },
+    { to: 'professional/donations', label: 'Registrar doação', icon: 'activity' },
   ],
   administrator: [
     { to: 'professional/admin', label: 'Mapa regional', icon: 'map' },

@@ -1,11 +1,14 @@
 import { Module } from '@nestjs/common';
 import { MinhasConsultasController } from './minhas-consultas.controller.js';
 import { MinhasConsultasService } from './minhas-consultas.service.js';
+import { PreTriagemController } from './pre-triagem.controller.js';
+import { PreTriagemService } from './pre-triagem.service.js';
+import { AgendamentoService } from './agendamento.service.js';
+import { AtendimentoService } from './atendimento.service.js';
 
-// Agenda e teleconsulta. O agendamento (UC09) e a agenda do médico (UC13/UC14)
-// entram neste módulo nas tarefas HEM-39, HEM-41 e HEM-43.
 @Module({
-  controllers: [MinhasConsultasController],
-  providers: [MinhasConsultasService],
+  controllers: [MinhasConsultasController, PreTriagemController],
+  providers: [MinhasConsultasService, PreTriagemService, AgendamentoService, AtendimentoService],
+  exports: [AgendamentoService, AtendimentoService],
 })
 export class ConsultasModule {}

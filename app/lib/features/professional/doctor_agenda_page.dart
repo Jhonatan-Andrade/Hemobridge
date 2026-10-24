@@ -286,29 +286,21 @@ class _DoctorAgendaPageState extends State<DoctorAgendaPage> {
                           label: const Text('Entrar na consulta'),
                         ),
                       OutlinedButton(
-                        onPressed:
-                            DateTime.tryParse(
-                                  row['inicio'] as String,
-                                )?.isAfter(DateTime.now()) !=
-                                false
-                            ? null
-                            : () async {
-                                await Navigator.of(context).push(
-                                  MaterialPageRoute<void>(
-                                    builder: (_) => DoctorAttendancePage(
-                                      api: widget.api,
-                                      consultationId:
-                                          consultation['id'] as String,
-                                      patientName:
-                                          consultation['paciente']['usuario']['nome']
-                                              as String,
-                                      initialStatus:
-                                          consultation['status'] as String,
-                                    ),
-                                  ),
-                                );
-                                if (mounted) await reload();
-                              },
+                        onPressed: () async {
+                          await Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => DoctorAttendancePage(
+                                api: widget.api,
+                                consultationId: consultation['id'] as String,
+                                patientName:
+                                    consultation['paciente']['usuario']['nome']
+                                        as String,
+                                initialStatus: consultation['status'] as String,
+                              ),
+                            ),
+                          );
+                          if (mounted) await reload();
+                        },
                         child: Text(
                           consultation['status'] == 'REALIZADA'
                               ? 'Retomar atendimento'
@@ -516,48 +508,106 @@ class _DoctorAttendancePageState extends State<DoctorAttendancePage> {
   final form = GlobalKey<FormState>();
   final exams = TextEditingController();
   final instructions = TextEditingController();
+  final observations = TextEditingController();
+  final reason = TextEditingController();
   late String status;
-  bool busy = false;
-  String? feedback;
+  bool busy = false, loading = true;
+  Map<String, dynamic>? details;
+  String? feedback, loadError;
+  bool get canAttend => details?['podeAtender'] == true;
+  bool get canCancel => details?['podeCancelar'] == true;
+  int? get patientAge {
+    final birth = DateTime.tryParse(
+      details?['paciente']?['dataNascimento'] as String? ?? '',
+    );
+    if (birth == null) return null;
+    final now = DateTime.now();
+    return now.year -
+        birth.year -
+        (now.month < birth.month ||
+                (now.month == birth.month && now.day < birth.day)
+            ? 1
+            : 0);
+  }
+
   @override
   void initState() {
     super.initState();
     status = widget.initialStatus;
+    loadDetails();
+  }
+
+  Future<void> loadDetails() async {
+    setState(() {
+      loading = true;
+      loadError = null;
+    });
+    try {
+      final result =
+          await widget.api.request('/medico/consultas/${widget.consultationId}')
+              as Map<String, dynamic>;
+      if (!mounted) return;
+      setState(() {
+        details = result;
+        status = result['status'] as String;
+        observations.text = result['observacoes'] as String? ?? '';
+      });
+    } catch (error) {
+      if (mounted) setState(() => loadError = error.toString());
+    } finally {
+      if (mounted) setState(() => loading = false);
+    }
   }
 
   @override
   void dispose() {
     exams.dispose();
     instructions.dispose();
+    observations.dispose();
+    reason.dispose();
     super.dispose();
   }
 
-  Future<void> record(String decision) async {
-    if (busy || status != 'AGENDADA') return;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          decision == 'REALIZADA'
+  Future<bool> confirm(String title, String message) async =>
+      await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Voltar'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Confirmar registro'),
+            ),
+          ],
+        ),
+      ) ==
+      true;
+
+  Future<void> record(String decision, {bool reject = false}) async {
+    if (busy || loading || !canAttend) return;
+    if (reject && reason.text.trim().length < 5) {
+      setState(
+        () => feedback =
+            'Informe o motivo da inaptidão com ao menos cinco caracteres.',
+      );
+      return;
+    }
+    if (!await confirm(
+          reject
+              ? 'Confirmar inaptidão'
+              : decision == 'REALIZADA'
               ? 'Confirmar atendimento'
               : 'Confirmar ausência',
-        ),
-        content: Text(
-          'Paciente: ${widget.patientName}. Confirme o registro de ${decision == 'REALIZADA' ? 'atendimento realizado' : 'ausência'}.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Voltar'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Confirmar registro'),
-          ),
-        ],
-      ),
-    );
-    if (confirmed != true || !mounted) return;
+          'Paciente: ${widget.patientName}. Confirme o registro. O paciente receberá uma notificação.',
+        ) ||
+        !mounted) {
+      return;
+    }
     setState(() {
       busy = true;
       feedback = null;
@@ -566,13 +616,60 @@ class _DoctorAttendancePageState extends State<DoctorAttendancePage> {
       await widget.api.request(
         '/medico/consultas/${widget.consultationId}',
         method: 'PATCH',
-        body: {'status': decision},
+        body: {
+          'status': decision,
+          if (decision == 'REALIZADA') 'observacoes': observations.text.trim(),
+          if (reject) 'decisao': 'REPROVAR',
+          if (reject) 'motivoReprovacao': reason.text.trim(),
+        },
       );
+      if (!mounted) return;
+      await loadDetails();
       if (mounted) {
-        setState(() {
-          status = decision;
-          feedback = 'Atendimento registrado.';
-        });
+        setState(
+          () =>
+              feedback = 'Atendimento registrado. O paciente será notificado.',
+        );
+      }
+    } catch (error) {
+      if (mounted) setState(() => feedback = error.toString());
+    } finally {
+      if (mounted) setState(() => busy = false);
+    }
+  }
+
+  Future<void> cancelConsultation() async {
+    if (busy || loading || !canCancel) return;
+    if (reason.text.trim().length < 5) {
+      setState(
+        () => feedback =
+            'Informe o motivo do cancelamento com ao menos cinco caracteres.',
+      );
+      return;
+    }
+    if (!await confirm(
+          'Cancelar consulta',
+          'O horário será retirado da agenda e o paciente receberá uma orientação para novo agendamento.',
+        ) ||
+        !mounted) {
+      return;
+    }
+    setState(() {
+      busy = true;
+      feedback = null;
+    });
+    try {
+      await widget.api.request(
+        '/medico/consultas/${widget.consultationId}/cancelar',
+        method: 'POST',
+        body: {'motivo': reason.text.trim()},
+      );
+      if (!mounted) return;
+      await loadDetails();
+      if (mounted) {
+        setState(
+          () => feedback = 'Consulta cancelada. O paciente será notificado.',
+        );
       }
     } catch (error) {
       if (mounted) setState(() => feedback = error.toString());
@@ -582,7 +679,10 @@ class _DoctorAttendancePageState extends State<DoctorAttendancePage> {
   }
 
   Future<void> requestExams() async {
-    if (busy || status == 'NAO_COMPARECEU' || !form.currentState!.validate()) {
+    if (busy ||
+        !canAttend ||
+        status != 'REALIZADA' ||
+        !form.currentState!.validate()) {
       return;
     }
     setState(() {
@@ -631,70 +731,177 @@ class _DoctorAttendancePageState extends State<DoctorAttendancePage> {
           ),
           Text(professionalStatus(status)),
           const SizedBox(height: 20),
-          if (status == 'AGENDADA') ...[
-            FilledButton(
-              onPressed: busy ? null : () => record('REALIZADA'),
-              child: const Text('Registrar como realizado'),
-            ),
-            const SizedBox(height: 12),
+          if (loading)
+            const Center(child: CircularProgressIndicator())
+          else if (loadError != null) ...[
+            ProfessionalFeedback(loadError),
             OutlinedButton(
-              onPressed: busy ? null : () => record('NAO_COMPARECEU'),
-              child: const Text('Registrar ausência'),
+              onPressed: loadDetails,
+              child: const Text('Tentar novamente'),
             ),
-          ],
-          ProfessionalFeedback(feedback),
-          if (status != 'NAO_COMPARECEU')
-            Form(
-              key: form,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+          ] else ...[
+            if (details?['paciente'] != null) ...[
+              if (patientAge != null) Text('Idade: $patientAge anos'),
+              Text('Peso cadastrado: ${details!['paciente']['pesoKg']} kg'),
+              Text(
+                'Sexo: ${details!['paciente']['sexo'] == 'FEMININO' ? 'Feminino' : 'Masculino'}',
+              ),
+            ],
+            if (details?['preTriagem'] != null)
+              ExpansionTile(
+                title: const Text('Respostas da pré-triagem'),
                 children: [
-                  Text(
-                    'Solicitar exames',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: exams,
-                    enabled: !busy,
-                    decoration: const InputDecoration(
-                      labelText: 'Exames (um por linha)',
+                  for (final answer
+                      in details!['preTriagem']['respostas'] as List)
+                    ListTile(
+                      title: Text(answer['pergunta'] as String),
+                      subtitle: Text(
+                        answer['resposta'] == 'true'
+                            ? 'Sim'
+                            : answer['resposta'] == 'false'
+                            ? 'Não'
+                            : answer['resposta'] as String,
+                      ),
                     ),
-                    minLines: 3,
-                    maxLines: 6,
-                    maxLength: 4000,
-                    validator: (value) {
-                      final list = (value ?? '')
-                          .split('\n')
-                          .map((e) => e.trim())
-                          .where((e) => e.isNotEmpty)
-                          .toList();
-                      return list.isEmpty ||
-                              list.length > 20 ||
-                              list.any((e) => e.length > 200)
-                          ? 'Informe de 1 a 20 exames, com até 200 caracteres por linha.'
-                          : null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: instructions,
-                    enabled: !busy,
-                    decoration: const InputDecoration(
-                      labelText: 'Orientações ao paciente',
+                  const Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Text(
+                      'Orientação registrada. A decisão clínica é do médico.',
                     ),
-                    minLines: 3,
-                    maxLines: 6,
-                    maxLength: 2000,
-                  ),
-                  const SizedBox(height: 16),
-                  FilledButton(
-                    onPressed: busy ? null : requestExams,
-                    child: Text(busy ? 'Salvando…' : 'Enviar solicitação'),
                   ),
                 ],
               ),
-            ),
+            if (details?['cicloAtual'] == false)
+              const Text(
+                'Atendimento histórico. As alterações pertencem à consulta atual.',
+              ),
+            if (details?['motivoReprovacao'] != null)
+              Text('Motivo da inaptidão: ${details!['motivoReprovacao']}'),
+            if (canCancel) ...[
+              const Text(
+                'A consulta ainda não começou. É possível cancelar e orientar novo agendamento.',
+              ),
+              TextFormField(
+                key: const ValueKey('cancellation-reason'),
+                controller: reason,
+                enabled: !busy,
+                maxLength: 500,
+                decoration: const InputDecoration(
+                  labelText: 'Motivo do cancelamento',
+                ),
+                minLines: 2,
+                maxLines: 4,
+              ),
+              OutlinedButton(
+                onPressed: busy ? null : cancelConsultation,
+                child: const Text('Cancelar consulta e avisar paciente'),
+              ),
+            ],
+            if (canAttend) ...[
+              TextFormField(
+                key: const ValueKey('attendance-observations'),
+                controller: observations,
+                enabled: !busy,
+                maxLength: 10000,
+                decoration: const InputDecoration(
+                  labelText: 'Observações do atendimento',
+                ),
+                minLines: 3,
+                maxLines: 6,
+              ),
+              FilledButton(
+                onPressed: busy ? null : () => record('REALIZADA'),
+                child: Text(
+                  status == 'REALIZADA'
+                      ? 'Salvar observações'
+                      : 'Registrar como realizado',
+                ),
+              ),
+              if (status == 'AGENDADA')
+                OutlinedButton(
+                  onPressed: busy ? null : () => record('NAO_COMPARECEU'),
+                  child: const Text('Registrar ausência'),
+                ),
+              const SizedBox(height: 16),
+              ExpansionTile(
+                title: const Text('Registrar inaptidão para doação'),
+                children: [
+                  TextFormField(
+                    key: const ValueKey('rejection-reason'),
+                    controller: reason,
+                    enabled: !busy,
+                    maxLength: 2000,
+                    decoration: const InputDecoration(
+                      labelText: 'Motivo da inaptidão',
+                    ),
+                    minLines: 2,
+                    maxLines: 5,
+                  ),
+                  OutlinedButton(
+                    onPressed: busy
+                        ? null
+                        : () => record('REALIZADA', reject: true),
+                    child: const Text('Confirmar inaptidão e avisar paciente'),
+                  ),
+                ],
+              ),
+              if (status == 'REALIZADA')
+                Form(
+                  key: form,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        'Solicitar exames',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        key: const ValueKey('requested-exams'),
+                        controller: exams,
+                        enabled: !busy,
+                        decoration: const InputDecoration(
+                          labelText: 'Exames (um por linha)',
+                        ),
+                        minLines: 3,
+                        maxLines: 6,
+                        maxLength: 1000,
+                        validator: (value) {
+                          final list = (value ?? '')
+                              .split('\n')
+                              .map((e) => e.trim())
+                              .where((e) => e.isNotEmpty)
+                              .toList();
+                          return list.isEmpty ||
+                                  list.length > 20 ||
+                                  list.any((e) => e.length > 200)
+                              ? 'Informe de 1 a 20 exames, com até 200 caracteres por linha.'
+                              : null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        key: const ValueKey('exam-instructions'),
+                        controller: instructions,
+                        enabled: !busy,
+                        decoration: const InputDecoration(
+                          labelText: 'Orientações ao paciente',
+                        ),
+                        minLines: 3,
+                        maxLines: 6,
+                        maxLength: 2000,
+                      ),
+                      const SizedBox(height: 16),
+                      FilledButton(
+                        onPressed: busy ? null : requestExams,
+                        child: Text(busy ? 'Salvando…' : 'Enviar solicitação'),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ],
+          ProfessionalFeedback(feedback),
         ],
       ),
     ),

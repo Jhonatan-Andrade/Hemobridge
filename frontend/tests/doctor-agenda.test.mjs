@@ -29,21 +29,20 @@ const render = (value, attendance = true) => renderToStaticMarkup(createElement(
   slot: value, attendance, onUpdated() {},
 }))
 
-test('histórico permite solicitar exames sem repetir registro nem abrir teleconsulta encerrada', () => {
+test('histórico abre detalhes sob demanda sem antecipar escrita ou teleconsulta encerrada', () => {
   const html = render(slot())
-  assert.match(html, /Retomar atendimento/)
-  assert.match(html, /Solicitar exames ao paciente/)
+  assert.match(html, /Abrir atendimento/)
+  assert.doesNotMatch(html, /<form|Solicitar exames/)
   assert.doesNotMatch(html, /Registrar como realizado|Registrar ausência|Entrar na consulta/)
-  assert.doesNotMatch(html, /<fieldset[^>]*disabled/)
 })
 
-test('consulta futura mantém registro clínico bloqueado e oferece link seguro separado', () => {
+test('consulta futura abre detalhes de cancelamento sem renderizar decisão clínica prematuramente', () => {
   const html = render(slot('AGENDADA', {
     inicio: new Date(Date.now() + 3600000).toISOString(),
     fim: new Date(Date.now() + 5400000).toISOString(),
   }))
-  assert.match(html, /a partir do início agendado/)
-  assert.match(html, /<fieldset[^>]*disabled/)
+  assert.match(html, /Abrir atendimento/)
+  assert.doesNotMatch(html, /<form|Registrar como realizado|Registrar ausência/)
   assert.match(html, /href="https:\/\/meet.example.invalid\/consulta"/)
   assert.match(html, /target="_blank" rel="noopener noreferrer"/)
 })

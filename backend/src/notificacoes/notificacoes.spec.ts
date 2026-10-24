@@ -281,4 +281,18 @@ describe('NecessidadeCriticaService (HEM-38 / UC19)', () => {
       }),
     );
   });
+
+  it('preserva a confirmação pré-60 da triagem sem presumir confirmação em registros legados', async () => {
+    const candidatos = [true, false, null].map((confirmacao, index) =>
+      doador(`idoso-${index}`, 'O+', ['O+'], {
+        dataNascimento: new Date('1963-01-01T00:00:00Z'),
+        doacoes: [{ dataColeta: new Date('2026-06-01T00:00:00Z'), doouAntesDos60Confirmado: confirmacao }],
+      }),
+    );
+    const { service, notificacoes, prisma } = montar(candidatos);
+    const result = await service.notificarDoadores('h1', ['O+'], AGORA);
+    expect(result).toEqual({ doadoresNotificados: 1, inelegiveis: 2, jaNotificadosNaJanela: 0 });
+    expect(notificacoes.registrarEm.mock.calls[0][1].map((a: { usuarioId: string }) => a.usuarioId)).toEqual(['idoso-0']);
+    expect(prisma.paciente.findMany.mock.calls[0][0].select.doacoes.select.doouAntesDos60Confirmado).toBe(true);
+  });
 });

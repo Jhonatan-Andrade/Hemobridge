@@ -1,9 +1,12 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
+import type { UserRole } from '../types/domain'
 import { api, fileUrl, messageOf } from '../services/api-client'
 import { useResource } from '../services/use-resource'
 import { Alert, Intro, RouteLink } from '../components/ui'
 import type { Navigate } from '../components/ui'
+import { PatientPreTriageForm, type PreTriageResult } from '../components/patient-pre-triage-form'
+import { notificationDestination } from '../services/notification-destination'
 import '../styles/patient-journey.css'
 type Slot = {
   disponibilidadeId: string
@@ -37,6 +40,15 @@ function Failure({ message, retry }: { message: string; retry: () => void }) {
   )
 }
 function Booking() {
+  const [triage, setTriage] = useState<PreTriageResult>()
+  return <>
+    <Intro title="Agendar consulta" description="Registre a pré-triagem e escolha um horário para sua avaliação." />
+    {triage ? <BookingSlots preTriagemId={triage.id} /> : <PatientPreTriageForm onComplete={setTriage} />}
+  </>
+}
+function BookingSlots({ preTriagemId }: { preTriagemId: string }) {
+  const heading = useRef<HTMLHeadingElement>(null)
+  useEffect(() => { heading.current?.focus() }, [])
   const slots = useResource<{ itens: Slot[] }>('/paciente/consultas/horarios-disponiveis')
   const [slot, setSlot] = useState(''),
     [consent, setConsent] = useState(false),
@@ -49,7 +61,7 @@ function Booking() {
     try {
       await api('/paciente/agendamentos', {
         method: 'POST',
-        body: { disponibilidadeId: slot, aceiteTelemedicina: consent },
+        body: { disponibilidadeId: slot, aceiteTelemedicina: consent, preTriagemId },
       })
       setFeedback('Consulta agendada. Confira os detalhes em Minhas consultas.')
       setSlot('')
@@ -62,7 +74,7 @@ function Booking() {
   }
   return (
     <>
-      <Intro title="Agendar consulta" description="Escolha um horário publicado pela equipe." />
+      <h2 ref={heading} tabIndex={-1}>Escolha um horário</h2>
       {slots.loading ? (
         <p>Carregando horários…</p>
       ) : slots.error ? (
@@ -300,21 +312,35 @@ function Exams() {
     </>
   )
 }
-export function Notifications() {
+export function Notifications({ navigate, profile = 'PACIENTE' }: { navigate: Navigate; profile?: UserRole }) {
   const [page, setPage] = useState(1),
     resource = useResource<{
-      itens: { id: string; titulo: string; mensagem: string; lida: boolean; enviadaEm: string }[]
+      itens: { id: string; titulo: string; mensagem: string; link: string | null; lida: boolean; enviadaEm: string }[]
       total: number
       naoLidas: number
     }>(`/notificacoes?pagina=${page}&tamanhoPagina=20`)
   const [feedback, setFeedback] = useState('')
-  async function read(id: string) {
+  const [busy, setBusy] = useState(false)
+  async function read(id: string, destination?: string | null) {
+    if (busy) return
+    setBusy(true)
     try {
       await api(`/notificacoes/${id}`)
       resource.reload()
+      if (destination) navigate(destination)
     } catch (error) {
       setFeedback(messageOf(error))
-    }
+    } finally { setBusy(false) }
+  }
+  async function readAll() {
+    if (busy) return
+    setBusy(true)
+    try {
+      await api('/notificacoes/marcar-todas-lidas', { method: 'POST' })
+      resource.reload()
+      setFeedback('Todas as notificações foram marcadas como lidas.')
+    } catch (error) { setFeedback(messageOf(error)) }
+    finally { setBusy(false) }
   }
   return (
     <>
@@ -326,13 +352,15 @@ export function Notifications() {
       ) : (
         <>
           <p>{resource.data?.naoLidas ?? 0} não lidas</p>
+          <button className="button secondary" disabled={busy || !resource.data?.naoLidas} onClick={() => void readAll()}>Marcar todas como lidas</button>
           {resource.data?.itens.map((n) => (
             <article className="surface card" key={n.id}>
               <h2>{n.titulo}</h2>
               <time dateTime={n.enviadaEm}>{when(n.enviadaEm)}</time>
               <p>{n.mensagem}</p>
+              {notificationDestination(n.link, profile) && <button className="button secondary" disabled={busy} onClick={() => void read(n.id, notificationDestination(n.link, profile))}>Ver detalhes</button>}
               {!n.lida && (
-                <button className="text-button" onClick={() => void read(n.id)}>
+                <button className="text-button" disabled={busy} onClick={() => void read(n.id)}>
                   Marcar como lida
                 </button>
               )}
@@ -418,7 +446,7 @@ export function PatientJourneyPage({ route, navigate }: { route: string; navigat
       ) : route === 'external-exams' ? (
         <Exams />
       ) : route === 'external-notifications' ? (
-        <Notifications />
+        <Notifications navigate={navigate} />
       ) : (
         <PreTriage />
       )}

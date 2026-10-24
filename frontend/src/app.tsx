@@ -490,7 +490,7 @@ function App() {
             onTour={() => setTourRequested(true)}
           />
         ) : route === 'external-locations' ? (
-          <LocalDiscovery />
+          <LocalDiscovery user={user} />
         ) : route.startsWith('external-') ? (
           <PatientJourneyPage key={route} route={route} navigate={navigate} />
         ) : route === 'dashboard' || route === 'profile' ? (
@@ -503,7 +503,7 @@ function App() {
           />
         ) : route === 'notifications' ? (
           <main className="community-page">
-            <Notifications />
+            <Notifications navigate={navigate} profile={user?.perfil} />
           </main>
         ) : route === 'professional/privacy' && role === 'administrator' ? (
           <PrivacyRequestsPage />

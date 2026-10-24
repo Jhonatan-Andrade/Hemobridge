@@ -1201,4 +1201,36 @@ $$;
 CREATE TRIGGER exame_validado_tipagem_trg BEFORE INSERT OR UPDATE OF situacao, tipo_sanguineo_id
   ON exame FOR EACH ROW EXECUTE FUNCTION exigir_tipagem_exame_validado();
 
+
+-- Alteração aditiva: dados legados não recebem respostas ou versões retroativas.
+ALTER TABLE pre_triagem ADD COLUMN versao_questionario VARCHAR(30);
+ALTER TABLE disponibilidade_medico ADD COLUMN cancelada_em TIMESTAMPTZ(3);
+ALTER TABLE consulta ADD COLUMN pre_triagem_id UUID;
+ALTER TABLE consulta ADD COLUMN motivo_reprovacao VARCHAR(2000);
+CREATE INDEX consulta_pre_triagem_id_idx ON consulta(pre_triagem_id);
+ALTER TABLE consulta ADD CONSTRAINT consulta_pre_triagem_id_fkey
+  FOREIGN KEY (pre_triagem_id) REFERENCES pre_triagem(id) ON DELETE RESTRICT ON UPDATE CASCADE;
+-- O vínculo também deve preservar a titularidade, mesmo em uma escrita fora da API.
+ALTER TABLE pre_triagem ADD CONSTRAINT pre_triagem_id_paciente_key UNIQUE(id, paciente_id);
+ALTER TABLE consulta ADD CONSTRAINT consulta_pre_triagem_titular_fkey
+  FOREIGN KEY (pre_triagem_id, paciente_id) REFERENCES pre_triagem(id, paciente_id)
+  ON DELETE RESTRICT ON UPDATE CASCADE;
+
+
+-- Um horário retirado pelo médico continua no histórico, mas não ocupa a agenda.
+ALTER TABLE disponibilidade_medico DROP CONSTRAINT disponibilidade_sem_sobreposicao;
+DROP INDEX disponibilidade_medico_medico_id_inicio_fim_key;
+CREATE INDEX disponibilidade_medico_medico_id_inicio_fim_idx ON disponibilidade_medico(medico_id, inicio, fim);
+CREATE UNIQUE INDEX disponibilidade_medico_periodo_ativo_key
+  ON disponibilidade_medico(medico_id, inicio, fim) WHERE cancelada_em IS NULL;
+ALTER TABLE disponibilidade_medico ADD CONSTRAINT disponibilidade_sem_sobreposicao
+  EXCLUDE USING gist (medico_id WITH =, tstzrange(inicio, fim, '[)') WITH &&)
+  WHERE (cancelada_em IS NULL);
+
+
+-- Sem preenchimento retroativo: registros existentes permanecem NULL.
+ALTER TABLE doacao ADD COLUMN doou_antes_dos60_confirmado BOOLEAN;
+ALTER TABLE doacao ADD CONSTRAINT doacao_confirmacao_pre_60_vinculada_chk
+  CHECK (paciente_id IS NOT NULL OR doou_antes_dos60_confirmado IS NULL);
+
 COMMIT;

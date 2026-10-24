@@ -5,6 +5,7 @@ import '../../core/api_client.dart';
 import '../../core/app_theme.dart';
 import '../../core/private_file_page.dart';
 import 'patient_service.dart';
+import 'patient_pre_triage_form.dart';
 
 typedef PatientExamPicker = Future<XFile?> Function();
 
@@ -104,7 +105,8 @@ class _PatientWorkspaceState extends State<PatientWorkspace> {
                 'Acompanhe suas consultas e envie os resultados solicitados na área privada. A aptidão para doar depende da avaliação profissional e da triagem do serviço de hemoterapia.',
               ),
               const SizedBox(height: 20),
-              if (data['status'] == 'PRE_CADASTRADO') ...[
+              if (data['status'] == 'PRE_CADASTRADO' ||
+                  data['status'] == 'REPROVADO') ...[
                 FilledButton.icon(
                   onPressed: () => open(PatientBookingPage(api: widget.api)),
                   icon: const Icon(Icons.add_circle_outline),
@@ -314,8 +316,10 @@ class PatientBookingPage extends StatefulWidget {
 
 class _PatientBookingPageState extends State<PatientBookingPage> {
   late final PatientService service = PatientService(widget.api);
-  late Future<List<AvailableAppointment>> slots = service
-      .availableAppointments();
+  late Future<List<AvailableAppointment>> slots = rescheduling
+      ? service.availableAppointments()
+      : Future.value([]);
+  String? preTriagemId;
   String? selected, message;
   bool consent = false, busy = false;
   bool get rescheduling => widget.appointment != null;
@@ -342,7 +346,11 @@ class _PatientBookingPageState extends State<PatientBookingPage> {
       if (rescheduling) {
         await service.reschedule(widget.appointment!, selected!);
       } else {
-        await service.book(selected!, consent: consent);
+        await service.book(
+          selected!,
+          consent: consent,
+          preTriagemId: preTriagemId,
+        );
       }
       if (mounted) Navigator.pop(context, true);
     } catch (error) {
@@ -394,129 +402,148 @@ class _PatientBookingPageState extends State<PatientBookingPage> {
   );
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(
-      title: Text(rescheduling ? 'Reagendar consulta' : 'Agendar consulta'),
-    ),
-    body: FutureBuilder<List<AvailableAppointment>>(
-      future: slots,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState != ConnectionState.done) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (snapshot.hasError) {
-          return PatientFailure(error: snapshot.error!, retry: reload);
-        }
-        final rows = snapshot.data!;
-        return RefreshIndicator(
-          onRefresh: reload,
-          child: ListView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.all(24),
-            children: [
-              Text(
-                rescheduling
-                    ? 'Escolha o novo horário. A reserva anterior só será liberada após a confirmação.'
-                    : 'Escolha um horário publicado pela equipe para iniciar sua avaliação.',
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'Horários no fuso do dispositivo. Disponibilidade nos próximos 30 dias.',
-              ),
-              if (message != null) PatientMessage(message!),
-              const SizedBox(height: 16),
-              if (rows.isEmpty) ...[
-                const Text(
-                  'Nenhum horário disponível no período. Consulte novamente mais tarde.',
-                ),
-                OutlinedButton(
-                  onPressed: busy ? null : reload,
-                  child: const Text('Atualizar horários'),
-                ),
-              ] else ...[
-                for (final slot in rows)
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Semantics(
-                            checked: selected == slot.id,
-                            button: true,
-                            label:
-                                'Selecionar ${patientDate(slot.start)}, ${slot.doctor}, ${slot.hospital}',
-                            child: IconButton(
-                              onPressed: busy
-                                  ? null
-                                  : () => setState(() => selected = slot.id),
-                              icon: Icon(
-                                selected == slot.id
-                                    ? Icons.radio_button_checked
-                                    : Icons.radio_button_off,
-                                color: brand,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Column(
+  Widget build(BuildContext context) => !rescheduling && preTriagemId == null
+      ? Scaffold(
+          appBar: AppBar(title: const Text('Agendar consulta')),
+          body: PatientPreTriageForm(
+            api: widget.api,
+            onComplete: (id) => setState(() {
+              preTriagemId = id;
+              slots = service.availableAppointments();
+            }),
+          ),
+        )
+      : Scaffold(
+          appBar: AppBar(
+            title: Text(
+              rescheduling ? 'Reagendar consulta' : 'Agendar consulta',
+            ),
+          ),
+          body: FutureBuilder<List<AvailableAppointment>>(
+            future: slots,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState != ConnectionState.done) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.hasError) {
+                return PatientFailure(error: snapshot.error!, retry: reload);
+              }
+              final rows = snapshot.data!;
+              return RefreshIndicator(
+                onRefresh: reload,
+                child: ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.all(24),
+                  children: [
+                    Text(
+                      rescheduling
+                          ? 'Escolha o novo horário. A reserva anterior só será liberada após a confirmação.'
+                          : 'Escolha um horário publicado pela equipe para iniciar sua avaliação.',
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Horários no fuso do dispositivo. Disponibilidade nos próximos 30 dias.',
+                    ),
+                    if (message != null) PatientMessage(message!),
+                    const SizedBox(height: 16),
+                    if (rows.isEmpty) ...[
+                      const Text(
+                        'Nenhum horário disponível no período. Consulte novamente mais tarde.',
+                      ),
+                      OutlinedButton(
+                        onPressed: busy ? null : reload,
+                        child: const Text('Atualizar horários'),
+                      ),
+                    ] else ...[
+                      for (final slot in rows)
+                        Card(
+                          child: Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  patientDate(slot.start),
-                                  style: Theme.of(
-                                    context,
-                                  ).textTheme.titleMedium,
+                                Semantics(
+                                  checked: selected == slot.id,
+                                  button: true,
+                                  label:
+                                      'Selecionar ${patientDate(slot.start)}, ${slot.doctor}, ${slot.hospital}',
+                                  child: IconButton(
+                                    onPressed: busy
+                                        ? null
+                                        : () => setState(
+                                            () => selected = slot.id,
+                                          ),
+                                    icon: Icon(
+                                      selected == slot.id
+                                          ? Icons.radio_button_checked
+                                          : Icons.radio_button_off,
+                                      color: brand,
+                                    ),
+                                  ),
                                 ),
-                                const SizedBox(height: 6),
-                                Text('${slot.doctor}\n${slot.hospital}'),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        patientDate(slot.start),
+                                        style: Theme.of(
+                                          context,
+                                        ).textTheme.titleMedium,
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Text('${slot.doctor}\n${slot.hospital}'),
+                                    ],
+                                  ),
+                                ),
                               ],
                             ),
                           ),
-                        ],
+                        ),
+                      const SizedBox(height: 12),
+                      if (!rescheduling) ...[
+                        TextButton(
+                          onPressed: showAttendanceTerms,
+                          child: const Text('Ler termos do atendimento'),
+                        ),
+                        CheckboxListTile(
+                          value: consent,
+                          contentPadding: EdgeInsets.zero,
+                          controlAffinity: ListTileControlAffinity.leading,
+                          onChanged: busy
+                              ? null
+                              : (value) =>
+                                    setState(() => consent = value == true),
+                          title: const Text(
+                            'Concordo com o atendimento por telessaúde e com o tratamento dos dados necessários à consulta, conforme os termos apresentados.',
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 16),
+                      FilledButton(
+                        onPressed:
+                            busy ||
+                                selected == null ||
+                                (!rescheduling && !consent)
+                            ? null
+                            : submit,
+                        child: Text(
+                          busy
+                              ? 'Confirmando…'
+                              : rescheduling
+                              ? 'Confirmar reagendamento'
+                              : 'Confirmar agendamento',
+                        ),
                       ),
-                    ),
-                  ),
-                const SizedBox(height: 12),
-                if (!rescheduling) ...[
-                  TextButton(
-                    onPressed: showAttendanceTerms,
-                    child: const Text('Ler termos do atendimento'),
-                  ),
-                  CheckboxListTile(
-                    value: consent,
-                    contentPadding: EdgeInsets.zero,
-                    controlAffinity: ListTileControlAffinity.leading,
-                    onChanged: busy
-                        ? null
-                        : (value) => setState(() => consent = value == true),
-                    title: const Text(
-                      'Concordo com o atendimento por telessaúde e com o tratamento dos dados necessários à consulta, conforme os termos apresentados.',
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 16),
-                FilledButton(
-                  onPressed:
-                      busy || selected == null || (!rescheduling && !consent)
-                      ? null
-                      : submit,
-                  child: Text(
-                    busy
-                        ? 'Confirmando…'
-                        : rescheduling
-                        ? 'Confirmar reagendamento'
-                        : 'Confirmar agendamento',
-                  ),
+                    ],
+                  ],
                 ),
-              ],
-            ],
+              );
+            },
           ),
         );
-      },
-    ),
-  );
 }
 
 class PatientExamsPage extends StatefulWidget {

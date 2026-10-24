@@ -7,6 +7,8 @@ import '../locations/locations_page.dart';
 import '../onboarding/onboarding_page.dart';
 import '../workspace/role_workspace.dart';
 import '../patient/patient_workspace.dart';
+import '../patient/patient_notifications_page.dart';
+import '../professional/representative_donations_page.dart';
 import '../professional/doctor_agenda_page.dart';
 import '../professional/doctor_exams_page.dart';
 import '../professional/representative_needs_page.dart';
@@ -67,7 +69,7 @@ class _AppShellState extends State<AppShell> {
     final body = index == 1
         ? CommunityPage(api: widget.session.api, role: role)
         : index == 2 && patient
-        ? const LocationsPage()
+        ? LocationsPage(api: widget.session.api, patient: true)
         : index == 3
         ? ProfilePage(session: widget.session)
         : patient
@@ -87,7 +89,62 @@ class _AppShellState extends State<AppShell> {
             secondary: index == 2,
           );
     return Scaffold(
-      appBar: AppBar(title: const BrandTitle()),
+      appBar: AppBar(
+        title: const BrandTitle(),
+        actions: [
+          if (representative)
+            IconButton(
+              tooltip: 'Registrar doação',
+              icon: const Icon(Icons.bloodtype_outlined),
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute<void>(
+                  builder: (_) => Scaffold(appBar: AppBar(title: const Text('Doações')), body: SafeArea(child: RepresentativeDonationsPage(api: widget.session.api))),
+                ),
+              ),
+            ),
+          IconButton(
+            tooltip: 'Notificações',
+            icon: const Icon(Icons.notifications_outlined),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute<void>(
+                builder: (_) => PatientNotificationsPage(
+                  api: widget.session.api,
+                  destinationBuilder: (destination) => switch (destination) {
+                    'exams' when patient => PatientExamsPage(
+                      api: widget.session.api,
+                    ),
+                    'appointments' when patient => PatientAppointmentsPage(
+                      api: widget.session.api,
+                    ),
+                    'locations' when patient => Scaffold(
+                      appBar: AppBar(title: const Text('Locais')),
+                      body: LocationsPage(
+                        api: widget.session.api,
+                        patient: true,
+                      ),
+                    ),
+                    'doctor-exams' when doctor => Scaffold(
+                      appBar: AppBar(title: const Text('Exames')),
+                      body: DoctorExamsPage(api: widget.session.api),
+                    ),
+                    'agenda' when doctor => Scaffold(
+                      appBar: AppBar(title: const Text('Agenda')),
+                      body: DoctorAgendaPage(api: widget.session.api),
+                    ),
+                    'profile' => Scaffold(
+                      appBar: AppBar(title: const Text('Meu perfil')),
+                      body: ProfilePage(session: widget.session),
+                    ),
+                    _ => null,
+                  },
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
       body: SafeArea(child: body),
       bottomNavigationBar: NavigationBar(
         selectedIndex: index,

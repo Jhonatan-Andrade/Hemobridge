@@ -7,6 +7,8 @@ import {
 import { AuditoriaService } from '../auditoria/auditoria.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { HorariosDisponiveisDto } from './dto/consulta.dto.js';
+import { VERSAO_PRE_TRIAGEM } from './pre-triagem.dto.js';
+import { travarPacienteAtivo } from './ciclo-clinico.js';
 import {
   INSTITUICAO_ATIVA,
   vinculoDaAgendaAtivo,
@@ -68,8 +70,15 @@ export class MinhasConsultasService {
   ) {
     const paciente = await this.prisma.paciente.findUniqueOrThrow({
       where: { usuarioId: pacienteId },
-      select: { cidade: true, estado: true },
+      select: { cidade: true, estado: true, situacao: true },
     });
+    if (['PRE_CADASTRADO', 'REPROVADO'].includes(paciente.situacao)) {
+      const preTriagem = await this.prisma.preTriagem.findFirst({ where: { pacienteId,
+        versaoQuestionario: VERSAO_PRE_TRIAGEM, respostas: { some: {} },
+        consultas: { none: { status: { in: ['AGENDADA', 'REALIZADA', 'NAO_COMPARECEU'] } } } },
+        select: { id: true } });
+      if (!preTriagem) throw new ConflictException('Responda a pré-triagem antes de consultar os horários.');
+    }
     const ate = new Date(agora.getTime() + DIAS_AGENDA_VISIVEL * 86_400_000);
     const inicioDia = data ? new Date(`${data}T00:00:00-03:00`) : undefined;
     const dia = inicioDia
@@ -151,6 +160,7 @@ export class MinhasConsultasService {
     this.verificarAntecedencia(consulta.disponibilidade.inicio, agora);
 
     await this.prisma.$transaction(async (tx) => {
+      await travarPacienteAtivo(tx, pacienteId);
       const { count } = await tx.consulta.updateMany({
         where: { id: consultaId, status: 'AGENDADA' },
         data: {
@@ -221,6 +231,11 @@ export class MinhasConsultasService {
 
     try {
       const criada = await this.prisma.$transaction(async (tx) => {
+        await travarPacienteAtivo(tx, pacienteId);
+        await tx.$queryRaw`SELECT id FROM disponibilidade_medico WHERE id=${disponibilidadeId}::uuid FOR UPDATE`;
+        const disponivel = await tx.disponibilidadeMedico.findFirst({ where: { id: disponibilidadeId, canceladaEm: null,
+          inicio: { gt: agora }, ...INSTITUICAO_ATIVA }, select: { id: true } });
+        if (!disponivel) throw new NotFoundException('Horário não encontrado ou indisponível.');
         const { count } = await tx.consulta.updateMany({
           where: { id: consultaId, status: 'AGENDADA' },
           data: {
@@ -238,6 +253,8 @@ export class MinhasConsultasService {
             medicoId: nova.medicoId,
             disponibilidadeId: nova.id,
             consultaOrigemId: consultaId,
+            preTriagemId: anterior.preTriagemId,
+            criadoEm: new Date(Math.max(agora.getTime(), anterior.criadoEm.getTime() + 1)),
             linkVideochamada: nova.linkVideochamada,
             // O consentimento para telessaúde (RN18) dado no agendamento vale
             // para o mesmo atendimento remarcado.
@@ -275,6 +292,8 @@ export class MinhasConsultasService {
         status: true,
         disponibilidadeId: true,
         termoTelemedicinaAceitoEm: true,
+        preTriagemId: true,
+        criadoEm: true,
         disponibilidade: { select: { inicio: true } },
       },
     });

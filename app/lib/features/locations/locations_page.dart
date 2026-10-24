@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../core/api_client.dart';
 import 'ibge_localities.dart';
 
 class LocalityPicker extends StatefulWidget {
@@ -159,9 +160,241 @@ class _LocalityPickerState extends State<LocalityPicker> {
 
 enum _LocationSettingsTarget { device, app }
 
+class _DonorRecommendations extends StatefulWidget {
+  final ApiClient api;
+  final Position? position;
+  const _DonorRecommendations({required this.api, this.position});
+
+  @override
+  State<_DonorRecommendations> createState() => _DonorRecommendationsState();
+}
+
+class _DonorRecommendationsState extends State<_DonorRecommendations> {
+  Map<String, dynamic>? data;
+  String? error;
+  bool loading = true, restricted = false;
+  int requestId = 0;
+  int visibleCount = 6;
+
+  @override
+  void initState() {
+    super.initState();
+    load();
+  }
+
+  @override
+  void didUpdateWidget(covariant _DonorRecommendations oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.position != widget.position || oldWidget.api != widget.api) {
+      load();
+    }
+  }
+
+  Future<void> load() async {
+    final request = ++requestId;
+    setState(() {
+      loading = true;
+      error = null;
+      data = null;
+      restricted = false;
+      visibleCount = 6;
+    });
+    final position = widget.position;
+    final query = position == null
+        ? ''
+        : '?${Uri(queryParameters: {'lat': position.latitude.toStringAsFixed(2), 'lng': position.longitude.toStringAsFixed(2)}).query}';
+    try {
+      final response = await widget.api.request(
+        '/paciente/locais-recomendados$query',
+      );
+      if (!mounted || request != requestId) return;
+      setState(() => data = Map<String, dynamic>.from(response as Map));
+    } catch (failure) {
+      if (!mounted || request != requestId) return;
+      setState(() {
+        restricted = failure is ApiException && failure.status == 403;
+        error = failure is ApiException
+            ? failure.message
+            : 'Não foi possível consultar as recomendações. Tente novamente.';
+      });
+    } finally {
+      if (mounted && request == requestId) setState(() => loading = false);
+    }
+  }
+
+  String dateLabel(String value) {
+    final date = DateTime.tryParse(value);
+    return date == null
+        ? value
+        : '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+  }
+
+  Future<void> openInstitution(Map hospital) async {
+    final address =
+        '${hospital['nome']}, ${hospital['endereco']}, ${hospital['cidade']}, ${hospital['estado']}';
+    try {
+      final opened = await launchUrl(
+        Uri.https('www.google.com', '/maps/search/', {
+          'api': '1',
+          'query': address,
+        }),
+        mode: LaunchMode.externalApplication,
+      );
+      if (!opened) throw StateError('Maps indisponível');
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Não foi possível abrir o mapa. Consulte o endereço informado na instituição.',
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final result = data;
+    final eligibility = result?['elegibilidade'] as Map?;
+    final reference = result?['referencia'] as Map?;
+    final items = result?['itens'] as List? ?? [];
+    const labels = {
+      'CRITICO': 'Crítico',
+      'BAIXO': 'Baixo',
+      'ESTAVEL': 'Estável',
+    };
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Instituições que precisam de você',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 12),
+            if (loading)
+              Semantics(
+                liveRegion: true,
+                child: const Text(
+                  'Consultando necessidades compatíveis com seu cadastro…',
+                ),
+              ),
+            if (error != null) ...[
+              Semantics(liveRegion: true, child: Text(error!)),
+              if (!restricted)
+                TextButton(
+                  onPressed: load,
+                  child: const Text('Tentar recomendações novamente'),
+                ),
+            ],
+            if (result != null && eligibility != null && reference != null) ...[
+              Text(
+                'Tipo validado: ${result['tipoDoador']}. Referência do cadastro: ${reference['cidade']} / ${reference['estado']}.',
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Ordem: necessidade mais urgente, seu tipo exato, sua cidade e seu estado. A distância, quando autorizada, desempata essas prioridades.',
+              ),
+              const SizedBox(height: 12),
+              Text(
+                eligibility['elegivel'] == true
+                    ? 'Sua estimativa permite iniciar a jornada de doação.'
+                    : eligibility['mensagem']?.toString() ??
+                          'Consulte a equipe antes de doar.',
+              ),
+              Text(
+                result['dataEstimadaElegibilidade'] == null
+                    ? 'Não há uma data estimada de liberação. Consulte a equipe responsável.'
+                    : 'Data estimada para doar: ${dateLabel(result['dataEstimadaElegibilidade'].toString())}.',
+              ),
+              if (eligibility['exigeAutorizacaoResponsavel'] == true)
+                const Text(
+                  'É necessária autorização do responsável para menores de 18 anos.',
+                ),
+              const SizedBox(height: 8),
+              Text(result['orientacao']?.toString() ?? ''),
+              if (items.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.only(top: 12),
+                  child: Text(
+                    'Nenhuma instituição cadastrada informou necessidade crítica, baixa ou estável compatível neste momento. Você pode explorar a busca pública abaixo.',
+                  ),
+                ),
+              for (final rawItem in items.take(visibleCount))
+                Builder(
+                  builder: (context) {
+                    final item = rawItem as Map;
+                    final hospital = item['hospital'] as Map;
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Divider(),
+                          Text(
+                            '${labels[item['nivel']] ?? item['nivel']} · precisa de ${item['tipoNecessitado']}',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            hospital['nome'].toString(),
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          Text(
+                            '${hospital['endereco']} · ${hospital['cidade']} / ${hospital['estado']}',
+                          ),
+                          if (hospital['horarioFuncionamento'] != null)
+                            Text(
+                              'Atendimento: ${hospital['horarioFuncionamento']}',
+                            ),
+                          Text(
+                            item['atualizadoEm'] == null
+                                ? 'Data de atualização não informada.'
+                                : 'Necessidade atualizada em ${dateLabel(item['atualizadoEm'].toString())}.',
+                          ),
+                          if (item['distanciaKm'] != null)
+                            Text(
+                              'Distância aproximada em linha reta: ${item['distanciaKm']} km.',
+                            ),
+                          OutlinedButton.icon(
+                            onPressed: () => openInstitution(hospital),
+                            icon: const Icon(Icons.open_in_new),
+                            label: const Text('Ver endereço no Google Maps'),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              if (items.length > visibleCount)
+                TextButton(
+                  onPressed: () => setState(() => visibleCount += 6),
+                  child: Text('Mostrar mais necessidades (${items.length - visibleCount} restantes)'),
+                ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class LocationsPage extends StatefulWidget {
   final IbgeLocalities? localities;
-  const LocationsPage({super.key, this.localities});
+  final ApiClient? api;
+  final bool patient;
+  const LocationsPage({
+    super.key,
+    this.localities,
+    this.api,
+    this.patient = false,
+  });
   @override
   State<LocationsPage> createState() => _LocationsPageState();
 }
@@ -332,6 +565,13 @@ class _LocationsPageState extends State<LocationsPage> {
           onPressed: openSettings,
           child: const Text('Abrir configurações'),
         ),
+      if (widget.patient && widget.api != null) ...[
+        const SizedBox(height: 20),
+        _DonorRecommendations(
+          api: widget.api!,
+          position: useGps ? position : null,
+        ),
+      ],
       const SizedBox(height: 20),
       Text(
         'Ou escolha uma localidade',
@@ -377,7 +617,7 @@ class _LocationsPageState extends State<LocationsPage> {
           ),
         ),
       const Text(
-        'O GPS é opcional e consultado somente ao tocar no botão, sem acompanhamento contínuo. A posição fica apenas na memória desta tela. O Maps recebe a região aproximada somente quando você abre a busca.',
+        'O GPS é opcional e consultado somente ao tocar no botão, sem acompanhamento contínuo. Uma posição aproximada é enviada ao HemoBridge para desempatar recomendações por distância, sem ser salva no cadastro. O Maps recebe a região aproximada somente quando você abre a busca. A busca externa não informa os níveis de necessidade cadastrados na plataforma.',
       ),
     ],
   );

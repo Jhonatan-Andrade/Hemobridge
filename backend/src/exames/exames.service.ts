@@ -13,6 +13,7 @@ import { NotificacoesService } from '../notificacoes/notificacoes.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import type { Prisma } from '../generated/prisma/client.js';
 import { consultaComVinculoClinicoAtivo } from '../consultas/acesso-clinico.js';
+import { exigirCicloAtual, travarPacienteAtivo } from '../consultas/ciclo-clinico.js';
 import { AvaliarExameDto, SolicitarExamesDto } from './dto/exame.dto.js';
 
 /** Arquivo recebido pelo multer (memória). */
@@ -41,10 +42,7 @@ export class ExamesService {
 
   /** Todas as alterações de exames do titular usam a mesma trava transacional. */
   private async travarPaciente(tx: Prisma.TransactionClient, pacienteId: string) {
-    const ativos = await tx.$queryRaw<{ usuario_id: string }[]>`
-      SELECT p.usuario_id FROM paciente p JOIN usuario u ON u.id=p.usuario_id
-      WHERE p.usuario_id=${pacienteId}::uuid AND u.status='ATIVO' FOR UPDATE OF p`;
-    if (!ativos.length) throw new ConflictException('Cadastro indisponível para avaliação.');
+    await travarPacienteAtivo(tx, pacienteId);
   }
 
   private async consultaAtiva(tx: Prisma.TransactionClient, consultaId: string, medicoId: string) {
@@ -53,6 +51,7 @@ export class ExamesService {
       select: {
         status: true,
         pacienteId: true,
+        motivoReprovacao: true,
         paciente: { select: { situacao: true } },
         disponibilidade: {
           select: {
@@ -65,6 +64,9 @@ export class ExamesService {
     });
     if (!consulta)
       throw new NotFoundException('Consulta não encontrada ou vínculo institucional indisponível.');
+    await exigirCicloAtual(tx, consulta.pacienteId, consultaId);
+    if (consulta.motivoReprovacao)
+      throw new ConflictException('O atendimento foi encerrado por inaptidão. Inicie uma nova consulta para outra avaliação.');
     return consulta;
   }
 
@@ -109,7 +111,7 @@ export class ExamesService {
           tipoSanguineoId: dto.situacao === 'VALIDADO' ? dto.tipoSanguineoId! : null },
       });
       const solicitacoes = await tx.solicitacaoExame.findMany({
-        where: { consulta: { pacienteId, status: { in: ['AGENDADA', 'REALIZADA'] } } },
+        where: { consultaId: referencia.solicitacao.consultaId },
         select: { exames: { orderBy: [{ enviadoEm: 'desc' }, { id: 'desc' }], take: 1,
           select: { situacao: true, tipoSanguineoId: true } } },
       });
@@ -224,7 +226,9 @@ export class ExamesService {
         descricao: true,
         orientacoes: true,
         solicitadoEm: true,
-        consulta: { select: { medico: { select: { usuario: { select: { nome: true } } } } } },
+        consulta: { select: { id: true, status: true, motivoReprovacao: true,
+          paciente: { select: { consultas: { orderBy: [{ criadoEm: 'desc' }, { id: 'desc' }], take: 1, select: { id: true } } } },
+          medico: { select: { usuario: { select: { nome: true } } } } } },
         exames: {
           select: SELECAO_ENVIO,
           orderBy: { enviadoEm: 'desc' },
@@ -245,7 +249,10 @@ export class ExamesService {
         situacao,
         // FA01: reprovado mostra o motivo e permite novo envio.
         motivoReprovacao: situacao === 'REPROVADO' ? ultimo!.motivoReprovacao : null,
-        podeEnviar: situacao === 'AGUARDANDO_RESULTADO' || situacao === 'REPROVADO',
+        cicloAtual: s.consulta.paciente.consultas[0]?.id === s.consulta.id,
+        podeEnviar: s.consulta.paciente.consultas[0]?.id === s.consulta.id && !s.consulta.motivoReprovacao
+          && ['AGENDADA', 'REALIZADA'].includes(s.consulta.status)
+          && (situacao === 'AGUARDANDO_RESULTADO' || situacao === 'REPROVADO'),
         envios: s.exames,
       };
     });
@@ -260,11 +267,15 @@ export class ExamesService {
       where: { id: solicitacaoId, consulta: { pacienteId } },
       select: {
         id: true,
-        consulta: { select: { medicoId: true } },
+        consulta: { select: { id: true, medicoId: true, motivoReprovacao: true, status: true,
+          paciente: { select: { consultas: { orderBy: [{ criadoEm: 'desc' }, { id: 'desc' }], take: 1, select: { id: true } } } } } },
         exames: { select: { situacao: true }, orderBy: { enviadoEm: 'desc' }, take: 1 },
       },
     });
     if (!solicitacao) throw new NotFoundException('Solicitação de exame não encontrada.');
+    if (solicitacao.consulta.paciente.consultas[0]?.id !== solicitacao.consulta.id
+      || solicitacao.consulta.motivoReprovacao || !['AGENDADA', 'REALIZADA'].includes(solicitacao.consulta.status))
+      throw new ConflictException('Esta solicitação pertence a um atendimento encerrado ou a um ciclo anterior.');
     const ultima = solicitacao.exames[0]?.situacao;
     if (ultima === 'EM_ANALISE') throw new ConflictException('O resultado enviado ainda está em análise pelo médico.');
     if (ultima === 'VALIDADO') throw new ConflictException('Este exame já foi validado pelo médico.');
@@ -281,9 +292,10 @@ export class ExamesService {
     try {
       const exame = await this.prisma.$transaction(async (tx) => {
         await this.travarPaciente(tx, pacienteId);
+        await exigirCicloAtual(tx, pacienteId, solicitacao.consulta.id);
         // Revalida sob a trava: dois uploads simultâneos não podem criar dois resultados em análise.
         const atual = await tx.solicitacaoExame.findFirst({
-          where: { id: solicitacaoId, consulta: { pacienteId, status: { in: ['AGENDADA', 'REALIZADA'] } } },
+          where: { id: solicitacaoId, consulta: { pacienteId, motivoReprovacao: null, status: { in: ['AGENDADA', 'REALIZADA'] } } },
           select: { exames: { orderBy: [{ enviadoEm: 'desc' }, { id: 'desc' }], take: 1, select: { situacao: true } } },
         });
         if (!atual) throw new ConflictException('Solicitação indisponível para envio.');

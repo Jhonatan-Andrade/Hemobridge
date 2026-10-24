@@ -9,6 +9,81 @@ import 'package:hemobridge/core/session_controller.dart';
 import 'package:hemobridge/features/navigation/app_shell.dart';
 
 void main() {
+  testWidgets(
+    '360 px: doações abrem com cabeçalho e retorno preserva a aba Estoque do representante',
+    (tester) async {
+      tester.view.physicalSize = const Size(360, 800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final paths = <String>[];
+      final api = ApiClient(
+        baseUrl: 'https://api.example.invalid',
+        client: MockClient((request) async {
+          paths.add(request.url.path);
+          final Object value = switch (request.url.path) {
+            '/representante/necessidades' => {
+              'hospital': {'nome': 'Instituição de teste'},
+              'necessidades': <dynamic>[],
+            },
+            '/representante/doacoes' => {
+              'itens': <dynamic>[],
+              'total': 0,
+              'pagina': 1,
+              'tamanhoPagina': 10,
+            },
+            _ => <dynamic>[],
+          };
+          return http.Response(
+            jsonEncode(value),
+            200,
+            headers: {'content-type': 'application/json; charset=utf-8'},
+          );
+        }),
+      )..token = 'token-representante';
+      final session = SessionController(api)
+        ..user = {
+          'id': 'representante-teste',
+          'nome': 'Representante de teste',
+          'email': 'representante@example.invalid',
+          'perfil': 'REPRESENTANTE',
+        };
+      addTearDown(session.dispose);
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: hemobridgeTheme(),
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(
+              context,
+            ).copyWith(textScaler: const TextScaler.linear(1.2)),
+            child: child!,
+          ),
+          home: AppShell(session: session),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Estoque'));
+      await tester.pumpAndSettle();
+      expect(find.text('Estoque de bolsas'), findsOneWidget);
+      await tester.tap(find.byTooltip('Registrar doação'));
+      await tester.pumpAndSettle();
+      expect(find.text('Doações'), findsOneWidget);
+      expect(find.text('Doações da instituição'), findsOneWidget);
+      expect(paths.last, '/representante/doacoes');
+      expect(find.byType(BackButton), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      expect(find.text('Estoque de bolsas'), findsOneWidget);
+      expect(
+        tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
+        2,
+      );
+      expect(find.text('Doações da instituição'), findsNothing);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   for (final account in [
     ('PACIENTE', 'PRE_CADASTRADO', 'Painel', 'Meu painel', '/paciente/perfil'),
     ('PACIENTE', 'APROVADO', 'Painel', 'Meu painel', '/paciente/perfil'),

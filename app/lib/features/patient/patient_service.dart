@@ -21,17 +21,28 @@ class PatientService {
         .toList();
   }
 
-  Future<void> book(String slotId, {required bool consent}) async {
-    if (slotId.isEmpty || !consent) {
+  Future<void> book(
+    String slotId, {
+    required bool consent,
+    String? preTriagemId,
+  }) async {
+    if (slotId.isEmpty ||
+        !consent ||
+        preTriagemId == null ||
+        preTriagemId.isEmpty) {
       throw ApiException(
-        'Escolha um horário e aceite o atendimento por telessaúde.',
+        'Registre a pré-triagem, escolha um horário e aceite o atendimento por telessaúde.',
         0,
       );
     }
     await api.request(
       '/paciente/agendamentos',
       method: 'POST',
-      body: {'disponibilidadeId': slotId, 'aceiteTelemedicina': consent},
+      body: {
+        'disponibilidadeId': slotId,
+        'aceiteTelemedicina': consent,
+        'preTriagemId': preTriagemId,
+      },
     );
   }
 

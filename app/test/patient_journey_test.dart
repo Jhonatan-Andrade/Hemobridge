@@ -8,6 +8,7 @@ import 'package:http/testing.dart';
 import 'package:hemobridge/core/api_client.dart';
 import 'package:hemobridge/core/app_theme.dart';
 import 'package:hemobridge/features/patient/patient_service.dart';
+import 'package:hemobridge/features/patient/patient_pre_triage_form.dart';
 import 'package:hemobridge/features/patient/patient_workspace.dart';
 
 http.Response response(Object data, [int status = 200]) => http.Response.bytes(
@@ -74,6 +75,66 @@ Future<void> show(WidgetTester tester, Widget page) async {
 }
 
 void main() {
+  testWidgets(
+    '360 px: paciente reprovado pode iniciar nova consulta pela pré-triagem sem carregar horários antes',
+    (tester) async {
+      final paths = <String>[];
+      final api = client((request) async {
+        paths.add(request.url.path);
+        if (request.url.path == '/paciente/perfil') {
+          return response({'name': 'Paciente de teste', 'status': 'REPROVADO'});
+        }
+        expect(request.url.path, '/paciente/pre-triagem');
+        return response({'versao': '2026-10-23'});
+      });
+      await show(tester, Scaffold(body: PatientWorkspace(api: api)));
+      await tester.ensureVisible(find.text('Agendar consulta'));
+      await tester.tap(find.text('Agendar consulta'));
+      await tester.pumpAndSettle();
+      expect(find.byType(PatientPreTriageForm), findsOneWidget);
+      expect(paths, ['/paciente/perfil', '/paciente/pre-triagem']);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    '360 px: repetir carregamento da pré-triagem recupera a falha sem abrir horários nem concluir o formulário',
+    (tester) async {
+      var reads = 0, completions = 0;
+      final api = client((request) async {
+        expect(request.url.path, '/paciente/pre-triagem');
+        expect(request.method, 'GET');
+        reads++;
+        return reads == 1
+            ? response({
+                'message': 'Pré-triagem temporariamente indisponível.',
+              }, 503)
+            : response({'versao': '2026-10-23'});
+      });
+      await show(
+        tester,
+        Scaffold(
+          body: PatientPreTriageForm(
+            api: api,
+            onComplete: (_) => completions++,
+          ),
+        ),
+      );
+      expect(
+        find.text('Pré-triagem temporariamente indisponível.'),
+        findsOneWidget,
+      );
+      await tester.tap(find.text('Tentar novamente'));
+      await tester.pumpAndSettle();
+      expect(reads, 2);
+      expect(find.text('Peso atual (kg)'), findsOneWidget);
+      expect(find.text('Você já doou sangue?'), findsOneWidget);
+      expect(find.text('Tentar novamente'), findsNothing);
+      expect(completions, 0);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   test(
     'Patient service requires explicit consent and authoritative change/upload permissions',
     () async {
@@ -154,8 +215,26 @@ void main() {
   testWidgets(
     'Booking waits for consent; a concurrent reservation reloads slots without choosing another',
     (tester) async {
-      var reads = 0, writes = 0;
+      var reads = 0, writes = 0, triageWrites = 0;
       final api = client((request) async {
+        if (request.url.path == '/paciente/pre-triagem') {
+          if (request.method == 'GET') {
+            return response({'versao': '2026-10-23'});
+          }
+          triageWrites++;
+          expect(jsonDecode(request.body), {
+            'versao': '2026-10-23',
+            'pesoKg': 65.0,
+            'doouAntes': false,
+            'condicaoSaudeRequerAvaliacao': false,
+          });
+          return response({
+            'id': 'triage-one',
+            'resultado': 'APTO',
+            'proximaDataPossivel': null,
+            'orientacoes': ['Continue para avaliação médica.'],
+          });
+        }
         if (request.method == 'GET') {
           return response({
             'itens': [slot(reads++ == 0 ? 'slot-one' : 'slot-two')],
@@ -166,10 +245,36 @@ void main() {
         expect(jsonDecode(request.body), {
           'disponibilidadeId': 'slot-one',
           'aceiteTelemedicina': true,
+          'preTriagemId': 'triage-one',
         });
         return response({'message': 'Horário ocupado. Escolha outro.'}, 409);
       });
       await show(tester, PatientBookingPage(api: api));
+      expect(
+        reads,
+        0,
+        reason: 'Não consultar horários antes de registrar a pré-triagem',
+      );
+      await tester.enterText(find.byType(TextFormField), '65');
+      await tester.tap(find.byType(DropdownButtonFormField<bool>).first);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Não').last);
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(
+        find.byType(DropdownButtonFormField<bool>).last,
+      );
+      await tester.tap(find.byType(DropdownButtonFormField<bool>).last);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Não').last);
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Registrar pré-triagem'));
+      await tester.tap(find.text('Registrar pré-triagem'));
+      await tester.pumpAndSettle();
+      expect(triageWrites, 1);
+      expect(reads, 0, reason: 'Orientação deve ser lida antes de continuar');
+      await tester.ensureVisible(find.text('Continuar para os horários'));
+      await tester.tap(find.text('Continuar para os horários'));
+      await tester.pumpAndSettle();
       await tester.tap(find.byIcon(Icons.radio_button_off));
       await tester.pumpAndSettle();
       expect(

@@ -4,6 +4,8 @@
 
 Para atualizar um ambiente existente, execute `prisma migrate deploy` com identidade de migração e backup verificado. Não execute o SQL consolidado sobre um banco que já tem tabelas. Uma instalação feita pelo consolidado exige registrar a linha de base das migrações antes de passar a usar o Prisma Migrate. O caminho recomendado para todos os ambientes é a cadeia versionada.
 
+A migração aditiva de 23/10 registra a versão do questionário, vincula a pré-triagem à consulta e preserva o motivo de inaptidão e o cancelamento de horários médicos. Os novos campos são nulos nos registros legados: a atualização não inventa respostas, versões ou decisões anteriores. Novos agendamentos exigem pré-triagem persistida do próprio titular; reagendamentos mantêm o vínculo original. Resultados e pedidos de ciclos anteriores permanecem no histórico, mas não mudam a decisão clínica do ciclo atual. As treze migrações anteriores permanecem intactas.
+
 | Domínio | Persistência e controle |
 |---|---|
 | Conta e permissões | Usuário, perfis, versão de sessão, vínculo institucional e conferência de registro profissional |
@@ -24,3 +26,9 @@ Necessidade qualitativa e quantidade de bolsas são informações diferentes. O 
 O seed de produção cria tipos sanguíneos, compatibilidade de concentrado de hemácias e o administrador inicial configurado por variáveis seguras. A massa de testes fica separada e não deve ser importada para produção. O banco compartilhado da VM não recebeu as migrações do bundle, conforme a mensagem do autor; os bancos de testes da VM são ambientes diferentes. Esta entrega foi validada em um PostgreSQL/PostGIS local temporário.
 
 Não guardar senhas em texto simples, tokens de recuperação, arquivos clínicos ou chaves S3 em tabelas de conteúdo público. A API usa consultas parametrizadas e autorização por proprietário/instituição. Na AWS, o banco fica privado, cifrado e acessível apenas à aplicação e à tarefa de migração.
+
+## Ambiente local canônico
+
+Use `backend/docker-compose.yml` para PostgreSQL/PostGIS, armazenamento S3 de desenvolvimento e captura de e-mails. O Compose de `database/` é mantido como alternativa histórica de banco + pgAdmin, agora também com PostGIS e portas em loopback. Ele exige `POSTGRES_PASSWORD`, `PGADMIN_EMAIL` e `PGADMIN_PASSWORD`; não substitua arquivos `.env` nem exclua o volume `pgdata` de uma instalação existente. Não é necessário subir os dois Composes.
+
+A árvore local contém 16 migrações: as 13 anteriores foram preservadas e três novas completam a pré-triagem e seu vínculo por titularidade com a consulta, o histórico de cancelamento de disponibilidades e a confirmação opcional de doação anterior aos 60 anos no registro vinculado. Dados anteriores permanecem sem respostas ou confirmações atribuídas retroativamente. Veja [a referência documental e os contratos](../docs/alinhamento-com-requisitos-originais.md), os [resultados de validação de 24/10](../docs/testes/alinhamento-requisitos-2026-10-24.md) e a [medição HTTP com as 16 migrações](../docs/testes/desempenho-uc17-2026-10-24.md). Esses ensaios locais não aplicaram migrações à VM ou ao banco do notebook.
