@@ -69,6 +69,7 @@ Os tokens de design (cores, tipografia, raios, sombra e larguras) ficam em `tail
 | `/locais/:id` | Detalhes do banco de sangue | sem frame próprio (ver divergências) |
 | `/hospital/necessidades` | Necessidades | 101:3114 |
 | `/hospital` | Painel do hospital (indicadores) | 910:9870 |
+| `/hospital/equipe-medica` | Equipe médica: listagem, cadastro com declaração de CRM conferido, edição, desativação e reenvio de senha provisória | 101:3113 |
 | `/admin` | Painel geral do administrador | 154:3520 |
 | `/admin/instituicoes` | Hospitais e representantes: listagem, edição, desativação e novos representantes | 101:3111 |
 | `/admin/instituicoes/nova` | Cadastrar instituição (hospital + primeiro representante), com item próprio no menu lateral do administrador | formulário de 102:3161 em tela própria |
@@ -105,7 +106,8 @@ O backend não foi alterado. Para tirar o mock e completar as telas, faltam:
 | Menu do visitante | O Figma (468:5148) tem Início, Comunidade, Entrar, Fazer pré-cadastro e Acessibilidade. Aqui ficam Início, Encontrar locais, Entrar e Fazer pré-cadastro. |
 | Fonte Fraunces | O destaque "A ponte que" usa Fraunces Italic (OFL), salva como subconjunto latino em `src/assets/fonts`, sem dependência nova. |
 | Rotas desconhecidas | Agora redirecionam para a Home pública (`/`) em vez de `/entrar`. |
-| Navegação lateral | Comunidade, Perfil, Estoque, Equipe médica e Relatórios ficaram fora do escopo. Os ícones vêm do Figma, e o botão Sair fica no cabeçalho. |
+| Equipe médica | O Figma filtra por Situação e Estado e o formulário tem Nome, CRM, Estado e a declaração. O backend não filtra médicos por estado, então o segundo filtro virou busca por nome, e-mail ou CRM. O cadastro também pede CPF, e-mail e telefone, que o backend exige. Na edição só e-mail e telefone mudam (nome, CPF e CRM são fixos no backend). |
+| Navegação lateral | Comunidade, Perfil, Estoque e Relatórios ficaram fora do escopo. Os ícones vêm do Figma, e o botão Sair fica no cabeçalho. |
 | Médico | Não tem área neste frontend e vê uma tela informativa em `/sem-acesso`. |
 | Telas do administrador sem API | Mapa regional IBGE, Moderação, Relatórios gerais, Comunidade, Perfil, Solicitações de privacidade, Indicadores e Boas-vindas não foram implementadas: o backend não tem endpoints para elas. O item Relatórios saiu do rail. |
 | Painel geral | Os cards mostram os números calculados (ver contrato 4). "Evolução agregada" fica como estado vazio, porque não há registro de doações, e o botão "Ver indicadores" foi removido por não haver tela de destino. |

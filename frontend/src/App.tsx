@@ -10,6 +10,7 @@ import { InstituicoesPage } from './features/admin/InstituicoesPage'
 import { PainelGeralPage } from './features/admin/PainelGeralPage'
 import { UsuariosPage } from './features/admin/UsuariosPage'
 import { DashboardPage } from './features/bloodbank/DashboardPage'
+import { EquipeMedicaPage } from './features/bloodbank/EquipeMedicaPage'
 import { NeedsPage } from './features/bloodbank/NeedsPage'
 import { DonorDashboardPage } from './features/donor/DonorDashboardPage'
 import { HospitalDetailPage } from './features/donor/HospitalDetailPage'
@@ -43,6 +44,7 @@ function App() {
       <Route element={<ProtectedRoute perfis={['REPRESENTANTE']} />}>
         <Route path="/hospital" element={<DashboardPage />} />
         <Route path="/hospital/necessidades" element={<NeedsPage />} />
+        <Route path="/hospital/equipe-medica" element={<EquipeMedicaPage />} />
       </Route>
 
       <Route element={<ProtectedRoute perfis={['ADMINISTRADOR']} />}>
