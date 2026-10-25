@@ -61,6 +61,8 @@ npm run dev
 ```
 
 > Configure as variáveis de ambiente com base em `.env.example` em cada pasta antes de rodar.
+>
+> Detalhes do frontend (telas, tokens do Figma, mocks e divergências) estão em [`frontend/README.md`](./frontend/README.md).
 
 ## Equipe
 
