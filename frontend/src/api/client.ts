@@ -46,7 +46,7 @@ function montarUrl(caminho: string, query?: Query) {
   return url
 }
 
-async function requisicao<T>(metodo: string, caminho: string, corpo?: unknown, query?: Query): Promise<T> {
+async function enviar(metodo: string, caminho: string, corpo?: unknown, query?: Query): Promise<Response> {
   const token = obterToken()
   let resposta: Response
   try {
@@ -62,16 +62,20 @@ async function requisicao<T>(metodo: string, caminho: string, corpo?: unknown, q
     throw new ApiError(0, ['Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.'])
   }
 
-  if (resposta.status === 204) return undefined as T
-  const dados = await resposta.json().catch(() => null)
-
   if (!resposta.ok) {
+    const dados = await resposta.json().catch(() => null)
     // Token expirado ou sessão encerrada em outro lugar (logout, desativação).
     if (resposta.status === 401 && token) aoExpirarSessao?.()
     const mensagem = dados?.message ?? resposta.statusText
     throw new ApiError(resposta.status, Array.isArray(mensagem) ? mensagem : [String(mensagem)])
   }
-  return dados as T
+  return resposta
+}
+
+async function requisicao<T>(metodo: string, caminho: string, corpo?: unknown, query?: Query): Promise<T> {
+  const resposta = await enviar(metodo, caminho, corpo, query)
+  if (resposta.status === 204) return undefined as T
+  return (await resposta.json().catch(() => null)) as T
 }
 
 export const api = {
@@ -79,6 +83,9 @@ export const api = {
   post: <T>(caminho: string, corpo?: unknown) => requisicao<T>('POST', caminho, corpo ?? {}),
   put: <T>(caminho: string, corpo: unknown) => requisicao<T>('PUT', caminho, corpo),
   patch: <T>(caminho: string, corpo: unknown) => requisicao<T>('PATCH', caminho, corpo),
+  delete: <T>(caminho: string) => requisicao<T>('DELETE', caminho),
+  /** Arquivo protegido (ex.: resultado de exame), baixado com o token da sessão. */
+  arquivo: async (caminho: string) => (await enviar('GET', caminho)).blob(),
 }
 
 export function mensagemDeErro(erro: unknown): string[] {

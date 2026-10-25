@@ -1,4 +1,4 @@
-import { useId, useState, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes } from 'react'
+import { useId, useState, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react'
 
 // Figma: Field (3:178) — kinds Text, Password, Select e ReadOnly; estados Focus, Error e Disabled.
 const control =
@@ -106,6 +106,31 @@ export function SelectField({ label, hint, error, placeholder, options, containe
           ))}
         </select>
       </div>
+    </FieldShell>
+  )
+}
+
+type TextAreaFieldProps = TextareaHTMLAttributes<HTMLTextAreaElement> & {
+  label: string
+  hint?: string
+  error?: string
+  containerClassName?: string
+}
+
+/** Variação de várias linhas do Field Text (observações, motivos). */
+export function TextAreaField({ label, hint, error, containerClassName, id, rows = 4, ...props }: TextAreaFieldProps) {
+  const autoId = useId()
+  const campoId = id ?? autoId
+  return (
+    <FieldShell id={campoId} label={label} hint={hint} error={error} className={containerClassName}>
+      <textarea
+        id={campoId}
+        rows={rows}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={error || hint ? `${campoId}-msg` : undefined}
+        className={`w-full resize-y rounded-control border bg-surface px-3 py-2.5 text-body text-ink outline-none placeholder:text-muted focus:border-2 focus:border-info disabled:cursor-not-allowed disabled:bg-background disabled:text-muted ${borda(error)}`}
+        {...props}
+      />
     </FieldShell>
   )
 }

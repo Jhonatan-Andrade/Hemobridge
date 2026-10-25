@@ -18,6 +18,11 @@ import { RecommendedPage } from './features/donor/RecommendedPage'
 import { SearchPage } from './features/donor/SearchPage'
 import { BoasVindasPage } from './features/home/BoasVindasPage'
 import { HomePage } from './features/home/HomePage'
+import { AgendaPage } from './features/medico/AgendaPage'
+import { AtendimentoPage } from './features/medico/AtendimentoPage'
+import { AtendimentosPage } from './features/medico/AtendimentosPage'
+import { AvaliarExamePage } from './features/medico/AvaliarExamePage'
+import { ExamesPage } from './features/medico/ExamesPage'
 
 function App() {
   return (
@@ -45,6 +50,14 @@ function App() {
         <Route path="/hospital" element={<DashboardPage />} />
         <Route path="/hospital/necessidades" element={<NeedsPage />} />
         <Route path="/hospital/equipe-medica" element={<EquipeMedicaPage />} />
+      </Route>
+
+      <Route element={<ProtectedRoute perfis={['MEDICO']} />}>
+        <Route path="/medico" element={<AgendaPage />} />
+        <Route path="/medico/atendimentos" element={<AtendimentosPage />} />
+        <Route path="/medico/atendimentos/:id" element={<AtendimentoPage />} />
+        <Route path="/medico/exames" element={<ExamesPage />} />
+        <Route path="/medico/exames/:id" element={<AvaliarExamePage />} />
       </Route>
 
       <Route element={<ProtectedRoute perfis={['ADMINISTRADOR']} />}>

@@ -25,7 +25,7 @@ export function rotaInicial(usuario: Pick<UsuarioAutenticado, 'papel' | 'senhaPr
     PACIENTE: '/doador',
     DOADOR: '/doador',
     REPRESENTANTE: '/hospital',
-    MEDICO: '/sem-acesso',
+    MEDICO: '/medico',
     ADMINISTRADOR: '/admin',
   }
   return destinos[usuario.papel]

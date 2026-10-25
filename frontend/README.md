@@ -46,7 +46,8 @@ src/
 │   ├── home/       # home pública e boas-vindas do visitante (conteúdo estático)
 │   ├── auth/       # contexto de sessão, rotas protegidas, login, pré-cadastro, senha
 │   ├── donor/      # painel do doador, recomendados, busca e detalhes do banco de sangue
-│   └── bloodbank/  # necessidades e dashboard do hospital
+│   ├── bloodbank/  # necessidades, dashboard e equipe médica do hospital
+│   └── medico/     # agenda, atendimento e avaliação de exames
 ├── lib/            # formatação, validação e useAsync
 └── assets/         # fontes Poppins, ícones, marca e imagens exportados do Figma
 ```
@@ -74,8 +75,13 @@ Os tokens de design (cores, tipografia, raios, sombra e larguras) ficam em `tail
 | `/admin/instituicoes` | Hospitais e representantes: listagem, edição, desativação e novos representantes | 101:3111 |
 | `/admin/instituicoes/nova` | Cadastrar instituição (hospital + primeiro representante), com item próprio no menu lateral do administrador | formulário de 102:3161 em tela própria |
 | `/admin/usuarios` | Usuários: filtros, edição, ativação/desativação, reenvio de senha provisória e novo administrador | 101:3112 |
+| `/medico` | Minha agenda: calendário, publicação de horários com link da teleconsulta, próximos horários e histórico | 101:3115, 832:9757 |
+| `/medico/atendimentos` | Consultas marcadas, da mais próxima para a mais distante | item "Atendimento" de 558:5767 |
+| `/medico/atendimentos/:id` | Atendimento: dados do paciente, entrada na sala e registro do desfecho (exames, inapto, não compareceu ou cancelamento) | 154:3704 |
+| `/medico/exames` | Exames dos atendimentos (para avaliar ou todos) | 154:3753 |
+| `/medico/exames/:id` | Avaliar resultado: abrir o arquivo, validar com tipo sanguíneo ou reprovar com motivo | 824:10121, 824:10086 |
 
-Cada tela tem estados de carregamento, vazio e erro. As rotas `/doador/*` exigem o perfil Paciente e `/hospital/*` exige Representante. Quem não está logado vai para `/entrar`, e quem já está logado não vê as telas de acesso.
+Cada tela tem estados de carregamento, vazio e erro. As rotas `/doador/*` exigem o perfil Paciente `/hospital/*` exige Representante e `/medico/*` exige Médico. Quem não está logado vai para `/entrar`, e quem já está logado não vê as telas de acesso.
 
 ## O que está mockado
 
@@ -108,7 +114,9 @@ O backend não foi alterado. Para tirar o mock e completar as telas, faltam:
 | Rotas desconhecidas | Agora redirecionam para a Home pública (`/`) em vez de `/entrar`. |
 | Equipe médica | O Figma filtra por Situação e Estado e o formulário tem Nome, CRM, Estado e a declaração. O backend não filtra médicos por estado, então o segundo filtro virou busca por nome, e-mail ou CRM. O cadastro também pede CPF, e-mail e telefone, que o backend exige. Na edição só e-mail e telefone mudam (nome, CPF e CRM são fixos no backend). |
 | Navegação lateral | Comunidade, Perfil, Estoque e Relatórios ficaram fora do escopo. Os ícones vêm do Figma, e o botão Sair fica no cabeçalho. |
-| Médico | Não tem área neste frontend e vê uma tela informativa em `/sem-acesso`. |
+| Área do médico | O menu segue o overlay 558:5767 (Agenda, Atendimento e Exames, com os mesmos ícones). Perfil e o seletor "Instituição de atendimento" ficaram de fora: o médico tem um único hospital e não há API de perfil. O card "Pré-triagem" do Atendimento também saiu, porque o backend ainda não registra a pré-triagem. |
+| Publicação de horário | O Figma pede início e fim de um único período. Aqui o período é dividido em consultas com a duração escolhida (15 a 60 min), como define o UC13, e os horários são de Brasília. |
+| Desfecho do atendimento | O campo "Desfecho" virou uma escolha entre quatro opções (realizada com exames, realizada com paciente inapto, não compareceu e cancelar). Antes do horário, só o cancelamento fica habilitado (FE01 do UC14). Os exames são digitados um por linha. |
 | Telas do administrador sem API | Mapa regional IBGE, Moderação, Relatórios gerais, Comunidade, Perfil, Solicitações de privacidade, Indicadores e Boas-vindas não foram implementadas: o backend não tem endpoints para elas. O item Relatórios saiu do rail. |
 | Painel geral | Os cards mostram os números calculados (ver contrato 4). "Evolução agregada" fica como estado vazio, porque não há registro de doações, e o botão "Ver indicadores" foi removido por não haver tela de destino. |
 | Formulário de hospital | O Figma mostra só Nome, Cidade e UF, Endereço e Representante. O backend exige CNPJ, CEP, telefone, latitude e longitude, e no cadastro também nome, CPF, e-mail e telefone do primeiro representante. Todos esses campos estão no formulário. |

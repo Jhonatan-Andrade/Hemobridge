@@ -246,3 +246,92 @@ export interface Doador {
   cidade: string
   estado: string
 }
+
+// UC13–UC16 – área do médico
+export type SituacaoConsulta = 'AGENDADA' | 'REALIZADA' | 'NAO_COMPARECEU' | 'CANCELADA'
+export type SituacaoExame = 'AGUARDANDO_RESULTADO' | 'EM_ANALISE' | 'REPROVADO' | 'VALIDADO'
+
+type PacienteRef = { id: string; nome: string }
+
+export interface HorarioAgenda {
+  id: string
+  inicio: string
+  fim: string
+  linkSala: string
+  livre: boolean
+  consulta: { id: string; situacao: SituacaoConsulta; paciente: PacienteRef } | null
+}
+
+export interface AgendaMedico {
+  de: string
+  ate: string
+  horarios: HorarioAgenda[]
+}
+
+export interface ConsultaMedicoResumo {
+  id: string
+  situacao: SituacaoConsulta
+  inicio: string
+  fim: string
+  paciente: PacienteRef
+}
+
+export interface ConsultaMedico {
+  id: string
+  situacao: SituacaoConsulta
+  inicio: string
+  fim: string
+  linkSala: string
+  observacoes: string | null
+  motivoReprovacao: string | null
+  canceladaPor: Perfil | null
+  motivoCancelamento: string | null
+  encerradaEm: string | null
+  consultaOrigemId: string | null
+  paciente: PacienteRef & {
+    idade: number
+    sexo: Sexo
+    pesoKg: number
+    cidade: string
+    estado: string
+    situacao: SituacaoPaciente
+  }
+  solicitacaoExame: { id: string; exames: string[]; orientacoes: string | null; situacao: SituacaoExame } | null
+}
+
+export interface EnvioExame {
+  id: string
+  situacao: SituacaoExame
+  nomeArquivo: string
+  mimeType: string
+  tamanhoBytes: number
+  enviadoEm: string
+  avaliadoEm: string | null
+  motivoReprovacao: string | null
+}
+
+export interface SolicitacaoExameResumo {
+  id: string
+  exames: string[]
+  situacao: SituacaoExame
+  atualizadoEm: string
+  paciente: PacienteRef
+  ultimoEnvioEm: string | null
+}
+
+export interface SolicitacaoExameMedico {
+  id: string
+  exames: string[]
+  orientacoes: string | null
+  situacao: SituacaoExame
+  criadoEm: string
+  consulta: { id: string; inicio: string }
+  paciente: PacienteRef & {
+    idade: number
+    sexo: Sexo
+    pesoKg: number
+    situacao: SituacaoPaciente
+    tipoSanguineo: TipoSanguineo | null
+  }
+  envios: EnvioExame[]
+}
