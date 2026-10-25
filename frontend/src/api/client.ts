@@ -52,11 +52,12 @@ async function enviar(metodo: string, caminho: string, corpo?: unknown, query?: 
   try {
     resposta = await fetch(montarUrl(caminho, query), {
       method: metodo,
+      // FormData (arquivos) define o próprio Content-Type com o boundary do multipart.
       headers: {
-        ...(corpo !== undefined ? { 'Content-Type': 'application/json' } : {}),
+        ...(corpo !== undefined && !(corpo instanceof FormData) ? { 'Content-Type': 'application/json' } : {}),
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
-      body: corpo !== undefined ? JSON.stringify(corpo) : undefined,
+      body: corpo instanceof FormData ? corpo : corpo !== undefined ? JSON.stringify(corpo) : undefined,
     })
   } catch {
     throw new ApiError(0, ['Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.'])

@@ -12,11 +12,11 @@ import { HospitalListItem } from './HospitalListItem'
 const etapas: Record<SituacaoPaciente, { situacao: string; proximo: string }> = {
   PRE_CADASTRADO: {
     situacao: 'Seu pré-cadastro foi recebido.',
-    proximo: 'Agende a consulta com a equipe médica para iniciar a avaliação.',
+    proximo: 'Escolha um local e agende a teleconsulta com a equipe médica para iniciar a avaliação.',
   },
   CONSULTA_AGENDADA: {
     situacao: 'Sua consulta está agendada.',
-    proximo: 'Compareça na data marcada. A equipe pode solicitar exames.',
+    proximo: 'Entre na sala de teleconsulta no horário marcado. O link aparece 15 minutos antes.',
   },
   AGUARDANDO_EXAME: {
     situacao: 'A equipe solicitou exames.',
@@ -32,14 +32,33 @@ const etapas: Record<SituacaoPaciente, { situacao: string; proximo: string }> = 
   },
   REPROVADO: {
     situacao: 'Seu processo não foi aprovado nesta avaliação.',
-    proximo: 'Converse com a equipe para entender os motivos e as orientações.',
+    proximo: 'Veja o motivo em Meus exames: você pode enviar um novo exame ou agendar uma nova consulta.',
   },
+}
+
+// Próximo passo de cada situação: agendar (UC09), ver a consulta (UC10) ou enviar o exame (UC11).
+function AcoesDoProcesso({ situacao }: { situacao: SituacaoPaciente }) {
+  if (situacao === 'CONSULTA_AGENDADA') return <ButtonLink to="/doador/consultas" block>Ver consulta</ButtonLink>
+  if (situacao === 'AGUARDANDO_EXAME') return <ButtonLink to="/doador/exames" block>Enviar exame</ButtonLink>
+  if (situacao === 'EM_ANALISE') return <ButtonLink to="/doador/exames" block>Ver exames</ButtonLink>
+  return (
+    <>
+      {situacao === 'REPROVADO' && (
+        <ButtonLink to="/doador/exames" block>
+          Ver exames
+        </ButtonLink>
+      )}
+      <ButtonLink to="/locais" block kind={situacao === 'REPROVADO' ? 'secondary' : 'primary'}>
+        {situacao === 'REPROVADO' ? 'Agendar nova consulta' : 'Encontrar locais e agendar'}
+      </ButtonLink>
+    </>
+  )
 }
 
 // Figma: Web desktop / Paciente/Doador / Meu painel (8:1858 aprovado, 8:1947 carregando, 8:1962 falha).
 export function DonorDashboardPage() {
   const { usuario } = useAuth()
-  const perfil = useAsync(() => doadorService.obterPerfil(usuario!), [usuario])
+  const perfil = useAsync(() => doadorService.obterPerfil(), [usuario?.id])
   const doador = perfil.dados
   const tipo = doador?.tipoSanguineo ?? null
 
@@ -91,9 +110,7 @@ export function DonorDashboardPage() {
               </section>
             </>
           ) : (
-            <ButtonLink to="/locais" block>
-              Encontrar locais
-            </ButtonLink>
+            <AcoesDoProcesso situacao={doador.situacao} />
           )}
 
           <ReadOnlyField label="Tipo sanguíneo" value={tipo ?? 'Ainda não disponível'} hint="Definido pela equipe após exame" />

@@ -1,12 +1,12 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { ApiError, mensagemDeErro } from '../../api/client'
-import type { ConsultaPaciente, MedicoComHorarios } from '../../api/types'
-import { Button, buttonClasses, ButtonLink, Consent, EmptyState, ErrorState, Loading, Message, Panel } from '../../components/ui'
-import { formatarDataHora } from '../../lib/formato'
+import { Button, ButtonLink, Consent, ErrorState, Loading, Message, Panel } from '../../components/ui'
 import { useAsync } from '../../lib/useAsync'
 import { consultasService } from '../../services/consultas'
 import { useAuth } from '../auth/authState'
-import { dataLocalIso, formatarHora, formatarHorario } from '../medico/rotulos'
+import { formatarHorario } from '../medico/rotulos'
+import { ConsultaResumo } from './ConsultaResumo'
+import { EscolhaDeHorario, type Escolha } from './EscolhaDeHorario'
 
 type Props = { hospitalId: string; hospitalNome: string }
 
@@ -64,6 +64,7 @@ function AgendamentoPaciente({ hospitalId }: { hospitalId: string }) {
   }
   const [consultas, { medicos }] = dados.dados
   const agendada = consultas.find((c) => c.situacao === 'AGENDADA')
+  const recarregar = () => setVersao((v) => v + 1)
 
   return (
     <>
@@ -73,147 +74,32 @@ function AgendamentoPaciente({ hospitalId }: { hospitalId: string }) {
         </Message>
       )}
       {agendada ? (
-        <ConsultaAgendada consulta={agendada} />
+        <ConsultaResumo consulta={agendada}>
+          <ButtonLink to="/doador/consultas" kind="secondary">
+            Gerenciar consulta
+          </ButtonLink>
+        </ConsultaResumo>
       ) : (
         <EscolhaDeHorario
           medicos={medicos}
-          onAgendado={(m) => {
-            setAviso(m)
-            setVersao((v) => v + 1)
-          }}
-          onHorarioOcupado={() => setVersao((v) => v + 1)}
+          renderConfirmacao={(escolha) => (
+            <ConfirmacaoAgendamento
+              escolha={escolha}
+              onAgendado={(m) => {
+                setAviso(m)
+                recarregar()
+              }}
+              onHorarioOcupado={recarregar}
+            />
+          )}
         />
       )}
     </>
   )
 }
 
-/** RN18: o paciente pode ter só uma consulta futura; o link aparece 15 minutos antes. */
-function ConsultaAgendada({ consulta: c }: { consulta: ConsultaPaciente }) {
-  return (
-    <section className="flex flex-col gap-2 rounded-card border border-line p-4" aria-labelledby="titulo-agendada">
-      <p className="text-small font-semibold uppercase text-brand">Consulta agendada</p>
-      <h3 id="titulo-agendada" className="text-section font-semibold text-ink">
-        {formatarHorario(c.inicio, c.fim)}
-      </h3>
-      <p className="text-body text-ink">
-        {c.medico.nome} · CRM {c.medico.crm}/{c.medico.ufCrm}
-      </p>
-      <p className="text-body text-muted">
-        {c.hospital.nome} · {c.hospital.cidade}/{c.hospital.estado}
-      </p>
-      {c.linkSala ? (
-        <a href={c.linkSala} target="_blank" rel="noopener noreferrer" className={buttonClasses('primary')}>
-          Entrar na sala<span className="sr-only"> (abre em nova aba)</span>
-        </a>
-      ) : (
-        <p className="text-body text-ink">O link da sala aparece aqui em {formatarDataHora(c.linkDisponivelEm)}.</p>
-      )}
-      <p className="text-small text-muted">
-        {c.podeCancelar
-          ? 'Você pode cancelar ou reagendar até 24 horas antes do horário.'
-          : 'Faltam menos de 24 horas: a consulta não pode mais ser cancelada pela plataforma.'}
-      </p>
-    </section>
-  )
-}
-
-type Escolha = { id: string; inicio: string; fim: string; medico: MedicoComHorarios }
-
-function EscolhaDeHorario({
-  medicos,
-  onAgendado,
-  onHorarioOcupado,
-}: {
-  medicos: MedicoComHorarios[]
-  onAgendado: (mensagem: string) => void
-  onHorarioOcupado: () => void
-}) {
-  const porDia = useMemo(() => {
-    const dias = new Map<string, Escolha[]>()
-    for (const medico of medicos) {
-      for (const h of medico.horarios) {
-        const dia = dataLocalIso(new Date(h.inicio))
-        dias.set(dia, [...(dias.get(dia) ?? []), { ...h, medico }])
-      }
-    }
-    return [...dias.entries()]
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([dia, lista]) => [dia, lista.sort((a, b) => a.inicio.localeCompare(b.inicio))] as const)
-  }, [medicos])
-
-  const [dia, setDia] = useState<string | null>(null)
-  const [escolha, setEscolha] = useState<Escolha | null>(null)
-  const diaAtivo = dia ?? porDia[0]?.[0] ?? null
-
-  // FE01
-  if (!porDia.length) {
-    return (
-      <EmptyState title="Nenhum horário disponível">
-        Este local não tem horários livres nos próximos 30 dias. Tente outro local ou volte mais tarde.
-      </EmptyState>
-    )
-  }
-
-  const rotuloDia = (iso: string) =>
-    new Date(`${iso}T12:00:00`).toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' })
-
-  return (
-    <div className="flex flex-col gap-4">
-      <fieldset className="flex flex-col gap-2">
-        <legend className="mb-2 text-label font-semibold text-ink">1. Escolha o dia</legend>
-        <div className="flex flex-wrap gap-2">
-          {porDia.map(([iso, lista]) => (
-            <button
-              key={iso}
-              type="button"
-              aria-pressed={iso === diaAtivo}
-              onClick={() => {
-                setDia(iso)
-                setEscolha(null)
-              }}
-              className={`rounded-pill border px-4 py-2 text-small font-semibold transition-colors ${
-                iso === diaAtivo ? 'border-brand bg-brand text-surface' : 'border-input bg-surface text-ink hover:bg-background'
-              }`}
-            >
-              {rotuloDia(iso)}
-              <span className="sr-only">, {lista.length} {lista.length === 1 ? 'horário' : 'horários'}</span>
-            </button>
-          ))}
-        </div>
-      </fieldset>
-
-      <fieldset className="flex flex-col gap-2">
-        <legend className="mb-2 text-label font-semibold text-ink">2. Escolha o horário</legend>
-        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-          {porDia
-            .find(([iso]) => iso === diaAtivo)?.[1]
-            .map((h) => (
-              <button
-                key={h.id}
-                type="button"
-                aria-pressed={escolha?.id === h.id}
-                onClick={() => setEscolha(h)}
-                className={`flex flex-col items-start rounded-control border p-3 text-left transition-colors ${
-                  escolha?.id === h.id ? 'border-2 border-brand bg-surface' : 'border-input bg-surface hover:bg-background'
-                }`}
-              >
-                <span className="text-body font-semibold text-ink">
-                  {formatarHora(h.inicio)}–{formatarHora(h.fim)}
-                </span>
-                <span className="text-small text-muted">{h.medico.nome}</span>
-              </button>
-            ))}
-        </div>
-      </fieldset>
-
-      {escolha && <Confirmacao key={escolha.id} escolha={escolha} onAgendado={onAgendado} onHorarioOcupado={onHorarioOcupado} />}
-    </div>
-  )
-}
-
 // Passos 7–9: termo de telessaúde e confirmação.
-function Confirmacao({
+function ConfirmacaoAgendamento({
   escolha,
   onAgendado,
   onHorarioOcupado,

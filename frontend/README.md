@@ -37,7 +37,7 @@ Não há biblioteca de componentes, ícones ou gráficos: tudo vem do Figma e do
 ```
 src/
 ├── api/            # cliente HTTP (token, erros) e tipos espelhados do backend
-├── services/       # camada de serviços por recurso: auth, hospitais, necessidades, doador (mock)
+├── services/       # camada de serviços por recurso: auth, hospitais, necessidades, doador, consultas e exames do paciente, área do médico
 ├── components/
 │   ├── ui/         # componentes da biblioteca do Figma (Button, Field, Message, Card, LevelBadge…)
 │   ├── layout/     # AppShell (cabeçalho + navegação lateral) e PageTitle
@@ -66,6 +66,8 @@ Os tokens de design (cores, tipografia, raios, sombra e larguras) ficam em `tail
 | `/primeiro-acesso` | Primeiro acesso do profissional | 8:2318 (montada com os componentes base, frame não conferido) |
 | `/doador` | Meu painel (por situação, carregando, falha) | 8:1858 (aprovado); os textos das outras situações (8:1746–8:1919) foram escritos sem conferir os frames |
 | `/doador/recomendados` | Locais recomendados | 906:9914 |
+| `/doador/consultas` | Minhas consultas: próxima consulta com link da sala, cancelamento e reagendamento (até 24 h antes) e consultas anteriores | 8:2449 |
+| `/doador/exames` | Meus exames: exames pedidos, orientações, envio e reenvio do resultado (PDF, JPG ou PNG até 5 MB) e arquivos enviados | 8:2461 |
 | `/locais` | Encontrar locais (busca com filtros) | 707:7062 |
 | `/locais/:id` | Detalhes do banco de sangue e agendamento da teleconsulta com os médicos do local (dia, horário e aceite do termo de telessaúde) | sem frame próprio (ver divergências) |
 | `/hospital/necessidades` | Necessidades | 101:3114 |
@@ -81,17 +83,17 @@ Os tokens de design (cores, tipografia, raios, sombra e larguras) ficam em `tail
 | `/medico/exames` | Exames dos atendimentos (para avaliar ou todos) | 154:3753 |
 | `/medico/exames/:id` | Avaliar resultado: abrir o arquivo, validar com tipo sanguíneo ou reprovar com motivo | 824:10121, 824:10086 |
 
-Cada tela tem estados de carregamento, vazio e erro. As rotas `/doador/*` exigem o perfil Paciente `/hospital/*` exige Representante e `/medico/*` exige Médico. Quem não está logado vai para `/entrar`, e quem já está logado não vê as telas de acesso.
+Cada tela tem estados de carregamento, vazio e erro. As rotas `/doador/*` exigem o perfil Paciente, `/hospital/*` exige Representante e `/medico/*` exige Médico. Quem não está logado vai para `/entrar` e, depois do login, volta para a página de onde veio. Quem já está logado não vê as telas de acesso.
 
 ## O que está mockado
 
-- **Perfil do doador** (`src/services/doador.ts`): tipo sanguíneo, cidade e estado do paciente logado. A situação vem do papel da sessão (`DOADOR` = aprovado). O doador aprovado aparece como O+ em Curitiba/PR.
+Nada. O painel do paciente usa `GET /pacientes/me`, criado no backend junto com a agenda e os exames.
 
 ## Contratos pendentes no backend
 
-O backend não foi alterado. Para tirar o mock e completar as telas, faltam:
+Para completar as telas, faltam:
 
-1. `GET /pacientes/me` (paciente autenticado) → `{ id, nome, situacao, tipoSanguineo: "O+" | null, cidade, estado }`. Substitui `doadorService.obterPerfil`.
+1. Pré-triagem do UC09 e notificações ao paciente (UC12): o backend ainda não registra nenhuma das duas.
 2. (Opcional) filtro `nivel` em `GET /hospitais`. Hoje o filtro por nível é aplicado no frontend sobre a página recebida, então uma página pode vir com menos itens.
 3. (Opcional) registro de doações por hospital, para os gráficos "Doações por tipo" e "Doações por semana" do Figma.
 4. (Opcional) `GET /admin/indicadores` → `{ doadoresAprovados, hospitaisAtivos, criticosPorEstado: [{ estado, hospitais, tipos }] }`. Hoje o Painel geral calcula esses números no navegador percorrendo `/admin/usuarios?perfil=PACIENTE` e `/hospitais` (até 1.000 registros de cada; acima disso a tela avisa que o número é parcial).

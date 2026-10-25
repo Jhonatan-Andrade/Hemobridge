@@ -368,3 +368,17 @@ export interface ConsultaPaciente {
   motivoReprovacao: string | null
   solicitacaoExame: { id: string; situacao: SituacaoExame } | null
 }
+
+// UC11 – exames solicitados ao paciente
+export interface SolicitacaoExamePaciente {
+  id: string
+  exames: string[]
+  orientacoes: string | null
+  situacao: SituacaoExame
+  criadoEm: string
+  medico: { nome: string }
+  consulta: { id: string; inicio: string }
+  envios: EnvioExame[]
+  /** Aguardando resultado ou reprovado (FA01: reenvio). */
+  podeEnviar: boolean
+}

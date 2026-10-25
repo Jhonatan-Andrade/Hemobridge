@@ -11,7 +11,7 @@ import { useLocalizacao } from './useLocalizacao'
 // Figma: Web desktop / Paciente/Doador / Locais / Recomendações (906:9914).
 export function RecommendedPage() {
   const { usuario } = useAuth()
-  const perfil = useAsync(() => doadorService.obterPerfil(usuario!), [usuario])
+  const perfil = useAsync(() => doadorService.obterPerfil(), [usuario?.id])
   const doador = perfil.dados
   const tipo = doador?.tipoSanguineo ?? null
   const local = useLocalizacao()

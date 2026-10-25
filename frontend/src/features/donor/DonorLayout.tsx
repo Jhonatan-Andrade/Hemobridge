@@ -1,14 +1,19 @@
 import type { ReactNode } from 'react'
 import activityIcon from '../../assets/icons/activity.svg'
-import dashboardIcon from '../../assets/icons/dashboard.svg'
+import comunidadeIcon from '../../assets/icons/comunidade.svg'
+import inicioIcon from '../../assets/icons/inicio.svg'
 import mapIcon from '../../assets/icons/map.svg'
+import painelIcon from '../../assets/icons/painel.svg'
 import { AppShell } from '../../components/layout/AppShell'
 import type { NavItem } from '../../components/layout/NavigationRail'
 import { SairButton } from '../auth/SairButton'
 
-// Figma: Navegação/desktop/patient (757:8484 / 757:8547). Comunidade e Perfil ficam fora do escopo.
+// Figma: Navegação/desktop/patient (757:8484 / 757:8547) e Overlay menu (468:5150). Comunidade e Perfil
+// ficam fora do escopo; Minhas consultas e Meus exames seguem os frames 8:2449 e 8:2461.
 const navDoador: NavItem[] = [
-  { to: '/doador', label: 'Meu painel', icon: dashboardIcon, end: true },
+  { to: '/doador', label: 'Meu painel', icon: inicioIcon, end: true },
+  { to: '/doador/consultas', label: 'Minhas consultas', icon: comunidadeIcon },
+  { to: '/doador/exames', label: 'Meus exames', icon: painelIcon },
   { to: '/doador/recomendados', label: 'Locais recomendados', icon: activityIcon },
   { to: '/locais', label: 'Encontrar locais', icon: mapIcon },
 ]
