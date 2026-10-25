@@ -574,7 +574,7 @@ const GRUPOS = [
         regras: ['CPF e CRM não são editáveis.'], corpo: [['email', 'string', false, ''], ['telefone', 'string', false, '']],
         exReq: { telefone: '(41) 3222-1111' }, erros: [[400, 'Dados inválidos ou campo não editável.'], [404, 'Não encontrado.'], [409, 'E-mail em uso.']],
       },
-      { metodo: 'POST', caminho: '/representante/medicos/:id/desativar', resumo: 'Desativar médico (FA02)', acesso: perfis('REPRESENTANTE'), status: 200, regras: ['Encerra as sessões do médico.'], erros: [[404, 'Não encontrado.']] },
+      { metodo: 'POST', caminho: '/representante/medicos/:id/desativar', resumo: 'Desativar médico (FA02)', acesso: perfis('REPRESENTANTE'), status: 200, regras: ['Encerra as sessões do médico.', 'Cancela as consultas futuras e devolve os pacientes a Pré-cadastrado (RN09).'], erros: [[404, 'Não encontrado.']] },
       { metodo: 'POST', caminho: '/representante/medicos/:id/ativar', resumo: 'Reativar médico', acesso: perfis('REPRESENTANTE'), status: 200, erros: [[404, 'Não encontrado.']] },
       {
         metodo: 'POST', caminho: '/representante/medicos/:id/reenviar-senha-provisoria', resumo: 'Reenviar senha provisória (FA03)', acesso: perfis('REPRESENTANTE'), status: 200,
@@ -607,6 +607,170 @@ const GRUPOS = [
         metodo: 'GET', caminho: '/representante/necessidades/historico', resumo: 'Histórico de alterações (RN03)', acesso: perfis('REPRESENTANTE'), status: 200,
         query: [['tipo', 'string', false, 'Sigla.'], ['de', 'string', false, 'Data/hora ISO inicial.'], ['ate', 'string', false, 'Data/hora ISO final.'], ['pagina', 'int', false, ''], ['tamanhoPagina', 'int', false, 'Padrão 50, máximo 100.']],
         exRes: { itens: [{ tipo: 'O-', de: 'CRITICO', para: 'ESTAVEL', alteradoEm: '…', alteradoPor: 'Rita' }], total: 4, pagina: 1, tamanhoPagina: 50 },
+      },
+    ],
+  },
+  {
+    id: 'paciente-consultas', nome: 'Paciente · Consultas', desc: 'Agendamento, cancelamento e reagendamento de teleconsulta (RF04, RF05 · UC09, UC10 · RN18).',
+    rotas: [
+      {
+        metodo: 'GET', caminho: '/paciente/consultas/termo-telessaude', resumo: 'Termo de telessaúde vigente', acesso: perfis('PACIENTE'), status: 200,
+        regras: ['O aceite é registrado a cada agendamento, com versão, data/hora e IP (RN18).'],
+        exRes: { versao: '1.0', titulo: 'Termo de consentimento para atendimento por telessaúde', texto: '…' },
+      },
+      {
+        metodo: 'GET', caminho: '/paciente/consultas/horarios', resumo: 'Horários livres dos próximos 30 dias', acesso: perfis('PACIENTE'), status: 200,
+        regras: [
+          'Só médicos ativos de bancos de sangue ativos.',
+          'Agrupado por médico, primeiro os da cidade do paciente, depois os do estado (UC09 passo 5).',
+          'Lista vazia = nenhum horário no período (FE01).',
+        ],
+        query: [['data', 'string', false, 'AAAA-MM-DD, entre hoje e +30 dias (FA01).']],
+        exQuery: '?data=2026-11-10',
+        exRes: { data: '2026-11-10', medicos: [{ id: 'uuid', nome: 'Dra. Ana', crm: '123456', ufCrm: 'PR', hospital: { nome: 'Hemocentro', cidade: 'Curitiba', estado: 'PR' }, horarios: [{ id: 'uuid', inicio: '2026-11-10T11:00:00.000Z', fim: '2026-11-10T11:30:00.000Z' }] }] },
+      },
+      {
+        metodo: 'GET', caminho: '/paciente/consultas', resumo: 'Minhas consultas', acesso: perfis('PACIENTE'), status: 200,
+        regras: ['linkSala só vem preenchido de 15 minutos antes até o fim do horário; antes disso, linkDisponivelEm diz quando (RN18).', 'podeCancelar indica se ainda faltam 24 h.'],
+        exRes: [{ id: 'uuid', situacao: 'AGENDADA', inicio: '…', fim: '…', medico: { nome: 'Dra. Ana', crm: '123456', ufCrm: 'PR' }, hospital: { nome: 'Hemocentro', cidade: 'Curitiba', estado: 'PR' }, linkSala: null, linkDisponivelEm: '…', podeCancelar: true, canceladaPor: null, motivoCancelamento: null, motivoReprovacao: null, solicitacaoExame: null }],
+      },
+      { metodo: 'GET', caminho: '/paciente/consultas/:id', resumo: 'Detalhe da consulta', acesso: perfis('PACIENTE'), status: 200, erros: [[404, 'Não encontrada ou de outro paciente.']] },
+      {
+        metodo: 'POST', caminho: '/paciente/consultas', resumo: 'Agendar consulta', acesso: perfis('PACIENTE'), status: 201,
+        regras: [
+          'Só para Pré-cadastrado ou Reprovado; passa o paciente a Consulta agendada (RN10).',
+          'Uma consulta futura por paciente e uma consulta por horário (índices únicos no banco).',
+        ],
+        corpo: [['disponibilidadeId', 'uuid', true, 'Horário escolhido.'], ['aceiteTermoTelessaude', 'boolean', true, 'Deve ser true (FE04).'], ['versaoTermoTelessaude', 'string', true, 'Versão vigente do termo.']],
+        exReq: { disponibilidadeId: 'uuid', aceiteTermoTelessaude: true, versaoTermoTelessaude: '1.0' },
+        exRes: { mensagem: 'Consulta agendada. O link da sala ficará disponível 15 minutos antes do horário.', consulta: { id: 'uuid', situacao: 'AGENDADA', '…': '…' } },
+        erros: [[400, 'Sem aceite ou termo em versão antiga.'], [409, 'Já existe consulta futura (FE03) ou o horário foi reservado (FE02).'], [422, 'Paciente aprovado ou com exames em andamento.']],
+      },
+      {
+        metodo: 'POST', caminho: '/paciente/consultas/:id/cancelar', resumo: 'Cancelar consulta', acesso: perfis('PACIENTE'), status: 200,
+        regras: ['Até 24 h antes do horário (RN18); o horário é liberado e o paciente volta a Pré-cadastrado.'],
+        erros: [[404, 'Não encontrada.'], [409, 'Consulta não está mais agendada.'], [422, 'Menos de 24 h para o horário (FE01).']],
+      },
+      {
+        metodo: 'POST', caminho: '/paciente/consultas/:id/reagendar', resumo: 'Reagendar consulta (FA01)', acesso: perfis('PACIENTE'), status: 200,
+        regras: ['Cancela a consulta atual e cria outra com consulta_origem_id, mantendo o aceite do termo.', 'Pode ser com outro médico.'],
+        corpo: [['disponibilidadeId', 'uuid', true, 'Novo horário.']],
+        exReq: { disponibilidadeId: 'uuid' },
+        erros: [[409, 'Horário indisponível.'], [422, 'Menos de 24 h para o horário.']],
+      },
+    ],
+  },
+  {
+    id: 'paciente-exames', nome: 'Paciente · Exames', desc: 'Envio do resultado dos exames solicitados (RF07 · UC11 · RN19).',
+    rotas: [
+      {
+        metodo: 'GET', caminho: '/paciente/exames', resumo: 'Exames solicitados e envios', acesso: perfis('PACIENTE'), status: 200,
+        regras: ['podeEnviar é true aguardando resultado ou depois de reprovado (FA01).', 'Envios reprovados trazem o motivo informado pelo médico.'],
+        exRes: [{ id: 'uuid', exames: ['Hemograma completo'], orientacoes: 'Jejum de 4 h.', situacao: 'AGUARDANDO_RESULTADO', criadoEm: '…', medico: { nome: 'Dra. Ana' }, consulta: { id: 'uuid', inicio: '…' }, envios: [], podeEnviar: true }],
+      },
+      {
+        metodo: 'POST', caminho: '/paciente/exames/:id/resultado', resumo: 'Enviar resultado (multipart)', acesso: perfis('PACIENTE'), status: 201,
+        regras: [
+          'multipart/form-data com o campo "arquivo".',
+          'PDF, JPG ou PNG de até 5 MB; o tipo é conferido pelo conteúdo do arquivo, não pela extensão (RN19).',
+          'Cada envio é um novo registro; o paciente passa a Em análise (RN10).',
+        ],
+        corpo: [['arquivo', 'file', true, 'Resultado do exame.']],
+        erros: [[400, 'Arquivo ausente, de tipo não aceito ou vazio.'], [404, 'Solicitação não encontrada.'], [409, 'Exame já em análise ou validado.'], [413, 'Arquivo acima de 5 MB.']],
+      },
+      { metodo: 'GET', caminho: '/paciente/exames/:id/envios/:exameId/arquivo', resumo: 'Baixar o arquivo enviado', acesso: perfis('PACIENTE'), status: 200, regras: ['Resposta binária com o Content-Type do arquivo.'], erros: [[404, 'Não encontrado.']] },
+    ],
+  },
+  {
+    id: 'medico-agenda', nome: 'Médico · Agenda', desc: 'Horários de disponibilidade com o link da sala de teleconsulta (RF03 · UC13 · RN18).',
+    rotas: [
+      {
+        metodo: 'GET', caminho: '/medico/agenda', resumo: 'Minha agenda', acesso: perfis('MEDICO'), status: 200,
+        regras: ['Padrão: de hoje até +30 dias.', 'Cada horário traz a consulta que o ocupa (nome do paciente), se houver.'],
+        query: [['de', 'string', false, 'AAAA-MM-DD.'], ['ate', 'string', false, 'AAAA-MM-DD.']],
+        exRes: { de: '2026-11-01', ate: '2026-12-01', horarios: [{ id: 'uuid', inicio: '…', fim: '…', linkSala: 'https://meet.exemplo.com/sala', livre: false, consulta: { id: 'uuid', situacao: 'AGENDADA', paciente: { id: 'uuid', nome: 'Maria' } } }] },
+      },
+      {
+        metodo: 'POST', caminho: '/medico/agenda', resumo: 'Cadastrar horários', acesso: perfis('MEDICO'), status: 201,
+        regras: [
+          'O intervalo é dividido em horários com a duração informada (horário de Brasília); a sobra que não cabe uma consulta é ignorada.',
+          'No máximo 48 horários por vez; só horários futuros.',
+          'Cada horário comporta uma consulta e guarda o link da sala (RN18).',
+        ],
+        corpo: [['data', 'string', true, 'AAAA-MM-DD.'], ['inicio', 'string', true, 'HH:mm.'], ['fim', 'string', true, 'HH:mm.'], ['duracaoMinutos', 'int', true, '10 a 180.'], ['linkSala', 'string', true, 'URL https (FE03).']],
+        exReq: { data: '2026-11-10', inicio: '08:00', fim: '12:00', duracaoMinutos: 30, linkSala: 'https://meet.exemplo.com/sala-dra-ana' },
+        exRes: { mensagem: '8 horários criados.', de: '2026-11-10', ate: '2026-11-10', horarios: ['…'] },
+        erros: [[400, 'Dados inválidos, link sem https, horário passado ou intervalo menor que a duração.'], [409, 'Conflita com horários existentes (FE01).']],
+      },
+      {
+        metodo: 'DELETE', caminho: '/medico/agenda/:id', resumo: 'Remover horário livre (FA01)', acesso: perfis('MEDICO'), status: 200,
+        regras: ['Horário com consultas canceladas no histórico só sai da agenda (RN09).'],
+        erros: [[404, 'Não encontrado ou de outro médico.'], [409, 'Horário com consulta marcada (FE02).']],
+      },
+    ],
+  },
+  {
+    id: 'medico-consultas', nome: 'Médico · Atendimento', desc: 'Registro da teleconsulta e solicitação de exames (RF06, RF29 · UC14, UC15).',
+    rotas: [
+      {
+        metodo: 'GET', caminho: '/medico/consultas', resumo: 'Histórico de consultas', acesso: perfis('MEDICO'), status: 200,
+        query: [['situacao', 'enum', false, 'AGENDADA | REALIZADA | NAO_COMPARECEU | CANCELADA.'], ['pagina', 'int', false, ''], ['tamanhoPagina', 'int', false, 'Máximo 50.']],
+        exRes: { itens: [{ id: 'uuid', situacao: 'REALIZADA', inicio: '…', fim: '…', paciente: { id: 'uuid', nome: 'Maria' } }], total: 1, pagina: 1, tamanhoPagina: 20 },
+      },
+      {
+        metodo: 'GET', caminho: '/medico/consultas/:id', resumo: 'Detalhe com dados do paciente', acesso: perfis('MEDICO'), status: 200,
+        regras: ['Idade, sexo, peso e situação do paciente, link da sala e exames solicitados (UC14 passo 2).'],
+        exRes: { id: 'uuid', situacao: 'AGENDADA', inicio: '…', fim: '…', linkSala: 'https://…', observacoes: null, paciente: { id: 'uuid', nome: 'Maria', idade: 31, sexo: 'FEMININO', pesoKg: 62, cidade: 'Curitiba', estado: 'PR', situacao: 'CONSULTA_AGENDADA' }, solicitacaoExame: null },
+        erros: [[404, 'Não encontrada ou de outro médico.']],
+      },
+      {
+        metodo: 'POST', caminho: '/medico/consultas/:id/realizada', resumo: 'Registrar consulta realizada', acesso: perfis('MEDICO'), status: 200,
+        regras: [
+          'Informe exames (UC15 → paciente Aguardando exame) ou motivoReprovacao (FA01 → paciente Reprovado), nunca os dois.',
+          'Só a partir do horário da consulta (FE01).',
+        ],
+        corpo: [['observacoes', 'string', false, 'Até 5000 caracteres.'], ['exames', 'string[]', false, '1 a 20 exames.'], ['orientacoes', 'string', false, 'Orientações ao paciente.'], ['motivoReprovacao', 'string', false, 'Paciente inapto.']],
+        exReq: { observacoes: 'Sem intercorrências.', exames: ['Hemograma completo', 'Tipagem ABO/Rh'], orientacoes: 'Jejum de 4 h.' },
+        erros: [[400, 'Nem exames nem motivo, ou os dois.'], [409, 'Atendimento já registrado.'], [422, 'Consulta ainda não começou.']],
+      },
+      {
+        metodo: 'POST', caminho: '/medico/consultas/:id/nao-compareceu', resumo: 'Registrar não comparecimento (FA02)', acesso: perfis('MEDICO'), status: 200,
+        regras: ['Paciente volta a Pré-cadastrado.'], erros: [[409, 'Atendimento já registrado.'], [422, 'Consulta ainda não começou.']],
+      },
+      {
+        metodo: 'POST', caminho: '/medico/consultas/:id/cancelar', resumo: 'Cancelar consulta (FA03)', acesso: perfis('MEDICO'), status: 200,
+        regras: ['Só antes do horário; o horário sai da agenda e o paciente volta a Pré-cadastrado.'],
+        corpo: [['motivo', 'string', true, '5 a 1000 caracteres.']], exReq: { motivo: 'Imprevisto na agenda.' },
+        erros: [[409, 'Atendimento já registrado.'], [422, 'A consulta já começou.']],
+      },
+    ],
+  },
+  {
+    id: 'medico-exames', nome: 'Médico · Exames', desc: 'Avaliação dos exames e do cadastro do paciente (RF08–RF10, RF12 · UC16).',
+    rotas: [
+      {
+        metodo: 'GET', caminho: '/medico/exames', resumo: 'Exames solicitados por mim', acesso: perfis('MEDICO'), status: 200,
+        query: [['situacao', 'enum', false, 'EM_ANALISE para "Exames para avaliar"; AGUARDANDO_RESULTADO | REPROVADO | VALIDADO.'], ['pagina', 'int', false, ''], ['tamanhoPagina', 'int', false, 'Máximo 50.']],
+        exQuery: '?situacao=EM_ANALISE',
+        exRes: { itens: [{ id: 'uuid', exames: ['Hemograma completo'], situacao: 'EM_ANALISE', atualizadoEm: '…', paciente: { id: 'uuid', nome: 'Maria' }, ultimoEnvioEm: '…' }], total: 1, pagina: 1, tamanhoPagina: 20 },
+      },
+      {
+        metodo: 'GET', caminho: '/medico/exames/:id', resumo: 'Detalhe da solicitação e envios', acesso: perfis('MEDICO'), status: 200,
+        exRes: { id: 'uuid', exames: ['…'], situacao: 'EM_ANALISE', consulta: { id: 'uuid', inicio: '…' }, paciente: { nome: 'Maria', idade: 31, sexo: 'FEMININO', pesoKg: 62, situacao: 'EM_ANALISE', tipoSanguineo: null }, envios: [{ id: 'uuid', situacao: 'EM_ANALISE', nomeArquivo: 'resultado.pdf', mimeType: 'application/pdf', tamanhoBytes: 182044, enviadoEm: '…', avaliadoEm: null, motivoReprovacao: null }] },
+        erros: [[404, 'Não encontrada ou de outro médico.']],
+      },
+      { metodo: 'GET', caminho: '/medico/exames/:id/envios/:exameId/arquivo', resumo: 'Abrir o arquivo do exame', acesso: perfis('MEDICO'), status: 200, regras: ['Só o médico que solicitou o exame (RN19).'], erros: [[404, 'Não encontrado.']] },
+      {
+        metodo: 'POST', caminho: '/medico/exames/:id/aprovar', resumo: 'Aprovar e registrar tipo sanguíneo', acesso: perfis('MEDICO'), status: 200,
+        regras: ['Registra tipo sanguíneo, médico validador e data; o paciente passa a Aprovado (Doador) (RN01, RN10).'],
+        corpo: [['tipoSanguineo', 'string', true, 'A+, A-, B+, B-, AB+, AB-, O+ ou O-.']], exReq: { tipoSanguineo: 'O+' },
+        erros: [[400, 'Tipo sanguíneo ausente ou inválido (FE01).'], [409, 'Não há exame em análise.']],
+      },
+      {
+        metodo: 'POST', caminho: '/medico/exames/:id/reprovar', resumo: 'Reprovar com motivo (FA01)', acesso: perfis('MEDICO'), status: 200,
+        regras: ['O paciente passa a Reprovado e pode enviar novo exame (UC11 FA01).'],
+        corpo: [['motivo', 'string', true, '5 a 1000 caracteres.']], exReq: { motivo: 'Arquivo ilegível, envie novamente.' },
+        erros: [[409, 'Não há exame em análise.']],
       },
     ],
   },
