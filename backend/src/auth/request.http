@@ -1,4 +1,4 @@
-@baseUrl = http://localhost:3333
+@baseUrl = http://localhost:3333/api
 @email = admin@hemobridge.com
 @senha = SenhaProvisoria1
 @novaSenha = NovaSenha9
@@ -63,7 +63,7 @@ Accept: application/json
 
 
 ### Termo de responsabilidade e sigilo (UC07 / RN12)
-# Perfis: MEDICO, REPRESENTANTE, ADMINISTRADOR (paciente → 403).
+# Perfis: EQUIPE (médico ou Admin do hemocentro) e ADMIN_PLATAFORMA (paciente → 403).
 # 200 { versao, finalidade }
 GET {{baseUrl}}/auth/primeiro-acesso/termo
 Authorization: Bearer {{token}}
@@ -71,7 +71,7 @@ Accept: application/json
 
 
 ### Definir senha no primeiro acesso (UC07)
-# Perfis: MEDICO, REPRESENTANTE, ADMINISTRADOR.
+# Perfis: EQUIPE e ADMIN_PLATAFORMA.
 # A nova senha segue a RN06 (8+ caracteres, maiúscula, minúscula e número)
 # e deve ser diferente da provisória. "versaoTermo" deve ser a vigente.
 # 200 nova sessão (mesmo formato do login) — o token anterior é invalidado

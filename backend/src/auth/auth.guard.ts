@@ -7,15 +7,21 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
-import type { Perfil } from '../generated/prisma/enums.js';
+import type { PapelEquipe, Perfil } from '../generated/prisma/enums.js';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { SELECAO_INSTITUICAO, instituicaoDesativada, papelDe, type TokenPayload } from './auth.types.js';
-import { PERFIS_KEY, PRIMEIRO_ACESSO_KEY, PUBLICO_KEY, type RequestAutenticada,} from './decorators.js';
+import { SELECAO_EQUIPE, hemocentroDesativado, vinculoDe, type TokenPayload } from './auth.types.js';
+import {
+  PAPEIS_KEY,
+  PERFIS_KEY,
+  PRIMEIRO_ACESSO_KEY,
+  PUBLICO_KEY,
+  type RequestAutenticada,
+} from './decorators.js';
 
 /**
  * Guard global: toda rota exige token, salvo as marcadas com @Publico().
  * O usuário é recarregado do banco a cada requisição, para que desativação
- * de conta (RN09) e troca de perfil tenham efeito imediato.
+ * de conta ou do hemocentro tenha efeito imediato.
  */
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -50,16 +56,15 @@ export class AuthGuard implements CanActivate {
         status: true,
         senhaProvisoria: true,
         versaoSessao: true,
-        paciente: { select: { situacao: true } },
-        ...SELECAO_INSTITUICAO,
+        ...SELECAO_EQUIPE,
       },
     });
     // Token emitido antes de troca de senha ou logout não vale mais.
     if (!usuario || usuario.status !== 'ATIVO' || usuario.versaoSessao !== payload.ver) {
       throw new UnauthorizedException('Sessão inválida ou expirada');
     }
-    if (instituicaoDesativada(usuario)) {
-      throw new UnauthorizedException('A instituição vinculada à sua conta está desativada.');
+    if (hemocentroDesativado(usuario)) {
+      throw new UnauthorizedException('O hemocentro vinculado à sua conta está desativado.');
     }
 
     if (
@@ -69,8 +74,13 @@ export class AuthGuard implements CanActivate {
       throw new ForbiddenException('Defina uma nova senha para concluir o primeiro acesso');
     }
 
+    const vinculo = vinculoDe(usuario);
     const perfis = this.reflector.getAllAndOverride<Perfil[] | undefined>(PERFIS_KEY, alvos);
-    if (perfis && !perfis.includes(usuario.perfil)) {
+    const papeis = this.reflector.getAllAndOverride<PapelEquipe[] | undefined>(PAPEIS_KEY, alvos);
+    if (
+      (perfis && !perfis.includes(usuario.perfil)) ||
+      (papeis && (!vinculo.papel || !papeis.includes(vinculo.papel)))
+    ) {
       throw new ForbiddenException('Acesso não permitido para o seu perfil');
     }
 
@@ -79,7 +89,7 @@ export class AuthGuard implements CanActivate {
       nome: usuario.nome,
       email: usuario.email,
       perfil: usuario.perfil,
-      papel: papelDe(usuario.perfil, usuario.paciente?.situacao),
+      ...vinculo,
       senhaProvisoria: usuario.senhaProvisoria,
     };
     return true;

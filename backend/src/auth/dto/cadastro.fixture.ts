@@ -1,5 +1,5 @@
-// Dados válidos de pré-cadastro, usados nos testes.
-export const preCadastroValido = () => ({
+// Dados válidos de cadastro do paciente, usados nos testes.
+export const cadastroValido = () => ({
   nome: '  Maria   da Silva ',
   cpf: '529.982.247-25',
   email: ' Maria@Email.COM ',
@@ -7,10 +7,6 @@ export const preCadastroValido = () => ({
   confirmacaoSenha: 'senhaForte1',
   telefone: '(41) 99999-8888',
   dataNascimento: '1995-05-20',
-  sexo: 'FEMININO',
-  pesoKg: 62.5,
-  cidade: 'Curitiba',
-  estado: 'pr',
   aceiteTermo: true,
-  versaoTermo: '1.0',
+  versaoTermo: '2.0',
 });

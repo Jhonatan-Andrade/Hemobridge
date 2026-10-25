@@ -1,27 +1,10 @@
 import { Transform } from 'class-transformer';
-import {
-  Equals,
-  IsBoolean,
-  IsEmail,
-  IsEnum,
-  IsIn,
-  IsISO8601,
-  IsNumber,
-  IsOptional,
-  IsString,
-  Length,
-  Matches,
-  Max,
-  MaxLength,
-  Min,
-} from 'class-validator';
-import { Sexo } from '../../generated/prisma/enums.js';
-import { aparar, emailNormalizado, maiusculas, somenteDigitos } from '../../common/transformacoes.js';
-import { UFS } from '../../common/uf.js';
-import { IsCpf, IsIgualA, IsSenhaValida } from '../../common/validators.js';
+import { Equals, IsEmail, IsISO8601, IsString, Length, Matches, MaxLength } from 'class-validator';
+import { aparar, emailNormalizado, somenteDigitos } from '../../common/transformacoes.js';
+import { IsCpf, IsDataPassada, IsIgualA, IsSenhaValida } from '../../common/validators.js';
 
-// RF01 / UC01
-export class PreCadastroDto {
+// RF01 – Cadastro do paciente
+export class CadastroDto {
   @Transform(aparar)
   @IsString()
   @Length(3, 150, { message: 'O nome deve ter entre 3 e 150 caracteres' })
@@ -48,26 +31,10 @@ export class PreCadastroDto {
 
   @IsISO8601({ strict: true, strictSeparator: true }, { message: 'Data de nascimento inválida' })
   @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: 'Data de nascimento deve estar no formato AAAA-MM-DD' })
+  @IsDataPassada({ message: 'A data de nascimento deve ser anterior a hoje' })
   dataNascimento: string;
 
-  @IsEnum(Sexo, { message: 'Sexo deve ser MASCULINO ou FEMININO' })
-  sexo: Sexo;
-
-  @IsNumber({ maxDecimalPlaces: 2 }, { message: 'Peso inválido' })
-  @Min(1)
-  @Max(400)
-  pesoKg: number;
-
-  @Transform(aparar)
-  @IsString()
-  @Length(2, 100)
-  cidade: string;
-
-  @Transform(maiusculas)
-  @IsIn(UFS, { message: 'Estado deve ser uma UF válida' })
-  estado: string;
-
-  // RN12 / FE03
+  // RF01: consentimento explícito, incluindo o compartilhamento entre hemocentros.
   @Equals(true, {
     message: 'O aceite do termo de consentimento é obrigatório para o tratamento de dados de saúde',
   })
@@ -76,9 +43,4 @@ export class PreCadastroDto {
   @IsString()
   @MaxLength(20)
   versaoTermo: string;
-
-  // UC01 FA01: acima de 60 anos, o paciente confirma ciência da regra da RN17.
-  @IsOptional()
-  @IsBoolean()
-  cienteRegraAcimaDe60?: boolean;
 }

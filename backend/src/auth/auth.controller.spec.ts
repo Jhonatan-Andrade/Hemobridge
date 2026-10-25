@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller.js';
 import { AuthService } from './auth.service.js';
+import { CadastroService } from './cadastro.service.js';
 import { RecuperacaoSenhaService } from './recuperacao-senha.service.js';
 
 describe('AuthController', () => {
@@ -12,6 +13,7 @@ describe('AuthController', () => {
       providers: [
         { provide: AuthService, useValue: {} },
         { provide: RecuperacaoSenhaService, useValue: {} },
+        { provide: CadastroService, useValue: {} },
       ],
     }).compile();
 

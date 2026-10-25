@@ -8,6 +8,9 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const config = app.get(ConfigService);
 
+  // Todas as rotas da API ficam sob /api (ex.: /api/auth/login).
+  app.setGlobalPrefix('api');
+
   // Origens autorizadas a chamar a API pelo navegador (separadas por vírgula).
   // A autenticação usa o cabeçalho Authorization, então cookies não são necessários.
   const origens = config

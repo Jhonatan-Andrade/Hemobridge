@@ -51,18 +51,20 @@ describe('SenhaProvisoriaService', () => {
   });
 
   it('envia a senha por e-mail e informa falha de envio sem lançar erro', async () => {
-    const destinatario = { nome: 'Ana Souza', email: 'ana@h.com', perfil: 'REPRESENTANTE' };
+    const destinatario = { nome: 'Ana Souza', email: 'ana@h.com', perfil: 'EQUIPE' as const, papel: 'ADMIN_HEMOCENTRO' as const };
 
     const ok = montar();
     expect(await ok.service.enviar(destinatario, 'Abc123xyzWQ9')).toBe(true);
     expect(ok.email.enviar.mock.calls[0][0].texto).toContain('Abc123xyzWQ9');
+    expect(ok.email.enviar.mock.calls[0][0].texto).toContain('administrador(a) do hemocentro');
+    expect(ok.email.enviar.mock.calls[0][0].texto).toContain('administrador(a) do hemocentro');
 
     expect(await montar(null, true).service.enviar(destinatario, 'x')).toBe(false);
   });
 
-  it('reenvia: nova senha, invalida sessões e desbloqueia (UC26 FA02)', async () => {
+  it('reenvia: nova senha, invalida sessões e desbloqueia', async () => {
     const { service, prisma } = montar({
-      nome: 'Ana', email: 'ana@h.com', perfil: 'REPRESENTANTE', status: 'ATIVO', senhaProvisoria: true,
+      nome: 'Ana', email: 'ana@h.com', perfil: 'EQUIPE', status: 'ATIVO', senhaProvisoria: true, equipe: { papel: 'MEDICO' },
     });
 
     const r = await service.reenviar('u1');
@@ -80,7 +82,7 @@ describe('SenhaProvisoriaService', () => {
     ['conta já ativada', { status: 'ATIVO', senhaProvisoria: false }],
     ['conta desativada', { status: 'INATIVO', senhaProvisoria: true }],
   ])('não reenvia para %s', async (_, dados) => {
-    const { service } = montar({ nome: 'Ana', email: 'a@h.com', perfil: 'MEDICO', ...dados });
+    const { service } = montar({ nome: 'Ana', email: 'a@h.com', perfil: 'EQUIPE', equipe: { papel: 'MEDICO' }, ...dados });
     await expect(service.reenviar('u1')).rejects.toBeInstanceOf(BadRequestException);
   });
 });

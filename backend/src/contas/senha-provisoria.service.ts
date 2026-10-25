@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { randomInt } from 'node:crypto';
 import { gerarHashSenha } from '../common/senha.js';
 import { EmailService } from '../email/email.service.js';
+import type { PapelEquipe, Perfil } from '../generated/prisma/enums.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 
 // RN15
@@ -28,11 +29,19 @@ export function gerarSenhaProvisoria(): string {
   return caracteres.join('');
 }
 
-const NOME_PERFIL: Record<string, string> = {
-  MEDICO: 'médico(a)',
-  REPRESENTANTE: 'representante de banco de sangue',
-  ADMINISTRADOR: 'administrador(a)',
-};
+/** Destinatário de uma conta criada por terceiros (equipe de hemocentro ou administrador da plataforma). */
+export interface DestinatarioConta {
+  nome: string;
+  email: string;
+  perfil: Perfil;
+  papel?: PapelEquipe | null;
+}
+
+function descricaoConta({ perfil, papel }: DestinatarioConta) {
+  if (papel === 'MEDICO') return 'médico(a) do hemocentro';
+  if (papel === 'ADMIN_HEMOCENTRO') return 'administrador(a) do hemocentro';
+  return perfil === 'ADMIN_PLATAFORMA' ? 'administrador(a) da plataforma' : 'usuário(a)';
+}
 
 /** Credenciais provisórias para contas criadas por terceiros (RN15). */
 @Injectable()
@@ -63,11 +72,11 @@ export class SenhaProvisoriaService {
 
   /**
    * Envia a senha por e-mail. Uma falha não desfaz o cadastro: retorna false
-   * para quem criou a conta poder reenviar (UC26 FA02).
+   * para quem criou a conta poder reenviar.
    */
-  async enviar(destinatario: { nome: string; email: string; perfil: string }, senha: string) {
+  async enviar(destinatario: DestinatarioConta, senha: string) {
     const primeiroNome = destinatario.nome.split(' ')[0];
-    const perfil = NOME_PERFIL[destinatario.perfil] ?? 'usuário(a)';
+    const perfil = descricaoConta(destinatario);
     try {
       await this.email.enviar({
         para: destinatario.email,
@@ -93,11 +102,18 @@ export class SenhaProvisoriaService {
     }
   }
 
-  /** UC26 FA02: nova senha provisória para conta ainda não ativada. */
+  /** Nova senha provisória para conta que ainda não fez o primeiro acesso. */
   async reenviar(usuarioId: string) {
     const usuario = await this.prisma.usuario.findUnique({
       where: { id: usuarioId },
-      select: { nome: true, email: true, perfil: true, status: true, senhaProvisoria: true },
+      select: {
+        nome: true,
+        email: true,
+        perfil: true,
+        status: true,
+        senhaProvisoria: true,
+        equipe: { select: { papel: true } },
+      },
     });
     if (!usuario) throw new NotFoundException('Usuário não encontrado.');
     if (!usuario.senhaProvisoria || usuario.status !== 'ATIVO') {
@@ -114,7 +130,7 @@ export class SenhaProvisoriaService {
     });
 
     return {
-      senhaProvisoriaEnviada: await this.enviar(usuario, senha),
+      senhaProvisoriaEnviada: await this.enviar({ ...usuario, papel: usuario.equipe?.papel }, senha),
       senhaProvisoriaExpiraEm: dados.senhaProvisoriaExpiraEm.toISOString(),
     };
   }
