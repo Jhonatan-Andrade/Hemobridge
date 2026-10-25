@@ -335,3 +335,36 @@ export interface SolicitacaoExameMedico {
   }
   envios: EnvioExame[]
 }
+
+// UC09 / UC10 – teleconsulta do paciente
+export interface TermoTelessaude {
+  versao: string
+  titulo: string
+  texto: string
+}
+
+export interface MedicoComHorarios {
+  id: string
+  nome: string
+  crm: string
+  ufCrm: string
+  hospital: { nome: string; cidade: string; estado: string }
+  horarios: { id: string; inicio: string; fim: string }[]
+}
+
+export interface ConsultaPaciente {
+  id: string
+  situacao: SituacaoConsulta
+  inicio: string
+  fim: string
+  medico: { nome: string; crm: string; ufCrm: string }
+  hospital: { nome: string; cidade: string; estado: string }
+  /** Só preenchido de 15 minutos antes até o fim do horário (RN18). */
+  linkSala: string | null
+  linkDisponivelEm: string | null
+  podeCancelar: boolean
+  canceladaPor: Perfil | null
+  motivoCancelamento: string | null
+  motivoReprovacao: string | null
+  solicitacaoExame: { id: string; situacao: SituacaoExame } | null
+}

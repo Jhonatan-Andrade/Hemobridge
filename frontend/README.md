@@ -67,7 +67,7 @@ Os tokens de design (cores, tipografia, raios, sombra e larguras) ficam em `tail
 | `/doador` | Meu painel (por situação, carregando, falha) | 8:1858 (aprovado); os textos das outras situações (8:1746–8:1919) foram escritos sem conferir os frames |
 | `/doador/recomendados` | Locais recomendados | 906:9914 |
 | `/locais` | Encontrar locais (busca com filtros) | 707:7062 |
-| `/locais/:id` | Detalhes do banco de sangue | sem frame próprio (ver divergências) |
+| `/locais/:id` | Detalhes do banco de sangue e agendamento da teleconsulta com os médicos do local (dia, horário e aceite do termo de telessaúde) | sem frame próprio (ver divergências) |
 | `/hospital/necessidades` | Necessidades | 101:3114 |
 | `/hospital` | Painel do hospital (indicadores) | 910:9870 |
 | `/hospital/equipe-medica` | Equipe médica: listagem, cadastro com declaração de CRM conferido, edição, desativação e reenvio de senha provisória | 101:3113 |
@@ -107,6 +107,7 @@ O backend não foi alterado. Para tirar o mock e completar as telas, faltam:
 | Largura dos campos | No Figma o controle tem 300px mesmo em colunas de 720px. Aqui ele ocupa a largura da coluna. |
 | Mapa estático em "Encontrar locais" | No lugar do mapa ilustrativo entra a lista de resultados com os filtros pedidos. A distância usa a geolocalização do navegador, só se a pessoa permitir. |
 | Detalhes do banco de sangue | Não há frame dedicado. A tela combina o cabeçalho das telas de Locais com a tabela de necessidades de 101:3114. |
+| Agendamento no local | O UC09 parte de "Agendar consulta" com todos os médicos. Aqui o paciente agenda pela tela do hemocentro, só com os médicos dele (filtro `hospitalId` em `GET /paciente/consultas/horarios`). Visitantes veem "Entrar para agendar" e voltam ao local depois do login. Doadores aprovados não agendam. A pré-triagem do UC09 ainda não existe no backend. |
 | Dashboard do hospital | Os gráficos de doações do Figma viraram "Necessidades por tipo" (urgência atual) e "Evolução por semana" (alterações de nível no histórico), porque o backend não registra doações. |
 | Comunidade na Home pública | Não existe API de comunidade. As três publicações são o conteúdo estático do Figma (`features/home/publicacoes.ts`), as curtidas são só contadores, e "Ver comunidade", "Ler publicação" e os comentários levam a `/entrar`. "Próximos passos" e "Como funciona? Ver tour" abrem `/boas-vindas`. |
 | Menu do visitante | O Figma (468:5148) tem Início, Comunidade, Entrar, Fazer pré-cadastro e Acessibilidade. Aqui ficam Início, Encontrar locais, Entrar e Fazer pré-cadastro. |

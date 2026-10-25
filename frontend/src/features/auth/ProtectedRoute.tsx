@@ -22,10 +22,14 @@ export function ProtectedRoute({ perfis }: { perfis?: Perfil[] }) {
   return <Outlet />
 }
 
-/** Telas públicas de acesso: quem já está logado vai direto para a sua área. */
+/**
+ * Telas públicas de acesso: quem já está logado vai direto para a sua área ou,
+ * logo depois do login, para a página de onde veio (`state.de`).
+ */
 export function PublicOnlyRoute() {
   const { usuario, carregando } = useAuth()
+  const destino = (useLocation().state as { de?: string } | null)?.de
   if (carregando) return null
-  if (usuario) return <Navigate to={rotaInicial(usuario)} replace />
+  if (usuario) return <Navigate to={destino && !usuario.senhaProvisoria ? destino : rotaInicial(usuario)} replace />
   return <Outlet />
 }

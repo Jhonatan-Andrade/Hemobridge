@@ -7,6 +7,7 @@ import { useAsync } from '../../lib/useAsync'
 import { hospitaisService } from '../../services/hospitais'
 import { useAuth } from '../auth/authState'
 import { PublicLayout } from '../auth/PublicLayout'
+import { AgendarConsulta } from './AgendarConsulta'
 import { DonorLayout } from './DonorLayout'
 
 /**
@@ -70,6 +71,7 @@ export function HospitalDetailPage() {
               <p className="text-small text-muted">Cada nível corresponde à última atualização informada pela instituição.</p>
             </Panel>
           </div>
+          <AgendarConsulta hospitalId={h.id} hospitalNome={h.nome} />
           <ButtonLink to="/locais" kind="secondary">
             Voltar aos locais
           </ButtonLink>
