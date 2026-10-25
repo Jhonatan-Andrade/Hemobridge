@@ -5,6 +5,10 @@ import { PrimeiroAcessoPage } from './features/auth/PrimeiroAcessoPage'
 import { ProtectedRoute, PublicOnlyRoute } from './features/auth/ProtectedRoute'
 import { RecuperarSenhaPage } from './features/auth/RecuperarSenhaPage'
 import { SemAcessoPage } from './features/auth/SemAcessoPage'
+import { DonorDashboardPage } from './features/donor/DonorDashboardPage'
+import { HospitalDetailPage } from './features/donor/HospitalDetailPage'
+import { RecommendedPage } from './features/donor/RecommendedPage'
+import { SearchPage } from './features/donor/SearchPage'
 
 function App() {
   return (
@@ -13,6 +17,15 @@ function App() {
         <Route path="/entrar" element={<LoginPage />} />
         <Route path="/cadastro" element={<PreCadastroPage />} />
         <Route path="/recuperar-senha" element={<RecuperarSenhaPage />} />
+      </Route>
+
+      {/* Consulta pública de bancos de sangue */}
+      <Route path="/locais" element={<SearchPage />} />
+      <Route path="/locais/:id" element={<HospitalDetailPage />} />
+
+      <Route element={<ProtectedRoute perfis={['PACIENTE']} />}>
+        <Route path="/doador" element={<DonorDashboardPage />} />
+        <Route path="/doador/recomendados" element={<RecommendedPage />} />
       </Route>
 
       <Route element={<ProtectedRoute />}>

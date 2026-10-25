@@ -14,5 +14,5 @@ const kinds: Record<Kind, string> = {
 
 /** `block` ocupa toda a largura (botões de formulário); sem ele, a largura mínima é a do Figma (220px). */
 export function buttonClasses(kind: Kind = 'primary', block = false, extra = '') {
-  return `${base} ${kinds[kind]} ${block ? 'w-full' : 'w-full sm:w-auto sm:min-w-55'} ${extra}`
+  return `${base} ${kinds[kind]} ${block ? 'w-full' : 'w-full sm:w-auto sm:min-w-55 sm:self-start'} ${extra}`
 }
