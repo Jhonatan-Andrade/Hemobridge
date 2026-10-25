@@ -7,3 +7,6 @@ src/generated/
 
 # Cache de build incremental do TypeScript
 *.tsbuildinfo
+
+# Arquivos de exame enviados em desenvolvimento (ARQUIVOS_DIR)
+/armazenamento/
