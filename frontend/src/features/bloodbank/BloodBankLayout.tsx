@@ -1,0 +1,21 @@
+import type { ReactNode } from 'react'
+import activityIcon from '../../assets/icons/activity.svg'
+import dashboardIcon from '../../assets/icons/dashboard.svg'
+import { AppShell } from '../../components/layout/AppShell'
+import type { NavItem } from '../../components/layout/NavigationRail'
+import { SairButton } from '../auth/SairButton'
+
+// Figma: Navegação/desktop/representative (757:8887 / 757:8944). Equipe médica, estoque,
+// doações e relatórios ficam fora do escopo desta entrega.
+const navHospital: NavItem[] = [
+  { to: '/hospital', label: 'Painel do hospital', icon: dashboardIcon, end: true },
+  { to: '/hospital/necessidades', label: 'Necessidades', icon: activityIcon },
+]
+
+export function BloodBankLayout({ children }: { children: ReactNode }) {
+  return (
+    <AppShell nav={navHospital} contexto="Área do hospital" acoes={<SairButton />}>
+      <div className="mx-auto flex w-full max-w-page flex-col gap-6">{children}</div>
+    </AppShell>
+  )
+}

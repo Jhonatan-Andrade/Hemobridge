@@ -5,6 +5,7 @@ import { PrimeiroAcessoPage } from './features/auth/PrimeiroAcessoPage'
 import { ProtectedRoute, PublicOnlyRoute } from './features/auth/ProtectedRoute'
 import { RecuperarSenhaPage } from './features/auth/RecuperarSenhaPage'
 import { SemAcessoPage } from './features/auth/SemAcessoPage'
+import { NeedsPage } from './features/bloodbank/NeedsPage'
 import { DonorDashboardPage } from './features/donor/DonorDashboardPage'
 import { HospitalDetailPage } from './features/donor/HospitalDetailPage'
 import { RecommendedPage } from './features/donor/RecommendedPage'
@@ -26,6 +27,11 @@ function App() {
       <Route element={<ProtectedRoute perfis={['PACIENTE']} />}>
         <Route path="/doador" element={<DonorDashboardPage />} />
         <Route path="/doador/recomendados" element={<RecommendedPage />} />
+      </Route>
+
+      <Route element={<ProtectedRoute perfis={['REPRESENTANTE']} />}>
+        <Route path="/hospital" element={<Navigate to="/hospital/necessidades" replace />} />
+        <Route path="/hospital/necessidades" element={<NeedsPage />} />
       </Route>
 
       <Route element={<ProtectedRoute />}>
