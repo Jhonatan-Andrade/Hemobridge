@@ -6,8 +6,10 @@ import { NavigationRail, type NavItem } from './NavigationRail'
 type AppShellProps = {
   nav: NavItem[]
   /** Texto ao lado da marca no cabeçalho (ex.: "Área do paciente"). */
-  contexto: string
+  contexto?: string
   acoes?: ReactNode
+  /** Cabeçalho baixo com borda, só com a marca (Figma: "Cabeçalho público / Home"). */
+  compacto?: boolean
   children: ReactNode
 }
 
@@ -15,7 +17,7 @@ type AppShellProps = {
  * Estrutura comum das telas do Figma: rail de 76px à esquerda, cabeçalho branco com a marca
  * e área de conteúdo sobre o fundo claro. Abaixo de `md` o rail vira menu sobreposto.
  */
-export function AppShell({ nav, contexto, acoes, children }: AppShellProps) {
+export function AppShell({ nav, contexto, acoes, compacto, children }: AppShellProps) {
   const [aberto, setAberto] = useState(false)
   const fechar = useCallback(() => setAberto(false), [])
 
@@ -26,7 +28,9 @@ export function AppShell({ nav, contexto, acoes, children }: AppShellProps) {
       </a>
       <NavigationRail items={nav} aberto={aberto} onToggle={() => setAberto((v) => !v)} onClose={fechar} />
       <div className={`transition-[margin] duration-rail ease-rail ${aberto ? 'md:ml-rail-open' : 'md:ml-rail'}`}>
-        <header className="flex items-center gap-3 bg-surface px-5 py-6 md:p-12">
+        <header
+          className={`flex items-center gap-3 bg-surface ${compacto ? 'border-b border-line px-5 py-2.5 md:px-8 md:py-4' : 'px-5 py-6 md:p-12'}`}
+        >
           <button
             type="button"
             onClick={() => setAberto(true)}
@@ -39,9 +43,9 @@ export function AppShell({ nav, contexto, acoes, children }: AppShellProps) {
             <span className="h-0.5 w-5 rounded-sm bg-ink" />
           </button>
           <Link to="/" className="shrink-0 rounded">
-            <img src={logo} alt="HemoBridge — página inicial" width={184} height={52} className="h-10 w-auto md:h-13" />
+            <img src={logo} alt="HemoBridge — página inicial" width={184} height={52} className={`w-auto md:h-13 ${compacto ? 'h-13' : 'h-10'}`} />
           </Link>
-          <p className="hidden flex-1 text-body text-muted md:block">{contexto}</p>
+          {contexto && <p className="hidden flex-1 text-body text-muted md:block">{contexto}</p>}
           <span className="flex-1 md:hidden" aria-hidden="true" />
           {acoes}
         </header>

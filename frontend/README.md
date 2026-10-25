@@ -43,6 +43,7 @@ src/
 │   ├── layout/     # AppShell (cabeçalho + navegação lateral) e PageTitle
 │   └── NeedsTable.tsx
 ├── features/
+│   ├── home/       # home pública e boas-vindas do visitante (conteúdo estático)
 │   ├── auth/       # contexto de sessão, rotas protegidas, login, pré-cadastro, senha
 │   ├── donor/      # painel do doador, recomendados, busca e detalhes do banco de sangue
 │   └── bloodbank/  # necessidades e dashboard do hospital
@@ -56,6 +57,8 @@ Os tokens de design (cores, tipografia, raios, sombra e larguras) ficam em `tail
 
 | Rota | Tela | Frame do Figma |
 | --- | --- | --- |
+| `/` | Home pública (estática, sem API) | 43:1340 · mobile 660:7571 |
+| `/boas-vindas` | Boas-vindas do visitante (tour de 1 etapa) | 192:4693 · mobile 660:9731 |
 | `/entrar` | Entrar (inicial, erro, carregando) | 8:1584, 8:1636, 8:1720 · mobile 660:6373 |
 | `/cadastro` | Pré-cadastro (inicial, erro, carregando, confirmação) | 8:1257 (a confirmação foi montada com Card/Button, sem conferir o frame 8:1571) |
 | `/recuperar-senha` | Recuperar senha e confirmação neutra | 8:2205, 8:2222 (montada com os componentes base, frame não conferido) |
@@ -93,6 +96,10 @@ O backend não foi alterado. Para tirar o mock e completar as telas, faltam:
 | Mapa estático em "Encontrar locais" | No lugar do mapa ilustrativo entra a lista de resultados com os filtros pedidos. A distância usa a geolocalização do navegador, só se a pessoa permitir. |
 | Detalhes do banco de sangue | Não há frame dedicado. A tela combina o cabeçalho das telas de Locais com a tabela de necessidades de 101:3114. |
 | Dashboard do hospital | Os gráficos de doações do Figma viraram "Necessidades por tipo" (urgência atual) e "Evolução por semana" (alterações de nível no histórico), porque o backend não registra doações. |
+| Comunidade na Home pública | Não existe API de comunidade. As três publicações são o conteúdo estático do Figma (`features/home/publicacoes.ts`), as curtidas são só contadores, e "Ver comunidade", "Ler publicação" e os comentários levam a `/entrar`. "Próximos passos" e "Como funciona? Ver tour" abrem `/boas-vindas`. |
+| Menu do visitante | O Figma (468:5148) tem Início, Comunidade, Entrar, Fazer pré-cadastro e Acessibilidade. Aqui ficam Início, Encontrar locais, Entrar e Fazer pré-cadastro. |
+| Fonte Fraunces | O destaque "A ponte que" usa Fraunces Italic (OFL), salva como subconjunto latino em `src/assets/fonts`, sem dependência nova. |
+| Rotas desconhecidas | Agora redirecionam para a Home pública (`/`) em vez de `/entrar`. |
 | Navegação lateral | Comunidade, Perfil, Estoque, Equipe médica e Relatórios ficaram fora do escopo. Os ícones vêm do Figma, e o botão Sair fica no cabeçalho. |
 | Médico e Administrador | Não têm área neste frontend e veem uma tela informativa em `/sem-acesso`. |
 | Breakpoints | O desktop segue os frames de 1440px. Abaixo de 768px (`md`), o rail vira menu sobreposto com fundo de proteção, o cabeçalho esconde o texto de contexto e o acionador do menu fica claro, como no frame mobile 660:6373. Tabelas viram listas abaixo de 640px (`sm`). |

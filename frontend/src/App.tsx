@@ -11,6 +11,8 @@ import { DonorDashboardPage } from './features/donor/DonorDashboardPage'
 import { HospitalDetailPage } from './features/donor/HospitalDetailPage'
 import { RecommendedPage } from './features/donor/RecommendedPage'
 import { SearchPage } from './features/donor/SearchPage'
+import { BoasVindasPage } from './features/home/BoasVindasPage'
+import { HomePage } from './features/home/HomePage'
 
 function App() {
   return (
@@ -20,6 +22,10 @@ function App() {
         <Route path="/cadastro" element={<PreCadastroPage />} />
         <Route path="/recuperar-senha" element={<RecuperarSenhaPage />} />
       </Route>
+
+      {/* Home pública e orientação do visitante (estáticas) */}
+      <Route path="/" element={<HomePage />} />
+      <Route path="/boas-vindas" element={<BoasVindasPage />} />
 
       {/* Consulta pública de bancos de sangue */}
       <Route path="/locais" element={<SearchPage />} />
@@ -40,7 +46,7 @@ function App() {
         <Route path="/sem-acesso" element={<SemAcessoPage />} />
       </Route>
 
-      <Route path="*" element={<Navigate to="/entrar" replace />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
 }
