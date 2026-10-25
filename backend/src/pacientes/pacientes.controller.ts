@@ -1,34 +1,52 @@
-import { Body, Controller, Get, Ip, Post } from '@nestjs/common';
-import type { UsuarioAutenticado } from '../auth/auth.types.js';
-import { Perfis, Publico, UsuarioAtual } from '../auth/decorators.js';
-import { LimiteCadastro } from '../common/limite-requisicoes.js';
-import { TERMO_CONSENTIMENTO } from '../lgpd/termo-consentimento.js';
-import { PreCadastroDto } from './dto/pre-cadastro.dto.js';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
+import type { MembroDaEquipe, UsuarioAutenticado } from '../auth/auth.types.js';
+import { MembroAtual, Papeis, Perfis, UsuarioAtual } from '../auth/decorators.js';
+import { PaginacaoDto } from '../common/paginacao.dto.js';
+import { AtivacaoService } from './ativacao.service.js';
+import { ExclusaoDto } from './dto/exclusao.dto.js';
+import { HistoricoService } from './historico.service.js';
 import { PacientesService } from './pacientes.service.js';
 
 @Controller('pacientes')
 export class PacientesController {
-  constructor(private readonly pacientesService: PacientesService) {}
+  constructor(
+    private readonly pacientes: PacientesService,
+    private readonly ativacao: AtivacaoService,
+    private readonly historicos: HistoricoService,
+  ) {}
 
-  // Versão vigente do termo, para o formulário de pré-cadastro (RN12).
-  @Publico()
-  @Get('termo-consentimento')
-  termoConsentimento() {
-    return TERMO_CONSENTIMENTO;
-  }
-
-  // Dados do painel do paciente logado.
+  // RF04
   @Perfis('PACIENTE')
-  @Get('me')
-  meuPerfil(@UsuarioAtual() paciente: UsuarioAutenticado) {
-    return this.pacientesService.meuPerfil(paciente.id);
+  @Get('me/painel')
+  painel(@UsuarioAtual() paciente: UsuarioAutenticado) {
+    return this.pacientes.painel(paciente.id);
   }
 
-  // UC01: pré-condição é o visitante não estar autenticado.
-  @Publico()
-  @LimiteCadastro()
-  @Post()
-  preCadastrar(@Body() dto: PreCadastroDto, @Ip() ip: string) {
-    return this.pacientesService.preCadastrar(dto, ip);
+  // RF16
+  @Perfis('PACIENTE')
+  @Post('me/exclusao')
+  @HttpCode(HttpStatus.OK)
+  excluirDados(@UsuarioAtual() paciente: UsuarioAutenticado, @Body() { senha }: ExclusaoDto) {
+    return this.pacientes.excluirDados(paciente.id, senha);
+  }
+
+  // RF13
+  @Papeis('ADMIN_HEMOCENTRO')
+  @Get('pendentes-ativacao')
+  pendentes(@MembroAtual() admin: MembroDaEquipe, @Query() paginacao: PaginacaoDto) {
+    return this.ativacao.pendentes(admin.hemocentro.id, paginacao);
+  }
+
+  @Papeis('ADMIN_HEMOCENTRO')
+  @Patch(':id/ativar')
+  ativar(@MembroAtual() admin: MembroDaEquipe, @Param('id', ParseUUIDPipe) id: string) {
+    return this.ativacao.ativar(admin, id);
+  }
+
+  // RF12
+  @Papeis('MEDICO', 'ADMIN_HEMOCENTRO')
+  @Get(':id/historico')
+  historico(@MembroAtual() membro: MembroDaEquipe, @Param('id', ParseUUIDPipe) id: string) {
+    return this.historicos.historico(membro, id);
   }
 }
