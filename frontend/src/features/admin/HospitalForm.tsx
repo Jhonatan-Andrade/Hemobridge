@@ -79,10 +79,12 @@ type Props = {
   /** Sem hospital, o formulário cadastra um novo junto com o primeiro representante (UC25 passos 4–6). */
   hospital?: HospitalAdminDetalhe
   onSalvo: (mensagem: string, hospitalId: string) => void
+  /** Tela própria de cadastro: campos em duas colunas a partir de `md`, agrupados em seções. */
+  largo?: boolean
 }
 
 // Figma: "Formulário e ações · Cadastrar ou editar hospital" (102:3161).
-export function HospitalForm({ hospital, onSalvo }: Props) {
+export function HospitalForm({ hospital, onSalvo, largo = false }: Props) {
   const [c, setC] = useState<Campos>(() => camposDe(hospital))
   const [rep, setRep] = useState<CamposRepresentante>(representanteVazio)
   const [erros, setErros] = useState<Erros<Campos>>({})
@@ -90,6 +92,9 @@ export function HospitalForm({ hospital, onSalvo }: Props) {
   const [falha, setFalha] = useState<string[]>([])
   const [enviando, setEnviando] = useState(false)
   const campo = (nome: keyof Campos, valor: string) => setC({ ...c, [nome]: valor })
+
+  const grade = largo ? 'grid gap-x-4 gap-y-2.5 md:grid-cols-2' : 'flex flex-col gap-2.5'
+  const linhaInteira = largo ? 'md:col-span-2' : ''
 
   async function aoEnviar(e: FormEvent) {
     e.preventDefault()
@@ -130,29 +135,41 @@ export function HospitalForm({ hospital, onSalvo }: Props) {
           ))}
         </Message>
       )}
-      <TextField label="Nome do hospital" value={c.nome} onChange={(e) => campo('nome', e.target.value)} error={erros.nome} disabled={enviando} />
-      <TextField label="CNPJ" inputMode="numeric" value={c.cnpj} onChange={(e) => campo('cnpj', mascaraCnpj(e.target.value))} error={erros.cnpj} disabled={enviando} />
-      <TextField label="Endereço" value={c.endereco} onChange={(e) => campo('endereco', e.target.value)} error={erros.endereco} disabled={enviando} />
-      <TextField label="Cidade" value={c.cidade} onChange={(e) => campo('cidade', e.target.value)} error={erros.cidade} disabled={enviando} />
-      <SelectField label="UF" placeholder="Selecione o estado" options={opcoesUf} value={c.estado} onChange={(e) => campo('estado', e.target.value)} error={erros.estado} disabled={enviando} />
-      <TextField label="CEP" inputMode="numeric" value={c.cep} onChange={(e) => campo('cep', mascaraCep(e.target.value))} error={erros.cep} disabled={enviando} />
-      <TextField label="Telefone" inputMode="tel" value={c.telefone} onChange={(e) => campo('telefone', mascaraTelefone(e.target.value))} error={erros.telefone} disabled={enviando} />
-      <TextField
-        label="Horário de funcionamento (opcional)"
-        placeholder="Ex.: seg. a sex., 7h às 18h"
-        value={c.horarioFuncionamento}
-        onChange={(e) => campo('horarioFuncionamento', e.target.value)}
-        disabled={enviando}
-      />
-      <div className="grid gap-x-2 sm:grid-cols-2">
-        <TextField label="Latitude" inputMode="decimal" placeholder="-25.4284" value={c.latitude} onChange={(e) => campo('latitude', e.target.value)} error={erros.latitude} disabled={enviando} />
-        <TextField label="Longitude" inputMode="decimal" placeholder="-49.2733" value={c.longitude} onChange={(e) => campo('longitude', e.target.value)} error={erros.longitude} disabled={enviando} />
-      </div>
-      <p className="px-1 text-caption text-muted">A localização define a distância exibida aos doadores.</p>
+      <fieldset className={grade}>
+        {largo && <legend className="float-left mb-1 w-full text-section font-semibold text-ink md:col-span-2">Dados da instituição</legend>}
+        <TextField
+          label="Nome do hospital"
+          containerClassName={linhaInteira}
+          value={c.nome}
+          onChange={(e) => campo('nome', e.target.value)}
+          error={erros.nome}
+          disabled={enviando}
+        />
+        <TextField label="CNPJ" inputMode="numeric" value={c.cnpj} onChange={(e) => campo('cnpj', mascaraCnpj(e.target.value))} error={erros.cnpj} disabled={enviando} />
+        <TextField label="Telefone" inputMode="tel" value={c.telefone} onChange={(e) => campo('telefone', mascaraTelefone(e.target.value))} error={erros.telefone} disabled={enviando} />
+        <TextField label="Endereço" containerClassName={linhaInteira} value={c.endereco} onChange={(e) => campo('endereco', e.target.value)} error={erros.endereco} disabled={enviando} />
+        <TextField label="Cidade" value={c.cidade} onChange={(e) => campo('cidade', e.target.value)} error={erros.cidade} disabled={enviando} />
+        <SelectField label="UF" placeholder="Selecione o estado" options={opcoesUf} value={c.estado} onChange={(e) => campo('estado', e.target.value)} error={erros.estado} disabled={enviando} />
+        <TextField label="CEP" inputMode="numeric" value={c.cep} onChange={(e) => campo('cep', mascaraCep(e.target.value))} error={erros.cep} disabled={enviando} />
+        <TextField
+          label="Horário de funcionamento (opcional)"
+          placeholder="Ex.: seg. a sex., 7h às 18h"
+          value={c.horarioFuncionamento}
+          onChange={(e) => campo('horarioFuncionamento', e.target.value)}
+          disabled={enviando}
+        />
+        <div className={`grid gap-x-2 sm:grid-cols-2 ${linhaInteira}`}>
+          <TextField label="Latitude" inputMode="decimal" placeholder="-25.4284" value={c.latitude} onChange={(e) => campo('latitude', e.target.value)} error={erros.latitude} disabled={enviando} />
+          <TextField label="Longitude" inputMode="decimal" placeholder="-49.2733" value={c.longitude} onChange={(e) => campo('longitude', e.target.value)} error={erros.longitude} disabled={enviando} />
+        </div>
+        <p className={`px-1 text-caption text-muted ${linhaInteira}`}>A localização define a distância exibida aos doadores.</p>
+      </fieldset>
 
       {!hospital && (
-        <fieldset className="mt-2 flex flex-col gap-2.5 border-t border-line pt-4">
-          <legend className="float-left mb-1 w-full text-label font-semibold text-ink">Representante</legend>
+        <fieldset className={`mt-2 border-t border-line pt-4 ${grade}`}>
+          <legend className={`float-left mb-1 w-full font-semibold text-ink ${largo ? 'text-section md:col-span-2' : 'text-label'}`}>
+            {largo ? 'Primeiro representante' : 'Representante'}
+          </legend>
           <RepresentanteCampos valor={rep} erros={errosRep} desabilitado={enviando} onChange={setRep} />
         </fieldset>
       )}

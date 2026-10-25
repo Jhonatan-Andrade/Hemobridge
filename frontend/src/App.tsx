@@ -5,6 +5,7 @@ import { PrimeiroAcessoPage } from './features/auth/PrimeiroAcessoPage'
 import { ProtectedRoute, PublicOnlyRoute } from './features/auth/ProtectedRoute'
 import { RecuperarSenhaPage } from './features/auth/RecuperarSenhaPage'
 import { SemAcessoPage } from './features/auth/SemAcessoPage'
+import { CadastroInstituicaoPage } from './features/admin/CadastroInstituicaoPage'
 import { InstituicoesPage } from './features/admin/InstituicoesPage'
 import { PainelGeralPage } from './features/admin/PainelGeralPage'
 import { UsuariosPage } from './features/admin/UsuariosPage'
@@ -47,6 +48,7 @@ function App() {
       <Route element={<ProtectedRoute perfis={['ADMINISTRADOR']} />}>
         <Route path="/admin" element={<PainelGeralPage />} />
         <Route path="/admin/instituicoes" element={<InstituicoesPage />} />
+        <Route path="/admin/instituicoes/nova" element={<CadastroInstituicaoPage />} />
         <Route path="/admin/usuarios" element={<UsuariosPage />} />
       </Route>
 

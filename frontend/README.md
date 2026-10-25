@@ -70,7 +70,8 @@ Os tokens de design (cores, tipografia, raios, sombra e larguras) ficam em `tail
 | `/hospital/necessidades` | Necessidades | 101:3114 |
 | `/hospital` | Painel do hospital (indicadores) | 910:9870 |
 | `/admin` | Painel geral do administrador | 154:3520 |
-| `/admin/instituicoes` | Hospitais e representantes: cadastro, edição, desativação e novos representantes | 101:3111 |
+| `/admin/instituicoes` | Hospitais e representantes: listagem, edição, desativação e novos representantes | 101:3111 |
+| `/admin/instituicoes/nova` | Cadastrar instituição (hospital + primeiro representante), com item próprio no menu lateral do administrador | formulário de 102:3161 em tela própria |
 | `/admin/usuarios` | Usuários: filtros, edição, ativação/desativação, reenvio de senha provisória e novo administrador | 101:3112 |
 
 Cada tela tem estados de carregamento, vazio e erro. As rotas `/doador/*` exigem o perfil Paciente e `/hospital/*` exige Representante. Quem não está logado vai para `/entrar`, e quem já está logado não vê as telas de acesso.

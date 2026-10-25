@@ -1,13 +1,14 @@
 import { useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import type { HospitalAdminResumo } from '../../api/types'
 import { DataTable } from '../../components/DataTable'
 import { PageTitle } from '../../components/layout/AppShell'
-import { EmptyState, ErrorState, Loading, Message, Pagination, Panel, SelectField, TextField } from '../../components/ui'
+import { ButtonLink, EmptyState, ErrorState, Loading, Message, Pagination, Panel, SelectField, TextField } from '../../components/ui'
 import { UFS } from '../../lib/formato'
 import { useAsync } from '../../lib/useAsync'
 import { hospitaisAdminService } from '../../services/admin'
 import { AdminLayout } from './AdminLayout'
-import { HospitalForm } from './HospitalForm'
+import type { AvisoInstituicoes } from './CadastroInstituicaoPage'
 import { HospitalPainel } from './HospitalPainel'
 import { focarPainel } from './painel'
 
@@ -20,11 +21,13 @@ const opcoesSituacao = [
 
 // Figma: Web desktop / Administrador / Instituições e representantes (101:3111).
 export function InstituicoesPage() {
+  // Ao voltar do cadastro, abre o hospital recém-criado com a mensagem de sucesso.
+  const vindoDoCadastro = useLocation().state as AvisoInstituicoes | null
   const [filtros, setFiltros] = useState({ estado: '', situacao: '', busca: '' })
   const [pagina, setPagina] = useState(1)
   const [versao, setVersao] = useState(0)
-  const [selecionado, setSelecionado] = useState<string | null>(null)
-  const [aviso, setAviso] = useState('')
+  const [selecionado, setSelecionado] = useState<string | null>(vindoDoCadastro?.selecionado ?? null)
+  const [aviso, setAviso] = useState(vindoDoCadastro?.aviso ?? '')
 
   const busca = filtros.busca.trim()
   const lista = useAsync(
@@ -50,15 +53,19 @@ export function InstituicoesPage() {
     focarPainel()
   }
 
-  const aoAlterar = (mensagem: string, id?: string) => {
+  const aoAlterar = (mensagem: string) => {
     setAviso(mensagem)
     setVersao((v) => v + 1)
-    if (id) setSelecionado(id)
   }
 
   return (
     <AdminLayout>
-      <PageTitle titulo="Instituições · Hospitais e representantes" descricao="Gerencie hospitais cadastrados, sua localização e representantes vinculados." />
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <PageTitle titulo="Instituições · Hospitais e representantes" descricao="Gerencie hospitais cadastrados, sua localização e representantes vinculados." />
+        <ButtonLink to="/admin/instituicoes/nova" className="shrink-0">
+          Cadastrar instituição
+        </ButtonLink>
+      </div>
 
       <div className="grid gap-x-4 sm:grid-cols-2 lg:grid-cols-3">
         <SelectField label="Estado" hint="Estados do Brasil" placeholder="Todos os estados" options={opcoesUf} value={filtros.estado} onChange={(e) => filtrar('estado', e.target.value)} />
@@ -118,18 +125,23 @@ export function InstituicoesPage() {
         <Panel>
           <div className="flex items-start justify-between gap-3">
             <h2 id="painel-admin" tabIndex={-1} className="text-section font-semibold text-ink outline-none">
-              {selecionado ? 'Editar hospital' : 'Cadastrar hospital'}
+              {selecionado ? 'Editar hospital' : 'Detalhes do hospital'}
             </h2>
             {selecionado && (
               <button type="button" onClick={() => selecionar(null)} className="shrink-0 rounded text-small font-medium text-brand hover:underline">
-                Novo cadastro
+                Fechar
               </button>
             )}
           </div>
           {selecionado ? (
             <HospitalPainel key={selecionado} id={selecionado} onAlterado={aoAlterar} />
           ) : (
-            <HospitalForm key={versao} onSalvo={aoAlterar} />
+            <>
+              <p className="text-body text-muted">Escolha "Detalhes" em um hospital da lista para editar os dados, desativar ou adicionar representantes.</p>
+              <ButtonLink to="/admin/instituicoes/nova" kind="secondary">
+                Cadastrar instituição
+              </ButtonLink>
+            </>
           )}
         </Panel>
       </div>
