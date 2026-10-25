@@ -1,7 +1,7 @@
 # Guia de instalação — Backend Hemobridge
 
 Passo a passo para subir a API em ambiente de desenvolvimento: banco PostgreSQL
-(com PostGIS) no Docker, variáveis de ambiente, Prisma (migrations, seed e
+no Docker, variáveis de ambiente, Prisma (migrations, seed e
 Prisma Studio) e a caixa de e-mails de teste (Mailpit).
 
 Todos os comandos abaixo são executados dentro da pasta `backend/`.
@@ -103,7 +103,8 @@ valores do `.env.example` já funcionam:
 
 | Variável | Valor | Observação |
 | --- | --- | --- |
-| `SEED_DADOS_EXEMPLO` | `true` / `false` | Com `true`, o seed cria hospitais **fictícios** para testar. Nunca use em produção. |
+| `SEED_DADOS_EXEMPLO` | `true` / `false` | Com `true`, o seed cria **dados fictícios** para testar: 2 hemocentros com Admin e médico, horários das próximas semanas e um paciente que doou no hemocentro A e tem agendamento no B (histórico compartilhado). Nunca use em produção. |
+| `SEED_SENHA_EXEMPLO` | `Demo-Senha1` | Senha de todas as contas fictícias. Obrigatória com `SEED_DADOS_EXEMPLO=true`; segue a RN06. |
 
 ### 2.8 Exemplo de `.env` pronto para desenvolvimento
 
@@ -132,6 +133,7 @@ EMAIL_REMETENTE=Hemobridge <nao-responda@hemobridge.local>
 FRONTEND_URL=http://localhost:5173
 
 SEED_DADOS_EXEMPLO=true
+SEED_SENHA_EXEMPLO=Demo-Senha1
 ```
 
 ---
@@ -142,7 +144,7 @@ O arquivo `docker-compose.yml` sobe dois serviços:
 
 | Serviço | Container | Imagem | Porta |
 | --- | --- | --- | --- |
-| `db` | `hemobridge-postgres` | `postgis/postgis:17-3.5` (PostgreSQL 17 + PostGIS) | `5434` → 5432 |
+| `db` | `hemobridge-postgres` | `postgis/postgis:17-3.5` (PostgreSQL 17) | `5434` → 5432 |
 | `mail` | `hemobridge-mailpit` | `axllent/mailpit` | `1025` (SMTP) e `8025` (interface web) |
 
 O Docker Compose lê o `.env` automaticamente, então crie o `.env` **antes** de
@@ -157,8 +159,12 @@ docker compose ps
 ```
 
 Na primeira vez, o script `docker/postgres-init/20-remove-extensoes-extras.sql`
-remove as extensões que a imagem PostGIS cria sozinha — assim quem cria a
-extensão `postgis` (e a `unaccent`) são as migrations do Prisma.
+remove as extensões que a imagem PostGIS cria sozinha — assim quem cria as
+extensões são as migrations do Prisma.
+
+> A geolocalização saiu do escopo: a migration `novo_escopo_agendamento` remove a
+> extensão `postgis`. A imagem continua sendo a `postgis/postgis` porque as
+> migrations antigas, aplicadas antes dela num banco novo, ainda criam a extensão.
 
 ### Comandos úteis do Docker
 
@@ -195,9 +201,9 @@ O `postinstall` já roda `prisma generate`, que gera o Prisma Client em
 | Arquivo | O que é |
 | --- | --- |
 | `prisma.config.ts` | Configuração do Prisma 7: caminho do schema, das migrations, comando do seed e `DATABASE_URL` (lida do `.env`). |
-| `prisma/schema.prisma` | Modelos, enums e extensões (`postgis`, `unaccent`). |
+| `prisma/schema.prisma` | Modelos, enums e extensão (`unaccent`, usada na busca por nome/cidade sem acentos). |
 | `prisma/migrations/` | Histórico de migrations SQL (inclui CHECKs, colunas geradas e índices GiST que o schema não expressa). |
-| `prisma/seed.ts` | Carga inicial: tipos sanguíneos, compatibilidade, administrador e (opcional) hospitais de exemplo. |
+| `prisma/seed.ts` | Carga inicial: tipos sanguíneos, administrador da plataforma e (opcional) dados de exemplo. |
 
 ### 4.3 Aplicar as migrations
 
@@ -221,13 +227,23 @@ npx prisma db seed
 Saída esperada (aproximada):
 
 ```
-Tipos sanguíneos: 8; pares de compatibilidade: 27
-Administrador inicial criado: admin@hemobridge.local
-Hospitais de exemplo: ...        # só com SEED_DADOS_EXEMPLO=true
+Tipos sanguíneos: 8
+Administrador da plataforma criado: admin@hemobridge.local
+Dados de exemplo: 2 hemocentros, ...   # só com SEED_DADOS_EXEMPLO=true
 ```
 
 O seed pode ser rodado várias vezes sem duplicar dados (se o administrador já
 existir, ele avisa e não faz nada).
+
+Contas fictícias criadas com `SEED_DADOS_EXEMPLO=true` (senha: `SEED_SENHA_EXEMPLO`):
+
+| Conta | Perfil |
+| --- | --- |
+| `admin.curitiba@hemobridge.local` | Admin do Hemocentro Exemplo Curitiba (A) |
+| `medico.curitiba@hemobridge.local` | Médico do hemocentro A |
+| `admin.londrina@hemobridge.local` | Admin do Hemocentro Exemplo Londrina (B) |
+| `medico.londrina@hemobridge.local` | Médico do hemocentro B |
+| `paciente@hemobridge.local` | Paciente ATIVA (O+): doou em A e tem agendamento em B |
 
 ### 4.5 Prisma Studio (ver e editar o banco no navegador)
 
@@ -236,7 +252,7 @@ npm run db:studio        # equivale a: npx prisma studio
 ```
 
 Abre em **http://localhost:5555**. Ali dá para navegar pelas tabelas
-(`usuario`, `hospital`, `tipo_sanguineo`…), filtrar, editar e excluir
+(`usuario`, `hemocentro`, `horario`, `agendamento`…), filtrar, editar e excluir
 registros. Para encerrar, `Ctrl + C` no terminal.
 
 > No WSL, se não abrir sozinho, acesse `http://localhost:5555` no navegador do
@@ -262,12 +278,13 @@ registros. Para encerrar, `Ctrl + C` no terminal.
 npm run start:dev        # modo desenvolvimento, recarrega ao salvar
 ```
 
-A API sobe em **http://localhost:3333** (ou na `PORT` do `.env`).
+A API sobe em **http://localhost:3333** (ou na `PORT` do `.env`). Todas as rotas
+ficam sob o prefixo **`/api`** (ex.: `/api/auth/login`).
 
 Teste rápido de login com o administrador do seed:
 
 ```bash
-curl -X POST http://localhost:3333/auth/login \
+curl -X POST http://localhost:3333/api/auth/login \
   -H 'Content-Type: application/json' \
   -d '{"email":"admin@hemobridge.local","senha":"Admin12345"}'
 ```
@@ -278,9 +295,19 @@ Outros comandos:
 
 ```bash
 npm test                 # testes unitários
-npm run test:e2e         # testes e2e
+npm run test:e2e         # testes e2e (veja abaixo)
 npm run lint             # lint
 npm run build && npm run start:prod   # build de produção
+```
+
+Os testes e2e (`test/fluxo.e2e-spec.ts`) rodam o fluxo completo e a concorrência
+de vagas contra um PostgreSQL **descartável** — o banco é apagado no início. Sem
+`E2E_DATABASE_URL` eles são ignorados:
+
+```bash
+docker exec hemobridge-postgres psql -U hemobridge -c "CREATE DATABASE hemobridge_e2e"
+DATABASE_URL=postgresql://hemobridge:SENHA@localhost:5434/hemobridge_e2e npx prisma migrate deploy
+E2E_DATABASE_URL=postgresql://hemobridge:SENHA@localhost:5434/hemobridge_e2e npm run test:e2e
 ```
 
 ---
@@ -293,8 +320,8 @@ o Mailpit, que sobe junto no `docker compose up -d`.
 👉 Abra **http://localhost:8025**
 
 Lá aparecem, como numa caixa de entrada, todos os e-mails enviados pela API —
-recuperação de senha, senha provisória de médicos/usuários criados pelo
-representante ou administrador etc. —, para **qualquer** destinatário. Dá para
+recuperação de senha, senha provisória dos médicos e administradores de
+hemocentro etc. —, para **qualquer** destinatário. Dá para
 ver o HTML, o texto puro e clicar nos links (que apontam para `FRONTEND_URL`).
 
 Se o e-mail não aparecer:
@@ -316,13 +343,13 @@ cp .env.example .env           # e ajuste as senhas (seção 2)
 docker compose up -d           # Postgres + Mailpit
 npm install                    # dependências + prisma generate
 npx prisma migrate dev         # cria as tabelas
-npx prisma db seed             # tipos sanguíneos + admin
+npx prisma db seed             # tipos sanguíneos + admin (+ exemplos)
 npm run start:dev              # API em http://localhost:3333
 ```
 
 | O quê | Endereço |
 | --- | --- |
-| API | http://localhost:3333 |
+| API | http://localhost:3333/api |
 | Prisma Studio (`npm run db:studio`) | http://localhost:5555 |
 | E-mails (Mailpit) | http://localhost:8025 |
 | PostgreSQL | `localhost:5434` |
