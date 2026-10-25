@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { Prisma } from '../generated/prisma/client.js';
@@ -87,6 +88,29 @@ export class PacientesService {
       }
       throw e;
     }
+  }
+
+  // Painel do paciente: situação do processo (RN10) e tipo sanguíneo validado (RF12, somente leitura).
+  async meuPerfil(usuarioId: string) {
+    const paciente = await this.prisma.paciente.findUnique({
+      where: { usuarioId },
+      select: {
+        situacao: true,
+        cidade: true,
+        estado: true,
+        tipoSanguineo: { select: { sigla: true } },
+        usuario: { select: { id: true, nome: true } },
+      },
+    });
+    if (!paciente) throw new NotFoundException('Paciente não encontrado.');
+    return {
+      id: paciente.usuario.id,
+      nome: paciente.usuario.nome,
+      situacao: paciente.situacao,
+      tipoSanguineo: paciente.tipoSanguineo?.sigla ?? null,
+      cidade: paciente.cidade,
+      estado: paciente.estado,
+    };
   }
 
   // RN17 / FE04 e FA01

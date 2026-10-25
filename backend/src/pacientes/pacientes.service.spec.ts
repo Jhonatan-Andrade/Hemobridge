@@ -109,3 +109,25 @@ describe('PacientesService.preCadastrar', () => {
     await expect(service.preCadastrar(dto({ versaoTermo: '0.9' }))).rejects.toThrow(/versão do termo/);
   });
 });
+
+describe('PacientesService.meuPerfil', () => {
+  it('devolve a situação e o tipo sanguíneo validado do paciente logado', async () => {
+    const prisma = {
+      paciente: {
+        findUnique: vi.fn().mockResolvedValue({
+          situacao: 'APROVADO',
+          cidade: 'Curitiba',
+          estado: 'PR',
+          tipoSanguineo: { sigla: 'O+' },
+          usuario: { id: 'p1', nome: 'Maria' },
+        }),
+      },
+    };
+    const service = new PacientesService(prisma as unknown as PrismaService);
+
+    await expect(service.meuPerfil('p1')).resolves.toEqual({
+      id: 'p1', nome: 'Maria', situacao: 'APROVADO', tipoSanguineo: 'O+', cidade: 'Curitiba', estado: 'PR',
+    });
+    expect(prisma.paciente.findUnique.mock.calls[0][0].where).toEqual({ usuarioId: 'p1' });
+  });
+});

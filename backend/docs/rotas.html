@@ -358,6 +358,11 @@ const GRUPOS = [
     id: 'pacientes', nome: 'Pacientes', desc: 'Pré-cadastro do paciente com consentimento LGPD (RF01, RF02 · UC01).',
     rotas: [
       {
+        metodo: 'GET', caminho: '/pacientes/me', resumo: 'Painel do paciente logado', acesso: perfis('PACIENTE'), status: 200,
+        regras: ['Situação do processo (RN10) e tipo sanguíneo validado pelo médico, somente leitura (RF12).'],
+        exRes: { id: 'uuid', nome: 'Maria da Silva', situacao: 'CONSULTA_AGENDADA', tipoSanguineo: null, cidade: 'Curitiba', estado: 'PR' },
+      },
+      {
         metodo: 'GET', caminho: '/pacientes/termo-consentimento', resumo: 'Termo de consentimento vigente', acesso: PUBLICO, status: 200,
         exRes: { versao: '1.0', finalidade: 'Tratamento de dados pessoais sensíveis de saúde (peso, exames e tipo sanguíneo)…' },
       },

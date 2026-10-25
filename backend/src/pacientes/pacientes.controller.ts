@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Ip, Post } from '@nestjs/common';
-import { Publico } from '../auth/decorators.js';
+import type { UsuarioAutenticado } from '../auth/auth.types.js';
+import { Perfis, Publico, UsuarioAtual } from '../auth/decorators.js';
 import { LimiteCadastro } from '../common/limite-requisicoes.js';
 import { TERMO_CONSENTIMENTO } from '../lgpd/termo-consentimento.js';
 import { PreCadastroDto } from './dto/pre-cadastro.dto.js';
@@ -14,6 +15,13 @@ export class PacientesController {
   @Get('termo-consentimento')
   termoConsentimento() {
     return TERMO_CONSENTIMENTO;
+  }
+
+  // Dados do painel do paciente logado.
+  @Perfis('PACIENTE')
+  @Get('me')
+  meuPerfil(@UsuarioAtual() paciente: UsuarioAutenticado) {
+    return this.pacientesService.meuPerfil(paciente.id);
   }
 
   // UC01: pré-condição é o visitante não estar autenticado.
