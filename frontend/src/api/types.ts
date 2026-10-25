@@ -47,6 +47,9 @@ export interface Paginado<T> {
   tamanhoPagina: number
 }
 
+/** Os oito tipos ABO/Rh (RN01). */
+export type TipoSanguineo = 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-'
+
 // UC02 / UC03
 export interface NecessidadeResumo {
   tipo: string
@@ -198,4 +201,48 @@ export interface UsuarioAdminDetalhe {
   paciente: { situacao: SituacaoPaciente; cidade?: string; estado?: string } | null
   medico: { crm: string; ufCrm: string; hospital: { id: string; nome: string } } | null
   representante: { cargo: string | null; hospital: { id: string; nome: string } } | null
+}
+
+// UC01
+export interface PreCadastro {
+  nome: string
+  cpf: string
+  email: string
+  senha: string
+  confirmacaoSenha: string
+  telefone: string
+  dataNascimento: string
+  sexo: Sexo
+  pesoKg: number
+  cidade: string
+  estado: string
+  aceiteTermo: boolean
+  versaoTermo: string
+  cienteRegraAcimaDe60?: boolean
+}
+
+export interface PreCadastroCriado {
+  id: string
+  nome: string
+  email: string
+  situacao: SituacaoPaciente
+  proximoPasso: string
+}
+
+// Nomes de domínio usados nas telas. O "banco de sangue" do produto é o hospital
+// cadastrado pelo administrador e mantido pelo representante.
+export type Necessidade = NecessidadeResumo
+export type BancoDeSangue = HospitalDetalhe
+
+/**
+ * Dados do doador logado. Ainda não há endpoint no backend que devolva o tipo
+ * sanguíneo e a cidade do paciente (ver README → "Contratos pendentes").
+ */
+export interface Doador {
+  id: string
+  nome: string
+  situacao: SituacaoPaciente
+  tipoSanguineo: TipoSanguineo | null
+  cidade: string
+  estado: string
 }

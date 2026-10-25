@@ -1,7 +1,6 @@
 import { useCallback, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import logo from '../../assets/brand/logo-horizontal.png'
-import menuIcon from '../../assets/icons/menu.svg'
 import { NavigationRail, type NavItem } from './NavigationRail'
 
 type AppShellProps = {
@@ -27,22 +26,26 @@ export function AppShell({ nav, contexto, acoes, children }: AppShellProps) {
       </a>
       <NavigationRail items={nav} aberto={aberto} onToggle={() => setAberto((v) => !v)} onClose={fechar} />
       <div className={`transition-[margin] duration-rail ease-rail ${aberto ? 'md:ml-rail-open' : 'md:ml-rail'}`}>
-        <header className="flex flex-wrap items-center gap-3 bg-surface px-4 py-4 md:p-12">
+        <header className="flex items-center gap-3 bg-surface px-5 py-6 md:p-12">
           <button
             type="button"
             onClick={() => setAberto(true)}
             aria-label="Abrir menu"
-            className="flex size-12 items-center justify-center rounded-control bg-ink md:hidden"
+            className="flex size-11 flex-col items-center justify-center gap-1 rounded-control border border-line bg-surface md:hidden"
           >
-            <img src={menuIcon} alt="" width={24} height={24} />
+            {/* Figma: "Ícone / três traços iguais" na versão clara do acionador mobile. */}
+            <span className="h-0.5 w-5 rounded-sm bg-ink" />
+            <span className="h-0.5 w-5 rounded-sm bg-ink" />
+            <span className="h-0.5 w-5 rounded-sm bg-ink" />
           </button>
           <Link to="/" className="shrink-0 rounded">
             <img src={logo} alt="HemoBridge — página inicial" width={184} height={52} className="h-10 w-auto md:h-13" />
           </Link>
-          <p className="flex-1 text-body text-muted">{contexto}</p>
+          <p className="hidden flex-1 text-body text-muted md:block">{contexto}</p>
+          <span className="flex-1 md:hidden" aria-hidden="true" />
           {acoes}
         </header>
-        <main id="conteudo" tabIndex={-1} className="px-4 py-8 outline-none md:p-12">
+        <main id="conteudo" tabIndex={-1} className="px-5 py-6 outline-none md:p-12">
           {children}
         </main>
       </div>
@@ -50,12 +53,20 @@ export function AppShell({ nav, contexto, acoes, children }: AppShellProps) {
   )
 }
 
-/** Cabeçalho de página: título e descrição (Figma: 32px Medium + Body muted). */
-export function PageTitle({ titulo, descricao, sobretitulo }: { titulo: string; descricao?: ReactNode; sobretitulo?: string }) {
+/** Cabeçalho de página: título (32px) e descrição em Body muted. */
+type PageTitleProps = {
+  titulo: string
+  descricao?: ReactNode
+  sobretitulo?: string
+  /** Telas de acesso usam Medium; painéis usam SemiBold (conforme cada frame do Figma). */
+  peso?: 'medium' | 'semibold'
+}
+
+export function PageTitle({ titulo, descricao, sobretitulo, peso = 'semibold' }: PageTitleProps) {
   return (
     <div className="flex flex-col gap-3">
       {sobretitulo && <p className="text-small font-semibold uppercase text-brand">{sobretitulo}</p>}
-      <h1 className="text-heading font-semibold text-ink md:text-title">{titulo}</h1>
+      <h1 className={`text-heading text-ink md:text-title ${peso === 'medium' ? 'font-medium' : 'font-semibold'}`}>{titulo}</h1>
       {descricao && <p className="text-body text-muted">{descricao}</p>}
     </div>
   )
