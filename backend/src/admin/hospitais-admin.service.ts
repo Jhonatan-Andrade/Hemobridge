@@ -4,6 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { cancelarConsultasFuturas } from '../common/consultas-futuras.js';
 import { SenhaProvisoriaService } from '../contas/senha-provisoria.service.js';
 import { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -172,8 +173,7 @@ export class HospitaisAdminService {
   /**
    * FA02 / RN09: o banco some das consultas públicas e seus representantes e
    * médicos perdem o acesso (o guard confere a instituição a cada requisição;
-   * as sessões abertas são encerradas aqui).
-   * TODO(etapa 8): cancelar as consultas futuras e notificar os pacientes.
+   * as sessões abertas são encerradas aqui) e as consultas futuras são canceladas.
    */
   async desativar(id: string) {
     await this.alterarSituacao(id, false);
@@ -181,6 +181,12 @@ export class HospitaisAdminService {
       where: { OR: [{ medico: { hospitalId: id } }, { representante: { hospitalId: id } }] },
       data: { versaoSessao: { increment: 1 } },
     });
+    await cancelarConsultasFuturas(
+      this.prisma,
+      { medico: { hospitalId: id } },
+      'ADMINISTRADOR',
+      'O banco de sangue foi desativado na plataforma.',
+    );
     return { id, ativo: false };
   }
 

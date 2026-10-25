@@ -1,4 +1,5 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { cancelarConsultasFuturas } from '../common/consultas-futuras.js';
 import { mascararCpf } from '../common/cpf.js';
 import { SenhaProvisoriaService } from '../contas/senha-provisoria.service.js';
 import { Prisma } from '../generated/prisma/client.js';
@@ -143,8 +144,8 @@ export class MedicosService {
   }
 
   /**
-   * FA02: o médico perde o acesso e as sessões abertas são encerradas.
-   * TODO(etapa 8): cancelar as consultas futuras e notificar os pacientes.
+   * FA02: o médico perde o acesso, as sessões abertas são encerradas e as
+   * consultas futuras são canceladas (RN09).
    */
   async desativar(hospitalId: string, medicoId: string) {
     await this.detalhar(hospitalId, medicoId);
@@ -152,6 +153,7 @@ export class MedicosService {
       where: { id: medicoId },
       data: { status: 'INATIVO', versaoSessao: { increment: 1 } },
     });
+    await cancelarConsultasFuturas(this.prisma, { medicoId }, 'REPRESENTANTE', 'O médico foi desativado pela instituição.');
     return this.detalhar(hospitalId, medicoId);
   }
 

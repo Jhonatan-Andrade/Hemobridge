@@ -13,6 +13,7 @@ function montar(status: string | null = 'ATIVO') {
       update: vi.fn().mockResolvedValue({}),
       create: vi.fn().mockResolvedValue({ id: 'a2', nome: 'Novo', email: 'novo@h.com', perfil: 'ADMINISTRADOR' }),
     },
+    consulta: { findMany: vi.fn().mockResolvedValue([]) },
   };
   const senhaProvisoria = {
     gerar: vi.fn().mockResolvedValue({ senha: 'Prov1234abcd', dados: { senhaHash: 'h', senhaProvisoria: true } }),
@@ -61,6 +62,11 @@ describe('UsuariosAdminService', () => {
     expect(prisma.usuario.update).toHaveBeenCalledWith({
       where: { id: 'u1' },
       data: { status: 'INATIVO', versaoSessao: { increment: 1 } },
+    });
+    // RN09: consultas futuras do médico ou do paciente desativado.
+    expect(prisma.consulta.findMany.mock.calls[0][0].where).toMatchObject({
+      OR: [{ medicoId: 'u1' }, { pacienteId: 'u1' }],
+      situacao: 'AGENDADA',
     });
   });
 

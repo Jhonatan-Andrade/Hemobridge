@@ -28,6 +28,7 @@ function montar() {
       create: vi.fn().mockResolvedValue({ id: 'm1', nome: 'Dr. João', email: 'joao@h.com', perfil: 'MEDICO' }),
       update: vi.fn().mockResolvedValue({}),
     },
+    consulta: { findMany: vi.fn().mockResolvedValue([]) },
   };
   const senhaProvisoria = {
     gerar: vi.fn().mockResolvedValue({ senha: 'Prov1234abcd', dados: { senhaHash: 'h', senhaProvisoria: true } }),
@@ -105,6 +106,8 @@ describe('MedicosService', () => {
       where: { id: 'm1' },
       data: { status: 'INATIVO', versaoSessao: { increment: 1 } },
     });
+    // RN09
+    expect(prisma.consulta.findMany.mock.calls[0][0].where).toMatchObject({ medicoId: 'm1', situacao: 'AGENDADA' });
   });
 
   it('só reenvia senha de médico do próprio hospital (FA03)', async () => {

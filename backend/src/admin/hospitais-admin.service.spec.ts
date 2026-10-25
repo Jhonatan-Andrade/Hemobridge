@@ -23,6 +23,7 @@ function montar() {
       updateMany: vi.fn().mockResolvedValue({ count: 2 }),
       create: tx.usuario.create,
     },
+    consulta: { findMany: vi.fn().mockResolvedValue([]) },
     $transaction: vi.fn((fn: (t: typeof tx) => unknown) => fn(tx)),
   };
   const senhaProvisoria = {
@@ -92,6 +93,10 @@ describe('HospitaisAdminService', () => {
     expect(prisma.usuario.updateMany).toHaveBeenCalledWith({
       where: { OR: [{ medico: { hospitalId: 'h1' } }, { representante: { hospitalId: 'h1' } }] },
       data: { versaoSessao: { increment: 1 } },
+    });
+    expect(prisma.consulta.findMany.mock.calls[0][0].where).toMatchObject({
+      medico: { hospitalId: 'h1' },
+      situacao: 'AGENDADA',
     });
   });
 

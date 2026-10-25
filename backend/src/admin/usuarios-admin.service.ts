@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { papelDe } from '../auth/auth.types.js';
+import { cancelarConsultasFuturas } from '../common/consultas-futuras.js';
 import {mascararCpf, normalizarCpf } from '../common/cpf.js';
 import { SenhaProvisoriaService } from '../contas/senha-provisoria.service.js';
 import { Prisma } from '../generated/prisma/client.js';
@@ -137,8 +138,8 @@ export class UsuariosAdminService {
   }
 
   /**
-   * Desativa a conta e encerra as sessões abertas.
-   * TODO(etapa 8): cancelar consultas futuras do paciente ou do médico desativado.
+   * Desativa a conta, encerra as sessões abertas e cancela as consultas
+   * futuras do paciente ou do médico (RN09).
    */
   async desativar(id: string, administradorId: string) {
     // FE02
@@ -154,6 +155,12 @@ export class UsuariosAdminService {
       where: { id },
       data: { status: 'INATIVO', versaoSessao: { increment: 1 } },
     });
+    await cancelarConsultasFuturas(
+      this.prisma,
+      { OR: [{ medicoId: id }, { pacienteId: id }] },
+      'ADMINISTRADOR',
+      'A conta foi desativada pela administração da plataforma.',
+    );
     return { id, status: 'INATIVO' as const };
   }
 
