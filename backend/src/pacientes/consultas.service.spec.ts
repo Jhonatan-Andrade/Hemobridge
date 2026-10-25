@@ -188,5 +188,14 @@ describe('ConsultasPacienteService', () => {
 
     expect(r.medicos.map((m) => m.id)).toEqual(['curitiba', 'londrina', 'sp']);
     expect(r.medicos[2].horarios).toHaveLength(2);
+    expect(prisma.disponibilidadeMedico.findMany.mock.calls[0][0].where.medico.hospitalId).toBeUndefined();
+  });
+
+  it('filtra os horários pelos médicos de um banco de sangue', async () => {
+    const { service, prisma } = montar();
+
+    await service.horariosDisponiveis('p1', { hospitalId: 'h1' });
+
+    expect(prisma.disponibilidadeMedico.findMany.mock.calls[0][0].where.medico).toMatchObject({ hospitalId: 'h1', hospital: { ativo: true } });
   });
 });

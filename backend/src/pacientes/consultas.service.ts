@@ -80,7 +80,7 @@ export class ConsultasPacienteService {
   }
 
   /** Horários livres de médicos ativos em hospitais ativos, nos próximos 30 dias. */
-  private filtroHorariosLivres(agora: Date, data?: string): Prisma.DisponibilidadeMedicoWhereInput {
+  private filtroHorariosLivres(agora: Date, data?: string, hospitalId?: string): Prisma.DisponibilidadeMedicoWhereInput {
     const limite = new Date(agora.getTime() + DIAS_JANELA_AGENDAMENTO * DIA);
     const inicio = data
       ? { gte: new Date(Math.max(instanteLocal(data).getTime(), agora.getTime())), lt: instanteLocal(somarDias(data, 1)), lte: limite }
@@ -89,18 +89,18 @@ export class ConsultasPacienteService {
       removidoEm: null,
       inicio,
       consultas: { none: { situacao: 'AGENDADA' } },
-      medico: { usuario: { status: 'ATIVO' }, hospital: { ativo: true } },
+      medico: { usuario: { status: 'ATIVO' }, hospital: { ativo: true }, hospitalId },
     };
   }
 
   // Passo 5: agrupados por médico, priorizando a cidade e o estado do paciente.
-  async horariosDisponiveis(pacienteId: string, { data }: HorariosDisponiveisDto) {
+  async horariosDisponiveis(pacienteId: string, { data, hospitalId }: HorariosDisponiveisDto) {
     if (data && (data < hojeIso() || data > somarDias(hojeIso(), DIAS_JANELA_AGENDAMENTO))) {
       throw new BadRequestException(`Escolha uma data entre hoje e os próximos ${DIAS_JANELA_AGENDAMENTO} dias.`);
     }
     const paciente = await this.obterPaciente(pacienteId);
     const horarios = await this.prisma.disponibilidadeMedico.findMany({
-      where: this.filtroHorariosLivres(new Date(), data),
+      where: this.filtroHorariosLivres(new Date(), data, hospitalId),
       select: {
         id: true,
         inicio: true,

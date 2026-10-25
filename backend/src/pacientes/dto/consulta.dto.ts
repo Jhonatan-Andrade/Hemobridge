@@ -6,6 +6,11 @@ export class HorariosDisponiveisDto {
   @IsISO8601({ strict: true, strictSeparator: true }, { message: 'Data inválida' })
   @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: 'Data deve estar no formato AAAA-MM-DD' })
   data?: string;
+
+  // Horários dos médicos de um banco de sangue (tela de detalhes do local).
+  @IsOptional()
+  @IsUUID('all', { message: 'Banco de sangue inválido' })
+  hospitalId?: string;
 }
 
 // UC09 passos 6–8

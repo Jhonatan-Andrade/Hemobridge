@@ -625,7 +625,7 @@ const GRUPOS = [
           'Agrupado por médico, primeiro os da cidade do paciente, depois os do estado (UC09 passo 5).',
           'Lista vazia = nenhum horário no período (FE01).',
         ],
-        query: [['data', 'string', false, 'AAAA-MM-DD, entre hoje e +30 dias (FA01).']],
+        query: [['data', 'string', false, 'AAAA-MM-DD, entre hoje e +30 dias (FA01).'], ['hospitalId', 'uuid', false, 'Só os médicos deste banco de sangue (tela de detalhes do local).']],
         exQuery: '?data=2026-11-10',
         exRes: { data: '2026-11-10', medicos: [{ id: 'uuid', nome: 'Dra. Ana', crm: '123456', ufCrm: 'PR', hospital: { nome: 'Hemocentro', cidade: 'Curitiba', estado: 'PR' }, horarios: [{ id: 'uuid', inicio: '2026-11-10T11:00:00.000Z', fim: '2026-11-10T11:30:00.000Z' }] }] },
       },
