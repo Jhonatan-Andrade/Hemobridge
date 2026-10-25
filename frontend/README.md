@@ -69,6 +69,9 @@ Os tokens de design (cores, tipografia, raios, sombra e larguras) ficam em `tail
 | `/locais/:id` | Detalhes do banco de sangue | sem frame próprio (ver divergências) |
 | `/hospital/necessidades` | Necessidades | 101:3114 |
 | `/hospital` | Painel do hospital (indicadores) | 910:9870 |
+| `/admin` | Painel geral do administrador | 154:3520 |
+| `/admin/instituicoes` | Hospitais e representantes: cadastro, edição, desativação e novos representantes | 101:3111 |
+| `/admin/usuarios` | Usuários: filtros, edição, ativação/desativação, reenvio de senha provisória e novo administrador | 101:3112 |
 
 Cada tela tem estados de carregamento, vazio e erro. As rotas `/doador/*` exigem o perfil Paciente e `/hospital/*` exige Representante. Quem não está logado vai para `/entrar`, e quem já está logado não vê as telas de acesso.
 
@@ -83,6 +86,7 @@ O backend não foi alterado. Para tirar o mock e completar as telas, faltam:
 1. `GET /pacientes/me` (paciente autenticado) → `{ id, nome, situacao, tipoSanguineo: "O+" | null, cidade, estado }`. Substitui `doadorService.obterPerfil`.
 2. (Opcional) filtro `nivel` em `GET /hospitais`. Hoje o filtro por nível é aplicado no frontend sobre a página recebida, então uma página pode vir com menos itens.
 3. (Opcional) registro de doações por hospital, para os gráficos "Doações por tipo" e "Doações por semana" do Figma.
+4. (Opcional) `GET /admin/indicadores` → `{ doadoresAprovados, hospitaisAtivos, criticosPorEstado: [{ estado, hospitais, tipos }] }`. Hoje o Painel geral calcula esses números no navegador percorrendo `/admin/usuarios?perfil=PACIENTE` e `/hospitais` (até 1.000 registros de cada; acima disso a tela avisa que o número é parcial).
 
 ## Divergências em relação ao Figma e aos requisitos
 
@@ -101,5 +105,10 @@ O backend não foi alterado. Para tirar o mock e completar as telas, faltam:
 | Fonte Fraunces | O destaque "A ponte que" usa Fraunces Italic (OFL), salva como subconjunto latino em `src/assets/fonts`, sem dependência nova. |
 | Rotas desconhecidas | Agora redirecionam para a Home pública (`/`) em vez de `/entrar`. |
 | Navegação lateral | Comunidade, Perfil, Estoque, Equipe médica e Relatórios ficaram fora do escopo. Os ícones vêm do Figma, e o botão Sair fica no cabeçalho. |
-| Médico e Administrador | Não têm área neste frontend e veem uma tela informativa em `/sem-acesso`. |
+| Médico | Não tem área neste frontend e vê uma tela informativa em `/sem-acesso`. |
+| Telas do administrador sem API | Mapa regional IBGE, Moderação, Relatórios gerais, Comunidade, Perfil, Solicitações de privacidade, Indicadores e Boas-vindas não foram implementadas: o backend não tem endpoints para elas. O item Relatórios saiu do rail. |
+| Painel geral | Os cards mostram os números calculados (ver contrato 4). "Evolução agregada" fica como estado vazio, porque não há registro de doações, e o botão "Ver indicadores" foi removido por não haver tela de destino. |
+| Formulário de hospital | O Figma mostra só Nome, Cidade e UF, Endereço e Representante. O backend exige CNPJ, CEP, telefone, latitude e longitude, e no cadastro também nome, CPF, e-mail e telefone do primeiro representante. Todos esses campos estão no formulário. |
+| Usuários e solicitações | O backend não tem fluxo de aprovação de solicitações. "Pendente" indica conta criada que ainda não fez o primeiro acesso, e a ação "Avaliar" virou "Detalhes". O novo administrador também pede CPF, que o backend exige. |
+| Desativação | Desativar hospital ou usuário pede confirmação na própria tela, porque encerra as sessões abertas. A pessoa logada não vê a opção de desativar a própria conta. |
 | Breakpoints | O desktop segue os frames de 1440px. Abaixo de 768px (`md`), o rail vira menu sobreposto com fundo de proteção, o cabeçalho esconde o texto de contexto e o acionador do menu fica claro, como no frame mobile 660:6373. Tabelas viram listas abaixo de 640px (`sm`). |

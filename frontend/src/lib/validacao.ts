@@ -16,6 +16,20 @@ export function cpfValido(valor: string) {
   return digito(cpf.slice(0, 9), 10) === Number(cpf[9]) && digito(cpf.slice(0, 10), 11) === Number(cpf[10])
 }
 
+/** Dígitos verificadores do CNPJ (mesma regra do backend, IsCnpj). */
+export function cnpjValido(valor: string) {
+  const cnpj = somenteDigitos(valor)
+  if (cnpj.length !== 14 || /^(\d)\1{13}$/.test(cnpj)) return false
+  const digito = (base: string) => {
+    const pesos = base.length === 12 ? [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2] : [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
+    const resto = [...base].reduce((total, d, i) => total + Number(d) * pesos[i], 0) % 11
+    return resto < 2 ? 0 : 11 - resto
+  }
+  return digito(cnpj.slice(0, 12)) === Number(cnpj[12]) && digito(cnpj.slice(0, 13)) === Number(cnpj[13])
+}
+
+export const telefoneValido = (valor: string) => /^\d{10,11}$/.test(somenteDigitos(valor))
+
 export function erroSenha(senha: string) {
   if (!senha) return 'Informe a senha.'
   if (!senhaValida(senha)) return REGRA_SENHA

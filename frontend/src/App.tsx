@@ -5,6 +5,9 @@ import { PrimeiroAcessoPage } from './features/auth/PrimeiroAcessoPage'
 import { ProtectedRoute, PublicOnlyRoute } from './features/auth/ProtectedRoute'
 import { RecuperarSenhaPage } from './features/auth/RecuperarSenhaPage'
 import { SemAcessoPage } from './features/auth/SemAcessoPage'
+import { InstituicoesPage } from './features/admin/InstituicoesPage'
+import { PainelGeralPage } from './features/admin/PainelGeralPage'
+import { UsuariosPage } from './features/admin/UsuariosPage'
 import { DashboardPage } from './features/bloodbank/DashboardPage'
 import { NeedsPage } from './features/bloodbank/NeedsPage'
 import { DonorDashboardPage } from './features/donor/DonorDashboardPage'
@@ -39,6 +42,12 @@ function App() {
       <Route element={<ProtectedRoute perfis={['REPRESENTANTE']} />}>
         <Route path="/hospital" element={<DashboardPage />} />
         <Route path="/hospital/necessidades" element={<NeedsPage />} />
+      </Route>
+
+      <Route element={<ProtectedRoute perfis={['ADMINISTRADOR']} />}>
+        <Route path="/admin" element={<PainelGeralPage />} />
+        <Route path="/admin/instituicoes" element={<InstituicoesPage />} />
+        <Route path="/admin/usuarios" element={<UsuariosPage />} />
       </Route>
 
       <Route element={<ProtectedRoute />}>
