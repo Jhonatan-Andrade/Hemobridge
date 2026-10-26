@@ -1,189 +1,152 @@
-import { useMemo, useState } from 'react'
-import { mensagemDeErro } from '../../api/client'
-import type { ConsultaMedicoResumo, HorarioAgenda } from '../../api/types'
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
+import type { AgendamentoNaAgenda } from '../../api/types'
 import { PageTitle } from '../../components/layout/AppShell'
-import { Button, ButtonLink, EmptyState, ErrorState, Loading, Message, Pagination, Panel } from '../../components/ui'
+import { Button, EmptyState, ErrorState, Loading, Message, Panel, TextField } from '../../components/ui'
+import { dataLocalIso, formatarData, formatarDiaLongo, RESULTADOS_DOACAO, SITUACOES_PACIENTE, somarDias, STATUS_AGENDAMENTO } from '../../lib/formato'
 import { useAsync } from '../../lib/useAsync'
-import { agendaService, atendimentoService } from '../../services/medico'
-import { Calendario } from './Calendario'
+import { medicoService } from '../../services/equipe'
 import { MedicoLayout } from './MedicoLayout'
-import { PublicarHorario } from './PublicarHorario'
-import { corSituacao, dataLocalIso, formatarHora, formatarHorario, SITUACOES_CONSULTA } from './rotulos'
+import { RegistroDoacao } from './RegistroDoacao'
 
-type Aba = 'proximos' | 'historico'
-
-// Figma: Web desktop / Médico / Agenda / Próximos (101:3115) e Histórico (832:9757). UC13.
+// RF10 / RF11 – agenda do dia por horário, com o registro da doação de cada paciente.
+// Figma: Web desktop / Médico / Agenda (101:3115), sem teleconsulta.
 export function AgendaPage() {
-  const [data, setData] = useState(() => dataLocalIso(new Date()))
-  const [aba, setAba] = useState<Aba>('proximos')
-  const [aviso, setAviso] = useState<{ tom: 'success' | 'error'; textos: string[] } | null>(null)
-  const agenda = useAsync(() => agendaService.listar(), [])
+  const hoje = dataLocalIso()
+  const [data, setData] = useState(hoje)
+  const [versao, setVersao] = useState(0)
+  const [aviso, setAviso] = useState('')
+  const agenda = useAsync(() => medicoService.agenda(data), [data, versao])
 
-  const comHorarios = useMemo(
-    () => new Set((agenda.dados?.horarios ?? []).map((h) => dataLocalIso(new Date(h.inicio)))),
-    [agenda.dados],
-  )
-
-  const avisar = (tom: 'success' | 'error', textos: string[]) => {
-    setAviso({ tom, textos })
-    agenda.recarregar()
+  const mudarData = (nova: string) => {
+    if (!nova) return
+    setData(nova)
+    setAviso('')
   }
 
   return (
     <MedicoLayout>
-      <PageTitle titulo="Minha agenda" descricao="Publique horários de teleconsulta e acompanhe as consultas marcadas pelos pacientes." />
+      <PageTitle titulo="Agenda do dia" descricao="Pacientes agendados por horário. Depois do atendimento, registre se a pessoa compareceu e doou." />
+
+      <Panel>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+          <TextField label="Data" type="date" value={data} onChange={(e) => mudarData(e.target.value)} containerClassName="sm:w-60" />
+          <div className="flex gap-2 pb-1">
+            <Button kind="secondary" onClick={() => mudarData(somarDias(data, -1))}>
+              Dia anterior
+            </Button>
+            <Button kind="secondary" onClick={() => mudarData(hoje)} disabled={data === hoje}>
+              Hoje
+            </Button>
+            <Button kind="secondary" onClick={() => mudarData(somarDias(data, 1))}>
+              Próximo dia
+            </Button>
+          </div>
+        </div>
+        <p className="text-body font-semibold text-ink first-letter:uppercase">{formatarDiaLongo(data)}</p>
+      </Panel>
 
       {aviso && (
-        <Message tone={aviso.tom}>
-          {aviso.textos.map((t) => (
-            <p key={t}>{t}</p>
-          ))}
+        <Message tone="success">
+          <p>{aviso}</p>
         </Message>
       )}
 
-      <Panel className="grid gap-8 md:grid-cols-2">
-        <Calendario selecionada={data} onSelecionar={setData} comHorarios={comHorarios} />
-        <PublicarHorario data={data} onPublicado={(m) => avisar('success', [m])} />
-      </Panel>
-
-      <div className="grid gap-3 sm:grid-cols-2" role="group" aria-label="Consultas">
-        <Button block kind={aba === 'proximos' ? 'primary' : 'secondary'} aria-pressed={aba === 'proximos'} onClick={() => setAba('proximos')}>
-          Próximos
-        </Button>
-        <Button block kind={aba === 'historico' ? 'primary' : 'secondary'} aria-pressed={aba === 'historico'} onClick={() => setAba('historico')}>
-          Histórico
-        </Button>
-      </div>
-
-      {aba === 'proximos' ? (
-        agenda.carregando ? (
-          <Loading texto="Carregando agenda…" />
-        ) : agenda.erro || !agenda.dados ? (
-          <ErrorState mensagens={agenda.erro ?? ['Não foi possível carregar a agenda.']} onRetry={agenda.recarregar} />
-        ) : (
-          <Proximos horarios={agenda.dados.horarios} onAlterado={avisar} />
-        )
+      {agenda.carregando ? (
+        <Loading texto="Carregando a agenda…" />
+      ) : agenda.erro || !agenda.dados ? (
+        <ErrorState mensagens={agenda.erro ?? ['Não foi possível carregar a agenda.']} onRetry={agenda.recarregar} />
+      ) : !agenda.dados.horarios.length ? (
+        <EmptyState title="Nenhum horário neste dia">O Admin do hemocentro cria os horários de atendimento.</EmptyState>
       ) : (
-        <Historico />
+        agenda.dados.horarios.map((h) => (
+          <Panel key={h.id}>
+            <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
+              <h2 className="text-section font-semibold text-ink">
+                {h.horaInicio}–{h.horaFim}
+                {!h.ativo && <span className="ml-2 text-small font-medium text-muted">(inativo)</span>}
+              </h2>
+              <p className="text-small text-muted">
+                {h.agendamentos.length} de {h.vagasTotal} vagas ocupadas
+              </p>
+            </div>
+            {h.agendamentos.length ? (
+              <ul className="flex flex-col gap-3">
+                {h.agendamentos.map((a) => (
+                  <PacienteAgendado
+                    key={a.id}
+                    agendamento={a}
+                    podeRegistrar={data <= hoje}
+                    onRegistrado={(m) => {
+                      setAviso(m)
+                      setVersao((v) => v + 1)
+                    }}
+                  />
+                ))}
+              </ul>
+            ) : (
+              <p className="text-body text-muted">Nenhum paciente agendado.</p>
+            )}
+          </Panel>
+        ))
       )}
     </MedicoLayout>
   )
 }
 
-function Proximos({ horarios, onAlterado }: { horarios: HorarioAgenda[]; onAlterado: (tom: 'success' | 'error', textos: string[]) => void }) {
-  const [removendo, setRemovendo] = useState<string | null>(null)
-  const [agora] = useState(() => Date.now())
-  const porDia = useMemo(() => {
-    const grupos = new Map<string, HorarioAgenda[]>()
-    for (const h of horarios.filter((x) => new Date(x.fim).getTime() >= agora)) {
-      const dia = dataLocalIso(new Date(h.inicio))
-      grupos.set(dia, [...(grupos.get(dia) ?? []), h])
-    }
-    return [...grupos.entries()]
-  }, [horarios, agora])
-
-  async function remover(h: HorarioAgenda) {
-    setRemovendo(h.id)
-    try {
-      const r = await agendaService.remover(h.id)
-      onAlterado('success', [r.mensagem])
-    } catch (err) {
-      onAlterado('error', mensagemDeErro(err))
-    } finally {
-      setRemovendo(null)
-    }
-  }
+function PacienteAgendado({
+  agendamento: a,
+  podeRegistrar,
+  onRegistrado,
+}: {
+  agendamento: AgendamentoNaAgenda
+  podeRegistrar: boolean
+  onRegistrado: (m: string) => void
+}) {
+  const [registrando, setRegistrando] = useState(false)
+  const p = a.paciente
 
   return (
-    <section className="flex flex-col gap-4" aria-labelledby="titulo-proximos">
-      <h2 id="titulo-proximos" className="text-section font-semibold text-ink">
-        Próximos 30 dias
-      </h2>
-      {!porDia.length ? (
-        <EmptyState title="Nenhum horário publicado">Escolha uma data no calendário e publique um período de atendimento.</EmptyState>
-      ) : (
-        porDia.map(([dia, lista]) => (
-          <div key={dia} className="flex flex-col gap-2">
-            <h3 className="text-label font-semibold text-ink first-letter:uppercase">
-              {new Date(`${dia}T12:00:00`).toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit' })}
-            </h3>
-            <ul className="flex flex-col gap-2">
-              {lista.map((h) => (
-                <li key={h.id} className="flex flex-col gap-3 rounded-card border border-line bg-surface p-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="flex flex-col gap-1">
-                    <p className="text-body font-semibold text-ink">
-                      {formatarHora(h.inicio)}–{formatarHora(h.fim)}
-                    </p>
-                    {h.consulta ? (
-                      <p className="text-body text-ink">
-                        {h.consulta.paciente.nome} · <span className={corSituacao(h.consulta.situacao)}>{SITUACOES_CONSULTA[h.consulta.situacao]}</span>
-                      </p>
-                    ) : (
-                      <p className="text-body text-muted">Livre</p>
-                    )}
-                  </div>
-                  {h.consulta ? (
-                    <ButtonLink to={`/medico/atendimentos/${h.consulta.id}`}>Abrir atendimento</ButtonLink>
-                  ) : (
-                    <Button kind="secondary" loading={removendo === h.id} disabled={!!removendo} onClick={() => remover(h)}>
-                      Remover<span className="sr-only"> horário das {formatarHora(h.inicio)}</span>
-                    </Button>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))
-      )}
-    </section>
-  )
-}
-
-const TAMANHO = 10
-
-function Historico() {
-  const [pagina, setPagina] = useState(1)
-  const lista = useAsync(() => atendimentoService.listar({ pagina, tamanhoPagina: TAMANHO }), [pagina])
-
-  return (
-    <section className="flex flex-col gap-4" aria-labelledby="titulo-historico">
-      <h2 id="titulo-historico" className="text-section font-semibold text-ink">
-        Atendimentos concluídos e anteriores
-      </h2>
-      {lista.carregando ? (
-        <Loading texto="Carregando histórico…" />
-      ) : lista.erro || !lista.dados ? (
-        <ErrorState mensagens={lista.erro ?? ['Não foi possível carregar o histórico.']} onRetry={lista.recarregar} />
-      ) : !lista.dados.itens.length ? (
-        <EmptyState title="Nenhum atendimento ainda">As consultas marcadas pelos pacientes aparecem aqui.</EmptyState>
-      ) : (
-        <>
-          <ul className="flex flex-col gap-3">
-            {lista.dados.itens.map((c) => (
-              <ConsultaCard key={c.id} consulta={c} />
-            ))}
-          </ul>
+    <li className="flex flex-col gap-2 rounded-card border border-line bg-background p-4">
+      <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex flex-col gap-0.5">
+          <h3 className="text-body font-semibold text-ink">{p.nome}</h3>
           <p className="text-small text-muted">
-            Página {pagina} · {lista.dados.total} {lista.dados.total === 1 ? 'atendimento' : 'atendimentos'}
+            {p.idade !== null && `${p.idade} anos · `}Conta {SITUACOES_PACIENTE[p.situacao].toLowerCase()}
+            {p.tipoSanguineo && ` · ${p.tipoSanguineo}`}
           </p>
-          <Pagination pagina={pagina} total={lista.dados.total} tamanhoPagina={TAMANHO} onChange={setPagina} />
-        </>
-      )}
-    </section>
-  )
-}
+          <p className="text-small text-muted">
+            Última doação:{' '}
+            {p.ultimaDoacao ? `${formatarData(p.ultimaDoacao.registradoEm)} · ${p.ultimaDoacao.hemocentro.nome}` : 'nenhuma registrada'}
+          </p>
+        </div>
+        <p className={`text-small font-semibold uppercase ${a.status === 'AGENDADO' ? 'text-brand' : 'text-success'}`}>
+          {STATUS_AGENDAMENTO[a.status]}
+        </p>
+      </div>
 
-/** Card de consulta do Figma (832:9757): situação, paciente, data e ação. */
-export function ConsultaCard({ consulta: c }: { consulta: ConsultaMedicoResumo }) {
-  return (
-    <li className="flex flex-col gap-2 rounded-card border border-line bg-surface p-4">
-      <p className={`text-small font-semibold uppercase ${corSituacao(c.situacao)}`}>{SITUACOES_CONSULTA[c.situacao]}</p>
-      <h3 className="text-section font-semibold text-ink">{c.paciente.nome}</h3>
-      <p className="text-body text-ink">{formatarHorario(c.inicio, c.fim)}</p>
-      <ButtonLink to={`/medico/atendimentos/${c.id}`} kind={c.situacao === 'AGENDADA' ? 'primary' : 'secondary'} block className="mt-1">
-        {c.situacao === 'AGENDADA' ? 'Abrir atendimento' : 'Consultar atendimento'}
-        <span className="sr-only"> de {c.paciente.nome}</span>
-      </ButtonLink>
+      {a.doacao && (
+        <p className="text-body text-ink">
+          Registro: {RESULTADOS_DOACAO[!a.doacao.compareceu ? 'AUSENTE' : a.doacao.doou ? 'DOOU' : 'NAO_DOOU']}
+          {a.doacao.tipoSanguineo && ` · ${a.doacao.tipoSanguineo}`}
+          {a.doacao.motivoNaoDoacao && ` · ${a.doacao.motivoNaoDoacao}`}
+        </p>
+      )}
+
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <Link to={`/medico/pacientes/${p.id}`} className="self-start rounded text-small font-semibold text-brand hover:underline">
+          Ver histórico de doações<span className="sr-only"> de {p.nome}</span>
+        </Link>
+      </div>
+
+      {a.status === 'AGENDADO' &&
+        (!podeRegistrar ? (
+          <p className="text-small text-muted">O registro fica disponível a partir do dia do agendamento.</p>
+        ) : registrando ? (
+          <RegistroDoacao agendamentoId={a.id} onRegistrado={onRegistrado} onCancelar={() => setRegistrando(false)} />
+        ) : (
+          <Button onClick={() => setRegistrando(true)}>Registrar atendimento</Button>
+        ))}
     </li>
   )
 }
