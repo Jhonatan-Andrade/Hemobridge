@@ -9,7 +9,11 @@ type Props = {
   renderConfirmacao: (horario: HorarioDisponivel) => ReactNode
 }
 
-/** RF05: horários por data com as vagas restantes ("4 de 6 vagas"); lotados ficam indisponíveis. */
+/** "1 vaga livre de 2", "2 vagas livres de 2": deixa claro que o número é o que sobra. */
+const vagasLivres = (restantes: number, total: number) =>
+  `${restantes} ${restantes === 1 ? 'vaga livre' : 'vagas livres'} de ${total}`
+
+/** RF05: horários por data com as vagas restantes ("4 vagas livres de 6"); lotados ficam indisponíveis. */
 export function EscolhaDeHorario({ horarios, renderConfirmacao }: Props) {
   const porDia = useMemo(() => {
     const dias = new Map<string, HorarioDisponivel[]>()
@@ -73,7 +77,7 @@ export function EscolhaDeHorario({ horarios, renderConfirmacao }: Props) {
                   {h.horaInicio}–{h.horaFim}
                 </span>
                 <span className={`text-small ${h.disponivel ? 'text-muted' : 'font-semibold text-error'}`}>
-                  {h.disponivel ? `${h.vagasRestantes} de ${h.vagasTotal} vagas` : 'Esgotado'}
+                  {h.disponivel ? vagasLivres(h.vagasRestantes, h.vagasTotal) : 'Esgotado'}
                 </span>
               </button>
             ))}

@@ -58,7 +58,7 @@ export function HorariosPage() {
                   titulo: 'Vagas',
                   celula: (h) => (
                     <span className={h.vagasRestantes ? '' : 'font-semibold text-error'}>
-                      {h.vagasRestantes ? `${h.vagasRestantes} de ${h.vagasTotal} livres` : `Esgotado (${h.vagasTotal})`}
+                      {h.vagasRestantes ? `${h.vagasRestantes} ${h.vagasRestantes === 1 ? 'vaga livre' : 'vagas livres'} de ${h.vagasTotal}` : `Esgotado (${h.vagasTotal})`}
                     </span>
                   ),
                 },
