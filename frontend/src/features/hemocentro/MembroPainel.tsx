@@ -1,18 +1,18 @@
 import { useState, type FormEvent } from 'react'
 import { mensagemDeErro } from '../../api/client'
-import type { Medico } from '../../api/types'
+import type { MembroEquipe } from '../../api/types'
 import { Button, ErrorState, Loading, Message, TextField } from '../../components/ui'
 import { formatarData, formatarDataHora, mascaraTelefone, somenteDigitos, STATUS_USUARIO } from '../../lib/formato'
 import { useAsync } from '../../lib/useAsync'
 import { emailValido, telefoneValido, temErros, type Erros } from '../../lib/validacao'
-import { medicosService } from '../../services/medicos'
+import { equipeService } from '../../services/equipe'
 
 type Props = { id: string; onAlterado: (mensagem: string) => void }
 
-// Detalhes do médico (UC22): edição (FA01), desativação (FA02) e reenvio da senha provisória (FA03).
-export function MedicoPainel({ id, onAlterado }: Props) {
+// Detalhes do médico (RF14): edição de contato, desativação/reativação e reenvio da senha provisória.
+export function MembroPainel({ id, onAlterado }: Props) {
   const [versao, setVersao] = useState(0)
-  const detalhe = useAsync(() => medicosService.detalhar(id), [id, versao])
+  const detalhe = useAsync(() => equipeService.detalhar(id), [id, versao])
   const [confirmando, setConfirmando] = useState(false)
   const [processando, setProcessando] = useState(false)
   const [falha, setFalha] = useState<string[]>([])
@@ -47,19 +47,15 @@ export function MedicoPainel({ id, onAlterado }: Props) {
       <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-small">
         <dt className="text-muted">Nome</dt>
         <dd className="text-ink">{m.nome}</dd>
-        <dt className="text-muted">CRM</dt>
-        <dd className="text-ink">
-          {m.crm}/{m.ufCrm}
-        </dd>
         <dt className="text-muted">CPF</dt>
-        <dd className="text-ink">{m.cpf}</dd>
+        <dd className="text-ink">{m.cpf ?? '—'}</dd>
         <dt className="text-muted">Situação</dt>
         <dd className={m.status === 'ATIVO' ? 'text-success' : 'text-error'}>
           {STATUS_USUARIO[m.status]}
           {m.primeiroAcessoPendente && <span className="text-muted"> · primeiro acesso pendente</span>}
         </dd>
-        <dt className="text-muted">CRM conferido</dt>
-        <dd className="text-ink">{formatarData(m.crmConferidoEm)}</dd>
+        <dt className="text-muted">Cadastrado em</dt>
+        <dd className="text-ink">{formatarData(m.criadoEm)}</dd>
       </dl>
 
       {m.status === 'ENCERRADO' ? (
@@ -67,7 +63,7 @@ export function MedicoPainel({ id, onAlterado }: Props) {
           <p>Conta encerrada. Os dados não podem ser alterados.</p>
         </Message>
       ) : (
-        <EdicaoMedico key={`${m.email}|${m.telefone}`} medico={m} onSalvo={atualizar} />
+        <EdicaoMembro key={`${m.email}|${m.telefone}`} membro={m} onSalvo={atualizar} />
       )}
 
       {falha.length > 0 && (
@@ -84,7 +80,7 @@ export function MedicoPainel({ id, onAlterado }: Props) {
           loading={processando}
           onClick={() =>
             executar(async () => {
-              const r = await medicosService.reenviarSenhaProvisoria(m.id)
+              const r = await equipeService.reenviarSenhaProvisoria(m.id)
               return r.senhaProvisoriaEnviada
                 ? `Nova senha provisória enviada para ${m.email}. Ela vale até ${formatarDataHora(r.senhaProvisoriaExpiraEm)}.`
                 : 'A senha provisória foi gerada, mas o e-mail não pôde ser enviado. Tente novamente.'
@@ -96,7 +92,7 @@ export function MedicoPainel({ id, onAlterado }: Props) {
       )}
 
       {m.status === 'INATIVO' && (
-        <Button kind="secondary" loading={processando} onClick={() => executar(() => medicosService.ativar(m.id).then(() => 'Médico reativado.'))}>
+        <Button kind="secondary" loading={processando} onClick={() => executar(() => equipeService.atualizar(m.id, { ativo: true }).then(() => 'Médico reativado.'))}>
           Reativar
         </Button>
       )}
@@ -108,7 +104,7 @@ export function MedicoPainel({ id, onAlterado }: Props) {
               <Button
                 kind="destructive"
                 loading={processando}
-                onClick={() => executar(() => medicosService.desativar(m.id).then(() => 'Médico desativado.'))}
+                onClick={() => executar(() => equipeService.atualizar(m.id, { ativo: false }).then(() => 'Médico desativado.'))}
               >
                 Confirmar desativação
               </Button>
@@ -128,7 +124,7 @@ export function MedicoPainel({ id, onAlterado }: Props) {
 
 type CamposEdicao = { email: string; telefone: string }
 
-function EdicaoMedico({ medico: m, onSalvo }: { medico: Medico; onSalvo: (mensagem: string) => void }) {
+function EdicaoMembro({ membro: m, onSalvo }: { membro: MembroEquipe; onSalvo: (mensagem: string) => void }) {
   const [c, setC] = useState<CamposEdicao>({ email: m.email, telefone: m.telefone ? mascaraTelefone(m.telefone) : '' })
   const [erros, setErros] = useState<Erros<CamposEdicao>>({})
   const [falha, setFalha] = useState<string[]>([])
@@ -145,7 +141,7 @@ function EdicaoMedico({ medico: m, onSalvo }: { medico: Medico; onSalvo: (mensag
     setEnviando(true)
     setFalha([])
     try {
-      await medicosService.atualizar(m.id, { email: c.email.trim(), telefone: somenteDigitos(c.telefone) })
+      await equipeService.atualizar(m.id, { email: c.email.trim(), telefone: somenteDigitos(c.telefone) })
       onSalvo('Dados do médico atualizados.')
     } catch (err) {
       setFalha(mensagemDeErro(err))
@@ -172,7 +168,7 @@ function EdicaoMedico({ medico: m, onSalvo }: { medico: Medico; onSalvo: (mensag
         error={erros.telefone}
         disabled={enviando}
       />
-      <p className="px-1 text-caption text-muted">Nome, CPF e CRM não podem ser alterados.</p>
+      <p className="px-1 text-caption text-muted">Nome e CPF não podem ser alterados.</p>
       <Button type="submit" loading={enviando}>
         Salvar
       </Button>
