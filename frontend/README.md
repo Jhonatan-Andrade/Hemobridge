@@ -1,6 +1,6 @@
 # HemoBridge · Frontend
 
-Interface web do HemoBridge, feita em **React 19 + Vite + TypeScript + React Router + Tailwind CSS**. O visual segue o arquivo do Figma **HemoBridge / Interfaces oficiais** (`7aKvXrajoLmEGpaYsn0dQ1`).
+Interface web do HemoBridge, feita em **React 19 + Vite + TypeScript + React Router + Tailwind CSS**. O visual segue o arquivo do Figma **HemoBridge / Interfaces oficiais** (`7aKvXrajoLmEGpaYsn0dQ1`), adaptado ao escopo de agendamento de doação em hemocentros (ver [`../docs/requisitos.md`](../docs/requisitos.md)).
 
 ## Instalação e execução
 
@@ -8,7 +8,7 @@ Requisitos: Node 20 ou superior e o backend (`../backend`) rodando.
 
 ```bash
 cd frontend
-cp .env.example .env      # ajuste VITE_API_URL se o backend não estiver em http://localhost:3333
+cp .env.example .env      # ajuste VITE_API_URL se a API não estiver em http://localhost:3333/api
 npm install
 npm run dev               # http://localhost:5173
 npm run build             # gera dist/
@@ -19,15 +19,15 @@ npm run lint
 
 | Variável | Padrão | Uso |
 | --- | --- | --- |
-| `VITE_API_URL` | `http://localhost:3333` | URL base da API NestJS, sem barra no final |
+| `VITE_API_URL` | `http://localhost:3333/api` | URL base da API NestJS, já com o prefixo `/api`, sem barra no final |
 
 O backend precisa liberar a origem do frontend em `FRONTEND_URL` ou `CORS_ORIGENS` (veja `backend/.env.example`).
 
-### Dependências adicionadas
+### Dependências
 
 | Pacote | Por quê |
 | --- | --- |
-| `react-router-dom` | Rotas e redirecionamento por perfil (já estava no working tree) |
+| `react-router-dom` | Rotas e redirecionamento por perfil e papel |
 | `tailwindcss`, `@tailwindcss/vite` (dev) | Estilização pedida no projeto; o plugin integra o Tailwind 4 ao Vite |
 
 Não há biblioteca de componentes, ícones ou gráficos: tudo vem do Figma e dos componentes em `src/components/ui`.
@@ -37,92 +37,58 @@ Não há biblioteca de componentes, ícones ou gráficos: tudo vem do Figma e do
 ```
 src/
 ├── api/            # cliente HTTP (token, erros) e tipos espelhados do backend
-├── services/       # camada de serviços por recurso: auth, hospitais, necessidades, doador, consultas e exames do paciente, área do médico
+├── services/       # auth, hemocentros (consulta pública), paciente, equipe (médico e Admin do hemocentro) e admin
 ├── components/
 │   ├── ui/         # componentes da biblioteca do Figma (Button, Field, Message, Card, LevelBadge…)
 │   ├── layout/     # AppShell (cabeçalho + navegação lateral) e PageTitle
+│   ├── DataTable.tsx
 │   └── NeedsTable.tsx
 ├── features/
-│   ├── home/       # home pública e boas-vindas do visitante (conteúdo estático)
-│   ├── auth/       # contexto de sessão, rotas protegidas, login, pré-cadastro, senha
-│   ├── donor/      # painel do doador, recomendados, busca e detalhes do banco de sangue
-│   ├── bloodbank/  # necessidades, dashboard e equipe médica do hospital
-│   └── medico/     # agenda, atendimento e avaliação de exames
+│   ├── home/       # Apresentação (pública)
+│   ├── auth/       # sessão, rotas protegidas, login, cadastro, senha
+│   ├── paciente/   # Painel, Doar, escolha de horário e exclusão de dados
+│   ├── medico/     # agenda do dia, registro da doação e histórico do paciente
+│   ├── hemocentro/ # Admin do hemocentro: horários e vagas, necessidades, ativações e equipe
+│   └── admin/      # administrador da plataforma: hemocentros e seus Admins
 ├── lib/            # formatação, validação e useAsync
 └── assets/         # fontes Poppins, ícones, marca e imagens exportados do Figma
 ```
 
-Os tokens de design (cores, tipografia, raios, sombra e larguras) ficam em `tailwind.config.ts` com os mesmos nomes das variáveis do Figma (`brand`, `ink`, `muted`, `line`, `background`, `error`/`warning`/`info`/`success`…). O `src/index.css` carrega esse arquivo com `@config`.
+Os tokens de design (cores, tipografia, raios, sombra e larguras) ficam em `tailwind.config.ts` com os mesmos nomes das variáveis do Figma. O `src/index.css` carrega esse arquivo com `@config`.
 
-## Telas implementadas
+## Telas
 
-| Rota | Tela | Frame do Figma |
+| Rota | Quem acessa | Tela |
 | --- | --- | --- |
-| `/` | Home pública (estática, sem API) | 43:1340 · mobile 660:7571 |
-| `/boas-vindas` | Boas-vindas do visitante (tour de 1 etapa) | 192:4693 · mobile 660:9731 |
-| `/entrar` | Entrar (inicial, erro, carregando) | 8:1584, 8:1636, 8:1720 · mobile 660:6373 |
-| `/cadastro` | Pré-cadastro (inicial, erro, carregando, confirmação) | 8:1257 (a confirmação foi montada com Card/Button, sem conferir o frame 8:1571) |
-| `/recuperar-senha` | Recuperar senha e confirmação neutra | 8:2205, 8:2222 (montada com os componentes base, frame não conferido) |
-| `/primeiro-acesso` | Primeiro acesso do profissional | 8:2318 (montada com os componentes base, frame não conferido) |
-| `/doador` | Meu painel (por situação, carregando, falha) | 8:1858 (aprovado); os textos das outras situações (8:1746–8:1919) foram escritos sem conferir os frames |
-| `/doador/recomendados` | Locais recomendados | 906:9914 |
-| `/doador/consultas` | Minhas consultas: próxima consulta com link da sala, cancelamento e reagendamento (até 24 h antes) e consultas anteriores | 8:2449 |
-| `/doador/exames` | Meus exames: exames pedidos, orientações, envio e reenvio do resultado (PDF, JPG ou PNG até 5 MB) e arquivos enviados | 8:2461 |
-| `/locais` | Encontrar locais (busca com filtros) | 707:7062 |
-| `/locais/:id` | Detalhes do banco de sangue e agendamento da teleconsulta com os médicos do local (dia, horário e aceite do termo de telessaúde) | sem frame próprio (ver divergências) |
-| `/hospital/necessidades` | Necessidades | 101:3114 |
-| `/hospital` | Painel do hospital (indicadores) | 910:9870 |
-| `/hospital/equipe-medica` | Equipe médica: listagem, cadastro com declaração de CRM conferido, edição, desativação e reenvio de senha provisória | 101:3113 |
-| `/admin` | Painel geral do administrador | 154:3520 |
-| `/admin/instituicoes` | Hospitais e representantes: listagem, edição, desativação e novos representantes | 101:3111 |
-| `/admin/instituicoes/nova` | Cadastrar instituição (hospital + primeiro representante), com item próprio no menu lateral do administrador | formulário de 102:3161 em tela própria |
-| `/admin/usuarios` | Usuários: filtros, edição, ativação/desativação, reenvio de senha provisória e novo administrador | 101:3112 |
-| `/medico` | Minha agenda: calendário, publicação de horários com link da teleconsulta, próximos horários e histórico | 101:3115, 832:9757 |
-| `/medico/atendimentos` | Consultas marcadas, da mais próxima para a mais distante | item "Atendimento" de 558:5767 |
-| `/medico/atendimentos/:id` | Atendimento: dados do paciente, entrada na sala e registro do desfecho (exames, inapto, não compareceu ou cancelamento) | 154:3704 |
-| `/medico/exames` | Exames dos atendimentos (para avaliar ou todos) | 154:3753 |
-| `/medico/exames/:id` | Avaliar resultado: abrir o arquivo, validar com tipo sanguíneo ou reprovar com motivo | 824:10121, 824:10086 |
+| `/` | todos | Apresentação: o que é, por que doar, como funciona e hemocentros parceiros (RF03) |
+| `/entrar`, `/cadastro`, `/recuperar-senha` | visitante | Login, cadastro com o termo LGPD (inclui o compartilhamento entre hemocentros) e recuperação de senha |
+| `/primeiro-acesso` | equipe e administradores | Troca da senha provisória e aceite do termo de responsabilidade |
+| `/doar` | todos | Hemocentros com busca por nome/cidade e necessidades; com conta ativa, quem precisa do tipo do paciente vem primeiro (RF05, RF18) |
+| `/doar/:id` | todos (agendar: paciente) | Detalhes, necessidades, horários por data com vagas restantes e confirmação; com `?reagendar=<id>`, troca o horário (RF06, RF07) |
+| `/painel` | paciente | Dados, status da conta, tipo sanguíneo, próximos agendamentos (cancelar/reagendar), histórico de doações e exclusão de dados (RF04, RF16) |
+| `/medico` | médico | Agenda do dia por horário e registro da doação (RF10, RF11) |
+| `/medico/pacientes/:id`, `/hemocentro/pacientes/:id` | equipe | Histórico do paciente em todos os hemocentros, com a origem de cada registro (RF12) |
+| `/hemocentro` | Admin do hemocentro | Horários e vagas: avulso, lote semanal, ajuste de vagas e desativação (RF08) |
+| `/hemocentro/necessidades` | Admin do hemocentro | Nível de necessidade por tipo sanguíneo (RF17) |
+| `/hemocentro/ativacoes` | Admin do hemocentro | Pacientes pendentes com doação tipada no hemocentro e ativação (RF13) |
+| `/hemocentro/equipe` | Admin do hemocentro | Médicos: cadastro, edição, desativação e reenvio de senha provisória (RF14) |
+| `/admin`, `/admin/hemocentros/novo` | administrador da plataforma | Lista de hemocentros, cadastro com o Admin inicial, edição e desativação (RF15) |
 
-Cada tela tem estados de carregamento, vazio e erro. As rotas `/doador/*` exigem o perfil Paciente, `/hospital/*` exige Representante e `/medico/*` exige Médico. Quem não está logado vai para `/entrar` e, depois do login, volta para a página de onde veio. Quem já está logado não vê as telas de acesso.
+Cada tela tem estados de carregamento, vazio e erro. Quem não está logado vai para `/entrar` e, depois do login, volta para a página de onde veio. Quem tenta abrir a área de outro perfil ou papel volta para a própria área.
 
 ## O que está mockado
 
-Nada. O painel do paciente usa `GET /pacientes/me`, criado no backend junto com a agenda e os exames.
+Nada: todas as telas usam a API.
 
-## Contratos pendentes no backend
-
-Para completar as telas, faltam:
-
-1. Pré-triagem do UC09 e notificações ao paciente (UC12): o backend ainda não registra nenhuma das duas.
-2. (Opcional) filtro `nivel` em `GET /hospitais`. Hoje o filtro por nível é aplicado no frontend sobre a página recebida, então uma página pode vir com menos itens.
-3. (Opcional) registro de doações por hospital, para os gráficos "Doações por tipo" e "Doações por semana" do Figma.
-4. (Opcional) `GET /admin/indicadores` → `{ doadoresAprovados, hospitaisAtivos, criticosPorEstado: [{ estado, hospitais, tipos }] }`. Hoje o Painel geral calcula esses números no navegador percorrendo `/admin/usuarios?perfil=PACIENTE` e `/hospitais` (até 1.000 registros de cada; acima disso a tela avisa que o número é parcial).
-
-## Divergências em relação ao Figma e aos requisitos
+## Divergências em relação ao Figma
 
 | Ponto | Decisão |
 | --- | --- |
-| "Banco de sangue" com cadastro próprio | No backend, o banco de sangue é o **hospital**, criado pelo administrador e mantido pelo **Representante**. Não há autocadastro: o representante entra com a senha provisória e a troca em `/primeiro-acesso`. |
-| Níveis "crítico, baixo, adequado, alto" | Usei os níveis do backend e do Figma: Crítico, Baixo, Estável, Adequado e Não informado. |
-| Tipo sanguíneo no cadastro do doador | O tipo é definido pela equipe médica depois do exame (RN10). O pré-cadastro segue o Figma e o backend, sem tipo sanguíneo. |
-| Município como lista do estado | O campo é texto livre, habilitado depois de escolher o estado, para não depender de uma API externa de municípios. |
-| Largura dos campos | No Figma o controle tem 300px mesmo em colunas de 720px. Aqui ele ocupa a largura da coluna. |
-| Mapa estático em "Encontrar locais" | No lugar do mapa ilustrativo entra a lista de resultados com os filtros pedidos. A distância usa a geolocalização do navegador, só se a pessoa permitir. |
-| Detalhes do banco de sangue | Não há frame dedicado. A tela combina o cabeçalho das telas de Locais com a tabela de necessidades de 101:3114. |
-| Agendamento no local | O UC09 parte de "Agendar consulta" com todos os médicos. Aqui o paciente agenda pela tela do hemocentro, só com os médicos dele (filtro `hospitalId` em `GET /paciente/consultas/horarios`). Visitantes veem "Entrar para agendar" e voltam ao local depois do login. Doadores aprovados não agendam. A pré-triagem do UC09 ainda não existe no backend. |
-| Dashboard do hospital | Os gráficos de doações do Figma viraram "Necessidades por tipo" (urgência atual) e "Evolução por semana" (alterações de nível no histórico), porque o backend não registra doações. |
-| Comunidade na Home pública | Não existe API de comunidade. As três publicações são o conteúdo estático do Figma (`features/home/publicacoes.ts`), as curtidas são só contadores, e "Ver comunidade", "Ler publicação" e os comentários levam a `/entrar`. "Próximos passos" e "Como funciona? Ver tour" abrem `/boas-vindas`. |
-| Menu do visitante | O Figma (468:5148) tem Início, Comunidade, Entrar, Fazer pré-cadastro e Acessibilidade. Aqui ficam Início, Encontrar locais, Entrar e Fazer pré-cadastro. |
-| Fonte Fraunces | O destaque "A ponte que" usa Fraunces Italic (OFL), salva como subconjunto latino em `src/assets/fonts`, sem dependência nova. |
-| Rotas desconhecidas | Agora redirecionam para a Home pública (`/`) em vez de `/entrar`. |
-| Equipe médica | O Figma filtra por Situação e Estado e o formulário tem Nome, CRM, Estado e a declaração. O backend não filtra médicos por estado, então o segundo filtro virou busca por nome, e-mail ou CRM. O cadastro também pede CPF, e-mail e telefone, que o backend exige. Na edição só e-mail e telefone mudam (nome, CPF e CRM são fixos no backend). |
-| Navegação lateral | Comunidade, Perfil, Estoque e Relatórios ficaram fora do escopo. Os ícones vêm do Figma, e o botão Sair fica no cabeçalho. |
-| Área do médico | O menu segue o overlay 558:5767 (Agenda, Atendimento e Exames, com os mesmos ícones). Perfil e o seletor "Instituição de atendimento" ficaram de fora: o médico tem um único hospital e não há API de perfil. O card "Pré-triagem" do Atendimento também saiu, porque o backend ainda não registra a pré-triagem. |
-| Publicação de horário | O Figma pede início e fim de um único período. Aqui o período é dividido em consultas com a duração escolhida (15 a 60 min), como define o UC13, e os horários são de Brasília. |
-| Desfecho do atendimento | O campo "Desfecho" virou uma escolha entre quatro opções (realizada com exames, realizada com paciente inapto, não compareceu e cancelar). Antes do horário, só o cancelamento fica habilitado (FE01 do UC14). Os exames são digitados um por linha. |
-| Telas do administrador sem API | Mapa regional IBGE, Moderação, Relatórios gerais, Comunidade, Perfil, Solicitações de privacidade, Indicadores e Boas-vindas não foram implementadas: o backend não tem endpoints para elas. O item Relatórios saiu do rail. |
-| Painel geral | Os cards mostram os números calculados (ver contrato 4). "Evolução agregada" fica como estado vazio, porque não há registro de doações, e o botão "Ver indicadores" foi removido por não haver tela de destino. |
-| Formulário de hospital | O Figma mostra só Nome, Cidade e UF, Endereço e Representante. O backend exige CNPJ, CEP, telefone, latitude e longitude, e no cadastro também nome, CPF, e-mail e telefone do primeiro representante. Todos esses campos estão no formulário. |
-| Usuários e solicitações | O backend não tem fluxo de aprovação de solicitações. "Pendente" indica conta criada que ainda não fez o primeiro acesso, e a ação "Avaliar" virou "Detalhes". O novo administrador também pede CPF, que o backend exige. |
-| Desativação | Desativar hospital ou usuário pede confirmação na própria tela, porque encerra as sessões abertas. A pessoa logada não vê a opção de desativar a própria conta. |
-| Breakpoints | O desktop segue os frames de 1440px. Abaixo de 768px (`md`), o rail vira menu sobreposto com fundo de proteção, o cabeçalho esconde o texto de contexto e o acionador do menu fica claro, como no frame mobile 660:6373. Tabelas viram listas abaixo de 640px (`sm`). |
+| Telas do escopo anterior | Os frames de teleconsulta, exames, estoque, comunidade, relatórios e indicadores não são usados no novo escopo. As telas novas (horários e vagas, ativação, registro da doação, histórico) foram montadas com os componentes da biblioteca. |
+| Representante do hospital | Virou Admin do hemocentro; as telas de Necessidades e Equipe médica (101:3114 e 101:3113) foram adaptadas a ele. A equipe médica não tem mais CRM nem declaração de CRM conferido. |
+| Encontrar locais | Virou Doar, sem mapa e sem geolocalização; a busca é por nome ou cidade. |
+| Níveis de necessidade | Urgente, Necessário e Estável, mais "Não informado" para o tipo que o hemocentro ainda não preencheu. |
+| Cadastro | O "pré-cadastro" do Figma (8:1257) virou cadastro simples, sem peso, sexo e município, porque não há verificação automática de elegibilidade. O texto do termo é exibido por completo. |
+| Menu do visitante | Início, Doar, Entrar e Criar conta. |
+| Exclusão de dados | Depois de confirmar com a senha, a conta é encerrada e a pessoa volta à Apresentação com a confirmação. |
+| Breakpoints | O desktop segue os frames de 1440px. Abaixo de 768px (`md`), o rail vira menu sobreposto; tabelas viram listas abaixo de 640px (`sm`). |
