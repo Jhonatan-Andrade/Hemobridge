@@ -185,7 +185,7 @@ describe('AuthService.definirSenhaPrimeiroAcesso', () => {
       Promise.resolve({
         id: 'm1',
         nome: 'Dr. João',
-        email: 'joao@hospital.com',
+        email: 'joao@hemocentro.org',
         perfil: 'EQUIPE',
         senhaProvisoria: data.senhaProvisoria,
         versaoSessao: 1,

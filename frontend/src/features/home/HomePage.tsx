@@ -14,7 +14,7 @@ const oQueE =
 
 const motivos = [
   ['Uma doação ajuda até quatro pessoas', 'O sangue é separado em componentes usados em cirurgias, tratamentos de câncer, partos e acidentes.'],
-  ['Não há substituto', 'O sangue não pode ser fabricado. Os estoques dependem de quem doa com regularidade.'],
+  ['Não há substituto', 'O sangue não pode ser fabricado. Os hemocentros dependem de quem doa com regularidade.'],
   ['Sem fila e sem viagem perdida', 'Cada horário tem um número de vagas. Quando você agenda, a sua está garantida.'],
 ] as const
 

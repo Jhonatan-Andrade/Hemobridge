@@ -22,7 +22,7 @@ const NOVA_SENHA = 'NovaSenha9';
 // CPFs válidos (dígitos verificadores) só para o teste.
 function cpf(base: string): string {
   const dv = (d: string) => {
-    const resto = ([...d].reduce((s, n, i) => s + Number(n) * (d.length + 1 - i), 0) * 10) % 11;
+    const resto = (d.split('').reduce((s, n, i) => s + Number(n) * (d.length + 1 - i), 0) * 10) % 11;
     return resto === 10 ? 0 : resto;
   };
   const d1 = dv(base);

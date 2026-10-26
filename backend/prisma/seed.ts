@@ -79,7 +79,7 @@ async function seedAdministradorInicial() {
 /** CPF válido a partir de 9 dígitos (só para dados fictícios). */
 function cpfFicticio(base: string): string {
   const dv = (digitos: string) => {
-    const soma = [...digitos].reduce((acc, d, i) => acc + Number(d) * (digitos.length + 1 - i), 0);
+    const soma = digitos.split('').reduce((acc, d, i) => acc + Number(d) * (digitos.length + 1 - i), 0);
     const resto = (soma * 10) % 11;
     return resto === 10 ? 0 : resto;
   };
