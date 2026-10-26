@@ -60,7 +60,7 @@ Os tokens de design (cores, tipografia, raios, sombra e larguras) ficam em `tail
 
 | Rota | Quem acessa | Tela |
 | --- | --- | --- |
-| `/` | todos | Apresentação: o que é, por que doar, como funciona e hemocentros parceiros (RF03) |
+| `/` | todos | Apresentação: o que é, por que doar, como funciona e hemocentros parceiros (RF03). Logado, mostra o menu da própria área (todos têm o item Início) e um atalho para ela |
 | `/entrar`, `/cadastro`, `/recuperar-senha` | visitante | Login, cadastro com o termo LGPD (inclui o compartilhamento entre hemocentros) e recuperação de senha |
 | `/primeiro-acesso` | equipe e administradores | Troca da senha provisória e aceite do termo de responsabilidade |
 | `/doar` | todos | Hemocentros com busca por nome/cidade e necessidades; com conta ativa, quem precisa do tipo do paciente vem primeiro (RF05, RF18) |

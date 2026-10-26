@@ -6,7 +6,9 @@ import { AppShell } from '../../components/layout/AppShell'
 import { ButtonLink, Card, ErrorState, Loading, Message } from '../../components/ui'
 import { useAsync } from '../../lib/useAsync'
 import { hemocentrosService } from '../../services/hemocentros'
-import { navVisitante } from '../auth/navVisitante'
+import { rotaInicial, useAuth } from '../auth/authState'
+import { navDoUsuario } from '../auth/navegacao'
+import { SairButton } from '../auth/SairButton'
 import { HemocentroCard } from '../paciente/HemocentroCard'
 
 const oQueE =
@@ -26,14 +28,16 @@ const etapas = [
 ] as const
 
 // Figma: Web desktop / Acesso e orientações / Home pública / Inicial (43:1340) e mobile (660:7571).
-// RF03 – apresentação pública do Hemobridge.
+// RF03 – apresentação pública do Hemobridge. Aparece para todos os perfis: quem está logado
+// vê o menu da própria área e um atalho para ela no lugar de "Criar conta".
 export function HomePage() {
+  const { usuario } = useAuth()
   const parceiros = useAsync(() => hemocentrosService.listar({ tamanhoPagina: 4 }), [])
   // Ex.: confirmação da exclusão de dados (RF16), que encerra a sessão e volta para cá.
   const aviso = (useLocation().state as { aviso?: string } | null)?.aviso
 
   return (
-    <AppShell nav={navVisitante} compacto>
+    <AppShell nav={navDoUsuario(usuario)} acoes={usuario ? <SairButton /> : undefined} compacto>
       <div className="mx-auto flex w-full max-w-296 flex-col gap-10">
         {aviso && (
           <Message tone="success">
@@ -62,14 +66,20 @@ export function HomePage() {
                   </h1>
                   <p className="text-body">Escolha um hemocentro, veja os horários com vaga e agende sua doação de sangue.</p>
                 </div>
-                <div className="flex w-full flex-col gap-3 sm:flex-row">
-                  <ButtonLink to="/cadastro" kind="editorial">
-                    Criar conta
+                {usuario ? (
+                  <ButtonLink to={rotaInicial(usuario)} kind="editorial">
+                    Ir para minha área
                   </ButtonLink>
-                  <ButtonLink to="/entrar" kind="secondary">
-                    Já tenho conta
-                  </ButtonLink>
-                </div>
+                ) : (
+                  <div className="flex w-full flex-col gap-3 sm:flex-row">
+                    <ButtonLink to="/cadastro" kind="editorial">
+                      Criar conta
+                    </ButtonLink>
+                    <ButtonLink to="/entrar" kind="secondary">
+                      Já tenho conta
+                    </ButtonLink>
+                  </div>
+                )}
                 <ButtonLink to="/doar" kind="secondary">
                   Ver hemocentros
                 </ButtonLink>
@@ -160,16 +170,26 @@ export function HomePage() {
           )}
         </section>
 
-        <section className="flex flex-col items-center gap-3 rounded-sheet bg-surface p-6 text-center">
-          <h2 className="text-section font-semibold text-ink">Pronto para doar?</h2>
-          <p className="text-body text-muted">Crie sua conta e agende em poucos minutos.</p>
-          <div className="flex w-full flex-col justify-center gap-3 sm:flex-row">
-            <ButtonLink to="/cadastro">Criar conta</ButtonLink>
-            <ButtonLink to="/entrar" kind="secondary">
-              Entrar
-            </ButtonLink>
-          </div>
-        </section>
+        {!usuario ? (
+          <section className="flex flex-col items-center gap-3 rounded-sheet bg-surface p-6 text-center">
+            <h2 className="text-section font-semibold text-ink">Pronto para doar?</h2>
+            <p className="text-body text-muted">Crie sua conta e agende em poucos minutos.</p>
+            <div className="flex w-full flex-col justify-center gap-3 sm:flex-row">
+              <ButtonLink to="/cadastro">Criar conta</ButtonLink>
+              <ButtonLink to="/entrar" kind="secondary">
+                Entrar
+              </ButtonLink>
+            </div>
+          </section>
+        ) : (
+          usuario.perfil === 'PACIENTE' && (
+            <section className="flex flex-col items-center gap-3 rounded-sheet bg-surface p-6 text-center">
+              <h2 className="text-section font-semibold text-ink">Pronto para doar?</h2>
+              <p className="text-body text-muted">Escolha um hemocentro e um horário com vaga.</p>
+              <ButtonLink to="/doar">Agendar doação</ButtonLink>
+            </section>
+          )
+        )}
       </div>
     </AppShell>
   )
