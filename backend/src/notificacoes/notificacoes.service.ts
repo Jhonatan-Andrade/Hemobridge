@@ -1,0 +1,239 @@
+import {
+  Injectable,
+  Logger,
+  OnModuleDestroy,
+  OnModuleInit,
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { randomUUID } from 'node:crypto';
+import type { Prisma } from '../generated/prisma/client.js';
+import { EmailService } from '../email/email.service.js';
+import { PrismaService } from '../prisma/prisma.service.js';
+
+export interface NovaNotificacao {
+  usuarioId: string;
+  titulo: string;
+  mensagem: string;
+  /** Rota do frontend para a funcionalidade relacionada, ex.: "/meus-exames". */
+  link?: string;
+  /** Necessidade crítica que originou o aviso (UC19 / RN20). */
+  necessidadeId?: string;
+  /** Também envia por e-mail (registrando email_enviado_em). */
+  email?: boolean;
+}
+
+type ClienteNotificacao = Pick<Prisma.TransactionClient, 'notificacao'>;
+
+// Depois disso o e-mail deixa de ser reenviado; a notificação in-app continua.
+export const MAX_TENTATIVAS_EMAIL = 5;
+const LOTE_REENVIO = 50;
+
+/**
+ * Serviço central de notificações (HEM-36, Seção 9.2.3): registro in-app e,
+ * opcionalmente, e-mail. A falha no e-mail não desfaz o registro in-app e fica
+ * guardada para nova tentativa (UC19 FE02).
+ */
+@Injectable()
+export class NotificacoesService implements OnModuleInit, OnModuleDestroy {
+  private readonly logger = new Logger(NotificacoesService.name);
+  private readonly frontendUrl: string;
+  private readonly minutosReenvio: number;
+  private timer?: NodeJS.Timeout;
+
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly email: EmailService,
+    config: ConfigService,
+  ) {
+    this.frontendUrl = config
+      .get<string>('FRONTEND_URL', 'http://localhost:5173')
+      .replace(/\/+$/, '');
+    this.minutosReenvio = Number(
+      config.get('NOTIFICACOES_REENVIO_MINUTOS', 10),
+    );
+  }
+
+  onModuleInit() {
+    if (this.minutosReenvio > 0) {
+      this.timer = setInterval(
+        () => void this.reenviarPendentes(),
+        this.minutosReenvio * 60_000,
+      );
+      this.timer.unref();
+      void this.reenviarPendentes();
+    }
+  }
+
+  onModuleDestroy() {
+    clearInterval(this.timer);
+  }
+
+  /** Cria uma ou mais notificações e envia os e-mails solicitados. */
+  async notificar(
+    notificacoes: NovaNotificacao | NovaNotificacao[],
+  ): Promise<string[]> {
+    const ids = await this.registrarEm(this.prisma, notificacoes);
+    await this.despacharEmails(ids);
+    return ids;
+  }
+
+  /**
+   * Registra dentro de uma transação. Chame despacharEmails(ids) DEPOIS do
+   * commit, para não enviar e-mail de uma operação que foi desfeita.
+   */
+  async registrarEm(
+    tx: ClienteNotificacao,
+    notificacoes: NovaNotificacao | NovaNotificacao[],
+  ): Promise<string[]> {
+    const lista = Array.isArray(notificacoes) ? notificacoes : [notificacoes];
+    if (!lista.length) return [];
+    const criadas = await tx.notificacao.createManyAndReturn({
+      data: lista.map((n) => ({
+        usuarioId: n.usuarioId,
+        titulo: n.titulo,
+        mensagem: n.mensagem,
+        link: n.link,
+        necessidadeId: n.necessidadeId,
+        emailSolicitado: n.email === true,
+      })),
+      select: { id: true },
+    });
+    return criadas.map((c) => c.id);
+  }
+
+  /** Envia os e-mails pendentes das notificações informadas. */
+  async despacharEmails(
+    ids: string[],
+  ): Promise<{ enviados: number; falhas: number }> {
+    if (!ids.length) return { enviados: 0, falhas: 0 };
+    const pendentes = await this.prisma.notificacao.findMany({
+      where: { id: { in: ids }, emailSolicitado: true, emailEnviadoEm: null },
+      select: SELECAO_ENVIO,
+    });
+    return this.enviar(pendentes);
+  }
+
+  /** Nova tentativa para e-mails que falharam (executado periodicamente). */
+  async reenviarPendentes(): Promise<{ enviados: number; falhas: number }> {
+    try {
+      const pendentes = await this.prisma.notificacao.findMany({
+        where: {
+          emailSolicitado: true,
+          emailEnviadoEm: null,
+          emailTentativas: { lt: MAX_TENTATIVAS_EMAIL },
+          emailProximaTentativaEm: { lte: new Date() },
+          OR: [
+            { emailReservadoAte: null },
+            { emailReservadoAte: { lt: new Date() } },
+          ],
+          usuario: { status: 'ATIVO' },
+        },
+        select: SELECAO_ENVIO,
+        orderBy: { enviadaEm: 'asc' },
+        take: LOTE_REENVIO,
+      });
+      return await this.enviar(pendentes);
+    } catch {
+      this.logger.error('Falha no reenvio de e-mails pendentes.');
+      return { enviados: 0, falhas: 0 };
+    }
+  }
+
+  private async enviar(pendentes: Pendente[]) {
+    let enviados = 0;
+    let falhas = 0;
+    for (const n of pendentes) {
+      const token = randomUUID();
+      const agora = new Date();
+      const claim = await this.prisma.notificacao.updateMany({
+        where: {
+          id: n.id,
+          emailSolicitado: true,
+          emailEnviadoEm: null,
+          emailTentativas: { lt: MAX_TENTATIVAS_EMAIL },
+          emailProximaTentativaEm: { lte: agora },
+          usuario: { status: 'ATIVO' },
+          OR: [
+            { emailReservadoAte: null },
+            { emailReservadoAte: { lt: agora } },
+          ],
+        },
+        data: {
+          emailReservaToken: token,
+          emailReservadoAte: new Date(agora.getTime() + 300_000),
+          emailTentativas: { increment: 1 },
+        },
+      });
+      if (!claim.count) continue;
+      try {
+        await this.email.enviar({
+          para: n.usuario.email,
+          assunto: 'HemoBridge – atualização na sua conta',
+          texto: this.textoEmail(n),
+        });
+        await this.prisma.notificacao.updateMany({
+          where: { id: n.id, emailReservaToken: token },
+          data: {
+            emailEnviadoEm: new Date(),
+            emailUltimoErro: null,
+            emailReservaToken: null,
+            emailReservadoAte: null,
+          },
+        });
+        enviados++;
+      } catch {
+        falhas++;
+        this.logger.error(`Falha ao enviar e-mail da notificação ${n.id}.`);
+        await this.prisma.notificacao
+          .updateMany({
+            where: { id: n.id, emailReservaToken: token },
+            data: {
+              emailUltimoErro: 'Falha de entrega; nova tentativa programada.',
+              emailReservaToken: null,
+              emailReservadoAte: null,
+              emailProximaTentativaEm: new Date(
+                Date.now() +
+                  Math.min(3_600_000, 30_000 * 2 ** n.emailTentativas),
+              ),
+            },
+          })
+          .catch(() => undefined);
+      }
+    }
+    return { enviados, falhas };
+  }
+
+  private textoEmail(n: Pendente): string {
+    const primeiroNome = n.usuario.nome.split(' ')[0];
+    const linhas = [
+      `Olá, ${primeiroNome}.`,
+      '',
+      'Há uma atualização disponível na sua conta. Consulte os detalhes na área privada.',
+      '',
+      `Acesse: ${this.frontendUrl}/#notifications`,
+    ];
+    linhas.push(
+      '',
+      'Você também encontra este aviso em Notificações, na plataforma.',
+    );
+    return linhas.join('\n');
+  }
+}
+
+const SELECAO_ENVIO = {
+  id: true,
+  emailTentativas: true,
+  titulo: true,
+  mensagem: true,
+  link: true,
+  usuario: { select: { nome: true, email: true } },
+} as const;
+
+type Pendente = {
+  id: string;
+  emailTentativas: number;
+  titulo: string;
+  mensagem: string;
+  link: string | null;
+  usuario: { nome: string; email: string };
+};

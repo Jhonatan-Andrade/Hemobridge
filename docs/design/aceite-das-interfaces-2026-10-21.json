@@ -1,0 +1,3158 @@
+{
+  "data": "2026-10-21",
+  "arquivoFigma": "7aKvXrajoLmEGpaYsn0dQ1",
+  "pagina": "0:1",
+  "alteracoes": {
+    "figmaH55Changes": {
+      "mutatedNodeIds": [
+        "154:3808",
+        "154:3809",
+        "154:3811",
+        "154:3812",
+        "154:3813",
+        "154:3814",
+        "154:3817",
+        "154:3818",
+        "154:3819",
+        "154:3821",
+        "154:3822",
+        "154:3823",
+        "154:3824",
+        "154:3825",
+        "154:3665",
+        "154:3666",
+        "154:3667",
+        "154:3669",
+        "154:3670",
+        "I154:3692;3:114",
+        "I154:3692;3:116",
+        "I154:3692;3:117",
+        "154:3672",
+        "154:3673",
+        "I154:3697;3:169",
+        "I154:3697;3:171",
+        "I154:3697;3:172",
+        "154:3675",
+        "154:3676",
+        "I154:3702;3:69",
+        "154:3678",
+        "154:3679",
+        "154:3681",
+        "154:3682",
+        "154:3567",
+        "154:3568",
+        "154:3569",
+        "154:3571",
+        "154:3572",
+        "I154:3592;3:169",
+        "I154:3592;3:171",
+        "I154:3592;3:172",
+        "154:3574",
+        "154:3575",
+        "I154:3597;3:169",
+        "I154:3597;3:171",
+        "I154:3597;3:172",
+        "154:3577",
+        "154:3578",
+        "154:3580",
+        "154:3581",
+        "I155:3641;3:73",
+        "154:3583",
+        "154:3584",
+        "154:3616",
+        "154:3617",
+        "154:3618",
+        "154:3620",
+        "154:3621",
+        "I154:3641;3:169",
+        "I154:3641;3:171",
+        "I154:3641;3:172",
+        "154:3623",
+        "154:3624",
+        "I154:3646;3:169",
+        "I154:3646;3:171",
+        "I154:3646;3:172",
+        "154:3626",
+        "154:3627",
+        "154:3629",
+        "154:3630",
+        "I155:3644;3:73",
+        "154:3632",
+        "154:3633",
+        "153:3534",
+        "153:3535",
+        "153:3536",
+        "153:3538",
+        "153:3539",
+        "153:3541",
+        "153:3542",
+        "153:3544",
+        "153:3545",
+        "153:3547",
+        "153:3548",
+        "153:3550",
+        "153:3551",
+        "176:4039",
+        "176:4043",
+        "176:4047",
+        "176:4051",
+        "154:3532",
+        "154:3533",
+        "154:3534",
+        "154:3536",
+        "154:3537",
+        "154:3539",
+        "154:3540",
+        "154:3542",
+        "154:3543",
+        "154:3545",
+        "154:3546",
+        "154:3548",
+        "154:3549",
+        "176:4056",
+        "176:4060",
+        "176:4064",
+        "176:4068"
+      ],
+      "edits": [
+        {
+          "id": "154:3808",
+          "before": "Relatório HemoBridge · modelo para revisão",
+          "after": "Relatório HemoBridge"
+        },
+        {
+          "id": "154:3809",
+          "before": "Modelo sem dados reais. Tipo, período, indicadores e responsável dependem de aprovação.",
+          "after": "Doações por tipo sanguíneo"
+        },
+        {
+          "id": "154:3811",
+          "before": "Acesse as informações e ações autorizadas para o seu perfil.",
+          "after": "Abrangência: instituição autorizada ou todos os hospitais, conforme o perfil."
+        },
+        {
+          "id": "154:3812",
+          "before": "Acesse as informações e ações autorizadas para o seu perfil.",
+          "after": "Período: data inicial a data final · intervalo máximo de 366 dias."
+        },
+        {
+          "id": "154:3813",
+          "before": "Acesse as informações e ações autorizadas para o seu perfil.",
+          "after": "Emitido em: data e hora da geração · Responsável: usuário autenticado."
+        },
+        {
+          "id": "154:3814",
+          "before": "Indicadores",
+          "after": "Doações por tipo sanguíneo"
+        },
+        {
+          "id": "154:3817",
+          "before": "Indicador",
+          "after": "Tipo sanguíneo"
+        },
+        {
+          "id": "154:3818",
+          "before": "Valor",
+          "after": "Vinculadas / avulsas"
+        },
+        {
+          "id": "154:3819",
+          "before": "Fonte",
+          "after": "Total"
+        },
+        {
+          "id": "154:3821",
+          "before": "Sem dados nesta",
+          "after": "Nenhum dado no período"
+        },
+        {
+          "id": "154:3822",
+          "before": "—",
+          "after": "—"
+        },
+        {
+          "id": "154:3823",
+          "before": "Acesse as informações e ações autorizadas para o seu perfil.",
+          "after": "—"
+        },
+        {
+          "id": "154:3824",
+          "before": "Este layout demonstra a organização visual. Não substitui relatório oficial nem comprova geração de PDF.",
+          "after": "Se não houver dados no período, informe a ausência de registros e solicite outro intervalo; nenhum PDF vazio será gerado."
+        },
+        {
+          "id": "154:3825",
+          "before": "HemoBridge · modelo para revisão · sem assinatura ou dados reais",
+          "after": "HemoBridge · dados agregados · acesso conforme o perfil e a instituição"
+        },
+        {
+          "id": "154:3665",
+          "before": "Doações · Registrar doação",
+          "after": "Registrar doação avulsa"
+        },
+        {
+          "id": "154:3666",
+          "before": "Localize o cadastro autorizado, confira a elegibilidade e registre o atendimento.",
+          "after": "Consulte o doador aprovado por CPF ou registre uma coleta sem vínculo, para fins estatísticos."
+        },
+        {
+          "id": "154:3667",
+          "before": "sem dados pessoais · regras clínicas e permissão aguardam validação.",
+          "after": "Acesso restrito ao representante da instituição. A triagem permanece sob responsabilidade do hemocentro."
+        },
+        {
+          "id": "154:3669",
+          "before": "Localizar paciente",
+          "after": "Buscar doador aprovado"
+        },
+        {
+          "id": "154:3670",
+          "before": "Busca por CPF restrita ao perfil autorizado.",
+          "after": "Informe o CPF na área privada para localizar um cadastro aprovado e ativo."
+        },
+        {
+          "id": "I154:3692;3:114",
+          "before": "CPF do paciente",
+          "after": "CPF do doador"
+        },
+        {
+          "id": "I154:3692;3:116",
+          "before": "Busca indisponível",
+          "after": "Informe o CPF"
+        },
+        {
+          "id": "I154:3692;3:117",
+          "before": "Acesso restrito; sem dado real",
+          "after": "O CPF não é incluído na URL."
+        },
+        {
+          "id": "154:3672",
+          "before": "Conferir elegibilidade",
+          "after": "Resultado da busca"
+        },
+        {
+          "id": "154:3673",
+          "before": "O resultado depende de avaliação e regras aprovadas.",
+          "after": "Se não houver cadastro aprovado, é possível registrar uma doação avulsa."
+        },
+        {
+          "id": "I154:3697;3:169",
+          "before": "Resultado da avaliação",
+          "after": "Vínculo com o doador"
+        },
+        {
+          "id": "I154:3697;3:171",
+          "before": "Aguardando regra",
+          "after": "Sem vínculo cadastral"
+        },
+        {
+          "id": "I154:3697;3:172",
+          "before": "Critérios clínicos pendentes",
+          "after": "Não revela cadastros não aprovados."
+        },
+        {
+          "id": "154:3675",
+          "before": "Registrar doação",
+          "after": "Dados da coleta"
+        },
+        {
+          "id": "154:3676",
+          "before": "Ação indisponível nesta .",
+          "after": "Informe a data da coleta, sem data futura, e um dos oito tipos sanguíneos."
+        },
+        {
+          "id": "I154:3702;3:69",
+          "before": "Salvar registro",
+          "after": "Registrar doação avulsa"
+        },
+        {
+          "id": "154:3678",
+          "before": "Etapas do atendimento",
+          "after": "Confirmação do registro"
+        },
+        {
+          "id": "154:3679",
+          "before": "A equipe definirá campos obrigatórios e sequência de confirmação.",
+          "after": "A doação avulsa é registrada sem vínculo com doador, apenas para fins estatísticos. A elegibilidade é responsabilidade da triagem do hemocentro. O registro não altera automaticamente o nível de necessidade do estoque."
+        },
+        {
+          "id": "154:3681",
+          "before": "Rastreabilidade",
+          "after": "Rastreabilidade"
+        },
+        {
+          "id": "154:3682",
+          "before": "Responsável, data e alterações exigem contrato de auditoria.",
+          "after": "A instituição, o representante autenticado, o tipo e a data da coleta compõem o registro e a auditoria."
+        },
+        {
+          "id": "154:3567",
+          "before": "Relatórios · Relatórios do hospital",
+          "after": "Relatórios do hospital"
+        },
+        {
+          "id": "154:3568",
+          "before": "Selecione tipo e período para gerar um relatório autorizado em PDF.",
+          "after": "Consulte os dados agregados da sua instituição e exporte o relatório disponível para o período."
+        },
+        {
+          "id": "154:3569",
+          "before": "Acesse as informações e ações autorizadas para o seu perfil.",
+          "after": "Acesso do representante limitado à própria instituição."
+        },
+        {
+          "id": "154:3571",
+          "before": "Tipo de relatório",
+          "after": "Tipo de relatório"
+        },
+        {
+          "id": "154:3572",
+          "before": "Escolha condicionada aos tipos aprovados.",
+          "after": "Doações por tipo sanguíneo ou Histórico de necessidades."
+        },
+        {
+          "id": "I154:3592;3:169",
+          "before": "Tipo de relatório",
+          "after": "Tipo de relatório"
+        },
+        {
+          "id": "I154:3592;3:171",
+          "before": "Seleção indisponível",
+          "after": "Doações por tipo sanguíneo"
+        },
+        {
+          "id": "I154:3592;3:172",
+          "before": "Aguardando contrato",
+          "after": "Também: Histórico de necessidades."
+        },
+        {
+          "id": "154:3574",
+          "before": "Período",
+          "after": "Período"
+        },
+        {
+          "id": "154:3575",
+          "before": "Intervalo e limites dependem do contrato.",
+          "after": "Datas inicial e final obrigatórias; início não futuro, em ordem e até 366 dias."
+        },
+        {
+          "id": "I154:3597;3:169",
+          "before": "Período",
+          "after": "Data inicial — data final"
+        },
+        {
+          "id": "I154:3597;3:171",
+          "before": "Seleção indisponível",
+          "after": "Selecione o período"
+        },
+        {
+          "id": "I154:3597;3:172",
+          "before": "Aguardando contrato",
+          "after": "Intervalo máximo de 366 dias."
+        },
+        {
+          "id": "154:3577",
+          "before": "Arquivo PDF",
+          "after": "Exportar PDF"
+        },
+        {
+          "id": "154:3578",
+          "before": "A geração fica indisponível até a integração.",
+          "after": "Gere após selecionar tipo e período. Sem registros, ajuste o intervalo."
+        },
+        {
+          "id": "154:3580",
+          "before": "Pré-visualização",
+          "after": "Cabeçalho e conteúdo do PDF"
+        },
+        {
+          "id": "154:3581",
+          "before": "O layout do PDF pode ser revisto sem dados reais.",
+          "after": "O arquivo identifica título, instituição, período, emissão e responsável. As tabelas contêm dados agregados."
+        },
+        {
+          "id": "I155:3641;3:73",
+          "before": "Ver modelo de PDF",
+          "after": "Ver estrutura do PDF"
+        },
+        {
+          "id": "154:3583",
+          "before": "Permissão e fonte",
+          "after": "Escopo autorizado"
+        },
+        {
+          "id": "154:3584",
+          "before": "A equipe definirá quais perfis podem gerar cada relatório.",
+          "after": "O consolidado por hospital é exclusivo do administrador. Dados clínicos individuais não integram estes relatórios."
+        },
+        {
+          "id": "154:3616",
+          "before": "Relatórios · Relatórios gerais",
+          "after": "Relatórios gerais"
+        },
+        {
+          "id": "154:3617",
+          "before": "Consulte agregados por tipo e período e gere um PDF autorizado.",
+          "after": "Consulte indicadores agregados e exporte relatórios das instituições autorizadas."
+        },
+        {
+          "id": "154:3618",
+          "before": "de interface · escopo, métricas e permissões aguardam confirmação.",
+          "after": "Acesso administrativo. O conteúdo não inclui exames nem dados clínicos individuais."
+        },
+        {
+          "id": "154:3620",
+          "before": "Tipo de relatório",
+          "after": "Tipo de relatório"
+        },
+        {
+          "id": "154:3621",
+          "before": "Tipos disponíveis serão definidos pelo grupo.",
+          "after": "Doações por tipo sanguíneo, Histórico de necessidades ou Consolidado por hospital."
+        },
+        {
+          "id": "I154:3641;3:169",
+          "before": "Tipo de relatório",
+          "after": "Tipo de relatório"
+        },
+        {
+          "id": "I154:3641;3:171",
+          "before": "Seleção indisponível",
+          "after": "Consolidado por hospital"
+        },
+        {
+          "id": "I154:3641;3:172",
+          "before": "Aguardando contrato",
+          "after": "Disponível ao administrador."
+        },
+        {
+          "id": "154:3623",
+          "before": "Período",
+          "after": "Período"
+        },
+        {
+          "id": "154:3624",
+          "before": "Intervalo e limites dependem do contrato.",
+          "after": "Datas inicial e final obrigatórias; início não futuro, em ordem e até 366 dias."
+        },
+        {
+          "id": "I154:3646;3:169",
+          "before": "Período",
+          "after": "Data inicial — data final"
+        },
+        {
+          "id": "I154:3646;3:171",
+          "before": "Seleção indisponível",
+          "after": "Selecione o período"
+        },
+        {
+          "id": "I154:3646;3:172",
+          "before": "Aguardando contrato",
+          "after": "Intervalo máximo de 366 dias."
+        },
+        {
+          "id": "154:3626",
+          "before": "Arquivo PDF",
+          "after": "Exportar PDF"
+        },
+        {
+          "id": "154:3627",
+          "before": "A geração fica indisponível até a integração.",
+          "after": "Gere após selecionar tipo e período. Sem registros, ajuste o intervalo."
+        },
+        {
+          "id": "154:3629",
+          "before": "Pré-visualização",
+          "after": "Cabeçalho e conteúdo do PDF"
+        },
+        {
+          "id": "154:3630",
+          "before": "O layout do PDF pode ser revisto sem dados reais.",
+          "after": "Título, abrangência, período, emissão e responsável. No consolidado: hospital, cidade/UF, doações e tipos críticos."
+        },
+        {
+          "id": "I155:3644;3:73",
+          "before": "Ver modelo de PDF",
+          "after": "Ver estrutura do PDF"
+        },
+        {
+          "id": "154:3632",
+          "before": "Fonte e acesso",
+          "after": "Fonte e acesso"
+        },
+        {
+          "id": "154:3633",
+          "before": "Sem dados pessoais ou clínicos nesta .",
+          "after": "Somente dados agregados das instituições. O servidor aplica a permissão antes de gerar o arquivo."
+        },
+        {
+          "id": "153:3534",
+          "before": "Painel do hospital · Painel do hospital",
+          "after": "Painel do hospital"
+        },
+        {
+          "id": "153:3535",
+          "before": "Doações por tipo e situação, evolução e necessidades críticas.",
+          "after": "Acompanhe as doações e necessidades da sua instituição no período selecionado."
+        },
+        {
+          "id": "153:3536",
+          "before": "Acesse as informações e ações autorizadas para o seu perfil.",
+          "after": "Período inicial: últimos 30 dias. Valores zerados indicam ausência de registros, não uma falha de consulta."
+        },
+        {
+          "id": "153:3538",
+          "before": "Doações por tipo",
+          "after": "Doações por tipo"
+        },
+        {
+          "id": "153:3539",
+          "before": "— Dados agregados indisponíveis nesta .",
+          "after": "Totais por tipo sanguíneo, com separação entre doações vinculadas e avulsas."
+        },
+        {
+          "id": "153:3541",
+          "before": "Situação das doações",
+          "after": "Necessidades atuais"
+        },
+        {
+          "id": "153:3542",
+          "before": "Consulte o período e a atualização dos dados.",
+          "after": "Níveis informados pela instituição, com data da última atualização."
+        },
+        {
+          "id": "153:3544",
+          "before": "Necessidades críticas",
+          "after": "Tipos em nível crítico"
+        },
+        {
+          "id": "153:3545",
+          "before": "— Sem fonte de indicadores conectada.",
+          "after": "Tipos classificados como CRÍTICO no estoque atual da instituição."
+        },
+        {
+          "id": "153:3547",
+          "before": "Evolução das doações",
+          "after": "Evolução das doações"
+        },
+        {
+          "id": "153:3548",
+          "before": "Acesse as informações e ações autorizadas para o seu perfil.",
+          "after": "Sem doações no período selecionado. Escolha outro intervalo para consultar a evolução."
+        },
+        {
+          "id": "153:3550",
+          "before": "Leitura dos indicadores",
+          "after": "Leitura dos indicadores"
+        },
+        {
+          "id": "153:3551",
+          "before": "Rótulos e valores devem vir do contrato aprovado. Não há números reais nesta tela.",
+          "after": "A evolução usa registros de doação agrupados por período. Dados clínicos individuais permanecem nas áreas privadas."
+        },
+        {
+          "id": "176:4039",
+          "before": "Período 1",
+          "after": "Início"
+        },
+        {
+          "id": "176:4043",
+          "before": "Período 2",
+          "after": "Período selecionado"
+        },
+        {
+          "id": "176:4047",
+          "before": "Período 3",
+          "after": "Fim"
+        },
+        {
+          "id": "176:4051",
+          "before": "Período 4",
+          "after": "Sem registros"
+        },
+        {
+          "id": "154:3532",
+          "before": "Painel geral · Painel geral",
+          "after": "Painel geral"
+        },
+        {
+          "id": "154:3533",
+          "before": "Visão agregada de cadastros, doações aprovadas e necessidades críticas por estado.",
+          "after": "Consulte os indicadores agregados das instituições e as necessidades por estado."
+        },
+        {
+          "id": "154:3534",
+          "before": "Acesse as informações e ações autorizadas para o seu perfil.",
+          "after": "Período inicial: últimos 30 dias. Necessidades atuais são apresentadas separadamente dos totais do período."
+        },
+        {
+          "id": "154:3536",
+          "before": "Cadastros",
+          "after": "Doadores aprovados"
+        },
+        {
+          "id": "154:3537",
+          "before": "— Sem dados agregados conectados.",
+          "after": "Quantidade total de doadores com situação aprovada."
+        },
+        {
+          "id": "154:3539",
+          "before": "Doações aprovadas",
+          "after": "Hospitais ativos"
+        },
+        {
+          "id": "154:3540",
+          "before": "Sem informações para o período selecionado.",
+          "after": "Quantidade de instituições com cadastro ativo."
+        },
+        {
+          "id": "154:3542",
+          "before": "Críticas por estado",
+          "after": "Críticos por estado"
+        },
+        {
+          "id": "154:3543",
+          "before": "A fonte e a atualização acompanham os indicadores disponíveis.",
+          "after": "Tipos em nível CRÍTICO, agrupados pela UF da instituição."
+        },
+        {
+          "id": "154:3545",
+          "before": "Evolução agregada",
+          "after": "Evolução agregada"
+        },
+        {
+          "id": "154:3546",
+          "before": "Acesse as informações e ações autorizadas para o seu perfil.",
+          "after": "Sem doações no período selecionado. Ajuste as datas para consultar os totais por período."
+        },
+        {
+          "id": "154:3548",
+          "before": "Definição dos indicadores",
+          "after": "Definição dos indicadores"
+        },
+        {
+          "id": "154:3549",
+          "before": "Nenhum dado individual ou clínico é exibido nesta .",
+          "after": "Dados agregados de doações, cadastros e necessidades. Não são exibidos registros clínicos individuais."
+        },
+        {
+          "id": "176:4056",
+          "before": "Período 1",
+          "after": "Início"
+        },
+        {
+          "id": "176:4060",
+          "before": "Período 2",
+          "after": "Período selecionado"
+        },
+        {
+          "id": "176:4064",
+          "before": "Período 3",
+          "after": "Fim"
+        },
+        {
+          "id": "176:4068",
+          "before": "Período 4",
+          "after": "Sem registros"
+        }
+      ]
+    },
+    "figmaGlobalCopyChanges": {
+      "mutatedNodeIds": [
+        "I8:1324;3:180",
+        "I8:1326;3:190",
+        "I8:1329;3:73",
+        "I8:1402;3:180",
+        "I8:1404;3:193",
+        "I8:1407;3:73",
+        "I8:1482;3:180",
+        "I8:1484;3:196",
+        "I8:1487;3:73",
+        "I8:1560;3:180",
+        "I8:1562;3:193",
+        "I8:1565;3:73",
+        "227:5170",
+        "I206:5247;3:180",
+        "I206:5265;3:180",
+        "I8:2340;3:190",
+        "8:2480",
+        "I172:4044;3:223",
+        "I172:4047;3:222",
+        "I172:4047;3:223",
+        "I172:4050;3:232",
+        "154:3730",
+        "104:3255",
+        "I104:3347;3:152",
+        "I104:3352;3:152",
+        "I103:3259;99:3119",
+        "I103:3259;99:3124",
+        "103:3260",
+        "I103:3263;3:97",
+        "I103:3264;3:97",
+        "I102:3136;3:152",
+        "102:3160",
+        "I102:3163;3:97",
+        "I102:3168;3:97",
+        "I102:3173;3:97",
+        "I102:3178;3:97",
+        "103:3179",
+        "I103:3182;3:97",
+        "I103:3183;3:97",
+        "I660:6056;3:180",
+        "I660:6057;3:190",
+        "I660:6058;3:73",
+        "I660:6136;3:180",
+        "I660:6137;3:193",
+        "I660:6138;3:73",
+        "I660:6218;3:180",
+        "I660:6219;3:196",
+        "I660:6220;3:73",
+        "I660:6299;3:180",
+        "I660:6300;3:193",
+        "I660:6301;3:73",
+        "660:11406",
+        "I660:10915;3:180",
+        "I660:10933;3:180",
+        "I660:7291;3:190",
+        "660:7546",
+        "I660:7547;3:180",
+        "I660:7548;3:223",
+        "I660:7549;3:222",
+        "I660:7549;3:223",
+        "I660:7550;3:232",
+        "660:8779",
+        "660:8822",
+        "660:9532",
+        "I660:9533;3:180",
+        "I660:9534;3:232",
+        "660:9558",
+        "I660:9559;3:180",
+        "660:9584",
+        "660:9615",
+        "660:8720",
+        "227:5118",
+        "I206:5211;3:180",
+        "I206:5229;3:180",
+        "I8:1112;3:190",
+        "8:1252",
+        "I8:1253;3:180",
+        "I143:3461;3:223",
+        "I143:3466;3:222",
+        "I143:3466;3:223",
+        "I143:3471;3:232",
+        "104:3672",
+        "111:3349",
+        "160:4027",
+        "I160:4028;3:180",
+        "I160:4029;3:232",
+        "160:4053",
+        "I160:4054;3:180",
+        "160:4080",
+        "178:4070",
+        "104:3588"
+      ],
+      "edits": [
+        {
+          "id": "I8:1324;3:180",
+          "before": "i Se você tem mais de 60 anos, é necessário ter doado antes dos 60. Para menores, autorização do responsável será exigida no processo definido pela equipe.",
+          "after": "Acima de 60 anos, é necessário ter doado antes dos 60. Entre 16 e 17 anos, a triagem exige autorização do responsável."
+        },
+        {
+          "id": "I8:1326;3:190",
+          "before": "Li o aviso e usarei apenas dados de teste.",
+          "after": "Li e aceito o Termo de Consentimento para tratar meus dados de saúde."
+        },
+        {
+          "id": "I8:1329;3:73",
+          "before": "Ler aviso de uso e privacidade",
+          "after": "Ler consentimento e privacidade"
+        },
+        {
+          "id": "I8:1402;3:180",
+          "before": "i Se você tem mais de 60 anos, é necessário ter doado antes dos 60. Para menores, autorização do responsável será exigida no processo definido pela equipe.",
+          "after": "Acima de 60 anos, é necessário ter doado antes dos 60. Entre 16 e 17 anos, a triagem exige autorização do responsável."
+        },
+        {
+          "id": "I8:1404;3:193",
+          "before": "Li o aviso e usarei apenas dados de teste.",
+          "after": "Li e aceito o Termo de Consentimento para tratar meus dados de saúde."
+        },
+        {
+          "id": "I8:1407;3:73",
+          "before": "Ler aviso de uso e privacidade",
+          "after": "Ler consentimento e privacidade"
+        },
+        {
+          "id": "I8:1482;3:180",
+          "before": "i Se você tem mais de 60 anos, é necessário ter doado antes dos 60. Para menores, autorização do responsável será exigida no processo definido pela equipe.",
+          "after": "Acima de 60 anos, é necessário ter doado antes dos 60. Entre 16 e 17 anos, a triagem exige autorização do responsável."
+        },
+        {
+          "id": "I8:1484;3:196",
+          "before": "Li o aviso e usarei apenas dados de teste.",
+          "after": "Li e aceito o Termo de Consentimento para tratar meus dados de saúde."
+        },
+        {
+          "id": "I8:1487;3:73",
+          "before": "Ler aviso de uso e privacidade",
+          "after": "Ler consentimento e privacidade"
+        },
+        {
+          "id": "I8:1560;3:180",
+          "before": "i Se você tem mais de 60 anos, é necessário ter doado antes dos 60. Para menores, autorização do responsável será exigida no processo definido pela equipe.",
+          "after": "Acima de 60 anos, é necessário ter doado antes dos 60. Entre 16 e 17 anos, a triagem exige autorização do responsável."
+        },
+        {
+          "id": "I8:1562;3:193",
+          "before": "Li o aviso e usarei apenas dados de teste.",
+          "after": "Li e aceito o Termo de Consentimento para tratar meus dados de saúde."
+        },
+        {
+          "id": "I8:1565;3:73",
+          "before": "Ler aviso de uso e privacidade",
+          "after": "Ler consentimento e privacidade"
+        },
+        {
+          "id": "227:5170",
+          "before": "Ana · pré-cadastro ilustrativo",
+          "after": "Ana · pré-cadastro"
+        },
+        {
+          "id": "I206:5247;3:180",
+          "before": "Estado ilustrativo: o site solicita o widget oficial quando a pessoa ativa Libras ou escolhe a abertura automática.",
+          "after": "O tradutor oficial de Libras é carregado ao ativar o recurso ou escolher a abertura automática."
+        },
+        {
+          "id": "I206:5265;3:180",
+          "before": "Estado ilustrativo: no site, o widget oficial abre um botão flutuante para tradução automática. A tradução pode conter imprecisões.",
+          "after": "O botão flutuante abre o tradutor de Libras. A tradução automática pode conter imprecisões."
+        },
+        {
+          "id": "I8:2340;3:190",
+          "before": "Li o aviso e usarei apenas dados de teste.",
+          "after": "Li e aceito o Termo de Responsabilidade e Sigilo."
+        },
+        {
+          "id": "8:2480",
+          "before": "Locais recomendados · Locais recomendados",
+          "after": "Locais recomendados"
+        },
+        {
+          "id": "I172:4044;3:223",
+          "before": "Definido pela equipe após avaliação · somente leitura. Nenhuma tipagem clínica neste .",
+          "after": "Tipo validado na avaliação clínica, somente leitura. Caso ainda não validado, a busca permanece manual."
+        },
+        {
+          "id": "I172:4047;3:222",
+          "before": "Próxima data estimada",
+          "after": "Intervalo entre doações"
+        },
+        {
+          "id": "I172:4047;3:223",
+          "before": "Indisponível sem histórico e regras confirmadas; não substitui a triagem do hemocentro.",
+          "after": "Orientação: 60 dias para homens e 90 para mulheres, conforme cadastro e histórico. A triagem confirma a elegibilidade."
+        },
+        {
+          "id": "I172:4050;3:232",
+          "before": "Nenhuma recomendação calculada. Fonte e prioridade das necessidades dependem da integração.",
+          "after": "Prioridade: Crítico → Baixo → Estável → Adequado. Depois, distância quando disponível. Filtre pelo tipo validado."
+        },
+        {
+          "id": "154:3730",
+          "before": "Tipos e justificativas seguem o fluxo clínico definido pela equipe.",
+          "after": "Solicite o exame com tipo, justificativa clínica e prazo, conforme a permissão do atendimento."
+        },
+        {
+          "id": "104:3255",
+          "before": "Níveis e datas ilustrativos · nenhuma necessidade real é exibida",
+          "after": "Necessidades informadas pela instituição · consulte a data de atualização."
+        },
+        {
+          "id": "I104:3347;3:152",
+          "before": "Dados ilustrativos",
+          "after": "Confira os dados antes de salvar."
+        },
+        {
+          "id": "I104:3352;3:152",
+          "before": "Dados ilustrativos",
+          "after": "Confira os dados antes de salvar."
+        },
+        {
+          "id": "I103:3259;99:3119",
+          "before": "Identificador ilustrativo",
+          "after": "Identificador do cadastro"
+        },
+        {
+          "id": "I103:3259;99:3124",
+          "before": "Identificador ilustrativo",
+          "after": "Identificador do cadastro"
+        },
+        {
+          "id": "103:3260",
+          "before": "Listagem ilustrativa. Nenhum dado pessoal ou clínico real.",
+          "after": "Cadastros autorizados para este perfil. Dados clínicos permanecem na área privada."
+        },
+        {
+          "id": "I103:3263;3:97",
+          "before": "Dados ilustrativos",
+          "after": "Confira os dados antes de salvar."
+        },
+        {
+          "id": "I103:3264;3:97",
+          "before": "Dados ilustrativos",
+          "after": "Confira os dados antes de salvar."
+        },
+        {
+          "id": "I102:3136;3:152",
+          "before": "Dados ilustrativos",
+          "after": "Confira os dados antes de salvar."
+        },
+        {
+          "id": "102:3160",
+          "before": "Listagem ilustrativa. Nenhum dado pessoal ou clínico real.",
+          "after": "Cadastros autorizados para este perfil. Dados clínicos permanecem na área privada."
+        },
+        {
+          "id": "I102:3163;3:97",
+          "before": "Dados ilustrativos",
+          "after": "Confira os dados antes de salvar."
+        },
+        {
+          "id": "I102:3168;3:97",
+          "before": "Dados ilustrativos",
+          "after": "Confira os dados antes de salvar."
+        },
+        {
+          "id": "I102:3173;3:97",
+          "before": "Dados ilustrativos",
+          "after": "Confira os dados antes de salvar."
+        },
+        {
+          "id": "I102:3178;3:97",
+          "before": "Dados ilustrativos",
+          "after": "Confira os dados antes de salvar."
+        },
+        {
+          "id": "103:3179",
+          "before": "Listagem ilustrativa. Nenhum dado pessoal ou clínico real.",
+          "after": "Cadastros autorizados para este perfil. Dados clínicos permanecem na área privada."
+        },
+        {
+          "id": "I103:3182;3:97",
+          "before": "Dados ilustrativos",
+          "after": "Confira os dados antes de salvar."
+        },
+        {
+          "id": "I103:3183;3:97",
+          "before": "Dados ilustrativos",
+          "after": "Confira os dados antes de salvar."
+        },
+        {
+          "id": "I660:6056;3:180",
+          "before": "i Se você tem mais de 60 anos, é necessário ter doado antes dos 60. Para menores, autorização do responsável será exigida no processo definido pela equipe.",
+          "after": "Acima de 60 anos, é necessário ter doado antes dos 60. Entre 16 e 17 anos, a triagem exige autorização do responsável."
+        },
+        {
+          "id": "I660:6057;3:190",
+          "before": "Li o aviso e usarei apenas dados de teste.",
+          "after": "Li e aceito o Termo de Consentimento para tratar meus dados de saúde."
+        },
+        {
+          "id": "I660:6058;3:73",
+          "before": "Ler aviso de uso e privacidade",
+          "after": "Ler consentimento e privacidade"
+        },
+        {
+          "id": "I660:6136;3:180",
+          "before": "i Se você tem mais de 60 anos, é necessário ter doado antes dos 60. Para menores, autorização do responsável será exigida no processo definido pela equipe.",
+          "after": "Acima de 60 anos, é necessário ter doado antes dos 60. Entre 16 e 17 anos, a triagem exige autorização do responsável."
+        },
+        {
+          "id": "I660:6137;3:193",
+          "before": "Li o aviso e usarei apenas dados de teste.",
+          "after": "Li e aceito o Termo de Consentimento para tratar meus dados de saúde."
+        },
+        {
+          "id": "I660:6138;3:73",
+          "before": "Ler aviso de uso e privacidade",
+          "after": "Ler consentimento e privacidade"
+        },
+        {
+          "id": "I660:6218;3:180",
+          "before": "i Se você tem mais de 60 anos, é necessário ter doado antes dos 60. Para menores, autorização do responsável será exigida no processo definido pela equipe.",
+          "after": "Acima de 60 anos, é necessário ter doado antes dos 60. Entre 16 e 17 anos, a triagem exige autorização do responsável."
+        },
+        {
+          "id": "I660:6219;3:196",
+          "before": "Li o aviso e usarei apenas dados de teste.",
+          "after": "Li e aceito o Termo de Consentimento para tratar meus dados de saúde."
+        },
+        {
+          "id": "I660:6220;3:73",
+          "before": "Ler aviso de uso e privacidade",
+          "after": "Ler consentimento e privacidade"
+        },
+        {
+          "id": "I660:6299;3:180",
+          "before": "i Se você tem mais de 60 anos, é necessário ter doado antes dos 60. Para menores, autorização do responsável será exigida no processo definido pela equipe.",
+          "after": "Acima de 60 anos, é necessário ter doado antes dos 60. Entre 16 e 17 anos, a triagem exige autorização do responsável."
+        },
+        {
+          "id": "I660:6300;3:193",
+          "before": "Li o aviso e usarei apenas dados de teste.",
+          "after": "Li e aceito o Termo de Consentimento para tratar meus dados de saúde."
+        },
+        {
+          "id": "I660:6301;3:73",
+          "before": "Ler aviso de uso e privacidade",
+          "after": "Ler consentimento e privacidade"
+        },
+        {
+          "id": "660:11406",
+          "before": "Ana · pré-cadastro ilustrativo",
+          "after": "Ana · pré-cadastro"
+        },
+        {
+          "id": "I660:10915;3:180",
+          "before": "Estado ilustrativo: o site solicita o widget oficial quando a pessoa ativa Libras ou escolhe a abertura automática.",
+          "after": "O tradutor oficial de Libras é carregado ao ativar o recurso ou escolher a abertura automática."
+        },
+        {
+          "id": "I660:10933;3:180",
+          "before": "Estado ilustrativo: no site, o widget oficial abre um botão flutuante para tradução automática. A tradução pode conter imprecisões.",
+          "after": "O botão flutuante abre o tradutor de Libras. A tradução automática pode conter imprecisões."
+        },
+        {
+          "id": "I660:7291;3:190",
+          "before": "Li o aviso e usarei apenas dados de teste.",
+          "after": "Li e aceito o Termo de Responsabilidade e Sigilo."
+        },
+        {
+          "id": "660:7546",
+          "before": "Locais recomendados · Locais recomendados",
+          "after": "Locais recomendados"
+        },
+        {
+          "id": "I660:7547;3:180",
+          "before": "i visão para doador aprovado. Sem dados reais, não exibimos o tipo sanguíneo nem calculamos a próxima data ou a prioridade dos locais.",
+          "after": "Consulte locais e necessidades do seu tipo validado. As orientações não substituem a triagem."
+        },
+        {
+          "id": "I660:7548;3:223",
+          "before": "Definido pela equipe após avaliação · somente leitura. Nenhuma tipagem clínica neste .",
+          "after": "Tipo validado na avaliação clínica, somente leitura. Caso ainda não validado, a busca permanece manual."
+        },
+        {
+          "id": "I660:7549;3:222",
+          "before": "Próxima data estimada",
+          "after": "Intervalo entre doações"
+        },
+        {
+          "id": "I660:7549;3:223",
+          "before": "Indisponível sem histórico e regras confirmadas; não substitui a triagem do hemocentro.",
+          "after": "Orientação: 60 dias para homens e 90 para mulheres, conforme cadastro e histórico. A triagem confirma a elegibilidade."
+        },
+        {
+          "id": "I660:7550;3:232",
+          "before": "Nenhuma recomendação calculada. Fonte e prioridade das necessidades dependem da integração.",
+          "after": "Prioridade: Crítico → Baixo → Estável → Adequado. Depois, distância quando disponível. Filtre pelo tipo validado."
+        },
+        {
+          "id": "660:8779",
+          "before": "Níveis ilustrativos nesta .",
+          "after": "Níveis informados pela instituição. Não informado não indica estoque suficiente."
+        },
+        {
+          "id": "660:8822",
+          "before": "Níveis ilustrativos nesta .",
+          "after": "Níveis informados pela instituição. Não informado não indica estoque suficiente."
+        },
+        {
+          "id": "660:9532",
+          "before": "Locais recomendados · Locais recomendados",
+          "after": "Locais recomendados"
+        },
+        {
+          "id": "I660:9533;3:180",
+          "before": "i Cenário de : não há recomendação personalizada.",
+          "after": "Nenhum local corresponde aos filtros atuais."
+        },
+        {
+          "id": "I660:9534;3:232",
+          "before": "Consulte a listagem pública de bancos enquanto não houver indicação.",
+          "after": "Amplie o estado, município ou tipo sanguíneo na busca de instituições."
+        },
+        {
+          "id": "660:9558",
+          "before": "Locais recomendados · Locais recomendados",
+          "after": "Locais recomendados"
+        },
+        {
+          "id": "I660:9559;3:180",
+          "before": "i Estado : aguardando a consulta de locais.",
+          "after": "Consultando instituições e necessidades."
+        },
+        {
+          "id": "660:9584",
+          "before": "Locais recomendados · Locais recomendados",
+          "after": "Locais recomendados"
+        },
+        {
+          "id": "660:9615",
+          "before": "Resultados ilustrativos · 1 resultado",
+          "after": "Instituições encontradas · 1 resultado"
+        },
+        {
+          "id": "660:8720",
+          "before": "Resultados ilustrativos",
+          "after": "Instituições encontradas"
+        },
+        {
+          "id": "227:5118",
+          "before": "Ana · pré-cadastro ilustrativo",
+          "after": "Ana · pré-cadastro"
+        },
+        {
+          "id": "I206:5211;3:180",
+          "before": "Estado ilustrativo: o site solicita o widget oficial quando a pessoa ativa Libras ou escolhe a abertura automática.",
+          "after": "O tradutor oficial de Libras é carregado ao ativar o recurso ou escolher a abertura automática."
+        },
+        {
+          "id": "I206:5229;3:180",
+          "before": "Estado ilustrativo: no site, o widget oficial abre um botão flutuante para tradução automática. A tradução pode conter imprecisões.",
+          "after": "O botão flutuante abre o tradutor de Libras. A tradução automática pode conter imprecisões."
+        },
+        {
+          "id": "I8:1112;3:190",
+          "before": "Li o aviso e usarei apenas dados de teste.",
+          "after": "Li e aceito o Termo de Responsabilidade e Sigilo."
+        },
+        {
+          "id": "8:1252",
+          "before": "Locais recomendados · Locais recomendados",
+          "after": "Locais recomendados"
+        },
+        {
+          "id": "I8:1253;3:180",
+          "before": "i visão para doador aprovado. Sem dados reais, não exibimos o tipo sanguíneo nem calculamos a próxima data ou a prioridade dos locais.",
+          "after": "Consulte locais e necessidades do seu tipo validado. As orientações não substituem a triagem."
+        },
+        {
+          "id": "I143:3461;3:223",
+          "before": "Definido pela equipe após avaliação · somente leitura. Nenhuma tipagem clínica neste .",
+          "after": "Tipo validado na avaliação clínica, somente leitura. Caso ainda não validado, a busca permanece manual."
+        },
+        {
+          "id": "I143:3466;3:222",
+          "before": "Próxima data estimada",
+          "after": "Intervalo entre doações"
+        },
+        {
+          "id": "I143:3466;3:223",
+          "before": "Indisponível sem histórico e regras confirmadas; não substitui a triagem do hemocentro.",
+          "after": "Orientação: 60 dias para homens e 90 para mulheres, conforme cadastro e histórico. A triagem confirma a elegibilidade."
+        },
+        {
+          "id": "I143:3471;3:232",
+          "before": "Nenhuma recomendação calculada. Fonte e prioridade das necessidades dependem da integração.",
+          "after": "Prioridade: Crítico → Baixo → Estável → Adequado. Depois, distância quando disponível. Filtre pelo tipo validado."
+        },
+        {
+          "id": "104:3672",
+          "before": "Níveis ilustrativos nesta .",
+          "after": "Níveis informados pela instituição. Não informado não indica estoque suficiente."
+        },
+        {
+          "id": "111:3349",
+          "before": "Níveis ilustrativos nesta .",
+          "after": "Níveis informados pela instituição. Não informado não indica estoque suficiente."
+        },
+        {
+          "id": "160:4027",
+          "before": "Locais recomendados · Locais recomendados",
+          "after": "Locais recomendados"
+        },
+        {
+          "id": "I160:4028;3:180",
+          "before": "i Cenário de : não há recomendação personalizada.",
+          "after": "Nenhum local corresponde aos filtros atuais."
+        },
+        {
+          "id": "I160:4029;3:232",
+          "before": "Consulte a listagem pública de bancos enquanto não houver indicação.",
+          "after": "Amplie o estado, município ou tipo sanguíneo na busca de instituições."
+        },
+        {
+          "id": "160:4053",
+          "before": "Locais recomendados · Locais recomendados",
+          "after": "Locais recomendados"
+        },
+        {
+          "id": "I160:4054;3:180",
+          "before": "i Estado : aguardando a consulta de locais.",
+          "after": "Consultando instituições e necessidades."
+        },
+        {
+          "id": "160:4080",
+          "before": "Locais recomendados · Locais recomendados",
+          "after": "Locais recomendados"
+        },
+        {
+          "id": "178:4070",
+          "before": "Resultados ilustrativos · 1 resultado",
+          "after": "Instituições encontradas · 1 resultado"
+        },
+        {
+          "id": "104:3588",
+          "before": "Resultados ilustrativos",
+          "after": "Instituições encontradas"
+        }
+      ],
+      "count": 91
+    },
+    "figmaLegalChanges": {
+      "mutatedNodeIds": [
+        "I8:2369;3:235",
+        "I8:2369;3:236",
+        "I8:2382;3:235",
+        "I8:2382;3:236",
+        "I660:7339;3:235",
+        "I660:7339;3:236",
+        "I660:7354;3:235",
+        "I660:7354;3:236",
+        "I8:1154;3:235",
+        "I8:1154;3:236"
+      ],
+      "edits": [
+        {
+          "id": "I8:2369;3:235",
+          "before": "Aviso de uso e privacidade",
+          "after": "Consentimento e privacidade · versão 1.1"
+        },
+        {
+          "id": "I8:2369;3:236",
+          "before": "Leia os termos e o aviso de privacidade. Seus dados de saúde são usados na avaliação por profissionais autorizados; o pré-cadastro não constitui aprovação para doar.",
+          "after": "Autorizo o tratamento dos dados de saúde necessários à avaliação e ao acompanhamento da minha jornada de doação por profissionais autorizados. O pré-cadastro não garante aptidão para doar nem substitui a triagem do serviço de hemoterapia. Exames devem ser enviados somente na área privada. Posso solicitar acesso, correção, informações sobre compartilhamento e as demais providências previstas na LGPD pelo canal de privacidade. Posso revogar este consentimento, sem efeito retroativo sobre tratamentos lícitos anteriores; a continuidade de etapas que dependam dele poderá ser interrompida. Pedidos de eliminação serão analisados diante das obrigações legais de guarda, inclusive de registros clínicos. A localização do dispositivo é opcional e exige meu acionamento. Publicar na comunidade exige aceite separado de suas normas e não autoriza divulgar informações clínicas individuais."
+        },
+        {
+          "id": "I8:2382;3:235",
+          "before": "Aviso de uso profissional",
+          "after": "Responsabilidade e sigilo · versão 1.1"
+        },
+        {
+          "id": "I8:2382;3:236",
+          "before": "Este acesso serve para revisão do fluxo. Use somente credenciais de teste; não informe dados ou exames reais. O termo profissional para uso real ainda depende de versão identificada e aprovação institucional.",
+          "after": "Comprometo-me a utilizar uma conta individual, proteger minhas credenciais e acessar somente registros necessários às minhas atribuições e instituições autorizadas. Preservarei o sigilo dos dados de saúde e registrarei decisões clínicas na área privada, observando as normas profissionais e a legislação brasileira. Não publicarei exames, diagnósticos individuais ou dados identificáveis de pacientes na comunidade. O vínculo com múltiplas instituições não autoriza compartilhamento indiscriminado. Comunicarei suspeitas de acesso indevido pelo canal operacional do serviço. A autorização de acesso depende da manutenção do vínculo e das permissões conferidas pelo servidor."
+        },
+        {
+          "id": "I660:7339;3:235",
+          "before": "Aviso de uso e privacidade",
+          "after": "Consentimento e privacidade · versão 1.1"
+        },
+        {
+          "id": "I660:7339;3:236",
+          "before": "Leia os termos e o aviso de privacidade. Seus dados de saúde são usados na avaliação por profissionais autorizados; o pré-cadastro não constitui aprovação para doar.",
+          "after": "Autorizo o tratamento dos dados de saúde necessários à avaliação e ao acompanhamento da minha jornada de doação por profissionais autorizados. O pré-cadastro não garante aptidão para doar nem substitui a triagem do serviço de hemoterapia. Exames devem ser enviados somente na área privada. Posso solicitar acesso, correção, informações sobre compartilhamento e as demais providências previstas na LGPD pelo canal de privacidade. Posso revogar este consentimento, sem efeito retroativo sobre tratamentos lícitos anteriores; a continuidade de etapas que dependam dele poderá ser interrompida. Pedidos de eliminação serão analisados diante das obrigações legais de guarda, inclusive de registros clínicos. A localização do dispositivo é opcional e exige meu acionamento. Publicar na comunidade exige aceite separado de suas normas e não autoriza divulgar informações clínicas individuais."
+        },
+        {
+          "id": "I660:7354;3:235",
+          "before": "Aviso de uso profissional",
+          "after": "Responsabilidade e sigilo · versão 1.1"
+        },
+        {
+          "id": "I660:7354;3:236",
+          "before": "Este acesso serve para revisão do fluxo. Use somente credenciais de teste; não informe dados ou exames reais. O termo profissional para uso real ainda depende de versão identificada e aprovação institucional.",
+          "after": "Comprometo-me a utilizar uma conta individual, proteger minhas credenciais e acessar somente registros necessários às minhas atribuições e instituições autorizadas. Preservarei o sigilo dos dados de saúde e registrarei decisões clínicas na área privada, observando as normas profissionais e a legislação brasileira. Não publicarei exames, diagnósticos individuais ou dados identificáveis de pacientes na comunidade. O vínculo com múltiplas instituições não autoriza compartilhamento indiscriminado. Comunicarei suspeitas de acesso indevido pelo canal operacional do serviço. A autorização de acesso depende da manutenção do vínculo e das permissões conferidas pelo servidor."
+        },
+        {
+          "id": "I8:1154;3:235",
+          "before": "Aviso de uso profissional",
+          "after": "Responsabilidade e sigilo · versão 1.1"
+        },
+        {
+          "id": "I8:1154;3:236",
+          "before": "Este acesso serve para revisão do fluxo. Use somente credenciais de teste; não informe dados ou exames reais. O termo profissional para uso real ainda depende de versão identificada e aprovação institucional.",
+          "after": "Comprometo-me a utilizar uma conta individual, proteger minhas credenciais e acessar somente registros necessários às minhas atribuições e instituições autorizadas. Preservarei o sigilo dos dados de saúde e registrarei decisões clínicas na área privada, observando as normas profissionais e a legislação brasileira. Não publicarei exames, diagnósticos individuais ou dados identificáveis de pacientes na comunidade. O vínculo com múltiplas instituições não autoriza compartilhamento indiscriminado. Comunicarei suspeitas de acesso indevido pelo canal operacional do serviço. A autorização de acesso depende da manutenção do vínculo e das permissões conferidas pelo servidor."
+        }
+      ]
+    },
+    "figmaComposedChanges": {
+      "createdNodeIds": [
+        "887:9704",
+        "887:9705",
+        "887:9706",
+        "887:9707",
+        "887:9708",
+        "887:9709",
+        "887:9710",
+        "887:9711",
+        "887:9712",
+        "887:9713",
+        "887:9714",
+        "887:9715",
+        "887:9716",
+        "887:9717",
+        "I887:9717;3:73",
+        "887:9719",
+        "I887:9719;3:73",
+        "887:9721",
+        "I887:9721;3:73",
+        "887:9723",
+        "I887:9723;3:73",
+        "887:9725",
+        "I887:9725;3:73",
+        "887:9727",
+        "I887:9727;3:73",
+        "887:9729",
+        "I887:9729;3:73",
+        "887:9731",
+        "887:9732",
+        "I887:9732;3:73",
+        "887:9734",
+        "I887:9734;3:73",
+        "887:9736",
+        "I887:9736;3:73",
+        "887:9738",
+        "I887:9738;3:73",
+        "887:9740",
+        "I887:9740;3:73",
+        "887:9742",
+        "I887:9742;3:73",
+        "887:9744",
+        "I887:9744;3:73",
+        "887:9746",
+        "887:9747",
+        "I887:9747;3:73",
+        "887:9749",
+        "I887:9749;3:73",
+        "887:9751",
+        "I887:9751;3:73",
+        "887:9753",
+        "I887:9753;3:73",
+        "887:9755",
+        "I887:9755;3:73",
+        "887:9757",
+        "I887:9757;3:73",
+        "887:9759",
+        "I887:9759;3:73",
+        "887:9761",
+        "887:9762",
+        "I887:9762;3:73",
+        "887:9764",
+        "I887:9764;3:73",
+        "887:9766",
+        "I887:9766;3:63",
+        "887:9768",
+        "I887:9768;3:73",
+        "887:9770",
+        "I887:9770;3:73",
+        "887:9772",
+        "I887:9772;3:73",
+        "887:9774",
+        "I887:9774;3:73",
+        "887:9776",
+        "887:9777",
+        "I887:9777;3:73",
+        "887:9779",
+        "I887:9779;3:73",
+        "887:9781",
+        "I887:9781;3:73",
+        "887:9783",
+        "I887:9783;3:73",
+        "887:9785",
+        "I887:9785;3:73",
+        "887:9787",
+        "I887:9787;3:73",
+        "887:9789",
+        "I887:9789;3:73",
+        "887:9791",
+        "887:9792",
+        "887:9793",
+        "887:9794",
+        "887:9795",
+        "I887:9795;3:94",
+        "I887:9795;3:95",
+        "I887:9795;3:96",
+        "I887:9795;3:97",
+        "887:9800",
+        "I887:9800;3:94",
+        "I887:9800;3:95",
+        "I887:9800;3:96",
+        "I887:9800;3:97",
+        "887:9805",
+        "I887:9805;3:94",
+        "I887:9805;3:95",
+        "I887:9805;3:96",
+        "I887:9805;3:97",
+        "887:9810",
+        "887:9811",
+        "I887:9811;3:69",
+        "887:9813",
+        "887:9814",
+        "I887:9814;3:94",
+        "I887:9814;3:95",
+        "I887:9814;3:96",
+        "I887:9814;3:97",
+        "887:9819",
+        "I887:9819;3:149",
+        "I887:9819;3:150",
+        "I887:9819;3:151",
+        "I887:9819;3:152"
+      ],
+      "mutatedNodeIds": [
+        "832:9885",
+        "154:3674",
+        "176:4038",
+        "176:4042",
+        "176:4046",
+        "176:4050",
+        "176:4055",
+        "176:4059",
+        "176:4063",
+        "176:4067",
+        "154:3818",
+        "154:3817",
+        "154:3822",
+        "154:3821"
+      ],
+      "agendaPanel": "887:9704",
+      "calendar": "887:9705",
+      "form": "887:9792",
+      "donationFields": [
+        "887:9814",
+        "887:9819"
+      ],
+      "beforeAgendaHeight": 718,
+      "afterAgendaHeight": 1336,
+      "editable": true,
+      "existingIdsPreserved": true
+    },
+    "figmaVisualFixChanges": {
+      "mutatedNodeIds": [
+        "I887:9717;3:73",
+        "I887:9719;3:73",
+        "I887:9721;3:73",
+        "I887:9723;3:73",
+        "I887:9725;3:73",
+        "I887:9727;3:73",
+        "I887:9729;3:73",
+        "I887:9732;3:73",
+        "I887:9734;3:73",
+        "I887:9736;3:73",
+        "I887:9738;3:73",
+        "I887:9740;3:73",
+        "I887:9742;3:73",
+        "I887:9744;3:73",
+        "I887:9747;3:73",
+        "I887:9749;3:73",
+        "I887:9751;3:73",
+        "I887:9753;3:73",
+        "I887:9755;3:73",
+        "I887:9757;3:73",
+        "I887:9759;3:73",
+        "I887:9762;3:73",
+        "I887:9764;3:73",
+        "I887:9766;3:63",
+        "I887:9768;3:73",
+        "I887:9770;3:73",
+        "I887:9772;3:73",
+        "I887:9774;3:73",
+        "I887:9777;3:73",
+        "I887:9779;3:73",
+        "I887:9781;3:73",
+        "I887:9783;3:73",
+        "I887:9785;3:73",
+        "I887:9787;3:73",
+        "I887:9789;3:73",
+        "154:3677",
+        "154:3680",
+        "154:3655"
+      ],
+      "calendarLabelBounds": [
+        {
+          "id": "I887:9717;3:73",
+          "t": "28",
+          "x": 13,
+          "w": 30
+        },
+        {
+          "id": "I887:9719;3:73",
+          "t": "29",
+          "x": 13,
+          "w": 30
+        },
+        {
+          "id": "I887:9721;3:73",
+          "t": "30",
+          "x": 13,
+          "w": 30
+        },
+        {
+          "id": "I887:9723;3:73",
+          "t": "1",
+          "x": 13,
+          "w": 30
+        },
+        {
+          "id": "I887:9725;3:73",
+          "t": "2",
+          "x": 13,
+          "w": 30
+        },
+        {
+          "id": "I887:9727;3:73",
+          "t": "3",
+          "x": 13,
+          "w": 30
+        },
+        {
+          "id": "I887:9729;3:73",
+          "t": "4",
+          "x": 13,
+          "w": 30
+        },
+        {
+          "id": "I887:9732;3:73",
+          "t": "5",
+          "x": 13,
+          "w": 30
+        },
+        {
+          "id": "I887:9734;3:73",
+          "t": "6",
+          "x": 13,
+          "w": 30
+        },
+        {
+          "id": "I887:9736;3:73",
+          "t": "7",
+          "x": 13,
+          "w": 30
+        },
+        {
+          "id": "I887:9738;3:73",
+          "t": "8",
+          "x": 13,
+          "w": 30
+        },
+        {
+          "id": "I887:9740;3:73",
+          "t": "9",
+          "x": 13,
+          "w": 30
+        },
+        {
+          "id": "I887:9742;3:73",
+          "t": "10",
+          "x": 13,
+          "w": 30
+        },
+        {
+          "id": "I887:9744;3:73",
+          "t": "11",
+          "x": 13,
+          "w": 30
+        },
+        {
+          "id": "I887:9747;3:73",
+          "t": "12",
+          "x": 13,
+          "w": 30
+        },
+        {
+          "id": "I887:9749;3:73",
+          "t": "13",
+          "x": 13,
+          "w": 30
+        },
+        {
+          "id": "I887:9751;3:73",
+          "t": "14",
+          "x": 13,
+          "w": 30
+        },
+        {
+          "id": "I887:9753;3:73",
+          "t": "15",
+          "x": 13,
+          "w": 30
+        },
+        {
+          "id": "I887:9755;3:73",
+          "t": "16",
+          "x": 13,
+          "w": 30
+        },
+        {
+          "id": "I887:9757;3:73",
+          "t": "17",
+          "x": 13,
+          "w": 30
+        },
+        {
+          "id": "I887:9759;3:73",
+          "t": "18",
+          "x": 13,
+          "w": 30
+        },
+        {
+          "id": "I887:9762;3:73",
+          "t": "19",
+          "x": 13,
+          "w": 30
+        },
+        {
+          "id": "I887:9764;3:73",
+          "t": "20",
+          "x": 13,
+          "w": 30
+        },
+        {
+          "id": "I887:9766;3:63",
+          "t": "21",
+          "x": 12,
+          "w": 32
+        },
+        {
+          "id": "I887:9768;3:73",
+          "t": "22",
+          "x": 13,
+          "w": 30
+        },
+        {
+          "id": "I887:9770;3:73",
+          "t": "23",
+          "x": 13,
+          "w": 30
+        },
+        {
+          "id": "I887:9772;3:73",
+          "t": "24",
+          "x": 13,
+          "w": 30
+        },
+        {
+          "id": "I887:9774;3:73",
+          "t": "25",
+          "x": 13,
+          "w": 30
+        },
+        {
+          "id": "I887:9777;3:73",
+          "t": "26",
+          "x": 13,
+          "w": 30
+        },
+        {
+          "id": "I887:9779;3:73",
+          "t": "27",
+          "x": 13,
+          "w": 30
+        },
+        {
+          "id": "I887:9781;3:73",
+          "t": "28",
+          "x": 13,
+          "w": 30
+        },
+        {
+          "id": "I887:9783;3:73",
+          "t": "29",
+          "x": 13,
+          "w": 30
+        },
+        {
+          "id": "I887:9785;3:73",
+          "t": "30",
+          "x": 13,
+          "w": 30
+        },
+        {
+          "id": "I887:9787;3:73",
+          "t": "31",
+          "x": 13,
+          "w": 30
+        },
+        {
+          "id": "I887:9789;3:73",
+          "t": "1",
+          "x": 13,
+          "w": 30
+        }
+      ],
+      "donationContentHeight": 1020
+    },
+    "figmaWebPublicationChanges": {
+      "createdNodeIds": [
+        "890:9760",
+        "890:9761",
+        "890:9762",
+        "890:9763",
+        "890:9764",
+        "890:9765",
+        "890:9766",
+        "890:9767",
+        "890:9768",
+        "890:9769",
+        "890:9770",
+        "890:9785",
+        "890:9786",
+        "890:9787",
+        "890:9788",
+        "890:9789",
+        "890:9790",
+        "890:9791",
+        "890:9792",
+        "890:9793",
+        "890:9794",
+        "890:9809",
+        "890:9810",
+        "890:9811",
+        "890:9812",
+        "890:9813",
+        "890:9814",
+        "890:9815",
+        "890:9816",
+        "890:9817",
+        "890:9818",
+        "890:9819",
+        "890:9822",
+        "890:9823",
+        "890:9824",
+        "890:9825",
+        "890:9826",
+        "890:9827",
+        "890:9828",
+        "890:9829",
+        "890:9830",
+        "890:9831",
+        "890:9846",
+        "I890:9846;3:63",
+        "890:9849",
+        "I890:9849;3:63"
+      ],
+      "mutatedNodeIds": [
+        "858:9711",
+        "832:9697",
+        "832:9728"
+      ],
+      "frames": [
+        {
+          "id": "890:9760",
+          "name": "Web mobile / Médico / Publicação de horário / Publicar"
+        },
+        {
+          "id": "890:9785",
+          "name": "Web mobile / Médico / Publicação de horário / Preenchido"
+        },
+        {
+          "id": "890:9809",
+          "name": "Web mobile / Médico / Publicação de horário / Publicado"
+        },
+        {
+          "id": "890:9822",
+          "name": "Web mobile / Médico / Publicação de horário / Conflito"
+        }
+      ],
+      "buttons": [
+        {
+          "root": "660:11338",
+          "content": "832:9697",
+          "button": "890:9846"
+        },
+        {
+          "root": "832:9669",
+          "content": "832:9728",
+          "button": "890:9849"
+        }
+      ],
+      "map": {
+        "226:5074": "660:11338",
+        "840:9742": "890:9760",
+        "840:9764": "890:9785",
+        "840:9786": "890:9809",
+        "840:9808": "890:9822"
+      }
+    },
+    "figmaRhResidualChanges": {
+      "mutatedNodeIds": [
+        "154:3721",
+        "104:3295",
+        "104:3309",
+        "104:3323",
+        "104:3337",
+        "104:3343",
+        "178:4054",
+        "I660:9377;3:180",
+        "I660:9455;3:180",
+        "660:8774",
+        "660:8817",
+        "660:9623",
+        "660:8994",
+        "I660:8996;158:3633",
+        "I660:8999;158:3630",
+        "I660:9002;158:3630",
+        "I660:9005;158:3630",
+        "I660:9044;158:3630",
+        "I660:9047;158:3630",
+        "I660:9050;158:3630",
+        "I660:9053;158:3630",
+        "660:9090",
+        "I660:9092;158:3630",
+        "I660:9095;158:3633",
+        "I660:9098;158:3630",
+        "I660:9101;158:3630",
+        "I660:9140;158:3630",
+        "I660:9143;158:3630",
+        "I660:9146;158:3630",
+        "I660:9149;158:3630",
+        "660:9186",
+        "I660:9188;158:3630",
+        "I660:9191;158:3630",
+        "I660:9194;158:3633",
+        "I660:9197;158:3630",
+        "I660:9236;158:3630",
+        "I660:9239;158:3630",
+        "I660:9242;158:3630",
+        "I660:9245;158:3630",
+        "660:9282",
+        "I660:9284;158:3630",
+        "I660:9287;158:3630",
+        "I660:9290;158:3630",
+        "I660:9293;158:3633",
+        "I660:9332;158:3630",
+        "I660:9335;158:3630",
+        "I660:9338;158:3630",
+        "I660:9341;158:3630",
+        "660:8732",
+        "660:8735",
+        "104:3665",
+        "111:3344",
+        "178:4085",
+        "157:3627",
+        "I158:3635;158:3633",
+        "I158:3641;158:3630",
+        "I158:3645;158:3630",
+        "I158:3649;158:3630",
+        "I158:3665;158:3630",
+        "I158:3668;158:3630",
+        "I158:3671;158:3630",
+        "I158:3674;158:3630",
+        "158:3714",
+        "I158:3716;158:3630",
+        "I158:3719;158:3633",
+        "I158:3722;158:3630",
+        "I158:3725;158:3630",
+        "I158:3767;158:3630",
+        "I158:3770;158:3630",
+        "I158:3773;158:3630",
+        "I158:3776;158:3630",
+        "158:3816",
+        "I158:3818;158:3630",
+        "I158:3821;158:3630",
+        "I158:3824;158:3633",
+        "I158:3827;158:3630",
+        "I158:3869;158:3630",
+        "I158:3872;158:3630",
+        "I158:3875;158:3630",
+        "I158:3878;158:3630",
+        "158:3918",
+        "I158:3920;158:3630",
+        "I158:3923;158:3630",
+        "I158:3926;158:3630",
+        "I158:3929;158:3633",
+        "I158:3971;158:3630",
+        "I158:3974;158:3630",
+        "I158:3977;158:3630",
+        "I158:3980;158:3630",
+        "104:3602",
+        "104:3607",
+        "158:3630",
+        "158:3633",
+        "660:8984",
+        "660:9080",
+        "660:9176",
+        "660:9272",
+        "157:3604",
+        "158:3704",
+        "158:3806",
+        "158:3908"
+      ],
+      "edits": [
+        {
+          "id": "154:3721",
+          "before": "Identificação protegida; nenhuma informação pessoal nesta .",
+          "after": "Identificação disponível apenas aos profissionais autorizados para o atendimento."
+        },
+        {
+          "id": "104:3295",
+          "before": "A",
+          "after": "A−"
+        },
+        {
+          "id": "104:3309",
+          "before": "B",
+          "after": "B−"
+        },
+        {
+          "id": "104:3323",
+          "before": "AB",
+          "after": "AB−"
+        },
+        {
+          "id": "104:3337",
+          "before": "O",
+          "after": "O−"
+        },
+        {
+          "id": "104:3343",
+          "before": "A sequência e os níveis acima são apenas de interface.",
+          "after": "Cada nível corresponde à última atualização informada pela instituição."
+        },
+        {
+          "id": "178:4054",
+          "before": "Necessidades · Resultado de",
+          "after": "Atualização de necessidade"
+        },
+        {
+          "id": "I660:9377;3:180",
+          "before": "i Cenário de : nenhuma consulta real foi consultada.",
+          "after": "Você ainda não tem consultas registradas."
+        },
+        {
+          "id": "I660:9455;3:180",
+          "before": "i Cenário de : nenhuma solicitação real foi consultada.",
+          "after": "Você ainda não tem solicitações de exame."
+        },
+        {
+          "id": "660:8774",
+          "before": "A",
+          "after": "A−"
+        },
+        {
+          "id": "660:8817",
+          "before": "A",
+          "after": "A−"
+        },
+        {
+          "id": "660:9623",
+          "before": "Filtro e localidade . Não há demanda real nem busca conectada nesta .",
+          "after": "Resultado do filtro de localidade e tipo sanguíneo. Amplie os filtros se necessário."
+        },
+        {
+          "id": "660:8994",
+          "before": "Selecione o tipo doador · O",
+          "after": "Selecione o tipo doador · O−"
+        },
+        {
+          "id": "I660:8996;158:3633",
+          "before": "O",
+          "after": "O−"
+        },
+        {
+          "id": "I660:8999;158:3630",
+          "before": "A",
+          "after": "A−"
+        },
+        {
+          "id": "I660:9002;158:3630",
+          "before": "B",
+          "after": "B−"
+        },
+        {
+          "id": "I660:9005;158:3630",
+          "before": "AB",
+          "after": "AB−"
+        },
+        {
+          "id": "I660:9044;158:3630",
+          "before": "O",
+          "after": "O−"
+        },
+        {
+          "id": "I660:9047;158:3630",
+          "before": "A",
+          "after": "A−"
+        },
+        {
+          "id": "I660:9050;158:3630",
+          "before": "B",
+          "after": "B−"
+        },
+        {
+          "id": "I660:9053;158:3630",
+          "before": "AB",
+          "after": "AB−"
+        },
+        {
+          "id": "660:9090",
+          "before": "Selecione o tipo doador · A",
+          "after": "Selecione o tipo doador · A−"
+        },
+        {
+          "id": "I660:9092;158:3630",
+          "before": "O",
+          "after": "O−"
+        },
+        {
+          "id": "I660:9095;158:3633",
+          "before": "A",
+          "after": "A−"
+        },
+        {
+          "id": "I660:9098;158:3630",
+          "before": "B",
+          "after": "B−"
+        },
+        {
+          "id": "I660:9101;158:3630",
+          "before": "AB",
+          "after": "AB−"
+        },
+        {
+          "id": "I660:9140;158:3630",
+          "before": "O",
+          "after": "O−"
+        },
+        {
+          "id": "I660:9143;158:3630",
+          "before": "A",
+          "after": "A−"
+        },
+        {
+          "id": "I660:9146;158:3630",
+          "before": "B",
+          "after": "B−"
+        },
+        {
+          "id": "I660:9149;158:3630",
+          "before": "AB",
+          "after": "AB−"
+        },
+        {
+          "id": "660:9186",
+          "before": "Selecione o tipo doador · B",
+          "after": "Selecione o tipo doador · B−"
+        },
+        {
+          "id": "I660:9188;158:3630",
+          "before": "O",
+          "after": "O−"
+        },
+        {
+          "id": "I660:9191;158:3630",
+          "before": "A",
+          "after": "A−"
+        },
+        {
+          "id": "I660:9194;158:3633",
+          "before": "B",
+          "after": "B−"
+        },
+        {
+          "id": "I660:9197;158:3630",
+          "before": "AB",
+          "after": "AB−"
+        },
+        {
+          "id": "I660:9236;158:3630",
+          "before": "O",
+          "after": "O−"
+        },
+        {
+          "id": "I660:9239;158:3630",
+          "before": "A",
+          "after": "A−"
+        },
+        {
+          "id": "I660:9242;158:3630",
+          "before": "B",
+          "after": "B−"
+        },
+        {
+          "id": "I660:9245;158:3630",
+          "before": "AB",
+          "after": "AB−"
+        },
+        {
+          "id": "660:9282",
+          "before": "Selecione o tipo doador · AB",
+          "after": "Selecione o tipo doador · AB−"
+        },
+        {
+          "id": "I660:9284;158:3630",
+          "before": "O",
+          "after": "O−"
+        },
+        {
+          "id": "I660:9287;158:3630",
+          "before": "A",
+          "after": "A−"
+        },
+        {
+          "id": "I660:9290;158:3630",
+          "before": "B",
+          "after": "B−"
+        },
+        {
+          "id": "I660:9293;158:3633",
+          "before": "AB",
+          "after": "AB−"
+        },
+        {
+          "id": "I660:9332;158:3630",
+          "before": "O",
+          "after": "O−"
+        },
+        {
+          "id": "I660:9335;158:3630",
+          "before": "A",
+          "after": "A−"
+        },
+        {
+          "id": "I660:9338;158:3630",
+          "before": "B",
+          "after": "B−"
+        },
+        {
+          "id": "I660:9341;158:3630",
+          "before": "AB",
+          "after": "AB−"
+        },
+        {
+          "id": "660:8732",
+          "before": "Tipo A",
+          "after": "Tipo A−"
+        },
+        {
+          "id": "660:8735",
+          "before": "As localidades e os níveis desta lista são ; não há mapa ou demanda real nesta .",
+          "after": "Necessidades informadas pelas instituições, em ordem de prioridade. Confirme condições e horários antes de se deslocar."
+        },
+        {
+          "id": "104:3665",
+          "before": "A",
+          "after": "A−"
+        },
+        {
+          "id": "111:3344",
+          "before": "A",
+          "after": "A−"
+        },
+        {
+          "id": "178:4085",
+          "before": "Filtro e localidade . Não há demanda real nem busca conectada nesta .",
+          "after": "Resultado do filtro de localidade e tipo sanguíneo. Amplie os filtros se necessário."
+        },
+        {
+          "id": "157:3627",
+          "before": "Selecione o tipo doador · O",
+          "after": "Selecione o tipo doador · O−"
+        },
+        {
+          "id": "I158:3635;158:3633",
+          "before": "O",
+          "after": "O−"
+        },
+        {
+          "id": "I158:3641;158:3630",
+          "before": "A",
+          "after": "A−"
+        },
+        {
+          "id": "I158:3645;158:3630",
+          "before": "B",
+          "after": "B−"
+        },
+        {
+          "id": "I158:3649;158:3630",
+          "before": "AB",
+          "after": "AB−"
+        },
+        {
+          "id": "I158:3665;158:3630",
+          "before": "O",
+          "after": "O−"
+        },
+        {
+          "id": "I158:3668;158:3630",
+          "before": "A",
+          "after": "A−"
+        },
+        {
+          "id": "I158:3671;158:3630",
+          "before": "B",
+          "after": "B−"
+        },
+        {
+          "id": "I158:3674;158:3630",
+          "before": "AB",
+          "after": "AB−"
+        },
+        {
+          "id": "158:3714",
+          "before": "Selecione o tipo doador · A",
+          "after": "Selecione o tipo doador · A−"
+        },
+        {
+          "id": "I158:3716;158:3630",
+          "before": "O",
+          "after": "O−"
+        },
+        {
+          "id": "I158:3719;158:3633",
+          "before": "A",
+          "after": "A−"
+        },
+        {
+          "id": "I158:3722;158:3630",
+          "before": "B",
+          "after": "B−"
+        },
+        {
+          "id": "I158:3725;158:3630",
+          "before": "AB",
+          "after": "AB−"
+        },
+        {
+          "id": "I158:3767;158:3630",
+          "before": "O",
+          "after": "O−"
+        },
+        {
+          "id": "I158:3770;158:3630",
+          "before": "A",
+          "after": "A−"
+        },
+        {
+          "id": "I158:3773;158:3630",
+          "before": "B",
+          "after": "B−"
+        },
+        {
+          "id": "I158:3776;158:3630",
+          "before": "AB",
+          "after": "AB−"
+        },
+        {
+          "id": "158:3816",
+          "before": "Selecione o tipo doador · B",
+          "after": "Selecione o tipo doador · B−"
+        },
+        {
+          "id": "I158:3818;158:3630",
+          "before": "O",
+          "after": "O−"
+        },
+        {
+          "id": "I158:3821;158:3630",
+          "before": "A",
+          "after": "A−"
+        },
+        {
+          "id": "I158:3824;158:3633",
+          "before": "B",
+          "after": "B−"
+        },
+        {
+          "id": "I158:3827;158:3630",
+          "before": "AB",
+          "after": "AB−"
+        },
+        {
+          "id": "I158:3869;158:3630",
+          "before": "O",
+          "after": "O−"
+        },
+        {
+          "id": "I158:3872;158:3630",
+          "before": "A",
+          "after": "A−"
+        },
+        {
+          "id": "I158:3875;158:3630",
+          "before": "B",
+          "after": "B−"
+        },
+        {
+          "id": "I158:3878;158:3630",
+          "before": "AB",
+          "after": "AB−"
+        },
+        {
+          "id": "158:3918",
+          "before": "Selecione o tipo doador · AB",
+          "after": "Selecione o tipo doador · AB−"
+        },
+        {
+          "id": "I158:3920;158:3630",
+          "before": "O",
+          "after": "O−"
+        },
+        {
+          "id": "I158:3923;158:3630",
+          "before": "A",
+          "after": "A−"
+        },
+        {
+          "id": "I158:3926;158:3630",
+          "before": "B",
+          "after": "B−"
+        },
+        {
+          "id": "I158:3929;158:3633",
+          "before": "AB",
+          "after": "AB−"
+        },
+        {
+          "id": "I158:3971;158:3630",
+          "before": "O",
+          "after": "O−"
+        },
+        {
+          "id": "I158:3974;158:3630",
+          "before": "A",
+          "after": "A−"
+        },
+        {
+          "id": "I158:3977;158:3630",
+          "before": "B",
+          "after": "B−"
+        },
+        {
+          "id": "I158:3980;158:3630",
+          "before": "AB",
+          "after": "AB−"
+        },
+        {
+          "id": "104:3602",
+          "before": "Tipo A",
+          "after": "Tipo A−"
+        },
+        {
+          "id": "104:3607",
+          "before": "As localidades e os níveis desta lista são ; não há mapa ou demanda real nesta .",
+          "after": "Necessidades informadas pelas instituições, em ordem de prioridade. Confirme condições e horários antes de se deslocar."
+        },
+        {
+          "id": "158:3630",
+          "before": "O",
+          "after": "O−"
+        },
+        {
+          "id": "158:3633",
+          "before": "O",
+          "after": "O−"
+        }
+      ],
+      "renamed": [
+        {
+          "id": "660:8984",
+          "before": "Web mobile / Paciente/Doador / / Compatibilidade / O",
+          "after": "Web mobile / Paciente/Doador / / Compatibilidade / O−"
+        },
+        {
+          "id": "660:9080",
+          "before": "Web mobile / Paciente/Doador / / Compatibilidade / A",
+          "after": "Web mobile / Paciente/Doador / / Compatibilidade / A−"
+        },
+        {
+          "id": "660:9176",
+          "before": "Web mobile / Paciente/Doador / / Compatibilidade / B",
+          "after": "Web mobile / Paciente/Doador / / Compatibilidade / B−"
+        },
+        {
+          "id": "660:9272",
+          "before": "Web mobile / Paciente/Doador / / Compatibilidade / AB",
+          "after": "Web mobile / Paciente/Doador / / Compatibilidade / AB−"
+        },
+        {
+          "id": "157:3604",
+          "before": "Aplicativo / Paciente/Doador / Compatibilidade / O",
+          "after": "Aplicativo / Paciente/Doador / Compatibilidade / O−"
+        },
+        {
+          "id": "158:3704",
+          "before": "Aplicativo / Paciente/Doador / Compatibilidade / A",
+          "after": "Aplicativo / Paciente/Doador / Compatibilidade / A−"
+        },
+        {
+          "id": "158:3806",
+          "before": "Aplicativo / Paciente/Doador / Compatibilidade / B",
+          "after": "Aplicativo / Paciente/Doador / Compatibilidade / B−"
+        },
+        {
+          "id": "158:3908",
+          "before": "Aplicativo / Paciente/Doador / Compatibilidade / AB",
+          "after": "Aplicativo / Paciente/Doador / Compatibilidade / AB−"
+        }
+      ],
+      "count": 93
+    }
+  },
+  "auditorias": {
+    "figmaCloseoutFinalAudit": {
+      "page": "0:1",
+      "counts": [
+        {
+          "id": "858:9704",
+          "name": "Web desktop",
+          "frames": 0
+        },
+        {
+          "id": "858:9711",
+          "name": "Web mobile",
+          "frames": 4
+        },
+        {
+          "id": "858:9718",
+          "name": "Aplicativo",
+          "frames": 0
+        }
+      ],
+      "reactions": 3370,
+      "destinations": 2924,
+      "broken": [],
+      "cross": [],
+      "timers": [
+        "193:4795",
+        "206:5234",
+        "193:4911",
+        "81:3180",
+        "193:4569",
+        "206:5198",
+        "193:4675",
+        "81:3028",
+        "49:14023",
+        "49:14082",
+        "49:14135",
+        "49:14188",
+        "49:14241",
+        "49:14294",
+        "49:14347",
+        "49:14400",
+        "49:14614",
+        "49:14673",
+        "49:14726",
+        "49:14779",
+        "49:14832",
+        "49:14885",
+        "49:14938",
+        "49:14991"
+      ],
+      "residues": [],
+      "cloneLinks": [
+        {
+          "id": "890:9760",
+          "name": "Web mobile / Médico / Publicação de horário / Publicar",
+          "links": [
+            {
+              "from": "890:9763",
+              "to": "660:11338"
+            },
+            {
+              "from": "890:9767",
+              "to": "890:9785"
+            },
+            {
+              "from": "890:9768",
+              "to": "890:9785"
+            },
+            {
+              "from": "890:9769",
+              "to": "890:9785"
+            }
+          ]
+        },
+        {
+          "id": "890:9785",
+          "name": "Web mobile / Médico / Publicação de horário / Preenchido",
+          "links": [
+            {
+              "from": "890:9788",
+              "to": "890:9760"
+            },
+            {
+              "from": "890:9794",
+              "to": "890:9809"
+            }
+          ]
+        },
+        {
+          "id": "890:9809",
+          "name": "Web mobile / Médico / Publicação de horário / Publicado",
+          "links": [
+            {
+              "from": "890:9812",
+              "to": "660:11338"
+            },
+            {
+              "from": "890:9819",
+              "to": "660:11338"
+            }
+          ]
+        },
+        {
+          "id": "890:9822",
+          "name": "Web mobile / Médico / Publicação de horário / Conflito",
+          "links": [
+            {
+              "from": "890:9825",
+              "to": "890:9760"
+            },
+            {
+              "from": "890:9830",
+              "to": "660:11338"
+            },
+            {
+              "from": "890:9831",
+              "to": "890:9760"
+            }
+          ]
+        }
+      ],
+      "scope": "Inspeção estrutural; não equivale a navegação manual de todos os caminhos no Present nem a execução da API.",
+      "notaContagem": "counts contabiliza somente filhos diretos da seção; as telas estão em subgrupos. Para inventário completo usar figmaScreenCountsAudit."
+    },
+    "figmaScreenCountsAudit": {
+      "screenCount": 521,
+      "counts": [
+        {
+          "version": "Web desktop",
+          "count": 148
+        },
+        {
+          "version": "Web mobile",
+          "count": 170
+        },
+        {
+          "version": "Aplicativo",
+          "count": 203
+        }
+      ],
+      "timedTransitions": 8,
+      "timerCycles": [],
+      "changedScreenLinks": [
+        "101:3115",
+        "154:3653",
+        "154:3555",
+        "154:3604",
+        "153:3515",
+        "154:3520",
+        "154:3804",
+        "890:9760",
+        "890:9785",
+        "890:9809",
+        "890:9822"
+      ]
+    }
+  },
+  "resumo": {
+    "nosExistentesOuNovosAjustados": 361,
+    "nosCriados": 166,
+    "telasAdicionadas": 4,
+    "idsAjustados": [
+      "154:3808",
+      "154:3809",
+      "154:3811",
+      "154:3812",
+      "154:3813",
+      "154:3814",
+      "154:3817",
+      "154:3818",
+      "154:3819",
+      "154:3821",
+      "154:3822",
+      "154:3823",
+      "154:3824",
+      "154:3825",
+      "154:3665",
+      "154:3666",
+      "154:3667",
+      "154:3669",
+      "154:3670",
+      "I154:3692;3:114",
+      "I154:3692;3:116",
+      "I154:3692;3:117",
+      "154:3672",
+      "154:3673",
+      "I154:3697;3:169",
+      "I154:3697;3:171",
+      "I154:3697;3:172",
+      "154:3675",
+      "154:3676",
+      "I154:3702;3:69",
+      "154:3678",
+      "154:3679",
+      "154:3681",
+      "154:3682",
+      "154:3567",
+      "154:3568",
+      "154:3569",
+      "154:3571",
+      "154:3572",
+      "I154:3592;3:169",
+      "I154:3592;3:171",
+      "I154:3592;3:172",
+      "154:3574",
+      "154:3575",
+      "I154:3597;3:169",
+      "I154:3597;3:171",
+      "I154:3597;3:172",
+      "154:3577",
+      "154:3578",
+      "154:3580",
+      "154:3581",
+      "I155:3641;3:73",
+      "154:3583",
+      "154:3584",
+      "154:3616",
+      "154:3617",
+      "154:3618",
+      "154:3620",
+      "154:3621",
+      "I154:3641;3:169",
+      "I154:3641;3:171",
+      "I154:3641;3:172",
+      "154:3623",
+      "154:3624",
+      "I154:3646;3:169",
+      "I154:3646;3:171",
+      "I154:3646;3:172",
+      "154:3626",
+      "154:3627",
+      "154:3629",
+      "154:3630",
+      "I155:3644;3:73",
+      "154:3632",
+      "154:3633",
+      "153:3534",
+      "153:3535",
+      "153:3536",
+      "153:3538",
+      "153:3539",
+      "153:3541",
+      "153:3542",
+      "153:3544",
+      "153:3545",
+      "153:3547",
+      "153:3548",
+      "153:3550",
+      "153:3551",
+      "176:4039",
+      "176:4043",
+      "176:4047",
+      "176:4051",
+      "154:3532",
+      "154:3533",
+      "154:3534",
+      "154:3536",
+      "154:3537",
+      "154:3539",
+      "154:3540",
+      "154:3542",
+      "154:3543",
+      "154:3545",
+      "154:3546",
+      "154:3548",
+      "154:3549",
+      "176:4056",
+      "176:4060",
+      "176:4064",
+      "176:4068",
+      "I8:1324;3:180",
+      "I8:1326;3:190",
+      "I8:1329;3:73",
+      "I8:1402;3:180",
+      "I8:1404;3:193",
+      "I8:1407;3:73",
+      "I8:1482;3:180",
+      "I8:1484;3:196",
+      "I8:1487;3:73",
+      "I8:1560;3:180",
+      "I8:1562;3:193",
+      "I8:1565;3:73",
+      "227:5170",
+      "I206:5247;3:180",
+      "I206:5265;3:180",
+      "I8:2340;3:190",
+      "8:2480",
+      "I172:4044;3:223",
+      "I172:4047;3:222",
+      "I172:4047;3:223",
+      "I172:4050;3:232",
+      "154:3730",
+      "104:3255",
+      "I104:3347;3:152",
+      "I104:3352;3:152",
+      "I103:3259;99:3119",
+      "I103:3259;99:3124",
+      "103:3260",
+      "I103:3263;3:97",
+      "I103:3264;3:97",
+      "I102:3136;3:152",
+      "102:3160",
+      "I102:3163;3:97",
+      "I102:3168;3:97",
+      "I102:3173;3:97",
+      "I102:3178;3:97",
+      "103:3179",
+      "I103:3182;3:97",
+      "I103:3183;3:97",
+      "I660:6056;3:180",
+      "I660:6057;3:190",
+      "I660:6058;3:73",
+      "I660:6136;3:180",
+      "I660:6137;3:193",
+      "I660:6138;3:73",
+      "I660:6218;3:180",
+      "I660:6219;3:196",
+      "I660:6220;3:73",
+      "I660:6299;3:180",
+      "I660:6300;3:193",
+      "I660:6301;3:73",
+      "660:11406",
+      "I660:10915;3:180",
+      "I660:10933;3:180",
+      "I660:7291;3:190",
+      "660:7546",
+      "I660:7547;3:180",
+      "I660:7548;3:223",
+      "I660:7549;3:222",
+      "I660:7549;3:223",
+      "I660:7550;3:232",
+      "660:8779",
+      "660:8822",
+      "660:9532",
+      "I660:9533;3:180",
+      "I660:9534;3:232",
+      "660:9558",
+      "I660:9559;3:180",
+      "660:9584",
+      "660:9615",
+      "660:8720",
+      "227:5118",
+      "I206:5211;3:180",
+      "I206:5229;3:180",
+      "I8:1112;3:190",
+      "8:1252",
+      "I8:1253;3:180",
+      "I143:3461;3:223",
+      "I143:3466;3:222",
+      "I143:3466;3:223",
+      "I143:3471;3:232",
+      "104:3672",
+      "111:3349",
+      "160:4027",
+      "I160:4028;3:180",
+      "I160:4029;3:232",
+      "160:4053",
+      "I160:4054;3:180",
+      "160:4080",
+      "178:4070",
+      "104:3588",
+      "I8:2369;3:235",
+      "I8:2369;3:236",
+      "I8:2382;3:235",
+      "I8:2382;3:236",
+      "I660:7339;3:235",
+      "I660:7339;3:236",
+      "I660:7354;3:235",
+      "I660:7354;3:236",
+      "I8:1154;3:235",
+      "I8:1154;3:236",
+      "832:9885",
+      "154:3674",
+      "176:4038",
+      "176:4042",
+      "176:4046",
+      "176:4050",
+      "176:4055",
+      "176:4059",
+      "176:4063",
+      "176:4067",
+      "I887:9717;3:73",
+      "I887:9719;3:73",
+      "I887:9721;3:73",
+      "I887:9723;3:73",
+      "I887:9725;3:73",
+      "I887:9727;3:73",
+      "I887:9729;3:73",
+      "I887:9732;3:73",
+      "I887:9734;3:73",
+      "I887:9736;3:73",
+      "I887:9738;3:73",
+      "I887:9740;3:73",
+      "I887:9742;3:73",
+      "I887:9744;3:73",
+      "I887:9747;3:73",
+      "I887:9749;3:73",
+      "I887:9751;3:73",
+      "I887:9753;3:73",
+      "I887:9755;3:73",
+      "I887:9757;3:73",
+      "I887:9759;3:73",
+      "I887:9762;3:73",
+      "I887:9764;3:73",
+      "I887:9766;3:63",
+      "I887:9768;3:73",
+      "I887:9770;3:73",
+      "I887:9772;3:73",
+      "I887:9774;3:73",
+      "I887:9777;3:73",
+      "I887:9779;3:73",
+      "I887:9781;3:73",
+      "I887:9783;3:73",
+      "I887:9785;3:73",
+      "I887:9787;3:73",
+      "I887:9789;3:73",
+      "154:3677",
+      "154:3680",
+      "154:3655",
+      "858:9711",
+      "832:9697",
+      "832:9728",
+      "154:3721",
+      "104:3295",
+      "104:3309",
+      "104:3323",
+      "104:3337",
+      "104:3343",
+      "178:4054",
+      "I660:9377;3:180",
+      "I660:9455;3:180",
+      "660:8774",
+      "660:8817",
+      "660:9623",
+      "660:8994",
+      "I660:8996;158:3633",
+      "I660:8999;158:3630",
+      "I660:9002;158:3630",
+      "I660:9005;158:3630",
+      "I660:9044;158:3630",
+      "I660:9047;158:3630",
+      "I660:9050;158:3630",
+      "I660:9053;158:3630",
+      "660:9090",
+      "I660:9092;158:3630",
+      "I660:9095;158:3633",
+      "I660:9098;158:3630",
+      "I660:9101;158:3630",
+      "I660:9140;158:3630",
+      "I660:9143;158:3630",
+      "I660:9146;158:3630",
+      "I660:9149;158:3630",
+      "660:9186",
+      "I660:9188;158:3630",
+      "I660:9191;158:3630",
+      "I660:9194;158:3633",
+      "I660:9197;158:3630",
+      "I660:9236;158:3630",
+      "I660:9239;158:3630",
+      "I660:9242;158:3630",
+      "I660:9245;158:3630",
+      "660:9282",
+      "I660:9284;158:3630",
+      "I660:9287;158:3630",
+      "I660:9290;158:3630",
+      "I660:9293;158:3633",
+      "I660:9332;158:3630",
+      "I660:9335;158:3630",
+      "I660:9338;158:3630",
+      "I660:9341;158:3630",
+      "660:8732",
+      "660:8735",
+      "104:3665",
+      "111:3344",
+      "178:4085",
+      "157:3627",
+      "I158:3635;158:3633",
+      "I158:3641;158:3630",
+      "I158:3645;158:3630",
+      "I158:3649;158:3630",
+      "I158:3665;158:3630",
+      "I158:3668;158:3630",
+      "I158:3671;158:3630",
+      "I158:3674;158:3630",
+      "158:3714",
+      "I158:3716;158:3630",
+      "I158:3719;158:3633",
+      "I158:3722;158:3630",
+      "I158:3725;158:3630",
+      "I158:3767;158:3630",
+      "I158:3770;158:3630",
+      "I158:3773;158:3630",
+      "I158:3776;158:3630",
+      "158:3816",
+      "I158:3818;158:3630",
+      "I158:3821;158:3630",
+      "I158:3824;158:3633",
+      "I158:3827;158:3630",
+      "I158:3869;158:3630",
+      "I158:3872;158:3630",
+      "I158:3875;158:3630",
+      "I158:3878;158:3630",
+      "158:3918",
+      "I158:3920;158:3630",
+      "I158:3923;158:3630",
+      "I158:3926;158:3630",
+      "I158:3929;158:3633",
+      "I158:3971;158:3630",
+      "I158:3974;158:3630",
+      "I158:3977;158:3630",
+      "I158:3980;158:3630",
+      "104:3602",
+      "104:3607",
+      "158:3630",
+      "158:3633",
+      "660:8984",
+      "660:9080",
+      "660:9176",
+      "660:9272",
+      "157:3604",
+      "158:3704",
+      "158:3806",
+      "158:3908"
+    ],
+    "idsCriados": [
+      "887:9704",
+      "887:9705",
+      "887:9706",
+      "887:9707",
+      "887:9708",
+      "887:9709",
+      "887:9710",
+      "887:9711",
+      "887:9712",
+      "887:9713",
+      "887:9714",
+      "887:9715",
+      "887:9716",
+      "887:9717",
+      "I887:9717;3:73",
+      "887:9719",
+      "I887:9719;3:73",
+      "887:9721",
+      "I887:9721;3:73",
+      "887:9723",
+      "I887:9723;3:73",
+      "887:9725",
+      "I887:9725;3:73",
+      "887:9727",
+      "I887:9727;3:73",
+      "887:9729",
+      "I887:9729;3:73",
+      "887:9731",
+      "887:9732",
+      "I887:9732;3:73",
+      "887:9734",
+      "I887:9734;3:73",
+      "887:9736",
+      "I887:9736;3:73",
+      "887:9738",
+      "I887:9738;3:73",
+      "887:9740",
+      "I887:9740;3:73",
+      "887:9742",
+      "I887:9742;3:73",
+      "887:9744",
+      "I887:9744;3:73",
+      "887:9746",
+      "887:9747",
+      "I887:9747;3:73",
+      "887:9749",
+      "I887:9749;3:73",
+      "887:9751",
+      "I887:9751;3:73",
+      "887:9753",
+      "I887:9753;3:73",
+      "887:9755",
+      "I887:9755;3:73",
+      "887:9757",
+      "I887:9757;3:73",
+      "887:9759",
+      "I887:9759;3:73",
+      "887:9761",
+      "887:9762",
+      "I887:9762;3:73",
+      "887:9764",
+      "I887:9764;3:73",
+      "887:9766",
+      "I887:9766;3:63",
+      "887:9768",
+      "I887:9768;3:73",
+      "887:9770",
+      "I887:9770;3:73",
+      "887:9772",
+      "I887:9772;3:73",
+      "887:9774",
+      "I887:9774;3:73",
+      "887:9776",
+      "887:9777",
+      "I887:9777;3:73",
+      "887:9779",
+      "I887:9779;3:73",
+      "887:9781",
+      "I887:9781;3:73",
+      "887:9783",
+      "I887:9783;3:73",
+      "887:9785",
+      "I887:9785;3:73",
+      "887:9787",
+      "I887:9787;3:73",
+      "887:9789",
+      "I887:9789;3:73",
+      "887:9791",
+      "887:9792",
+      "887:9793",
+      "887:9794",
+      "887:9795",
+      "I887:9795;3:94",
+      "I887:9795;3:95",
+      "I887:9795;3:96",
+      "I887:9795;3:97",
+      "887:9800",
+      "I887:9800;3:94",
+      "I887:9800;3:95",
+      "I887:9800;3:96",
+      "I887:9800;3:97",
+      "887:9805",
+      "I887:9805;3:94",
+      "I887:9805;3:95",
+      "I887:9805;3:96",
+      "I887:9805;3:97",
+      "887:9810",
+      "887:9811",
+      "I887:9811;3:69",
+      "887:9813",
+      "887:9814",
+      "I887:9814;3:94",
+      "I887:9814;3:95",
+      "I887:9814;3:96",
+      "I887:9814;3:97",
+      "887:9819",
+      "I887:9819;3:149",
+      "I887:9819;3:150",
+      "I887:9819;3:151",
+      "I887:9819;3:152",
+      "890:9760",
+      "890:9761",
+      "890:9762",
+      "890:9763",
+      "890:9764",
+      "890:9765",
+      "890:9766",
+      "890:9767",
+      "890:9768",
+      "890:9769",
+      "890:9770",
+      "890:9785",
+      "890:9786",
+      "890:9787",
+      "890:9788",
+      "890:9789",
+      "890:9790",
+      "890:9791",
+      "890:9792",
+      "890:9793",
+      "890:9794",
+      "890:9809",
+      "890:9810",
+      "890:9811",
+      "890:9812",
+      "890:9813",
+      "890:9814",
+      "890:9815",
+      "890:9816",
+      "890:9817",
+      "890:9818",
+      "890:9819",
+      "890:9822",
+      "890:9823",
+      "890:9824",
+      "890:9825",
+      "890:9826",
+      "890:9827",
+      "890:9828",
+      "890:9829",
+      "890:9830",
+      "890:9831",
+      "890:9846",
+      "I890:9846;3:63",
+      "890:9849",
+      "I890:9849;3:63"
+    ]
+  },
+  "encerramentoDocumento": "2026-10-22",
+  "deltasLayout": [
+    {
+      "depois": 1336,
+      "propriedade": "height",
+      "antes": 718,
+      "id": "832:9885"
+    },
+    {
+      "depois": 452,
+      "propriedade": "height",
+      "antes": 200,
+      "id": "154:3674"
+    },
+    {
+      "depois": 806,
+      "propriedade": "y",
+      "antes": 660,
+      "id": "154:3677"
+    },
+    {
+      "depois": 806,
+      "propriedade": "y",
+      "antes": 660,
+      "id": "154:3680"
+    },
+    {
+      "depois": 230,
+      "propriedade": "width",
+      "antes": 290,
+      "id": "154:3817"
+    },
+    {
+      "depois": 180,
+      "propriedade": "width",
+      "antes": 120,
+      "id": "154:3818"
+    },
+    {
+      "depois": 230,
+      "propriedade": "width",
+      "antes": 290,
+      "id": "154:3821"
+    },
+    {
+      "depois": 180,
+      "propriedade": "width",
+      "antes": 120,
+      "id": "154:3822"
+    },
+    {
+      "depois": false,
+      "propriedade": "visible",
+      "antes": true,
+      "ids": [
+        "176:4038",
+        "176:4042",
+        "176:4046",
+        "176:4050",
+        "176:4055",
+        "176:4059",
+        "176:4063",
+        "176:4067"
+      ]
+    },
+    {
+      "depois": "FILL, CENTER, largura 30/32 e x 13/12",
+      "propriedade": "layoutSizingHorizontal e textAlignHorizontal",
+      "antes": "FIXED, largura 180 e x -62 nos botões de 56px",
+      "ids": "I887:*;3:73 e I887:9766;3:63, enumerados em figmaVisualFixChanges"
+    }
+  ]
+}

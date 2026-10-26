@@ -1,0 +1,305 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-21",
+  "lastUpdated": "2026-10-22",
+  "timezone": "America/Sao_Paulo",
+  "scope": "Consolidação PT01–PT23; sem aceite humano atribuído",
+  "formalCases": 23,
+  "formalCasesApproved": 0,
+  "localCodeCommit": "7b3ac2e4ef0d4f6c89340aaadf7cd825e1625328",
+  "ciCandidateMergeCommit": "8ab2474d0dcf23b86626adb4d7c162107d45e4ec",
+  "ciRunUrl": "https://github.com/Jhonatan-Andrade/Hemobridge/actions/runs/39347115658",
+  "origins": {
+    "U21": {
+      "date": "2026-10-21",
+      "executor": "Codex; Vitest 29 arquivos; execução local",
+      "result": "221/221 unitários da API; exit 0",
+      "commit": "7b3ac2e4ef0d4f6c89340aaadf7cd825e1625328",
+      "evidence": "api-unit-confirmado.json",
+      "sha256": "6A0673B8CB46CB5AE34F8F1CFD8C7EB1A6BF1AC35587C8F08782F8641AE1F6B3"
+    },
+    "W21": {
+      "date": "2026-10-21",
+      "executor": "Codex; runner Node; execução local",
+      "result": "35/35 testes de lógica web; exit 0",
+      "commit": "7b3ac2e4ef0d4f6c89340aaadf7cd825e1625328",
+      "evidence": "web-test.log",
+      "sha256": "4A67D2DD44EC8090ECE2931702723C9244CF6B508472CD756964EE682D00E105"
+    },
+    "I19": {
+      "date": "2026-10-19T21:22:20-03:00",
+      "executor": "GitHub Actions; Vitest E2E; job 118382269037",
+      "result": "78/78 testes de integração API; 12 arquivos; success",
+      "commit": "8ab2474d0dcf23b86626adb4d7c162107d45e4ec",
+      "evidence": "https://github.com/Jhonatan-Andrade/Hemobridge/actions/runs/39347115658/job/118382269037"
+    },
+    "F19": {
+      "date": "2026-10-19T21:22:37-03:00",
+      "executor": "GitHub Actions; Flutter test; job 118382269285",
+      "result": "76/76 testes Flutter; analyze e APK debug bem sucedidos no mesmo job",
+      "commit": "8ab2474d0dcf23b86626adb4d7c162107d45e4ec",
+      "evidence": "https://github.com/Jhonatan-Andrade/Hemobridge/actions/runs/39347115658/job/118382269285"
+    },
+    "REV21": {
+      "date": "2026-10-21",
+      "executor": "Codex; inspeção de fontes e documentos, sem executar cenário",
+      "result": "Leitura e cotejo com Quadro 42; não é aceite",
+      "commit": "7b3ac2e4ef0d4f6c89340aaadf7cd825e1625328",
+      "evidence": "docs/2026-2_Parcial_HemoBridge_01.pdf (páginas físicas 117–120)"
+    },
+    "H09": {
+      "date": "2026-10-09T11:50:00-03:00",
+      "executor": "Relatório histórico versionado; executor não identificado no arquivo",
+      "result": "200 requisições sequenciais por cenário; p95 histórico inferior a 3 s; sem reexecução atual",
+      "commit": "Commit da medição não informado; relatório consultado na base 7b3ac2e4ef0d4f6c89340aaadf7cd825e1625328",
+      "evidence": "backend/docs/desempenho-rnf08.md"
+    },
+    "U22": {
+      "date": "2026-10-22T06:23:49-03:00",
+      "executor": "Codex; Vitest local; 30 arquivos",
+      "result": "226/226 testes unitários; exit 0",
+      "commit": "1b64f92932d2fc7b9d9fddcd18b2901b00401896 + correção e testes locais identificados por hash no complemento",
+      "evidence": "api-unit-confirmado-2026-10-22.json",
+      "sha256": "EA463CCFE95C355AD6FF51197A7B51BA5FBEF2D32A9AD875BFF9902F96320FD6"
+    },
+    "E22": {
+      "date": "2026-10-22T06:23:49-03:00",
+      "executor": "Codex; Vitest/Supertest e API NestJS reais; PostgreSQL/PostGIS exclusivo em Docker",
+      "result": "5/5 contratos; API+DB reais, e-mail/S3 simulados; exit 0",
+      "commit": "1b64f92932d2fc7b9d9fddcd18b2901b00401896 + correção e testes locais identificados por hash no complemento",
+      "evidence": "docs/testes/complemento-pt04-pt09-pt11-pt16-pt18-2026-10-22.md",
+      "sha256": "7AC60E8E3DC45082D25BC03E0752F111216EF39F4C8C68D3776EBED6DBE01718"
+    },
+    "R21": {
+      "date": "2026-10-21 (coleta); consolidação 2026-10-22",
+      "executor": "Codex; navegador real do notebook por controles visíveis; viewports emulados",
+      "result": "47 capturas/medições em 360×800, 768×1024 e 1440×900; sem rolagem horizontal nas combinações observadas",
+      "commit": "1b64f92932d2fc7b9d9fddcd18b2901b00401896",
+      "evidence": "docs/testes/responsividade-web-2026-10-21.md"
+    },
+    "I22": {
+      "date": "2026-10-22T06:29:01–06:29:16-03:00",
+      "executor": "GitHub Actions; job API 119746735038; logs verificados pelo agente principal",
+      "result": "226/226 unitários (30 arquivos) e 83/83 E2E (13 arquivos); job concluído com sucesso",
+      "commit": "Execução associada ao head f8f1f457; checkout de merge candidato; SHA dessa árvore candidata não registrado neste complemento.",
+      "evidence": "https://github.com/Jhonatan-Andrade/Hemobridge/actions/runs/39755613944/job/119746735038"
+    },
+    "P22": {
+      "date": "2026-10-22T06:47:39–06:47:48-03:00",
+      "executor": "Codex; executor externo derivado do script de desempenho; API compilada loopback + PostgreSQL/PostGIS novo exclusivo",
+      "result": "5 cenários HTTP × 200: 100% ≤ 3 s, p95 entre 6,8 e 11,0 ms; SQL legado direto × 200 apenas informativo",
+      "commit": "f8f1f457db5047b0fa491bcd310005c13545f630",
+      "evidence": "docs/testes/desempenho-pt20-2026-10-22.md"
+    }
+  },
+  "complement20261022": {
+    "baseCommit": "1b64f92932d2fc7b9d9fddcd18b2901b00401896",
+    "sourceState": "Base com correção e testes locais, cujos hashes abaixo identificam os arquivos executados antes da publicação.",
+    "runtime": {
+      "node": "24.16.0",
+      "database": "PostgreSQL 17.5",
+      "image": "postgis/postgis:17-3.5"
+    },
+    "testEnvironment": {
+      "container": "hemobridge-pt-20261022-audit",
+      "database": "hemobridge_pt_20261022_test",
+      "loopbackPort": 55447,
+      "storage": "tmpfs:/var/lib/postgresql/data",
+      "hostVolumes": [],
+      "migrationsApplied": 13,
+      "bloodTypes": 8,
+      "compatibilityPairs": 27,
+      "resourcesRemoved": true,
+      "operationalDatabaseTouched": false,
+      "externalDatabaseReset": false,
+      "emailAndS3": "Simulados explicitamente; não homologados por estes cinco casos."
+    },
+    "results": {
+      "e2eNew": {
+        "total": 5,
+        "passed": 5,
+        "failed": 0,
+        "file": "formal-contracts-confirmado-2026-10-22.json",
+        "sha256": "7AC60E8E3DC45082D25BC03E0752F111216EF39F4C8C68D3776EBED6DBE01718"
+      },
+      "unit": {
+        "total": 226,
+        "passed": 226,
+        "failed": 0,
+        "file": "api-unit-confirmado-2026-10-22.json",
+        "sha256": "EA463CCFE95C355AD6FF51197A7B51BA5FBEF2D32A9AD875BFF9902F96320FD6"
+      },
+      "buildExitCode": 0,
+      "lintExitCode": 0,
+      "previous78E2eReexecuted": false
+    },
+    "bug": {
+      "key": "HEM-79",
+      "url": "https://jhonatanjaqstudy.atlassian.net/browse/HEM-79",
+      "observedBefore": [
+        201,
+        500
+      ],
+      "observedAfter": [
+        201,
+        409
+      ],
+      "driverCode": "P2039",
+      "sqlState": "23P01",
+      "constraint": "consulta_disponibilidade_ativa_excl",
+      "formalAcceptanceAssigned": false
+    },
+    "sourceHashes": {
+      "backend/src/plataforma/plataforma.controller.ts": "764506CBEF9700655B420AD5E5CBC445DC9DF742C57F0980738448E090175D25",
+      "backend/src/consultas/conflito-agendamento.ts": "E935E11502C4F020FBD3B2325286228ABAF166CAA7335168DFAC5AA9FC398934",
+      "backend/test/conflito-agendamento.spec.ts": "CBCB0BCF29B0D388FFE4D2879492225865965F6B8AC7CA236CAAFBC06B4B6957",
+      "backend/test/formal-contracts.e2e-spec.ts": "47CFA661D5E2143D53A91D1BE605DF032A55C2A3EA83787922A3A3867AFC5DCD"
+    }
+  },
+  "webResponsiveness": {
+    "source": "docs/testes/responsividade-web-2026-10-21.md",
+    "manifest": "docs/testes/evidencias/responsividade-2026-10-21/medidas.json",
+    "manifestSha256": "1BC6D5C375DE4BA79EB7F228FA5A58E81C07C499F8A989A5CF47A437DBC07798",
+    "capturedDate": "2026-10-21",
+    "consolidatedDate": "2026-10-22",
+    "reportedCombinations": 47,
+    "physicalAppTest": false,
+    "formalAcceptanceAssigned": false
+  },
+  "localRawEvidenceLocation": "Pasta de trabalho homologacao-2026-10-21, fora do pacote de código",
+  "notes": [
+    "A reexecução local original de 21/10 e o complemento de 22/10 têm datas e bases distintas.",
+    "A CI histórica de 19/10 em Brasília não corresponde a execução atual.",
+    "A rodada E22 utilizou somente container recém-criado exclusivo, já removido.",
+    "Lacunas de cenário são pendências de evidência; a falha PT04 foi efetivamente reproduzida e corrigida.",
+    "Nenhuma credencial operacional ou dado clínico real foi utilizado ou copiado para estes artefatos nesta rodada."
+  ],
+  "ci20261022": {
+    "runId": 39755613944,
+    "associatedHead": "f8f1f457",
+    "checkout": "merge candidato; SHA não inferido",
+    "apiJob": {
+      "id": 119746735038,
+      "url": "https://github.com/Jhonatan-Andrade/Hemobridge/actions/runs/39755613944/job/119746735038",
+      "status": "completed",
+      "conclusion": "success",
+      "unit": {
+        "total": 226,
+        "passed": 226,
+        "files": 30,
+        "loggedAtUtc": "2026-10-22T09:29:01Z"
+      },
+      "integration": {
+        "total": 83,
+        "passed": 83,
+        "files": 13,
+        "loggedAtUtc": "2026-10-22T09:29:16Z"
+      }
+    },
+    "webJob": {
+      "id": 119746735284,
+      "conclusion": "success"
+    },
+    "appJob": {
+      "id": 119746735617,
+      "stateAtCollection": "Ainda em execução; não atribuído sucesso."
+    },
+    "localFiveCaseExecutionPreserved": true,
+    "formalAcceptanceAssigned": false
+  },
+  "performance20261022": {
+    "sourceCommit": "f8f1f457db5047b0fa491bcd310005c13545f630",
+    "startedAtUtc": "2026-10-22T09:47:39.189Z",
+    "finishedAtUtc": "2026-10-22T09:47:48.172Z",
+    "executor": "Codex; API compilada com bootstrap externo de loopback e banco novo exclusivo",
+    "report": "docs/testes/desempenho-pt20-2026-10-22.md",
+    "samples": "docs/testes/desempenho-pt20-2026-10-22.json",
+    "samplesSha256": "F9EEC18619CA7652654CDAA9595677C91E13DD46BE15D5F03A718FAC67078711",
+    "httpMeasurements": 1000,
+    "sqlDirectLegacyMeasurements": 200,
+    "iterationsPerScenario": 200,
+    "warmupPerScenario": 10,
+    "thresholdMs": 3000,
+    "minimumPercentage": 95,
+    "httpResultsPassed": true,
+    "sqlLegacyIsEquivalentToCurrentEndpoint": false,
+    "formalAcceptanceAssigned": false,
+    "volume": {
+      "hospitais": 40,
+      "necessidades": 320,
+      "historicoNecessidade": 627,
+      "pacientes": 2000,
+      "doadoresAprovados": 1411,
+      "doacoes": 2865
+    },
+    "results": [
+      {
+        "cenario": "GET /hospitais (lista pública, UC02)",
+        "p50": 8.377800000000207,
+        "p95": 10.257300000000214,
+        "max": 13.469700000000103,
+        "dentroDoLimite": 100
+      },
+      {
+        "cenario": "GET /hospitais?estado=PR&tipos=O- (UC03)",
+        "p50": 8.139799999999923,
+        "p95": 9.778699999999844,
+        "max": 14.546500000000378,
+        "dentroDoLimite": 100
+      },
+      {
+        "cenario": "GET /hospitais?estado=SP&cidade=sao paulo&tipos=A+,O+ (UC03)",
+        "p50": 8.142399999999725,
+        "p95": 11.016599999999926,
+        "max": 19.439699999999903,
+        "dentroDoLimite": 100
+      },
+      {
+        "cenario": "GET /hospitais?lat&lng&raioKm=300&tipos=O- (proximidade, RF22)",
+        "p50": 7.181700000001001,
+        "p95": 8.572400000000926,
+        "max": 13.30580000000009,
+        "dentroDoLimite": 100
+      },
+      {
+        "cenario": "GET /hospitais/:id (detalhe e necessidades, UC02)",
+        "p50": 5.898499999999331,
+        "p95": 6.803600000001097,
+        "max": 10.145800000000236,
+        "dentroDoLimite": 100
+      },
+      {
+        "cenario": "Locais recomendados ao doador (consulta da Seção 9.1.5, UC17)",
+        "p50": 3.3104999999995925,
+        "p95": 4.0900000000001455,
+        "max": 4.875899999999092,
+        "dentroDoLimite": 100
+      }
+    ],
+    "runtime": {
+      "node": "24.16.0",
+      "apiCpuLogical": 8,
+      "apiRamGiB": 27.692100524902344,
+      "dockerCpu": 8,
+      "dockerRamBytes": 14493642752,
+      "postgres": "17.5",
+      "postgis": "3.5.2"
+    },
+    "temporaryEnvironment": {
+      "container": "hemobridge-pt20-20261022-audit",
+      "database": "hemobridge_pt20_20261022_test",
+      "databaseLoopbackPort": 55448,
+      "apiLoopbackPort": 34417,
+      "storage": "tmpfs:/var/lib/postgresql/data",
+      "operationalDatabaseTouched": false,
+      "seedOnlyExclusiveDatabase": true,
+      "containerRemoved": true,
+      "apiProcessEnded": true,
+      "apiPort3000Used": false
+    },
+    "externalHelperHashes": {
+      "medir-desempenho-loopback.mts": "CAB7F2ED7251142C314A220A5416A50D63E8FE8AADC499D03D7465BB9D2EF1E9",
+      "bootstrap-perf-loopback.mjs": "D9726EF2B836BBFD029A0C61F3A1AB5B6F7A1C8AA49887648A236B6B39020705"
+    }
+  }
+}

@@ -36,7 +36,7 @@ O `.env` **não é versionado** (está no `.gitignore`). Cada pessoa mantém o s
 
 | Variável | Exemplo | Para que serve |
 | --- | --- | --- |
-| `PORT` | `3333` | Porta da API. Se omitida, usa `3000`. |
+| `PORT` | `3000` | Porta da API. Se omitida, usa `3000`. |
 
 ### 2.2 Banco de dados (Docker + Prisma)
 
@@ -76,7 +76,7 @@ administrador (RN16).
 | Variável | Exemplo | Observação |
 | --- | --- | --- |
 | `JWT_SECRET` | (gerado) | **Obrigatória** — a API não sobe sem ela. Gere com `openssl rand -base64 48`. |
-| `JWT_EXPIRACAO` | `1h` | Validade do token. Padrão: `1h`. |
+| `JWT_EXPIRACAO` | `15m` | Validade curta do token. Padrão: `15m`. |
 
 ### 2.5 E-mail (SMTP)
 
@@ -95,17 +95,28 @@ valores do `.env.example` já funcionam:
 
 | Variável | Exemplo | Observação |
 | --- | --- | --- |
-| `FRONTEND_URL` | `http://localhost:5173` | Usada nos links dos e-mails (recuperação de senha etc.) e como origem padrão do CORS. |
-| `CORS_ORIGENS` | `http://localhost:5173,https://app.exemplo.com` | Opcional. Origens liberadas, separadas por vírgula. |
+| `FRONTEND_URL` | `http://localhost:5174` | Usada nos links dos e-mails (recuperação de senha etc.) e como origem padrão do CORS. |
+| `CORS_ORIGENS` | `http://localhost:5174,https://app.exemplo.com` | Opcional. Origens liberadas, separadas por vírgula. |
 | `TRUST_PROXY` | `1` | Opcional. Só atrás de proxy reverso (nginx, load balancer). |
 
-### 2.7 Dados de exemplo
+### 2.7 Armazenamento de exames (S3)
+
+| Variável | Exemplo | Observação |
+| --- | --- | --- |
+| `S3_ENDPOINT` | `http://localhost:8333` | SeaweedFS do docker-compose (ou túnel para a VM). |
+| `S3_BUCKET` | `hemobridge-exames` | Criado automaticamente na primeira execução. |
+| `S3_ACCESS_KEY` / `S3_SECRET_KEY` | `hemobridge-dev` / `hemobridge-dev-secret` | Os valores do `.env.example` batem com `docker/seaweedfs/s3.dev.json`. |
+| `ARMAZENAMENTO_CHAVE` | (gerado) | **Obrigatória.** Gere com `openssl rand -base64 32`. Cifra os exames (AES-256-GCM). |
+
+Detalhes em [`armazenamento.md`](./armazenamento.md).
+
+### 2.8 Dados de exemplo
 
 | Variável | Valor | Observação |
 | --- | --- | --- |
-| `SEED_DADOS_EXEMPLO` | `true` / `false` | Com `true`, o seed cria hospitais **fictícios** para testar. Nunca use em produção. |
+| `SEED_DADOS_EXEMPLO` | `true` / `false` | Com `true`, o seed cria hospitais **de testes** para testar. Nunca use em produção. |
 
-### 2.8 Exemplo de `.env` pronto para desenvolvimento
+### 2.9 Exemplo de `.env` pronto para desenvolvimento
 
 ```dotenv
 PORT=3333
@@ -122,14 +133,20 @@ ADMIN_CPF=52998224725
 ADMIN_SENHA_INICIAL=Admin12345
 
 JWT_SECRET=cole-aqui-a-saida-do-openssl-rand-base64-48
-JWT_EXPIRACAO=1h
+JWT_EXPIRACAO=15m
 
 SMTP_HOST=localhost
 SMTP_PORTA=1025
 SMTP_SEGURO=false
 EMAIL_REMETENTE=Hemobridge <nao-responda@hemobridge.local>
 
-FRONTEND_URL=http://localhost:5173
+S3_ENDPOINT=http://localhost:8333
+S3_BUCKET=hemobridge-exames
+S3_ACCESS_KEY=hemobridge-dev
+S3_SECRET_KEY=hemobridge-dev-secret
+ARMAZENAMENTO_CHAVE=cole-aqui-a-saida-do-openssl-rand-base64-32
+
+FRONTEND_URL=http://localhost:5174
 
 SEED_DADOS_EXEMPLO=true
 ```
@@ -143,6 +160,7 @@ O arquivo `docker-compose.yml` sobe dois serviços:
 | Serviço | Container | Imagem | Porta |
 | --- | --- | --- | --- |
 | `db` | `hemobridge-postgres` | `postgis/postgis:17-3.5` (PostgreSQL 17 + PostGIS) | `5434` → 5432 |
+| `s3` | `hemobridge-s3` | `chrislusf/seaweedfs:4.47` (API S3) | `8333` |
 | `mail` | `hemobridge-mailpit` | `axllent/mailpit` | `1025` (SMTP) e `8025` (interface web) |
 
 O Docker Compose lê o `.env` automaticamente, então crie o `.env` **antes** de
@@ -229,6 +247,19 @@ Hospitais de exemplo: ...        # só com SEED_DADOS_EXEMPLO=true
 O seed pode ser rodado várias vezes sem duplicar dados (se o administrador já
 existir, ele avisa e não faz nada).
 
+> **Comando único:** `npm run db:setup` aplica todas as migrations e roda o seed
+> (equivale a `npx prisma migrate deploy && npx prisma db seed`). Use-o para
+> criar e popular um banco novo de uma vez.
+>
+> Para conferir as regras de integridade do banco (Quadro 38: auditoria somente
+> inclusão, horário sem sobreposição, uma consulta ativa por horário, exame com
+> formato/tamanho válidos, doação coerente etc.), rode `npm run test:banco`.
+> Os testes rodam em transação desfeita ao final, sem deixar dados.
+
+> **Massa de teste e contas de testes:** `npm run db:seed:teste` (só em bancos de
+> teste). Detalhes, contas e senha em [`dados-de-teste.md`](./dados-de-teste.md); a medição de
+> desempenho do PT20 está em [`desempenho-rnf08.md`](./desempenho-rnf08.md).
+
 ### 4.5 Prisma Studio (ver e editar o banco no navegador)
 
 ```bash
@@ -262,12 +293,12 @@ registros. Para encerrar, `Ctrl + C` no terminal.
 npm run start:dev        # modo desenvolvimento, recarrega ao salvar
 ```
 
-A API sobe em **http://localhost:3333** (ou na `PORT` do `.env`).
+A API sobe em **http://localhost:3000** (ou na `PORT` do `.env`).
 
 Teste rápido de login com o administrador do seed:
 
 ```bash
-curl -X POST http://localhost:3333/auth/login \
+curl -X POST http://localhost:3000/auth/login \
   -H 'Content-Type: application/json' \
   -d '{"email":"admin@hemobridge.local","senha":"Admin12345"}'
 ```
@@ -313,16 +344,15 @@ Para usar um SMTP real (produção), troque `SMTP_HOST`, `SMTP_PORTA`,
 ```bash
 cd backend
 cp .env.example .env           # e ajuste as senhas (seção 2)
-docker compose up -d           # Postgres + Mailpit
+docker compose up -d           # Postgres + S3 + Mailpit
 npm install                    # dependências + prisma generate
-npx prisma migrate dev         # cria as tabelas
-npx prisma db seed             # tipos sanguíneos + admin
-npm run start:dev              # API em http://localhost:3333
+npm run db:setup               # cria as tabelas + tipos sanguíneos + admin
+npm run start:dev              # API em http://localhost:3000
 ```
 
 | O quê | Endereço |
 | --- | --- |
-| API | http://localhost:3333 |
+| API | http://localhost:3000 |
 | Prisma Studio (`npm run db:studio`) | http://localhost:5555 |
 | E-mails (Mailpit) | http://localhost:8025 |
 | PostgreSQL | `localhost:5434` |

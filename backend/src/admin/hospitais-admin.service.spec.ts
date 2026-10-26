@@ -1,32 +1,54 @@
-import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 import { SenhaProvisoriaService } from '../contas/senha-provisoria.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import type { CriarHospitalDto } from './dto/hospital.dto.js';
 import { HospitaisAdminService } from './hospitais-admin.service.js';
 
-const credenciais = { senhaHash: 'hash', senhaProvisoria: true, senhaProvisoriaExpiraEm: new Date() };
+const credenciais = {
+  senhaHash: 'hash',
+  senhaProvisoria: true,
+  senhaProvisoriaExpiraEm: new Date(),
+};
 
 function montar() {
   const tx = {
-    hospital: { create: vi.fn().mockResolvedValue({ id: 'h1', nome: 'Hospital X' }) },
+    hospital: {
+      create: vi.fn().mockResolvedValue({ id: 'h1', nome: 'Hospital X' }),
+      updateMany: vi.fn().mockResolvedValue({ count: 1 }),
+    },
+    consulta: { updateManyAndReturn: vi.fn().mockResolvedValue([]) },
     usuario: {
-      create: vi.fn().mockResolvedValue({ id: 'u1', nome: 'Ana', email: 'ana@h.com', perfil: 'REPRESENTANTE' }),
+      updateMany: vi.fn().mockResolvedValue({ count: 2 }),
+      create: vi
+        .fn()
+        .mockResolvedValue({
+          id: 'u1',
+          nome: 'Ana',
+          email: 'ana@h.com',
+          perfil: 'REPRESENTANTE',
+        }),
     },
   };
   const prisma = {
     hospital: {
       findUnique: vi.fn().mockResolvedValue(null),
-      updateMany: vi.fn().mockResolvedValue({ count: 1 }),
+      updateMany: tx.hospital.updateMany,
     },
     usuario: {
       findMany: vi.fn().mockResolvedValue([]),
-      updateMany: vi.fn().mockResolvedValue({ count: 2 }),
+      updateMany: tx.usuario.updateMany,
       create: tx.usuario.create,
     },
     $transaction: vi.fn((fn: (t: typeof tx) => unknown) => fn(tx)),
   };
   const senhaProvisoria = {
-    gerar: vi.fn().mockResolvedValue({ senha: 'Senha123abcd', dados: credenciais }),
+    gerar: vi
+      .fn()
+      .mockResolvedValue({ senha: 'Senha123abcd', dados: credenciais }),
     enviar: vi.fn().mockResolvedValue(true),
   };
   const service = new HospitaisAdminService(
@@ -46,7 +68,13 @@ const dto = {
   telefone: '4133334444',
   latitude: -25.4,
   longitude: -49.2,
-  representante: { nome: 'Ana', cpf: '52998224725', email: 'ana@h.com', telefone: '41999998888', cargo: 'Coordenadora' },
+  representante: {
+    nome: 'Ana',
+    cpf: '52998224725',
+    email: 'ana@h.com',
+    telefone: '41999998888',
+    cargo: 'Coordenadora',
+  },
 } as CriarHospitalDto;
 
 describe('HospitaisAdminService', () => {
@@ -55,24 +83,33 @@ describe('HospitaisAdminService', () => {
 
     const r = await service.criar(dto);
 
-    expect(tx.hospital.create.mock.calls[0][0].data).not.toHaveProperty('representante');
+    expect(tx.hospital.create.mock.calls[0][0].data).not.toHaveProperty(
+      'representante',
+    );
     expect(tx.usuario.create.mock.calls[0][0].data).toMatchObject({
       cpf: '52998224725',
       perfil: 'REPRESENTANTE',
       senhaProvisoria: true,
-      representante: { create: { hospital: { connect: { id: 'h1' } }, cargo: 'Coordenadora' } },
+      representante: {
+        create: { hospital: { connect: { id: 'h1' } }, cargo: 'Coordenadora' },
+      },
     });
     expect(senhaProvisoria.enviar).toHaveBeenCalledWith(
       expect.objectContaining({ email: 'ana@h.com' }),
       'Senha123abcd',
     );
-    expect(r).toMatchObject({ representante: { id: 'u1' }, senhaProvisoriaEnviada: true });
+    expect(r).toMatchObject({
+      representante: { id: 'u1' },
+      senhaProvisoriaEnviada: true,
+    });
   });
 
   it('informa cada dado já cadastrado (FE01) sem gravar nada', async () => {
     const { service, prisma, tx } = montar();
     prisma.hospital.findUnique.mockResolvedValue({ id: 'outro' });
-    prisma.usuario.findMany.mockResolvedValue([{ cpf: '52998224725', email: 'x@x.com' }]);
+    prisma.usuario.findMany.mockResolvedValue([
+      { cpf: '52998224725', email: 'x@x.com' },
+    ]);
 
     const erro = await service.criar(dto).catch((e) => e);
 
@@ -87,10 +124,28 @@ describe('HospitaisAdminService', () => {
   it('desativa o banco e encerra as sessões dos seus profissionais (RN09)', async () => {
     const { service, prisma } = montar();
 
-    await expect(service.desativar('h1')).resolves.toEqual({ id: 'h1', ativo: false });
-    expect(prisma.hospital.updateMany).toHaveBeenCalledWith({ where: { id: 'h1' }, data: { ativo: false } });
+    await expect(service.desativar('h1')).resolves.toEqual({
+      id: 'h1',
+      ativo: false,
+    });
+    expect(prisma.hospital.updateMany).toHaveBeenCalledWith({
+      where: { id: 'h1' },
+      data: { ativo: false },
+    });
     expect(prisma.usuario.updateMany).toHaveBeenCalledWith({
-      where: { OR: [{ medico: { hospitalId: 'h1' } }, { representante: { hospitalId: 'h1' } }] },
+      where: {
+        OR: [
+          {
+            medico: {
+              OR: [
+                { hospitalId: 'h1' },
+                { vinculos: { some: { hospitalId: 'h1' } } },
+              ],
+            },
+          },
+          { representante: { hospitalId: 'h1' } },
+        ],
+      },
       data: { versaoSessao: { increment: 1 } },
     });
   });
@@ -98,14 +153,16 @@ describe('HospitaisAdminService', () => {
   it('responde 404 ao desativar banco inexistente', async () => {
     const { service, prisma } = montar();
     prisma.hospital.updateMany.mockResolvedValue({ count: 0 });
-    await expect(service.desativar('x')).rejects.toBeInstanceOf(NotFoundException);
+    await expect(service.desativar('x')).rejects.toBeInstanceOf(
+      NotFoundException,
+    );
   });
 
   it('não cadastra representante em banco desativado', async () => {
     const { service, prisma } = montar();
     prisma.hospital.findUnique.mockResolvedValue({ ativo: false });
-    await expect(service.adicionarRepresentante('h1', dto.representante)).rejects.toBeInstanceOf(
-      BadRequestException,
-    );
+    await expect(
+      service.adicionarRepresentante('h1', dto.representante),
+    ).rejects.toBeInstanceOf(BadRequestException);
   });
 });

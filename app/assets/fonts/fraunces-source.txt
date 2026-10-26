@@ -1,0 +1,9 @@
+Fraunces Italic — Google Fonts
+Fonte: https://github.com/google/fonts/blob/main/ofl/fraunces/Fraunces-Italic%5BSOFT%2CWONK%2Copsz%2Cwght%5D.ttf
+Download: https://raw.githubusercontent.com/google/fonts/main/ofl/fraunces/Fraunces-Italic%5BSOFT%2CWONK%2Copsz%2Cwght%5D.ttf
+Licença: SIL Open Font License 1.1, preservada integralmente em fraunces-ofl.txt.
+Licença original: https://raw.githubusercontent.com/google/fonts/main/ofl/fraunces/OFL.txt
+Obtida em: 2026-10-19
+SHA-256 fraunces-italic.ttf: b24448c43702fac4ee856781d461a0dfba8d8e594b6e8e190234b75fed2c0e01
+SHA-256 fraunces-ofl.txt: bdf4c22802eaf804f998195871c6b8938aac2ac14b2d78a8bd66a6f1eced833b
+Arquivo original sem alterações; nome do arquivo simplificado para distribuição local.

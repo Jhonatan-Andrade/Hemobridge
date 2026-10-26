@@ -1,0 +1,66 @@
+# Hemobridge — serviços de dados na VM (EC2). Todas as portas ficam presas em
+# 127.0.0.1: o acesso externo é feito apenas por túnel SSH.
+name: hemobridge
+services:
+  db:
+    image: postgis/postgis:17-3.5
+    container_name: hemobridge-postgres
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      TZ: America/Sao_Paulo
+      PGTZ: America/Sao_Paulo
+    command:
+      - postgres
+      - -c
+      - shared_buffers=512MB
+      - -c
+      - effective_cache_size=2GB
+      - -c
+      - work_mem=8MB
+      - -c
+      - maintenance_work_mem=128MB
+      - -c
+      - log_min_duration_statement=1000
+      - -c
+      - password_encryption=scram-sha-256
+    ports:
+      - '127.0.0.1:5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./postgres-init/20-remove-extensoes-extras.sql:/docker-entrypoint-initdb.d/20-remove-extensoes-extras.sql:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # Armazenamento de objetos compatível com S3 para arquivos de exame (HEM-17).
+  s3:
+    image: chrislusf/seaweedfs:4.47
+    container_name: hemobridge-s3
+    restart: unless-stopped
+    command: server -dir=/data -ip.bind=0.0.0.0 -s3 -s3.port=8333 -s3.config=/etc/seaweedfs/s3.json -master.volumeSizeLimitMB=256 -volume.max=50
+    ports:
+      - '127.0.0.1:8333:8333'
+    volumes:
+      - s3data:/data
+      - ./seaweedfs/s3.json:/etc/seaweedfs/s3.json:ro
+
+  mail:
+    image: axllent/mailpit:v1.31
+    container_name: hemobridge-mailpit
+    restart: unless-stopped
+    environment:
+      MP_MAX_MESSAGES: 2000
+    ports:
+      - '127.0.0.1:1025:1025'
+      - '127.0.0.1:8025:8025'
+    volumes:
+      - maildata:/data
+    command: --database /data/mailpit.db
+
+volumes:
+  pgdata:
+  s3data:
+  maildata:

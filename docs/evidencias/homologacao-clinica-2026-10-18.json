@@ -1,0 +1,79 @@
+{
+  "data": "2026-10-18",
+  "ambiente": "PostgreSQL/PostGIS e S3 locais descartáveis",
+  "apiUnitarios": {
+    "aprovados": 219,
+    "falhas": 0,
+    "total": 219
+  },
+  "apiIntegracao": {
+    "aprovados": 77,
+    "falhas": 0,
+    "total": 77
+  },
+  "web": {
+    "aprovados": 29,
+    "falhas": 0,
+    "total": 29
+  },
+  "migracoes": 13,
+  "casosClinicos": [
+    {
+      "resultado": "passed",
+      "caso": "Permissões clínicas e revogação de vínculo institucional mantém o vínculo ativo e bloqueia agenda, atendimento e exames do vínculo revogado"
+    },
+    {
+      "resultado": "passed",
+      "caso": "Permissões clínicas e revogação de vínculo institucional instituição desativada deixa de expor seus pacientes ao médico que segue em outra unidade"
+    },
+    {
+      "resultado": "passed",
+      "caso": "Permissões clínicas e revogação de vínculo institucional recusa dados alheios e mantém administrador e representante fora dos arquivos clínicos"
+    },
+    {
+      "resultado": "passed",
+      "caso": "Jornada clínica completa e avaliação de exames publica agenda, reserva, atende, solicita, envia e valida resultado, atualizando painel e trilha"
+    },
+    {
+      "resultado": "passed",
+      "caso": "Jornada clínica completa e avaliação de exames reprova com orientação, aceita novo envio e preserva o resultado anterior após aprovação"
+    },
+    {
+      "resultado": "passed",
+      "caso": "Jornada clínica completa e avaliação de exames não aprova enquanto outro pedido estiver sem resultado e exige concordância da tipagem"
+    },
+    {
+      "resultado": "passed",
+      "caso": "Jornada clínica completa e avaliação de exames exige atendimento realizado, tipagem válida e médico responsável na avaliação"
+    },
+    {
+      "resultado": "passed",
+      "caso": "Jornada clínica completa e avaliação de exames serializa duas avaliações simultâneas e grava uma única decisão e notificação"
+    },
+    {
+      "resultado": "passed",
+      "caso": "Jornada clínica completa e avaliação de exames serializa uploads simultâneos e mantém um único resultado em análise"
+    },
+    {
+      "resultado": "passed",
+      "caso": "Jornada clínica completa e avaliação de exames permite novo agendamento após não comparecimento, sem manter o cadastro preso na consulta antiga"
+    }
+  ],
+  "navegador": {
+    "desktop": {
+      "documento": 1425,
+      "rolagemLateral": false,
+      "viewport": 1440
+    },
+    "mobile": {
+      "documento": 345,
+      "rolagemLateral": false,
+      "viewport": 360
+    },
+    "agendamentoCancelamento": "aprovado",
+    "avaliacaoPersistente": "aprovado"
+  },
+  "limites": [
+    "Não certifica operação clínica real, AWS, GPS físico, paridade nativa ou reconciliação das novas ações no Figma."
+  ]
+}

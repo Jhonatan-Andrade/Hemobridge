@@ -5,7 +5,10 @@ import { gerarTokenAleatorio, hashToken } from '../common/token.js';
 import { EmailService } from '../email/email.service.js';
 import { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { RecuperarSenhaDto, RedefinirSenhaDto } from './dto/recuperacao-senha.dto.js';
+import {
+  RecuperarSenhaDto,
+  RedefinirSenhaDto,
+} from './dto/recuperacao-senha.dto.js';
 
 // RN14
 export const MINUTOS_VALIDADE_LINK = 30;
@@ -26,7 +29,10 @@ export class RecuperacaoSenhaService {
     private readonly email: EmailService,
     config: ConfigService,
   ) {
-    this.frontendUrl = config.get<string>('FRONTEND_URL', 'http://localhost:5173');
+    this.frontendUrl = config.get<string>(
+      'FRONTEND_URL',
+      'http://localhost:5173',
+    );
   }
 
   /**
@@ -36,7 +42,13 @@ export class RecuperacaoSenhaService {
   async solicitar(dto: RecuperarSenhaDto) {
     const usuario = await this.prisma.usuario.findUnique({
       where: { email: dto.email },
-      select: { id: true, nome: true, email: true, status: true, senhaProvisoria: true },
+      select: {
+        id: true,
+        nome: true,
+        email: true,
+        status: true,
+        senhaProvisoria: true,
+      },
     });
 
     // Contas inativas ou encerradas não recuperam acesso. Contas com senha
@@ -48,13 +60,18 @@ export class RecuperacaoSenhaService {
         where: { id: usuario.id },
         data: {
           senhaResetTokenHash: hashToken(token),
-          senhaResetExpiraEm: new Date(Date.now() + MINUTOS_VALIDADE_LINK * 60_000),
+          senhaResetExpiraEm: new Date(
+            Date.now() + MINUTOS_VALIDADE_LINK * 60_000,
+          ),
           senhaResetUsadoEm: null,
         },
       });
 
-      void this.enviarLink(usuario.nome, usuario.email, token).catch((erro: unknown) =>
-        this.logger.error(`Falha ao enviar e-mail de redefinição de senha: ${String(erro)}`),
+      void this.enviarLink(usuario.nome, usuario.email, token).catch(
+        (erro: unknown) =>
+          this.logger.error(
+            `Falha ao enviar e-mail de redefinição de senha: ${String(erro)}`,
+          ),
       );
     }
 
@@ -96,17 +113,22 @@ export class RecuperacaoSenhaService {
         },
       });
     } catch (e) {
-      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
+      if (
+        e instanceof Prisma.PrismaClientKnownRequestError &&
+        e.code === 'P2025'
+      ) {
         throw new BadRequestException(MENSAGEM_LINK_INVALIDO);
       }
       throw e;
     }
 
-    return { mensagem: 'Senha redefinida com sucesso. Entre com a nova senha.' };
+    return {
+      mensagem: 'Senha redefinida com sucesso. Entre com a nova senha.',
+    };
   }
 
   private async enviarLink(nome: string, email: string, token: string) {
-    const link = `${this.frontendUrl}/redefinir-senha?token=${encodeURIComponent(token)}`;
+    const link = `${this.frontendUrl}/#reset?token=${encodeURIComponent(token)}`;
     const primeiroNome = nome.split(' ')[0];
 
     await this.email.enviar({

@@ -9,14 +9,27 @@ const medicoDb = {
   ufCrm: 'PR',
   crmConferidoEm: new Date(),
   usuario: {
-    id: 'm1', nome: 'Dr. João', email: 'joao@h.com', cpf: '52998224725', telefone: '41999998888',
-    status: 'ATIVO', senhaProvisoria: true, senhaProvisoriaExpiraEm: new Date(),
+    id: 'm1',
+    nome: 'Dr. João',
+    email: 'joao@h.com',
+    cpf: '52998224725',
+    telefone: '41999998888',
+    status: 'ATIVO',
+    senhaProvisoria: true,
+    senhaProvisoriaExpiraEm: new Date(),
   },
 };
 
 function montar() {
   const prisma = {
+    $transaction: vi.fn(),
+    consulta: { updateManyAndReturn: vi.fn().mockResolvedValue([]) },
+    medicoHospital: {
+      upsert: vi.fn().mockResolvedValue({}),
+      count: vi.fn().mockResolvedValue(0),
+    },
     medico: {
+      findUniqueOrThrow: vi.fn().mockResolvedValue({ hospitalId: 'h1' }),
       findFirst: vi.fn().mockResolvedValue(medicoDb),
       findUnique: vi.fn().mockResolvedValue(null),
       findMany: vi.fn().mockResolvedValue([medicoDb]),
@@ -25,12 +38,25 @@ function montar() {
     usuario: {
       findMany: vi.fn().mockResolvedValue([]),
       findFirst: vi.fn().mockResolvedValue(null),
-      create: vi.fn().mockResolvedValue({ id: 'm1', nome: 'Dr. João', email: 'joao@h.com', perfil: 'MEDICO' }),
+      create: vi
+        .fn()
+        .mockResolvedValue({
+          id: 'm1',
+          nome: 'Dr. João',
+          email: 'joao@h.com',
+          perfil: 'MEDICO',
+        }),
       update: vi.fn().mockResolvedValue({}),
     },
   };
+  prisma.$transaction.mockImplementation((fn) => fn(prisma));
   const senhaProvisoria = {
-    gerar: vi.fn().mockResolvedValue({ senha: 'Prov1234abcd', dados: { senhaHash: 'h', senhaProvisoria: true } }),
+    gerar: vi
+      .fn()
+      .mockResolvedValue({
+        senha: 'Prov1234abcd',
+        dados: { senhaHash: 'h', senhaProvisoria: true },
+      }),
     enviar: vi.fn().mockResolvedValue(true),
     reenviar: vi.fn().mockResolvedValue({ senhaProvisoriaEnviada: true }),
   };
@@ -42,8 +68,13 @@ function montar() {
 }
 
 const dto: NovoMedicoDto = {
-  nome: 'Dr. João', cpf: '52998224725', email: 'joao@h.com', telefone: '41999998888',
-  crm: '123456', ufCrm: 'PR', declaracaoCrmConferido: true,
+  nome: 'Dr. João',
+  cpf: '52998224725',
+  email: 'joao@h.com',
+  telefone: '41999998888',
+  crm: '123456',
+  ufCrm: 'PR',
+  declaracaoCrmConferido: true,
 };
 
 describe('MedicosService', () => {
@@ -52,17 +83,34 @@ describe('MedicosService', () => {
 
     const r = await service.listar('h1', { pagina: 1, tamanhoPagina: 20 });
 
-    expect(prisma.medico.findMany.mock.calls[0][0].where.hospitalId).toBe('h1');
-    expect(r.itens[0]).toMatchObject({ id: 'm1', cpf: '***.982.247-**', crm: '123456' });
+    expect(prisma.medico.findMany.mock.calls[0][0].where.AND[0].OR).toEqual([
+      { hospitalId: 'h1' },
+      { vinculos: { some: { hospitalId: 'h1' } } },
+    ]);
+    expect(r.itens[0]).toMatchObject({
+      id: 'm1',
+      cpf: '***.982.247-**',
+      crm: '123456',
+    });
   });
 
   it('trata médico de outro hospital como inexistente (RN08)', async () => {
     const { service, prisma } = montar();
     prisma.medico.findFirst.mockResolvedValue(null);
 
-    await expect(service.desativar('h2', 'm1')).rejects.toBeInstanceOf(NotFoundException);
+    await expect(service.desativar('h2', 'm1')).rejects.toBeInstanceOf(
+      NotFoundException,
+    );
     expect(prisma.medico.findFirst).toHaveBeenCalledWith(
-      expect.objectContaining({ where: { usuarioId: 'm1', hospitalId: 'h2' } }),
+      expect.objectContaining({
+        where: {
+          usuarioId: 'm1',
+          OR: [
+            { hospitalId: 'h2' },
+            { vinculos: { some: { hospitalId: 'h2' } } },
+          ],
+        },
+      }),
     );
     expect(prisma.usuario.update).not.toHaveBeenCalled();
   });
@@ -94,7 +142,9 @@ describe('MedicosService', () => {
 
     const erro = await service.criar('h1', 'rep1', dto).catch((e) => e);
     expect(erro).toBeInstanceOf(ConflictException);
-    expect(erro.getResponse().message).toEqual(['Já existe um médico com este CRM e UF.']);
+    expect(erro.getResponse().message).toEqual([
+      'Já existe um médico com este CRM e UF.',
+    ]);
     expect(prisma.usuario.create).not.toHaveBeenCalled();
   });
 
@@ -103,14 +153,20 @@ describe('MedicosService', () => {
     await service.desativar('h1', 'm1');
     expect(prisma.usuario.update).toHaveBeenCalledWith({
       where: { id: 'm1' },
-      data: { status: 'INATIVO', versaoSessao: { increment: 1 } },
+      data: { versaoSessao: { increment: 1 } },
+    });
+    expect(prisma.usuario.update).toHaveBeenCalledWith({
+      where: { id: 'm1' },
+      data: { status: 'INATIVO' },
     });
   });
 
   it('só reenvia senha de médico do próprio hospital (FA03)', async () => {
     const { service, prisma, senhaProvisoria } = montar();
     prisma.medico.findFirst.mockResolvedValue(null);
-    await expect(service.reenviarSenhaProvisoria('h2', 'm1')).rejects.toBeInstanceOf(NotFoundException);
+    await expect(
+      service.reenviarSenhaProvisoria('h2', 'm1'),
+    ).rejects.toBeInstanceOf(NotFoundException);
     expect(senhaProvisoria.reenviar).not.toHaveBeenCalled();
   });
 });

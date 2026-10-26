@@ -1,0 +1,224 @@
+{
+  "date": "2026-10-26",
+  "note": "Leituras de navegação incluem instantes imediatamente após a troca de rota ou viewport; as medidas estáveis e a cobertura estão descritas no relatório.",
+  "accounts": [
+    {
+      "email": "paciente.teste@hemobridge.local",
+      "intro": {
+        "viewport": 360,
+        "width": 345,
+        "dialogs": 0
+      },
+      "titles": [
+        "Pré-triagem e agendamento",
+        "Consulta e próximos cuidados",
+        "Exames e avaliação, quando solicitados",
+        "Locais, triagem presencial e coleta",
+        "Acompanhamento e recursos da conta"
+      ],
+      "area": {
+        "route": "#dashboard",
+        "heading": "Olá, Paula",
+        "situation": "Pré-cadastrado",
+        "viewport": 360,
+        "width": 345
+      }
+    },
+    {
+      "email": "doador.teste@hemobridge.local",
+      "intro": {
+        "dialogs": 0,
+        "viewport": 1440,
+        "width": 1425
+      },
+      "titles": [
+        "Seu pré-cadastro inicia a jornada",
+        "Pré-triagem e agendamento",
+        "Consulta e próximos cuidados",
+        "Exames e avaliação, quando solicitados",
+        "Locais, triagem presencial e coleta",
+        "Acompanhamento e recursos da conta"
+      ],
+      "area": {
+        "heading": "Olá, Felipe",
+        "route": "#dashboard",
+        "viewport": 1440,
+        "width": 1425
+      }
+    },
+    {
+      "email": "medico.teste@hemobridge.local",
+      "intro": {
+        "dialogs": 0,
+        "viewport": 1440,
+        "width": 1425
+      },
+      "titles": [
+        "Sua instituição e seu acesso",
+        "Agenda e atendimento",
+        "Exames e registro da avaliação",
+        "Comunicação e sua conta"
+      ],
+      "area": {
+        "heading": "Minha agenda",
+        "route": "#professional",
+        "viewport": 1440,
+        "width": 1425
+      }
+    },
+    {
+      "email": "representante.teste@hemobridge.local",
+      "intro": {
+        "dialogs": 0,
+        "viewport": 360,
+        "width": 345
+      },
+      "titles": [
+        "Instituição e necessidades",
+        "Registrar a doação realizada",
+        "Estoque e liberação técnica",
+        "Avisos da instituição e sua conta"
+      ],
+      "area": {
+        "heading": "Necessidades da instituição",
+        "route": "#professional/needs",
+        "viewport": 360,
+        "width": 345
+      }
+    },
+    {
+      "email": "admin.teste@hemobridge.local",
+      "intro": {
+        "dialogs": 0,
+        "viewport": 1440,
+        "width": 1425
+      },
+      "titles": [
+        "Mapa, cobertura e atualidade",
+        "Moderação da Comunidade",
+        "Privacidade e canais disponíveis",
+        "Comunicação e sua conta"
+      ],
+      "area": {
+        "heading": "Mapa de necessidades",
+        "route": "#professional/admin",
+        "viewport": 1440,
+        "width": 1425
+      }
+    }
+  ],
+  "pages": [
+    {
+      "label": "Médico: Atendimento desktop",
+      "focus": "Atendimento",
+      "route": "#professional/attendance",
+      "title": "Atendimento",
+      "viewport": 1440,
+      "width": 1425
+    },
+    {
+      "label": "Médico: Exames desktop",
+      "focus": "Exames",
+      "route": "#professional/exams",
+      "title": "Exames",
+      "viewport": 1440,
+      "width": 1425
+    },
+    {
+      "label": "Médico: Exames mobile",
+      "focus": "Exames",
+      "route": "#professional/exams",
+      "title": "Exames",
+      "viewport": 360,
+      "width": 353
+    },
+    {
+      "label": "Médico: Comunidade mobile",
+      "focus": "\n    MenuÁrea do médicoInícioComunidadeÁrea profissionalPerfilÁrea profissionalM",
+      "route": "#community",
+      "title": "Comunidade HemoBridge",
+      "viewport": 360,
+      "width": 345
+    },
+    {
+      "label": "Representante: Doações mobile",
+      "focus": "Registrar doação",
+      "route": "#professional/donations",
+      "title": "Registrar doação",
+      "viewport": 360,
+      "width": 345
+    },
+    {
+      "label": "Representante: Doações desktop",
+      "focus": "Registrar doação",
+      "route": "#professional/donations",
+      "title": "Registrar doação",
+      "viewport": 1440,
+      "width": 1425
+    },
+    {
+      "label": "Representante: Estoque desktop",
+      "focus": "Estoque de bolsas",
+      "route": "#professional/stock",
+      "title": "Estoque de bolsas",
+      "viewport": 1440,
+      "width": 1425
+    },
+    {
+      "label": "Representante: Comunidade desktop",
+      "focus": "",
+      "route": "#community",
+      "title": "Comunidade HemoBridge",
+      "viewport": 1440,
+      "width": 1425
+    },
+    {
+      "label": "Administrador: Mapa desktop",
+      "focus": "S",
+      "route": "#professional/admin",
+      "title": "Mapa de necessidades",
+      "viewport": 1440,
+      "width": 1425
+    },
+    {
+      "label": "Administrador: Moderação desktop",
+      "focus": "Moderação",
+      "route": "#professional/moderation",
+      "title": "Moderação da comunidade",
+      "viewport": 1440,
+      "width": 1425
+    },
+    {
+      "label": "Administrador: Privacidade desktop",
+      "focus": "Privacidade",
+      "route": "#professional/privacy",
+      "title": "Solicitações de privacidade",
+      "viewport": 1440,
+      "width": 1440
+    },
+    {
+      "label": "Administrador: Privacidade mobile",
+      "focus": "\n    MenuÁrea administrativaInícioComunidadeÁrea profissionalPerfilÁrea profissi",
+      "route": "#professional/privacy",
+      "title": "Solicitações de privacidade",
+      "viewport": 360,
+      "width": 353
+    },
+    {
+      "label": "Administrador: Privacidade mobile estável",
+      "focus": "Solicitações de privacidade",
+      "route": "#professional/privacy",
+      "title": "Solicitações de privacidade",
+      "viewport": 360,
+      "width": 360
+    },
+    {
+      "label": "Administrador: Mapa mobile estável",
+      "focus": "Mapa de necessidades",
+      "route": "#professional/admin",
+      "title": "Mapa de necessidades",
+      "viewport": 360,
+      "width": 345
+    }
+  ]
+}

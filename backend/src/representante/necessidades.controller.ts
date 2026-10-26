@@ -4,6 +4,7 @@ import { Perfis, UsuarioAtual } from '../auth/decorators.js';
 import { AtualizarNecessidadesDto, HistoricoNecessidadesDto } from './dto/necessidade.dto.js';
 import { HospitalDoRepresentanteService } from './hospital-do-representante.service.js';
 import { NecessidadesService } from './necessidades.service.js';
+import { Auditar } from '../auditoria/auditar.decorator.js';
 
 // UC18 – Atualizar Necessidades de Estoque (RF17)
 @Perfis('REPRESENTANTE')
@@ -19,6 +20,7 @@ export class NecessidadesController {
     return this.necessidades.listar(await this.hospital.obterId(rep.id));
   }
 
+  @Auditar({ acao: 'ATUALIZAR_NECESSIDADES', entidade: 'necessidade_estoque' })
   @Put()
   async atualizar(@UsuarioAtual() rep: UsuarioAutenticado, @Body() dto: AtualizarNecessidadesDto) {
     return this.necessidades.atualizar(await this.hospital.obterId(rep.id), rep.id, dto);

@@ -6,6 +6,7 @@ import { AuthController } from './auth.controller.js';
 import { AuthGuard } from './auth.guard.js';
 import { AuthService } from './auth.service.js';
 import { RecuperacaoSenhaService } from './recuperacao-senha.service.js';
+import { OnboardingService } from './onboarding.service.js';
 
 @Module({
   imports: [
@@ -14,14 +15,27 @@ import { RecuperacaoSenhaService } from './recuperacao-senha.service.js';
       useFactory: (config: ConfigService): JwtModuleOptions => ({
         secret: config.getOrThrow<string>('JWT_SECRET'),
         signOptions: {
-          expiresIn: config.get('JWT_EXPIRACAO', '1h') as NonNullable<
+          issuer: config.get<string>('JWT_ISSUER', 'hemobridge'),
+          audience: config.get<string>('JWT_AUDIENCE', 'hemobridge-clients'),
+          algorithm: 'HS256',
+          expiresIn: config.get('JWT_EXPIRACAO', '15m') as NonNullable<
             JwtModuleOptions['signOptions']
           >['expiresIn'],
+        },
+        verifyOptions: {
+          issuer: config.get<string>('JWT_ISSUER', 'hemobridge'),
+          audience: config.get<string>('JWT_AUDIENCE', 'hemobridge-clients'),
+          algorithms: ['HS256'],
         },
       }),
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, RecuperacaoSenhaService, { provide: APP_GUARD, useClass: AuthGuard }],
+  providers: [
+    AuthService,
+    RecuperacaoSenhaService,
+    OnboardingService,
+    { provide: APP_GUARD, useClass: AuthGuard },
+  ],
 })
 export class AuthModule {}
