@@ -36,7 +36,7 @@ O sistema organiza a doação de sangue a partir do agendamento: o paciente se c
 |---|---|---|
 | **Apresentação** | `/` | Página pública: o que é o Hemobridge, por que doar, como funciona (cadastro → escolhe hemocentro → agenda → doa), hemocentros parceiros e chamadas para cadastro e login. |
 | **Painel** | `/painel` | Área logada: dados pessoais, status da conta (`PENDENTE`/`ATIVA`), tipo sanguíneo (somente leitura, depois da ativação), histórico de todas as doações (data, hemocentro, resultado), próximos agendamentos com cancelar e reagendar, e a solicitação de exclusão de dados. |
-| **Doar** | `/doar` | Hemocentros com busca por nome/cidade e as necessidades atuais por tipo sanguíneo. Com o tipo do paciente registrado, quem precisa exatamente desse tipo ganha destaque. Ao escolher um hemocentro, mostra os horários por data com as vagas restantes ("4 de 6 vagas"); horário lotado aparece indisponível. O paciente confirma e vê a confirmação. |
+| **Doar** | `/doar` | Hemocentros com busca por nome/cidade e as necessidades atuais por tipo sanguíneo. Com o tipo do paciente registrado, quem precisa exatamente desse tipo ganha destaque. Ao escolher um hemocentro, mostra os horários por data com os agendados sobre o limite ("4/6 agendados"); horário lotado aparece como esgotado e indisponível. O paciente confirma e vê a confirmação. |
 
 ## Funcionalidades
 

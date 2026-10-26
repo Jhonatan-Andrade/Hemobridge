@@ -64,7 +64,7 @@ Os tokens de design (cores, tipografia, raios, sombra e larguras) ficam em `tail
 | `/entrar`, `/cadastro`, `/recuperar-senha` | visitante | Login, cadastro com o termo LGPD (inclui o compartilhamento entre hemocentros) e recuperação de senha |
 | `/primeiro-acesso` | equipe e administradores | Troca da senha provisória e aceite do termo de responsabilidade |
 | `/doar` | todos | Hemocentros com busca por nome/cidade e necessidades; com conta ativa, quem precisa do tipo do paciente vem primeiro (RF05, RF18) |
-| `/doar/:id` | todos (agendar: paciente) | Detalhes, necessidades, horários por data com vagas restantes e confirmação; com `?reagendar=<id>`, troca o horário (RF06, RF07) |
+| `/doar/:id` | todos (agendar: paciente) | Detalhes, necessidades, horários por data com agendados/limite ("4/6 agendados") e confirmação; com `?reagendar=<id>`, troca o horário (RF06, RF07) |
 | `/painel` | paciente | Dados, status da conta, tipo sanguíneo, intervalo entre doações e próxima data permitida, próximos agendamentos (cancelar/reagendar), histórico de doações e exclusão de dados (RF04, RF16) |
 | `/medico` | médico | Agenda do dia por horário e registro da doação (RF10, RF11) |
 | `/medico/doacoes/:id` | médico | Registro completo do atendimento: triagem clínica, aferições, coleta e lançamento dos exames da amostra (RF11, RF20) |
