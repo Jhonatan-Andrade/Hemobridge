@@ -63,7 +63,8 @@ describe('HorariosService', () => {
       ['lotado', 0, false],
     ]);
     expect(r.horarios[0]).not.toHaveProperty('agendados');
-    expect(prisma.agendamento.groupBy.mock.calls[0][0].where.status).toBe('AGENDADO');
+    // Atendido (CONCLUIDO ou AUSENTE) continua ocupando a vaga; só o cancelado a devolve.
+    expect(prisma.agendamento.groupBy.mock.calls[0][0].where.status).toEqual({ not: 'CANCELADO' });
   });
 
   it('cria em lote nas próximas N ocorrências do dia da semana, sem datas passadas (RF08)', async () => {

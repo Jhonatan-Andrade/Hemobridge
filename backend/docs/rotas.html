@@ -413,7 +413,7 @@ const GRUPOS = [
         metodo: 'GET', caminho: '/api/hemocentros/:id/horarios', resumo: 'Horários com vagas restantes (RF05)', acesso: PUBLICO, status: 200,
         regras: [
           'Só horários ativos que ainda não começaram. Período padrão: hoje + 30 dias (máximo 62).',
-          'vagasRestantes = vagasTotal − agendamentos AGENDADO. Horário lotado vem com disponivel: false.',
+          'vagasRestantes = vagasTotal − agendamentos não cancelados (agendado, atendido ou ausente). Horário lotado vem com disponivel: false.',
         ],
         query: [['de', 'string', false, 'AAAA-MM-DD (padrão: hoje).'], ['ate', 'string', false, 'AAAA-MM-DD (padrão: de + 30 dias).']],
         exRes: { hemocentro: { id: 'uuid', nome: 'Hemocentro Exemplo Curitiba' }, de: '2026-10-25', ate: '2026-11-24', horarios: [{ ...horarioEx, vagasTotal: 6, vagasRestantes: 4, disponivel: true }] },

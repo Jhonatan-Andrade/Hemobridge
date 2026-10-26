@@ -103,6 +103,13 @@ describe('AgendamentosService', () => {
       );
     });
 
+    it('conta como ocupada a vaga de quem já foi atendido; só o cancelado libera', async () => {
+      const { service, prisma } = montar();
+      await service.agendar('p1', 'hor1');
+      const contagemDeVagas = prisma.agendamento.count.mock.calls.map((c) => c[0].where).find((w) => !w.pacienteId);
+      expect(contagemDeVagas).toEqual({ horarioId: 'hor1', status: { not: 'CANCELADO' } });
+    });
+
     it('recusa o horário lotado sem criar agendamento (sem overbooking)', async () => {
       const { service, prisma } = montar({ ocupadas: 6 });
 

@@ -108,7 +108,7 @@ Paciente agenda no hemocentro → Médico registra a doação → Admin do hemoc
 O hemocentro define, para cada horário, **quantos pacientes pode atender**. Exemplo: domingo às 13h, 6 vagas → só 6 pacientes podem agendar; o 7º vê o horário esgotado.
 
 - O Admin do hemocentro cria horários por data/hora com `vagas_total` e pode criar **em lote por dia da semana** (ex.: todo domingo às 13h, 6 vagas, pelas próximas N semanas).
-- Vagas restantes = `vagas_total` − agendamentos com status `AGENDADO`. Cancelar libera a vaga.
+- Vagas restantes = `vagas_total` − agendamentos não cancelados (`AGENDADO`, `CONCLUIDO` e `AUSENTE`): quem já foi atendido continua ocupando a vaga. Só cancelar libera a vaga.
 - **Sem overbooking em concorrência:** o agendamento acontece numa transação com `SELECT … FOR UPDATE` na linha do horário. Pedidos simultâneos esperam uns pelos outros e cada um conta as vagas já confirmadas.
 - Não se agenda horário passado, lotado ou inativo, e um paciente não tem dois agendamentos ativos no mesmo horário (índice único parcial no banco).
 - As vagas de um horário não podem ser reduzidas abaixo dos agendamentos já feitos. Desativar um horário impede novos agendamentos, mas mantém os existentes.

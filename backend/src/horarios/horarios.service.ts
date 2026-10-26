@@ -1,4 +1,5 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { OCUPA_VAGA } from '../agendamentos/vaga.js';
 import { dataIsoParaDate, hojeIso, instanteLocal, somarDias } from '../common/data.js';
 import { apresentarHorario, diaDaSemana, horaParaTime } from '../common/horario.js';
 import { Prisma } from '../generated/prisma/client.js';
@@ -132,10 +133,10 @@ export class HorariosService {
         SELECT id FROM horario WHERE id = ${id}::uuid AND hemocentro_id = ${hemocentroId}::uuid FOR UPDATE`;
       if (!linha) throw new NotFoundException('Horário não encontrado.');
 
-      const agendados = await tx.agendamento.count({ where: { horarioId: id, status: 'AGENDADO' } });
+      const agendados = await tx.agendamento.count({ where: { horarioId: id, ...OCUPA_VAGA } });
       if (dto.vagasTotal !== undefined && dto.vagasTotal < agendados) {
         throw new ConflictException(
-          `Já há ${agendados} paciente(s) agendado(s) neste horário; as vagas não podem ficar abaixo disso.`,
+          `Já há ${agendados} paciente(s) agendado(s) ou atendido(s) neste horário; as vagas não podem ficar abaixo disso.`,
         );
       }
       const horario = await tx.horario.update({
@@ -158,7 +159,7 @@ export class HorariosService {
     });
     const contagem = await this.prisma.agendamento.groupBy({
       by: ['horarioId'],
-      where: { horarioId: { in: horarios.map((h) => h.id) }, status: 'AGENDADO' },
+      where: { horarioId: { in: horarios.map((h) => h.id) }, ...OCUPA_VAGA },
       _count: { _all: true },
     });
     const agendadosPorHorario = new Map(contagem.map((c) => [c.horarioId, c._count._all]));

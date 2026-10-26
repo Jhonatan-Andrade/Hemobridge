@@ -8,6 +8,7 @@ import { dataIsoParaDate, hojeIso } from '../common/data.js';
 import { apresentarHorario, dateParaIso, inicioDoHorario } from '../common/horario.js';
 import { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { OCUPA_VAGA } from './vaga.js';
 import { impedimentoDeDoacao, impedimentoPorAptidao, situacaoDeAptidao } from './regra-doacao.js';
 
 export const MENSAGEM_ESGOTADO = 'Horário esgotado. Escolha outro horário.';
@@ -131,7 +132,7 @@ export class AgendamentosService {
 
     const [jaAgendado, ocupadas] = await Promise.all([
       tx.agendamento.count({ where: { pacienteId, horarioId, status: 'AGENDADO' } }),
-      tx.agendamento.count({ where: { horarioId, status: 'AGENDADO' } }),
+      tx.agendamento.count({ where: { horarioId, ...OCUPA_VAGA } }),
     ]);
     if (jaAgendado) throw new ConflictException(MENSAGEM_DUPLICADO);
     if (ocupadas >= horario.vagasTotal) throw new ConflictException(MENSAGEM_ESGOTADO);
