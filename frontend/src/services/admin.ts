@@ -1,18 +1,10 @@
 import { api } from '../api/client'
-import type {
-  HospitalAdminDetalhe,
-  HospitalAdminResumo,
-  Paginado,
-  Perfil,
-  StatusUsuario,
-  UsuarioAdminDetalhe,
-  UsuarioAdminResumo,
-} from '../api/types'
+import type { HemocentroGestaoDetalhe, HemocentroGestaoResumo, HemocentroRef, Paginado } from '../api/types'
 
-// UC25 – Gerenciar bancos de sangue e representantes (/admin/hospitais).
-export type FiltrosHospitaisAdmin = { busca?: string; estado?: string; ativo?: boolean; pagina?: number; tamanhoPagina?: number }
+// RF15: hemocentros e seus Admins, pelo administrador da plataforma.
+export type FiltrosHemocentrosGestao = { busca?: string; ativo?: boolean; pagina?: number; tamanhoPagina?: number }
 
-export type DadosHospital = {
+export type DadosHemocentro = {
   nome: string
   cnpj: string
   endereco: string
@@ -21,40 +13,24 @@ export type DadosHospital = {
   cep: string
   telefone: string
   horarioFuncionamento?: string
-  latitude: number
-  longitude: number
 }
 
-export type NovoRepresentante = { nome: string; cpf: string; email: string; telefone: string; cargo?: string }
+export type NovoAdminHemocentro = { nome: string; cpf: string; email: string; telefone: string }
 
 type ContaCriada = { id: string; nome: string; email: string }
 
-export const hospitaisAdminService = {
-  listar: (filtros: FiltrosHospitaisAdmin = {}) => api.get<Paginado<HospitalAdminResumo>>('/admin/hospitais', filtros),
-  detalhar: (id: string) => api.get<HospitalAdminDetalhe>(`/admin/hospitais/${id}`),
-  criar: (dados: DadosHospital & { representante: NovoRepresentante }) =>
-    api.post<{ hospital: HospitalAdminResumo; representante: ContaCriada; senhaProvisoriaEnviada: boolean }>('/admin/hospitais', dados),
-  atualizar: (id: string, dados: Partial<DadosHospital>) => api.patch<HospitalAdminDetalhe>(`/admin/hospitais/${id}`, dados),
-  desativar: (id: string) => api.post<{ id: string; ativo: false }>(`/admin/hospitais/${id}/desativar`),
-  ativar: (id: string) => api.post<{ id: string; ativo: true }>(`/admin/hospitais/${id}/ativar`),
-  adicionarRepresentante: (id: string, dados: NovoRepresentante) =>
-    api.post<{ representante: ContaCriada; senhaProvisoriaEnviada: boolean }>(`/admin/hospitais/${id}/representantes`, dados),
-}
-
-// UC26 – Gerenciar usuários (/admin/usuarios).
-export type FiltrosUsuariosAdmin = { perfil?: Perfil; status?: StatusUsuario; busca?: string; pagina?: number; tamanhoPagina?: number }
-
-export type NovoAdministrador = { nome: string; cpf: string; email: string; telefone?: string }
-
-export const usuariosAdminService = {
-  listar: (filtros: FiltrosUsuariosAdmin = {}) => api.get<Paginado<UsuarioAdminResumo>>('/admin/usuarios', filtros),
-  detalhar: (id: string) => api.get<UsuarioAdminDetalhe>(`/admin/usuarios/${id}`),
-  atualizar: (id: string, dados: { nome?: string; email?: string; telefone?: string }) =>
-    api.patch<UsuarioAdminDetalhe>(`/admin/usuarios/${id}`, dados),
-  desativar: (id: string) => api.post<{ id: string; status: 'INATIVO' }>(`/admin/usuarios/${id}/desativar`),
-  ativar: (id: string) => api.post<{ id: string; status: 'ATIVO' }>(`/admin/usuarios/${id}/ativar`),
-  reenviarSenhaProvisoria: (id: string) =>
-    api.post<{ senhaProvisoriaEnviada: boolean; senhaProvisoriaExpiraEm: string }>(`/admin/usuarios/${id}/reenviar-senha-provisoria`),
-  criarAdministrador: (dados: NovoAdministrador) =>
-    api.post<{ administrador: ContaCriada; senhaProvisoriaEnviada: boolean }>('/admin/usuarios/administradores', dados),
+export const gestaoHemocentrosService = {
+  listar: (filtros: FiltrosHemocentrosGestao = {}) => api.get<Paginado<HemocentroGestaoResumo>>('/hemocentros/gestao', filtros),
+  detalhar: (id: string) => api.get<HemocentroGestaoDetalhe>(`/hemocentros/gestao/${id}`),
+  criar: (dados: DadosHemocentro & { admin: NovoAdminHemocentro }) =>
+    api.post<{ hemocentro: HemocentroRef; admin: ContaCriada; senhaProvisoriaEnviada: boolean }>('/hemocentros', dados),
+  /** Com `ativo: false`, a equipe perde o acesso e os agendamentos futuros são cancelados. */
+  atualizar: (id: string, dados: Partial<DadosHemocentro> & { ativo?: boolean }) =>
+    api.patch<HemocentroGestaoDetalhe>(`/hemocentros/${id}`, dados),
+  adicionarAdmin: (id: string, dados: NovoAdminHemocentro) =>
+    api.post<{ admin: ContaCriada; senhaProvisoriaEnviada: boolean }>(`/hemocentros/${id}/admins`, dados),
+  reenviarSenhaAdmin: (id: string, usuarioId: string) =>
+    api.post<{ senhaProvisoriaEnviada: boolean; senhaProvisoriaExpiraEm: string }>(
+      `/hemocentros/${id}/admins/${usuarioId}/reenviar-senha-provisoria`,
+    ),
 }

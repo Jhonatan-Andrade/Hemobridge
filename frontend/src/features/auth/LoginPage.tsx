@@ -77,7 +77,7 @@ export function LoginPage() {
           Entrar
         </Button>
         <ButtonLink to="/cadastro" kind="secondary" block>
-          Criar pré-cadastro
+          Criar conta
         </ButtonLink>
       </form>
     </PublicLayout>

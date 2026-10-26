@@ -1,26 +1,30 @@
 // Tipos espelhados das respostas da API (backend/src).
 
-export type Perfil = 'PACIENTE' | 'MEDICO' | 'REPRESENTANTE' | 'ADMINISTRADOR'
-/** Doador é o Paciente com situação APROVADO (RN10). */
-export type Papel = Perfil | 'DOADOR'
+export type Perfil = 'PACIENTE' | 'EQUIPE' | 'ADMIN_PLATAFORMA'
+/** Papel de quem trabalha no hemocentro (perfil EQUIPE). */
+export type PapelEquipe = 'MEDICO' | 'ADMIN_HEMOCENTRO'
 export type StatusUsuario = 'ATIVO' | 'INATIVO' | 'ENCERRADO'
-export type Sexo = 'MASCULINO' | 'FEMININO'
-export type SituacaoPaciente =
-  | 'PRE_CADASTRADO'
-  | 'CONSULTA_AGENDADA'
-  | 'AGUARDANDO_EXAME'
-  | 'EM_ANALISE'
-  | 'APROVADO'
-  | 'REPROVADO'
-export type NivelNecessidade = 'CRITICO' | 'BAIXO' | 'ESTAVEL' | 'ADEQUADO' | 'NAO_INFORMADO'
-export type NivelInformavel = Exclude<NivelNecessidade, 'NAO_INFORMADO'>
+/** Status da conta do paciente: vira ATIVA (doador) na ativação pelo hemocentro. */
+export type SituacaoPaciente = 'PENDENTE' | 'ATIVA'
+export type NivelNecessidade = 'URGENTE' | 'NECESSARIO' | 'ESTAVEL'
+export type StatusAgendamento = 'AGENDADO' | 'CANCELADO' | 'CONCLUIDO' | 'AUSENTE'
+export type ResultadoDoacao = 'DOOU' | 'NAO_DOOU' | 'AUSENTE'
+
+/** Os oito tipos ABO/Rh. */
+export type TipoSanguineo = 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-'
+
+export interface HemocentroRef {
+  id: string
+  nome: string
+}
 
 export interface UsuarioSessao {
   id: string
   nome: string
   email: string
   perfil: Perfil
-  papel: Papel
+  papel: PapelEquipe | null
+  hemocentro: HemocentroRef | null
 }
 
 export interface Sessao {
@@ -40,6 +44,11 @@ export interface Termo {
   finalidade: string
 }
 
+/** RF01: termo do cadastro, com o texto que explica o compartilhamento entre hemocentros. */
+export interface TermoConsentimento extends Termo {
+  texto: string[]
+}
+
 export interface Paginado<T> {
   itens: T[]
   total: number
@@ -47,164 +56,8 @@ export interface Paginado<T> {
   tamanhoPagina: number
 }
 
-/** Os oito tipos ABO/Rh (RN01). */
-export type TipoSanguineo = 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-'
-
-// UC02 / UC03
-export interface NecessidadeResumo {
-  tipo: string
-  nivel: NivelNecessidade
-}
-
-export interface HospitalResumo {
-  id: string
-  nome: string
-  cidade: string
-  estado: string
-  distanciaKm: number | null
-  necessidades: NecessidadeResumo[]
-}
-
-export interface HospitalDetalhe {
-  id: string
-  nome: string
-  endereco: string
-  cidade: string
-  estado: string
-  cep: string
-  telefone: string
-  horarioFuncionamento: string | null
-  latitude: number
-  longitude: number
-  necessidades: (NecessidadeResumo & { atualizadoEm: string | null })[]
-  ultimaAtualizacao: string | null
-}
-
-// UC04
-export interface Compatibilidade {
-  aviso: string
-  tipos: { sigla: string; podeDoarPara: string[]; podeReceberDe: string[] }[]
-}
-
-// UC18
-export interface NecessidadesHospital {
-  hospital: { id: string; nome: string }
-  ultimaAtualizacao: string | null
-  necessidades: {
-    tipo: string
-    nivel: NivelNecessidade
-    atualizadoEm: string | null
-    atualizadoPor: string | null
-  }[]
-}
-
-export interface AtualizacaoNecessidades extends NecessidadesHospital {
-  mensagem: string
-  alteracoes: { tipo: string; de: NivelNecessidade; para: NivelNecessidade }[]
-  passaramACritico: string[]
-}
-
-export interface HistoricoNecessidade {
-  tipo: string
-  de: NivelNecessidade
-  para: NivelNecessidade
-  alteradoEm: string
-  alteradoPor: string
-}
-
-// UC22
-export interface Medico {
-  id: string
-  nome: string
-  email: string
-  cpf: string
-  telefone: string
-  crm: string
-  ufCrm: string
-  crmConferidoEm: string
-  status: StatusUsuario
-  primeiroAcessoPendente: boolean
-  senhaProvisoriaExpiraEm: string | null
-}
-
-// UC25
-export interface HospitalAdminResumo {
-  id: string
-  nome: string
-  cnpj: string
-  cidade: string
-  estado: string
-  ativo: boolean
-  criadoEm: string
-  totalRepresentantes: number
-  totalMedicos: number
-}
-
-export interface RepresentanteResumo {
-  id: string
-  nome: string
-  email: string
-  telefone: string
-  cargo: string | null
-  status: StatusUsuario
-  primeiroAcessoPendente: boolean
-  senhaProvisoriaExpiraEm: string | null
-}
-
-export interface HospitalAdminDetalhe {
-  id: string
-  nome: string
-  cnpj: string
-  endereco: string
-  cidade: string
-  estado: string
-  cep: string
-  telefone: string
-  horarioFuncionamento: string | null
-  latitude: number
-  longitude: number
-  ativo: boolean
-  criadoEm: string
-  atualizadoEm: string
-  totalMedicos: number
-  representantes: RepresentanteResumo[]
-}
-
-// UC26
-export interface UsuarioAdminResumo {
-  id: string
-  nome: string
-  email: string
-  cpf: string
-  perfil: Perfil
-  papel: Papel
-  status: StatusUsuario
-  primeiroAcessoPendente: boolean
-  hospital: string | null
-  criadoEm: string
-}
-
-export interface UsuarioAdminDetalhe {
-  id: string
-  nome: string
-  email: string
-  cpf: string
-  telefone: string | null
-  perfil: Perfil
-  papel: Papel
-  status: StatusUsuario
-  primeiroAcessoPendente: boolean
-  senhaProvisoriaExpiraEm: string | null
-  bloqueadoAte: string | null
-  criadoEm: string
-  atualizadoEm: string
-  paciente: { situacao: SituacaoPaciente; cidade?: string; estado?: string } | null
-  medico: { crm: string; ufCrm: string; hospital: { id: string; nome: string } } | null
-  representante: { cargo: string | null; hospital: { id: string; nome: string } } | null
-}
-
-// UC01
-export interface PreCadastro {
+// RF01
+export interface Cadastro {
   nome: string
   cpf: string
   email: string
@@ -212,173 +65,248 @@ export interface PreCadastro {
   confirmacaoSenha: string
   telefone: string
   dataNascimento: string
-  sexo: Sexo
-  pesoKg: number
-  cidade: string
-  estado: string
   aceiteTermo: boolean
   versaoTermo: string
-  cienteRegraAcimaDe60?: boolean
 }
 
-export interface PreCadastroCriado {
+export interface CadastroCriado {
   id: string
   nome: string
   email: string
   situacao: SituacaoPaciente
-  proximoPasso: string
 }
 
-// Nomes de domínio usados nas telas. O "banco de sangue" do produto é o hospital
-// cadastrado pelo administrador e mantido pelo representante.
-export type Necessidade = NecessidadeResumo
-export type BancoDeSangue = HospitalDetalhe
+// ---------------------------------------------------------------------------
+// Hemocentros, necessidades e horários (página Doar)
+// ---------------------------------------------------------------------------
 
-/**
- * Dados do doador logado. Ainda não há endpoint no backend que devolva o tipo
- * sanguíneo e a cidade do paciente (ver README → "Contratos pendentes").
- */
-export interface Doador {
-  id: string
-  nome: string
-  situacao: SituacaoPaciente
-  tipoSanguineo: TipoSanguineo | null
+export interface NecessidadeResumo {
+  tipo: TipoSanguineo
+  nivel: NivelNecessidade
+}
+
+/** Um dos oito tipos; nível nulo = não informado. */
+export interface NecessidadeTipo {
+  tipo: TipoSanguineo
+  nivel: NivelNecessidade | null
+  atualizadoEm: string | null
+}
+
+export interface Endereco {
+  endereco: string
   cidade: string
   estado: string
 }
 
-// UC13–UC16 – área do médico
-export type SituacaoConsulta = 'AGENDADA' | 'REALIZADA' | 'NAO_COMPARECEU' | 'CANCELADA'
-export type SituacaoExame = 'AGUARDANDO_RESULTADO' | 'EM_ANALISE' | 'REPROVADO' | 'VALIDADO'
-
-type PacienteRef = { id: string; nome: string }
-
-export interface HorarioAgenda {
-  id: string
-  inicio: string
-  fim: string
-  linkSala: string
-  livre: boolean
-  consulta: { id: string; situacao: SituacaoConsulta; paciente: PacienteRef } | null
+export interface HemocentroResumo extends HemocentroRef, Endereco {
+  necessidades: NecessidadeResumo[]
+  /** RF18: precisa exatamente do tipo informado na busca; nulo sem tipo. */
+  precisaDoTipo: boolean | null
 }
 
-export interface AgendaMedico {
+export interface HemocentroDetalhe extends HemocentroRef, Endereco {
+  cep: string
+  telefone: string | null
+  horarioFuncionamento: string | null
+  ultimaAtualizacao: string | null
+  necessidades: NecessidadeTipo[]
+}
+
+export interface NecessidadesHemocentro {
+  hemocentro: HemocentroRef
+  ultimaAtualizacao: string | null
+  necessidades: NecessidadeTipo[]
+}
+
+/** Datas e horas no fuso de Brasília; `inicio` e `fim` são os instantes (ISO). */
+export interface HorarioBase {
+  id: string
+  data: string
+  horaInicio: string
+  horaFim: string
+  inicio: string
+  fim: string
+}
+
+export interface HorarioDisponivel extends HorarioBase {
+  vagasTotal: number
+  vagasRestantes: number
+  disponivel: boolean
+}
+
+export interface HorariosHemocentro {
+  hemocentro: HemocentroRef
   de: string
   ate: string
-  horarios: HorarioAgenda[]
+  horarios: HorarioDisponivel[]
 }
 
-export interface ConsultaMedicoResumo {
-  id: string
-  situacao: SituacaoConsulta
-  inicio: string
-  fim: string
-  paciente: PacienteRef
-}
+// ---------------------------------------------------------------------------
+// Paciente
+// ---------------------------------------------------------------------------
 
-export interface ConsultaMedico {
+export interface Agendamento {
   id: string
-  situacao: SituacaoConsulta
-  inicio: string
-  fim: string
-  linkSala: string
-  observacoes: string | null
-  motivoReprovacao: string | null
-  canceladaPor: Perfil | null
-  motivoCancelamento: string | null
-  encerradaEm: string | null
-  consultaOrigemId: string | null
-  paciente: PacienteRef & {
-    idade: number
-    sexo: Sexo
-    pesoKg: number
-    cidade: string
-    estado: string
-    situacao: SituacaoPaciente
-  }
-  solicitacaoExame: { id: string; exames: string[]; orientacoes: string | null; situacao: SituacaoExame } | null
-}
-
-export interface EnvioExame {
-  id: string
-  situacao: SituacaoExame
-  nomeArquivo: string
-  mimeType: string
-  tamanhoBytes: number
-  enviadoEm: string
-  avaliadoEm: string | null
-  motivoReprovacao: string | null
-}
-
-export interface SolicitacaoExameResumo {
-  id: string
-  exames: string[]
-  situacao: SituacaoExame
-  atualizadoEm: string
-  paciente: PacienteRef
-  ultimoEnvioEm: string | null
-}
-
-export interface SolicitacaoExameMedico {
-  id: string
-  exames: string[]
-  orientacoes: string | null
-  situacao: SituacaoExame
+  status: StatusAgendamento
   criadoEm: string
-  consulta: { id: string; inicio: string }
-  paciente: PacienteRef & {
-    idade: number
-    sexo: Sexo
-    pesoKg: number
-    situacao: SituacaoPaciente
-    tipoSanguineo: TipoSanguineo | null
-  }
-  envios: EnvioExame[]
+  canceladoEm: string | null
+  horario: HorarioBase
+  hemocentro: HemocentroRef & Endereco
+  podeCancelar: boolean
 }
 
-// UC09 / UC10 – teleconsulta do paciente
-export interface TermoTelessaude {
-  versao: string
-  titulo: string
-  texto: string
+export interface ProximoAgendamento {
+  id: string
+  horario: HorarioBase
+  hemocentro: HemocentroRef & Endereco
+  podeCancelar: boolean
 }
 
-export interface MedicoComHorarios {
+export interface DoacaoPaciente {
+  id: string
+  registradoEm: string
+  resultado: ResultadoDoacao
+  motivoNaoDoacao: string | null
+  hemocentro: HemocentroRef & { cidade: string; estado: string }
+}
+
+// RF04
+export interface Painel {
   id: string
   nome: string
-  crm: string
-  ufCrm: string
-  hospital: { nome: string; cidade: string; estado: string }
-  horarios: { id: string; inicio: string; fim: string }[]
+  email: string
+  cpf: string | null
+  telefone: string | null
+  dataNascimento: string | null
+  cadastradoEm: string
+  situacao: SituacaoPaciente
+  ativadoEm: string | null
+  /** Só depois da ativação; somente leitura. */
+  tipoSanguineo: TipoSanguineo | null
+  doacoes: DoacaoPaciente[]
+  proximosAgendamentos: ProximoAgendamento[]
 }
 
-export interface ConsultaPaciente {
+// ---------------------------------------------------------------------------
+// Equipe do hemocentro
+// ---------------------------------------------------------------------------
+
+export interface DoacaoRegistrada {
   id: string
-  situacao: SituacaoConsulta
-  inicio: string
-  fim: string
-  medico: { nome: string; crm: string; ufCrm: string }
-  hospital: { nome: string; cidade: string; estado: string }
-  /** Só preenchido de 15 minutos antes até o fim do horário (RN18). */
-  linkSala: string | null
-  linkDisponivelEm: string | null
-  podeCancelar: boolean
-  canceladaPor: Perfil | null
-  motivoCancelamento: string | null
-  motivoReprovacao: string | null
-  solicitacaoExame: { id: string; situacao: SituacaoExame } | null
+  compareceu: boolean
+  doou: boolean
+  tipoSanguineo: TipoSanguineo | null
+  motivoNaoDoacao: string | null
+  observacoes: string | null
+  registradoEm: string
 }
 
-// UC11 – exames solicitados ao paciente
-export interface SolicitacaoExamePaciente {
+export interface PacienteNaAgenda {
   id: string
-  exames: string[]
-  orientacoes: string | null
-  situacao: SituacaoExame
+  nome: string
+  idade: number | null
+  situacao: SituacaoPaciente
+  tipoSanguineo: TipoSanguineo | null
+  ultimaDoacao: { registradoEm: string; hemocentro: HemocentroRef } | null
+}
+
+export interface AgendamentoNaAgenda {
+  id: string
+  status: StatusAgendamento
+  paciente: PacienteNaAgenda
+  doacao: DoacaoRegistrada | null
+}
+
+// RF10
+export interface AgendaDia {
+  data: string
+  hemocentro: HemocentroRef
+  horarios: (HorarioBase & { vagasTotal: number; ativo: boolean; agendamentos: AgendamentoNaAgenda[] })[]
+}
+
+export interface RegistroDoacao {
+  agendamentoId: string
+  compareceu: boolean
+  doou: boolean
+  tipoSanguineo?: TipoSanguineo
+  motivoNaoDoacao?: string
+  observacoes?: string
+}
+
+// RF12
+export interface HistoricoPaciente {
+  paciente: { id: string; nome: string; idade: number | null; situacao: SituacaoPaciente; tipoSanguineo: TipoSanguineo | null }
+  doacoes: (DoacaoRegistrada & {
+    resultado: ResultadoDoacao
+    medico: string
+    hemocentro: HemocentroRef & { cidade: string; estado: string }
+    doMeuHemocentro: boolean
+  })[]
+}
+
+// RF08
+export interface HorarioGestao extends HorarioBase {
+  vagasTotal: number
+  ativo: boolean
+  agendados: number
+  vagasRestantes: number
+}
+
+// RF13
+export interface PacientePendente {
+  id: string
+  nome: string
+  email: string
+  cpf: string | null
+  doacao: { id: string; registradoEm: string; doou: boolean; tipoSanguineo: TipoSanguineo }
+}
+
+// RF14
+export interface MembroEquipe {
+  id: string
+  nome: string
+  email: string
+  cpf: string | null
+  telefone: string | null
+  status: StatusUsuario
+  papel: PapelEquipe
+  primeiroAcessoPendente: boolean
+  senhaProvisoriaExpiraEm: string | null
   criadoEm: string
-  medico: { nome: string }
-  consulta: { id: string; inicio: string }
-  envios: EnvioExame[]
-  /** Aguardando resultado ou reprovado (FA01: reenvio). */
-  podeEnviar: boolean
+}
+
+// ---------------------------------------------------------------------------
+// Administrador da plataforma (RF15)
+// ---------------------------------------------------------------------------
+
+export interface HemocentroGestaoResumo extends HemocentroRef {
+  cnpj: string
+  cidade: string
+  estado: string
+  ativo: boolean
+  criadoEm: string
+  totalMedicos: number
+  totalAdmins: number
+}
+
+export interface AdminHemocentro {
+  id: string
+  nome: string
+  email: string
+  telefone: string | null
+  status: StatusUsuario
+  primeiroAcessoPendente: boolean
+  senhaProvisoriaExpiraEm: string | null
+}
+
+export interface HemocentroGestaoDetalhe extends HemocentroRef, Endereco {
+  cnpj: string
+  cep: string
+  telefone: string | null
+  horarioFuncionamento: string | null
+  ativo: boolean
+  criadoEm: string
+  atualizadoEm: string
+  totalMedicos: number
+  admins: AdminHemocentro[]
 }

@@ -1,4 +1,5 @@
-const API_URL = (import.meta.env.VITE_API_URL ?? 'http://localhost:3333').replace(/\/$/, '')
+// URL base da API, já com o prefixo /api do backend.
+const API_URL = (import.meta.env.VITE_API_URL ?? 'http://localhost:3333/api').replace(/\/$/, '')
 const CHAVE_TOKEN = 'hemobridge.token'
 
 /** Erro devolvido pela API no formato padrão do NestJS. */
@@ -46,18 +47,17 @@ function montarUrl(caminho: string, query?: Query) {
   return url
 }
 
-async function enviar(metodo: string, caminho: string, corpo?: unknown, query?: Query): Promise<Response> {
+async function requisicao<T>(metodo: string, caminho: string, corpo?: unknown, query?: Query): Promise<T> {
   const token = obterToken()
   let resposta: Response
   try {
     resposta = await fetch(montarUrl(caminho, query), {
       method: metodo,
-      // FormData (arquivos) define o próprio Content-Type com o boundary do multipart.
       headers: {
-        ...(corpo !== undefined && !(corpo instanceof FormData) ? { 'Content-Type': 'application/json' } : {}),
+        ...(corpo !== undefined ? { 'Content-Type': 'application/json' } : {}),
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
-      body: corpo instanceof FormData ? corpo : corpo !== undefined ? JSON.stringify(corpo) : undefined,
+      body: corpo !== undefined ? JSON.stringify(corpo) : undefined,
     })
   } catch {
     throw new ApiError(0, ['Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.'])
@@ -70,11 +70,6 @@ async function enviar(metodo: string, caminho: string, corpo?: unknown, query?: 
     const mensagem = dados?.message ?? resposta.statusText
     throw new ApiError(resposta.status, Array.isArray(mensagem) ? mensagem : [String(mensagem)])
   }
-  return resposta
-}
-
-async function requisicao<T>(metodo: string, caminho: string, corpo?: unknown, query?: Query): Promise<T> {
-  const resposta = await enviar(metodo, caminho, corpo, query)
   if (resposta.status === 204) return undefined as T
   return (await resposta.json().catch(() => null)) as T
 }
@@ -83,10 +78,7 @@ export const api = {
   get: <T>(caminho: string, query?: Query) => requisicao<T>('GET', caminho, undefined, query),
   post: <T>(caminho: string, corpo?: unknown) => requisicao<T>('POST', caminho, corpo ?? {}),
   put: <T>(caminho: string, corpo: unknown) => requisicao<T>('PUT', caminho, corpo),
-  patch: <T>(caminho: string, corpo: unknown) => requisicao<T>('PATCH', caminho, corpo),
-  delete: <T>(caminho: string) => requisicao<T>('DELETE', caminho),
-  /** Arquivo protegido (ex.: resultado de exame), baixado com o token da sessão. */
-  arquivo: async (caminho: string) => (await enviar('GET', caminho)).blob(),
+  patch: <T>(caminho: string, corpo?: unknown) => requisicao<T>('PATCH', caminho, corpo ?? {}),
 }
 
 export function mensagemDeErro(erro: unknown): string[] {

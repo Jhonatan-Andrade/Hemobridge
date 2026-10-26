@@ -1,6 +1,6 @@
-import type { NivelNecessidade, Papel, Perfil, SituacaoPaciente, StatusUsuario } from '../api/types'
+import type { NivelNecessidade, PapelEquipe, ResultadoDoacao, SituacaoPaciente, StatusAgendamento, StatusUsuario } from '../api/types'
 
-// RN01: os oito tipos ABO/Rh, na ordem de exibição.
+// Os oito tipos ABO/Rh, na ordem de exibição.
 export const TIPOS_SANGUINEOS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] as const
 
 export const UFS = [
@@ -9,38 +9,37 @@ export const UFS = [
   'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO',
 ] as const
 
-// RN02, em ordem decrescente de prioridade.
+// RF17, em ordem decrescente de prioridade.
 export const NIVEIS: Record<NivelNecessidade, string> = {
-  CRITICO: 'Crítico',
-  BAIXO: 'Baixo',
+  URGENTE: 'Urgente',
+  NECESSARIO: 'Necessário',
   ESTAVEL: 'Estável',
-  ADEQUADO: 'Adequado',
-  NAO_INFORMADO: 'Não informado',
 }
 
 export const SITUACOES_PACIENTE: Record<SituacaoPaciente, string> = {
-  PRE_CADASTRADO: 'Pré-cadastrado',
-  CONSULTA_AGENDADA: 'Consulta agendada',
-  AGUARDANDO_EXAME: 'Aguardando exame',
-  EM_ANALISE: 'Em análise',
-  APROVADO: 'Aprovado',
-  REPROVADO: 'Reprovado',
+  PENDENTE: 'Pendente',
+  ATIVA: 'Ativa',
 }
 
-export const PAPEIS: Record<Papel, string> = {
-  PACIENTE: 'Paciente',
-  DOADOR: 'Doador',
+export const PAPEIS: Record<PapelEquipe, string> = {
   MEDICO: 'Médico',
-  REPRESENTANTE: 'Representante',
-  ADMINISTRADOR: 'Administrador',
+  ADMIN_HEMOCENTRO: 'Admin do hemocentro',
 }
 
-export const PERFIS: Record<Perfil, string> = {
-  PACIENTE: 'Paciente',
-  MEDICO: 'Médico',
-  REPRESENTANTE: 'Representante',
-  ADMINISTRADOR: 'Administrador',
+export const STATUS_AGENDAMENTO: Record<StatusAgendamento, string> = {
+  AGENDADO: 'Agendado',
+  CANCELADO: 'Cancelado',
+  CONCLUIDO: 'Atendido',
+  AUSENTE: 'Não compareceu',
 }
+
+export const RESULTADOS_DOACAO: Record<ResultadoDoacao, string> = {
+  DOOU: 'Doou',
+  NAO_DOOU: 'Não doou',
+  AUSENTE: 'Não compareceu',
+}
+
+export const DIAS_SEMANA = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'] as const
 
 export const STATUS_USUARIO: Record<StatusUsuario, string> = {
   ATIVO: 'Ativo',
@@ -90,16 +89,27 @@ export function formatarData(iso: string | null | undefined) {
   return new Date(iso).toLocaleDateString('pt-BR')
 }
 
-/** Idade completa em anos a partir de uma data AAAA-MM-DD. */
-export function calcularIdade(dataIso: string) {
-  const [ano, mes, dia] = dataIso.split('-').map(Number)
-  if (!ano || !mes || !dia) return null
-  const hoje = new Date()
-  let idade = hoje.getFullYear() - ano
-  if (hoje.getMonth() + 1 < mes || (hoje.getMonth() + 1 === mes && hoje.getDate() < dia)) idade--
-  return idade
+/** "seg., 26/10" a partir de uma data AAAA-MM-DD. */
+export const formatarDiaCurto = (dataIso: string) =>
+  new Date(`${dataIso}T12:00:00`).toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' })
+
+/** "segunda-feira, 26 de outubro" a partir de uma data AAAA-MM-DD. */
+export const formatarDiaLongo = (dataIso: string) =>
+  new Date(`${dataIso}T12:00:00`).toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })
+
+/** Data local AAAA-MM-DD (o fuso dos usuários é o de Brasília). */
+export function dataLocalIso(data: Date = new Date()) {
+  const p = (n: number) => String(n).padStart(2, '0')
+  return `${data.getFullYear()}-${p(data.getMonth() + 1)}-${p(data.getDate())}`
 }
 
-// RN06: mínimo de 8 caracteres, com letra maiúscula, letra minúscula e número.
+/** Soma dias a uma data AAAA-MM-DD. */
+export function somarDias(dataIso: string, dias: number) {
+  const d = new Date(`${dataIso}T12:00:00`)
+  d.setDate(d.getDate() + dias)
+  return dataLocalIso(d)
+}
+
+// Mínimo de 8 caracteres, com letra maiúscula, letra minúscula e número (RN06 do backend).
 export const senhaValida = (senha: string) => /^(?=.*\p{Lu})(?=.*\p{Ll})(?=.*\d).{8,128}$/u.test(senha)
 export const REGRA_SENHA = 'Mínimo de 8 caracteres, com letra maiúscula, letra minúscula e número.'

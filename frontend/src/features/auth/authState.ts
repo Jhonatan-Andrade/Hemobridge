@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react'
-import type { Papel, Sessao, UsuarioAutenticado } from '../../api/types'
+import type { Sessao, UsuarioAutenticado } from '../../api/types'
 
 export interface EstadoAuth {
   usuario: UsuarioAutenticado | null
@@ -18,15 +18,10 @@ export function useAuth() {
   return ctx
 }
 
-/** Área inicial de cada papel após o login. */
-export function rotaInicial(usuario: Pick<UsuarioAutenticado, 'papel' | 'senhaProvisoria'>): string {
+/** Área inicial de cada perfil (e papel, na equipe do hemocentro) após o login. */
+export function rotaInicial(usuario: Pick<UsuarioAutenticado, 'perfil' | 'papel' | 'senhaProvisoria'>): string {
   if (usuario.senhaProvisoria) return '/primeiro-acesso'
-  const destinos: Record<Papel, string> = {
-    PACIENTE: '/doador',
-    DOADOR: '/doador',
-    REPRESENTANTE: '/hospital',
-    MEDICO: '/medico',
-    ADMINISTRADOR: '/admin',
-  }
-  return destinos[usuario.papel]
+  if (usuario.perfil === 'PACIENTE') return '/painel'
+  if (usuario.perfil === 'ADMIN_PLATAFORMA') return '/admin'
+  return usuario.papel === 'MEDICO' ? '/medico' : '/hemocentro'
 }

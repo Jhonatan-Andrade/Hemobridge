@@ -5,10 +5,10 @@ import perfilIcon from '../../assets/icons/perfil.svg'
 import type { NavItem } from '../../components/layout/NavigationRail'
 
 // Figma: "Overlay menu / Visitante" (468:5148). Comunidade e Acessibilidade ficam fora do escopo;
-// no lugar entra Encontrar locais (consulta pública).
+// no lugar entra Doar (lista pública de hemocentros).
 export const navVisitante: NavItem[] = [
   { to: '/', label: 'Início', icon: inicioIcon, end: true },
-  { to: '/locais', label: 'Encontrar locais', icon: mapIcon },
+  { to: '/doar', label: 'Doar', icon: mapIcon },
   { to: '/entrar', label: 'Entrar', icon: perfilIcon },
-  { to: '/cadastro', label: 'Fazer pré-cadastro', icon: activityIcon },
+  { to: '/cadastro', label: 'Criar conta', icon: activityIcon },
 ]

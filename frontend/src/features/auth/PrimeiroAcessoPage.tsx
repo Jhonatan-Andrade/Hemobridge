@@ -12,7 +12,7 @@ import { PublicLayout } from './PublicLayout'
 type Campos = { novaSenha: string; confirmacaoSenha: string; aceiteTermo: boolean }
 
 // Figma: Web desktop / Acesso e orientações / Profissional / Primeiro acesso (8:2318).
-// Representantes recebem senha provisória e precisam defini-la antes de usar o sistema (UC07).
+// A equipe dos hemocentros e os administradores recebem senha provisória e precisam defini-la antes de usar o sistema.
 export function PrimeiroAcessoPage() {
   const { aplicarSessao, sair } = useAuth()
   const navigate = useNavigate()
@@ -44,7 +44,7 @@ export function PrimeiroAcessoPage() {
     try {
       const sessao = await authService.definirSenhaPrimeiroAcesso({ ...c, versaoTermo: termo.versao })
       aplicarSessao(sessao)
-      navigate(rotaInicial({ papel: sessao.usuario.papel, senhaProvisoria: false }), { replace: true })
+      navigate(rotaInicial({ ...sessao.usuario, senhaProvisoria: false }), { replace: true })
     } catch (err) {
       setFalha(mensagemDeErro(err))
       setEnviando(false)

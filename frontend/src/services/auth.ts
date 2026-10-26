@@ -1,5 +1,5 @@
 import { api } from '../api/client'
-import type { PreCadastro, PreCadastroCriado, Sessao, Termo, UsuarioAutenticado } from '../api/types'
+import type { Cadastro, CadastroCriado, Sessao, Termo, TermoConsentimento, UsuarioAutenticado } from '../api/types'
 
 export const authService = {
   login: (email: string, senha: string) => api.post<Sessao>('/auth/login', { email, senha }),
@@ -11,6 +11,7 @@ export const authService = {
   definirSenhaPrimeiroAcesso: (dados: { novaSenha: string; confirmacaoSenha: string; aceiteTermo: boolean; versaoTermo: string }) =>
     api.post<Sessao>('/auth/primeiro-acesso', dados),
 
-  termoConsentimento: () => api.get<Termo>('/pacientes/termo-consentimento'),
-  preCadastrar: (dados: PreCadastro) => api.post<PreCadastroCriado>('/pacientes', dados),
+  // RF01 – cadastro do paciente
+  termoConsentimento: () => api.get<TermoConsentimento>('/auth/termo-consentimento'),
+  cadastrar: (dados: Cadastro) => api.post<CadastroCriado>('/auth/register', dados),
 }

@@ -1,4 +1,4 @@
-import { calcularIdade, REGRA_SENHA, senhaValida, somenteDigitos } from './formato'
+import { dataLocalIso, REGRA_SENHA, senhaValida, somenteDigitos } from './formato'
 
 export type Erros<T> = Partial<Record<keyof T, string>>
 
@@ -42,12 +42,10 @@ export function erroConfirmacao(senha: string, confirmacao: string) {
   return undefined
 }
 
-/** Idade permitida para iniciar o processo de doação (Figma: "Idade de 16 a 69 anos"). */
+/** Data de nascimento válida e anterior a hoje (sem verificação de elegibilidade). */
 export function erroDataNascimento(data: string) {
   if (!data) return 'Informe a data de nascimento.'
-  const idade = calcularIdade(data)
-  if (idade === null || idade < 0) return 'Data de nascimento inválida.'
-  if (idade < 16 || idade > 69) return 'A doação é permitida para pessoas de 16 a 69 anos.'
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(data) || data >= dataLocalIso()) return 'Data de nascimento inválida.'
   return undefined
 }
 
