@@ -40,6 +40,9 @@ ALTER TABLE "hospital"
     DROP COLUMN "localizacao",
     DROP COLUMN "latitude",
     DROP COLUMN "longitude";
+-- A imagem postgis/postgis também cria estas extensões, que dependem do postgis.
+DROP EXTENSION IF EXISTS "postgis_tiger_geocoder";
+DROP EXTENSION IF EXISTS "postgis_topology";
 DROP EXTENSION IF EXISTS "postgis";
 
 ALTER TABLE "hospital" RENAME TO "hemocentro";
