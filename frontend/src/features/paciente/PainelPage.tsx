@@ -3,7 +3,7 @@ import { mensagemDeErro } from '../../api/client'
 import type { DoacaoPaciente, Painel, ProximoAgendamento } from '../../api/types'
 import { PageTitle } from '../../components/layout/AppShell'
 import { Button, ButtonLink, Card, EmptyState, ErrorState, Loading, Message, Panel, PatientBadge, ReadOnlyField } from '../../components/ui'
-import { formatarData, formatarDiaLongo, mascaraTelefone, RESULTADOS_DOACAO } from '../../lib/formato'
+import { dataLocalIso, formatarData, formatarDiaLongo, mascaraTelefone, RESULTADOS_DOACAO, SEXOS } from '../../lib/formato'
 import { useAsync } from '../../lib/useAsync'
 import { agendamentosService, pacienteService } from '../../services/paciente'
 import { ExclusaoDados } from './ExclusaoDados'
@@ -42,7 +42,13 @@ export function PainelPage() {
             <Card title="Próximo passo">
               {p.proximosAgendamentos.length
                 ? 'Compareça ao hemocentro no horário agendado com um documento com foto.'
-                : 'Escolha um hemocentro em Doar e agende um horário com vaga.'}
+                : p.proximaDoacaoPermitida && p.proximaDoacaoPermitida > dataLocalIso()
+                  ? `Você pode doar de novo a partir de ${formatarDiaLongo(p.proximaDoacaoPermitida)}. Já dá para agendar um horário dessa data em diante.`
+                  : 'Escolha um hemocentro em Doar e agende um horário com vaga.'}
+              <span className="mt-2 block text-small text-muted">
+                Intervalo mínimo entre doações: {p.regraDoacao.intervaloDias} dias, até {p.regraDoacao.limiteAnual} doações em 12 meses
+                {p.sexo ? '' : ' (regra mais restritiva, porque o sexo não foi informado)'}.
+              </span>
             </Card>
           </div>
 
@@ -75,6 +81,7 @@ function DadosPessoais({ painel: p }: { painel: Painel }) {
     ['CPF', p.cpf ?? '—'],
     ['Telefone', p.telefone ? mascaraTelefone(p.telefone) : '—'],
     ['Nascimento', p.dataNascimento ? p.dataNascimento.split('-').reverse().join('/') : '—'],
+    ['Sexo', p.sexo ? SEXOS[p.sexo] : '—'],
     ['Conta criada em', formatarData(p.cadastradoEm)],
   ]
   return (

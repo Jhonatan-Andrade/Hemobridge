@@ -37,7 +37,7 @@ export class CadastroService {
           telefone: dto.telefone,
           senhaHash: await gerarHashSenha(dto.senha),
           perfil: 'PACIENTE',
-          paciente: { create: { dataNascimento: dataIsoParaDate(dto.dataNascimento) } },
+          paciente: { create: { dataNascimento: dataIsoParaDate(dto.dataNascimento), sexo: dto.sexo } },
           consentimentos: {
             create: {
               versaoTermo: TERMO_CONSENTIMENTO.versao,

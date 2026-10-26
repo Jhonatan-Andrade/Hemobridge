@@ -1,5 +1,5 @@
 import { Transform } from 'class-transformer';
-import { Equals, IsEmail, IsISO8601, IsString, Length, Matches, MaxLength } from 'class-validator';
+import { Equals, IsEmail, IsIn, IsISO8601, IsString, Length, Matches, MaxLength } from 'class-validator';
 import { aparar, emailNormalizado, somenteDigitos } from '../../common/transformacoes.js';
 import { IsCpf, IsDataPassada, IsIgualA, IsSenhaValida } from '../../common/validators.js';
 
@@ -33,6 +33,10 @@ export class CadastroDto {
   @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: 'Data de nascimento deve estar no formato AAAA-MM-DD' })
   @IsDataPassada({ message: 'A data de nascimento deve ser anterior a hoje' })
   dataNascimento: string;
+
+  // Define o intervalo mínimo e o limite anual de doações.
+  @IsIn(['MASCULINO', 'FEMININO'], { message: 'Informe o sexo: MASCULINO ou FEMININO' })
+  sexo: 'MASCULINO' | 'FEMININO';
 
   // RF01: consentimento explícito, incluindo o compartilhamento entre hemocentros.
   @Equals(true, {

@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { FatorRh, GrupoAbo, NivelNecessidade, PrismaClient } from '../src/generated/prisma/client.js';
 import { isCpfValido, normalizarCpf } from '../src/common/cpf.js';
-import { dataIsoParaDate, hojeIso, somarDias } from '../src/common/data.js';
+import { dataIsoParaDate, hojeIso, instanteLocal, somarDias } from '../src/common/data.js';
 import { diaDaSemana, horaParaTime } from '../src/common/horario.js';
 import { gerarHashSenha } from '../src/common/senha.js';
 import { TERMO_CONSENTIMENTO } from '../src/lgpd/termo-consentimento.js';
@@ -120,7 +120,8 @@ const PACIENTE_EXEMPLO = {
   cpf: cpfFicticio('100000005'),
   telefone: '41999990000',
   dataNascimento: '1990-04-12',
-};
+  sexo: 'MASCULINO',
+} as const;
 
 /** Horários das próximas 4 semanas: quartas 13h–17h (6 vagas) e sábados 8h–12h (10 vagas). */
 function proximosHorarios(hemocentroId: string) {
@@ -200,28 +201,28 @@ async function seedDadosExemplo() {
       telefone: PACIENTE_EXEMPLO.telefone,
       senhaHash,
       perfil: 'PACIENTE',
-      paciente: { create: { dataNascimento: dataIsoParaDate(PACIENTE_EXEMPLO.dataNascimento) } },
+      paciente: { create: { dataNascimento: dataIsoParaDate(PACIENTE_EXEMPLO.dataNascimento), sexo: PACIENTE_EXEMPLO.sexo } },
       consentimentos: {
         create: { versaoTermo: TERMO_CONSENTIMENTO.versao, finalidade: TERMO_CONSENTIMENTO.finalidade },
       },
     },
   });
 
-  // Histórico: doou há 30 dias no Hemocentro A, que ativou a conta com o tipo O+.
+  // Histórico: doou há 70 dias no Hemocentro A (homem: pode voltar a doar depois de 60), que ativou a conta com o tipo O+.
   if (!(await prisma.doacao.count({ where: { pacienteId: paciente.id } }))) {
     const a = ids['A'];
     const passado = await prisma.horario.upsert({
       where: {
         hemocentroId_data_horaInicio: {
           hemocentroId: a.hemocentro,
-          data: dataIsoParaDate(somarDias(hojeIso(), -30)),
+          data: dataIsoParaDate(somarDias(hojeIso(), -70)),
           horaInicio: horaParaTime('09:00'),
         },
       },
       update: {},
       create: {
         hemocentroId: a.hemocentro,
-        data: dataIsoParaDate(somarDias(hojeIso(), -30)),
+        data: dataIsoParaDate(somarDias(hojeIso(), -70)),
         horaInicio: horaParaTime('09:00'),
         horaFim: horaParaTime('12:00'),
         vagasTotal: 6,
@@ -240,6 +241,7 @@ async function seedDadosExemplo() {
         doou: true,
         tipoSanguineoId: tipos.get('O+')!,
         observacoes: 'Doação sem intercorrências.',
+        registradoEm: instanteLocal(somarDias(hojeIso(), -70), '10:00'),
       },
     });
     await prisma.paciente.update({

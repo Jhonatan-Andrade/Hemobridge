@@ -44,7 +44,7 @@ O sistema organiza a doação de sangue a partir do agendamento: o paciente se c
 
 | Código | Descrição |
 |---|---|
-| RF01 | Cadastro do paciente com dados básicos e aceite do termo LGPD (incluindo compartilhamento entre hemocentros). |
+| RF01 | Cadastro do paciente com dados básicos (inclusive o sexo) e aceite do termo LGPD (incluindo compartilhamento entre hemocentros). |
 | RF02 | Autenticação por credenciais com controle de acesso por perfil e papel. |
 | RF03 | Página pública de apresentação do Hemobridge. |
 | RF04 | Painel do paciente com dados, status da conta, tipo sanguíneo e histórico de doações com o hemocentro de origem. |
@@ -52,7 +52,7 @@ O sistema organiza a doação de sangue a partir do agendamento: o paciente se c
 | RF06 | Agendamento de doação pelo paciente em horário com vaga. |
 | RF07 | Cancelamento e reagendamento pelo paciente, liberando a vaga. |
 | RF08 | O Admin do hemocentro define horários e a quantidade de vagas de cada um, inclusive em lote semanal. |
-| RF09 | O sistema impede overbooking, agendamento em horário passado/inativo e duplicidade. |
+| RF09 | O sistema impede overbooking, agendamento em horário passado/inativo, duplicidade e agendamento fora do intervalo mínimo entre doações (RN20). |
 | RF10 | O médico visualiza, por data e horário, os pacientes agendados no seu hemocentro. |
 | RF11 | O médico registra a doação (comparecimento, doou ou não, tipo sanguíneo, motivo, observações), vinculada ao hemocentro. |
 | RF12 | A equipe consulta o histórico de doações do paciente em outros hemocentros, nas condições da regra de compartilhamento. |
@@ -78,13 +78,14 @@ O sistema organiza a doação de sangue a partir do agendamento: o paciente se c
 
 ### Regras de Negócio
 
-Regras de acesso herdadas da versão anterior e mantidas no código (as referências `RNxx` nos comentários apontam para esta tabela):
+Regras de acesso herdadas da versão anterior e mantidas no código, mais a regra de intervalo entre doações (as referências `RNxx` nos comentários apontam para esta tabela):
 
 | Código | Regra |
 |---|---|
 | RN06 | Senha com 8 a 128 caracteres, ao menos uma letra maiúscula, uma minúscula e um número; CPF validado pelos dígitos verificadores. |
 | RN07 | Cinco tentativas de login inválidas seguidas bloqueiam a conta por 15 minutos. |
 | RN14 | A recuperação de senha responde sempre a mesma mensagem, exista ou não a conta. |
+| RN20 | Intervalo entre doações de sangue total (Ministério da Saúde): homens a cada 60 dias, até 4 doações em 12 meses; mulheres a cada 90 dias, até 3. Contam as doações efetivas e os agendamentos ativos, nos dois sentidos da data. Sem sexo informado (contas anteriores ao campo), vale a regra mais restritiva (90 dias, 3 doações). |
 | RN15 | Contas criadas por terceiros (equipe e administradores) recebem senha provisória válida por 72 horas e precisam trocá-la no primeiro acesso, aceitando o termo de responsabilidade e sigilo. |
 
 ## Fluxo Principal
@@ -132,11 +133,11 @@ Quando o paciente doa em outro hemocentro, a equipe desse hemocentro pode ver o 
 O sistema trata dados sensíveis de saúde (tipo sanguíneo e registros de doação) e adota as seguintes salvaguardas:
 
 - **Consentimento explícito e versionado** no cadastro, cobrindo o compartilhamento do histórico entre hemocentros (RF01).
-- **Minimização:** o cadastro não coleta peso, sexo nem endereço; só o necessário para agendar e identificar o paciente.
+- **Minimização:** o cadastro não coleta peso nem endereço; só o necessário para agendar, identificar o paciente e aplicar o intervalo entre doações (sexo).
 - **Controle de acesso** por perfil e papel, com o hemocentro vindo sempre do vínculo da conta (RNF03, RNF04).
 - **Log de auditoria** de leitura do histórico, registro de doação, ativação de conta e exclusão de dados (RNF05).
 - **Direito de exclusão** (RF16): o paciente pede a exclusão pelo Painel, confirmando a senha. Nome, CPF, e-mail, telefone e data de nascimento são anonimizados, a conta é encerrada, os agendamentos ativos são cancelados e o consentimento é revogado. Os registros de doação são mantidos sem identificação direta, por obrigação legal de retenção da legislação sanitária (Art. 16 da LGPD).
 
 ## Fora do Escopo
 
-Ficaram fora desta versão: consulta online com médico, solicitação e envio de exames, aprovação/reprovação do paciente pelo médico, perfil de representante de hospital, lotes e estoque físico de hemocomponentes, compatibilidade entre tipos sanguíneos, busca por geolocalização e mapa, verificação automática de elegibilidade, notificações e relatórios/dashboards de gestão.
+Ficaram fora desta versão: consulta online com médico, solicitação e envio de exames, aprovação/reprovação do paciente pelo médico, perfil de representante de hospital, lotes e estoque físico de hemocomponentes, compatibilidade entre tipos sanguíneos, busca por geolocalização e mapa, verificação automática de elegibilidade além do intervalo entre doações (peso, idade, triagem clínica), notificações e relatórios/dashboards de gestão.

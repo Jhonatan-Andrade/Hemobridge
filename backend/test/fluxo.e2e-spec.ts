@@ -69,6 +69,7 @@ describe.skipIf(!URL_BANCO)('Fluxo paciente → médico → admin (e2e)', () => 
         confirmacaoSenha: SENHA,
         telefone: '41999990000',
         dataNascimento: '1990-01-01',
+        sexo: 'MASCULINO',
         aceiteTermo: true,
         versaoTermo: termo.body.versao,
       })
@@ -353,16 +354,29 @@ describe.skipIf(!URL_BANCO)('Fluxo paciente → médico → admin (e2e)', () => 
     // Sem agendamento em B: não há busca livre por paciente.
     await api().get(`/api/pacientes/${ctx.paciente.id}/historico`).set(autorizado(ctx.medicoB)).expect(404);
 
-    const { body } = await api()
-      .post('/api/horarios')
-      .set(autorizado(ctx.adminB))
-      .send({ data: amanha, horaInicio: '09:00', horaFim: '10:00', vagasTotal: 5 })
-      .expect(201);
+    const horarioB = async (data: string) =>
+      (
+        await api()
+          .post('/api/horarios')
+          .set(autorizado(ctx.adminB))
+          .send({ data, horaInicio: '09:00', horaFim: '10:00', vagasTotal: 5 })
+          .expect(201)
+      ).body.horario.id as string;
+
+    // Doou hoje: como homem, só volta a doar daqui a 60 dias, em qualquer hemocentro.
+    const cedo = await api()
+      .post('/api/agendamentos')
+      .set(autorizado(ctx.paciente.token))
+      .send({ horarioId: await horarioB(amanha) })
+      .expect(409);
+    expect(cedo.body.message).toMatch(/60 dias para homens/);
     await api()
       .post('/api/agendamentos')
       .set(autorizado(ctx.paciente.token))
-      .send({ horarioId: body.horario.id })
+      .send({ horarioId: await horarioB(somarDias(hojeIso(), 60)) })
       .expect(201);
+    const painel = await api().get('/api/pacientes/me/painel').set(autorizado(ctx.paciente.token)).expect(200);
+    expect(painel.body).toMatchObject({ sexo: 'MASCULINO', proximaDoacaoPermitida: somarDias(hojeIso(), 60) });
 
     const historico = await api()
       .get(`/api/pacientes/${ctx.paciente.id}/historico`)

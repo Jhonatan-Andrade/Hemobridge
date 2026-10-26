@@ -7,6 +7,7 @@ export const cadastroValido = () => ({
   confirmacaoSenha: 'senhaForte1',
   telefone: '(41) 99999-8888',
   dataNascimento: '1995-05-20',
+  sexo: 'FEMININO',
   aceiteTermo: true,
-  versaoTermo: '2.0',
+  versaoTermo: '2.1',
 });

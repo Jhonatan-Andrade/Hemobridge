@@ -6,6 +6,8 @@ export type PapelEquipe = 'MEDICO' | 'ADMIN_HEMOCENTRO'
 export type StatusUsuario = 'ATIVO' | 'INATIVO' | 'ENCERRADO'
 /** Status da conta do paciente: vira ATIVA (doador) na ativação pelo hemocentro. */
 export type SituacaoPaciente = 'PENDENTE' | 'ATIVA'
+/** Define o intervalo mínimo e o limite anual de doações. */
+export type Sexo = 'MASCULINO' | 'FEMININO'
 export type NivelNecessidade = 'URGENTE' | 'NECESSARIO' | 'ESTAVEL'
 export type StatusAgendamento = 'AGENDADO' | 'CANCELADO' | 'CONCLUIDO' | 'AUSENTE'
 export type ResultadoDoacao = 'DOOU' | 'NAO_DOOU' | 'AUSENTE'
@@ -65,6 +67,7 @@ export interface Cadastro {
   confirmacaoSenha: string
   telefone: string
   dataNascimento: string
+  sexo: Sexo
   aceiteTermo: boolean
   versaoTermo: string
 }
@@ -178,11 +181,17 @@ export interface Painel {
   cpf: string | null
   telefone: string | null
   dataNascimento: string | null
+  /** Nulo em contas anteriores ao campo: vale a regra mais restritiva. */
+  sexo: Sexo | null
   cadastradoEm: string
   situacao: SituacaoPaciente
   ativadoEm: string | null
   /** Só depois da ativação; somente leitura. */
   tipoSanguineo: TipoSanguineo | null
+  /** Intervalo mínimo entre doações e limite em 12 meses (Ministério da Saúde). */
+  regraDoacao: { intervaloDias: number; limiteAnual: number }
+  /** AAAA-MM-DD: última doação efetiva + intervalo; nulo se nunca doou. */
+  proximaDoacaoPermitida: string | null
   doacoes: DoacaoPaciente[]
   proximosAgendamentos: ProximoAgendamento[]
 }

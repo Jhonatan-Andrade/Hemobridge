@@ -1,4 +1,4 @@
-import type { NivelNecessidade, PapelEquipe, ResultadoDoacao, SituacaoPaciente, StatusAgendamento, StatusUsuario } from '../api/types'
+import type { NivelNecessidade, PapelEquipe, ResultadoDoacao, Sexo, SituacaoPaciente, StatusAgendamento, StatusUsuario } from '../api/types'
 
 // Os oito tipos ABO/Rh, na ordem de exibição.
 export const TIPOS_SANGUINEOS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] as const
@@ -14,6 +14,11 @@ export const NIVEIS: Record<NivelNecessidade, string> = {
   URGENTE: 'Urgente',
   NECESSARIO: 'Necessário',
   ESTAVEL: 'Estável',
+}
+
+export const SEXOS: Record<Sexo, string> = {
+  MASCULINO: 'Masculino',
+  FEMININO: 'Feminino',
 }
 
 export const SITUACOES_PACIENTE: Record<SituacaoPaciente, string> = {

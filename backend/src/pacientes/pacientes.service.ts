@@ -4,6 +4,7 @@ import { ACOES_AUDITORIA, AuditoriaService } from '../auditoria/auditoria.servic
 import { mascararCpf } from '../common/cpf.js';
 import { apresentarHorario, dateParaIso, inicioDoHorario } from '../common/horario.js';
 import { gerarHashSenha, verificarSenha } from '../common/senha.js';
+import { proximaDoacaoPermitida, regraDoacao } from '../agendamentos/regra-doacao.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 
 /** Resultado de um atendimento, como o paciente vê no painel. */
@@ -25,6 +26,7 @@ export class PacientesService {
       where: { usuarioId: pacienteId },
       select: {
         dataNascimento: true,
+        sexo: true,
         situacao: true,
         ativadoEm: true,
         tipoSanguineo: { select: { sigla: true } },
@@ -37,6 +39,7 @@ export class PacientesService {
             doou: true,
             motivoNaoDoacao: true,
             hemocentro: { select: { id: true, nome: true, cidade: true, estado: true } },
+            agendamento: { select: { horario: { select: { data: true } } } },
           },
           orderBy: { registradoEm: 'desc' },
         },
@@ -64,6 +67,7 @@ export class PacientesService {
 
     const { usuario, doacoes, agendamentos } = paciente;
     const agora = new Date();
+    const ultimaDoacao = doacoes.find((d) => d.doou)?.agendamento.horario.data;
     return {
       id: usuario.id,
       nome: usuario.nome,
@@ -71,12 +75,22 @@ export class PacientesService {
       cpf: usuario.cpf ? mascararCpf(usuario.cpf) : null,
       telefone: usuario.telefone,
       dataNascimento: paciente.dataNascimento ? dateParaIso(paciente.dataNascimento) : null,
+      sexo: paciente.sexo,
       cadastradoEm: usuario.criadoEm,
       situacao: paciente.situacao,
       ativadoEm: paciente.ativadoEm,
       // RF04: somente leitura, depois da ativação.
       tipoSanguineo: paciente.situacao === 'ATIVA' ? (paciente.tipoSanguineo?.sigla ?? null) : null,
-      doacoes: doacoes.map(({ compareceu, doou, ...d }) => ({ ...d, resultado: resultadoDe({ compareceu, doou }) })),
+      // Intervalo mínimo e limite em 12 meses que valem para este paciente.
+      regraDoacao: regraDoacao(paciente.sexo),
+      proximaDoacaoPermitida: proximaDoacaoPermitida(paciente.sexo, ultimaDoacao ? dateParaIso(ultimaDoacao) : null),
+      doacoes: doacoes.map(({ id, registradoEm, compareceu, doou, motivoNaoDoacao, hemocentro }) => ({
+        id,
+        registradoEm,
+        resultado: resultadoDe({ compareceu, doou }),
+        motivoNaoDoacao,
+        hemocentro,
+      })),
       proximosAgendamentos: agendamentos
         .filter((a) => inicioDoHorario(a.horario) > agora)
         .map(({ id, horario: { hemocentro, ...h } }) => {
@@ -120,7 +134,7 @@ export class PacientesService {
           senhaResetExpiraEm: null,
           status: 'ENCERRADO',
           versaoSessao: { increment: 1 },
-          paciente: { update: { dataNascimento: null } },
+          paciente: { update: { dataNascimento: null, sexo: null } },
         },
       });
       await tx.consentimentoLgpd.updateMany({

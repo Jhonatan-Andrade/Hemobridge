@@ -28,7 +28,17 @@ const agendamentoDb = (alteracao: Record<string, unknown> = {}) => ({
 });
 
 /** Prisma falso; o callback de $transaction recebe o próprio mock como cliente. */
-function montar({ ocupadas = 0, jaAgendado = 0, horario = horarioDb() as unknown } = {}) {
+/** Data (YYYY-MM-DD) como o Prisma devolve uma coluna DATE. */
+const dia = (data: string) => ({ data: new Date(`${data}T00:00:00Z`) });
+
+type PacienteDb = { sexo: 'MASCULINO' | 'FEMININO' | null; doacoes: string[]; agendamentos: string[] };
+
+function montar({
+  ocupadas = 0,
+  jaAgendado = 0,
+  horario = horarioDb() as unknown,
+  paciente = { sexo: 'MASCULINO', doacoes: [], agendamentos: [] } as PacienteDb,
+} = {}) {
   const ordem: string[] = [];
   const prisma = {
     $queryRaw: vi.fn().mockImplementation(() => {
@@ -36,6 +46,13 @@ function montar({ ocupadas = 0, jaAgendado = 0, horario = horarioDb() as unknown
       return Promise.resolve(horario ? [{ id: 'hor1' }] : []);
     }),
     horario: { findUnique: vi.fn().mockResolvedValue(horario) },
+    paciente: {
+      findUnique: vi.fn().mockResolvedValue({
+        sexo: paciente.sexo,
+        doacoes: paciente.doacoes.map((d) => ({ agendamento: { horario: dia(d) } })),
+        agendamentos: paciente.agendamentos.map((d) => ({ horario: dia(d) })),
+      }),
+    },
     agendamento: {
       count: vi.fn().mockImplementation(({ where }) => {
         ordem.push('count');
@@ -75,7 +92,8 @@ describe('AgendamentosService', () => {
         podeCancelar: true,
       });
       expect(ordem[0]).toBe('lock');
-      expect(String(prisma.$queryRaw.mock.calls[0][0].join('?'))).toMatch(/FOR UPDATE/);
+      expect(String(prisma.$queryRaw.mock.calls[0][0].join('?'))).toMatch(/FROM paciente .* FOR UPDATE/);
+      expect(String(prisma.$queryRaw.mock.calls[1][0].join('?'))).toMatch(/FROM horario .* FOR UPDATE/);
       expect(prisma.agendamento.create).toHaveBeenCalledWith(
         expect.objectContaining({ data: { pacienteId: 'p1', horarioId: 'hor1' } }),
       );
@@ -107,6 +125,26 @@ describe('AgendamentosService', () => {
       const { service, prisma } = montar({ jaAgendado: 1 });
       await expect(service.agendar('p1', 'hor1')).rejects.toThrow(/já tem um agendamento/);
       expect(prisma.agendamento.create).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['homem que doou há 59 dias', { sexo: 'MASCULINO', doacoes: ['2026-08-28'], agendamentos: [] }, /60 dias para homens.*a partir de 27\/10\/2026/],
+      ['mulher que doou há 89 dias', { sexo: 'FEMININO', doacoes: ['2026-07-29'], agendamentos: [] }, /90 dias para mulheres/],
+      ['agendamento ativo 30 dias depois', { sexo: 'MASCULINO', doacoes: [], agendamentos: ['2026-11-25'] }, /até 26\/09\/2026 ou cancele/],
+      [
+        'homem com 4 doações em 12 meses',
+        { sexo: 'MASCULINO', doacoes: ['2025-11-20', '2026-01-20', '2026-04-20', '2026-06-20'], agendamentos: [] },
+        /limite é de 4 doações em 12 meses para homens/,
+      ],
+    ] as [string, PacienteDb, RegExp][])('recusa pelo intervalo entre doações: %s', async (_, paciente, mensagem) => {
+      const { service, prisma } = montar({ paciente });
+      await expect(service.agendar('p1', 'hor1')).rejects.toThrow(mensagem);
+      expect(prisma.agendamento.create).not.toHaveBeenCalled();
+    });
+
+    it('aceita homem que doou há 60 dias', async () => {
+      const { service } = montar({ paciente: { sexo: 'MASCULINO', doacoes: ['2026-08-27'], agendamentos: [] } });
+      await expect(service.agendar('p1', 'hor1')).resolves.toMatchObject({ mensagem: 'Agendamento confirmado.' });
     });
 
     it('converte a violação do índice único parcial (corrida) em conflito', async () => {
@@ -162,6 +200,18 @@ describe('AgendamentosService', () => {
         data: { status: 'CANCELADO', canceladoEm: AGORA },
       });
       expect(r.agendamento.id).toBe('novo');
+    });
+
+    it('não conta o agendamento substituído no intervalo entre doações', async () => {
+      const { service, prisma } = montar({ paciente: { sexo: 'MASCULINO', doacoes: [], agendamentos: [] } });
+      prisma.agendamento.findFirst.mockResolvedValue(agendamentoDb({ horario: horarioDb({ id: 'antigo' }) }));
+
+      await service.reagendar('p1', 'ag1', 'hor1');
+
+      expect(prisma.paciente.findUnique.mock.calls[0][0].select.agendamentos.where).toMatchObject({
+        status: 'AGENDADO',
+        id: { not: 'ag1' },
+      });
     });
 
     it('mantém o agendamento antigo quando o novo horário está lotado', async () => {

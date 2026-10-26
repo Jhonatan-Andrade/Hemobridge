@@ -36,8 +36,8 @@ describe('CadastroService.cadastrar', () => {
     expect(data.cpf).toBe('52998224725');
     expect(data.senhaHash).toMatch(/^\$argon2id\$/);
     expect(data).not.toHaveProperty('senha');
-    expect(data.paciente.create).toEqual({ dataNascimento: new Date('1995-05-20T00:00:00Z') });
-    expect(data.consentimentos.create).toMatchObject({ versaoTermo: '2.0', ipOrigem: '127.0.0.1' });
+    expect(data.paciente.create).toEqual({ dataNascimento: new Date('1995-05-20T00:00:00Z'), sexo: 'FEMININO' });
+    expect(data.consentimentos.create).toMatchObject({ versaoTermo: '2.1', ipOrigem: '127.0.0.1' });
     expect(data.consentimentos.create.finalidade).toMatch(/compartilhar o histórico/);
   });
 

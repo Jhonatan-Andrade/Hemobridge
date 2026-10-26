@@ -65,7 +65,7 @@ Os tokens de design (cores, tipografia, raios, sombra e larguras) ficam em `tail
 | `/primeiro-acesso` | equipe e administradores | Troca da senha provisória e aceite do termo de responsabilidade |
 | `/doar` | todos | Hemocentros com busca por nome/cidade e necessidades; com conta ativa, quem precisa do tipo do paciente vem primeiro (RF05, RF18) |
 | `/doar/:id` | todos (agendar: paciente) | Detalhes, necessidades, horários por data com vagas restantes e confirmação; com `?reagendar=<id>`, troca o horário (RF06, RF07) |
-| `/painel` | paciente | Dados, status da conta, tipo sanguíneo, próximos agendamentos (cancelar/reagendar), histórico de doações e exclusão de dados (RF04, RF16) |
+| `/painel` | paciente | Dados, status da conta, tipo sanguíneo, intervalo entre doações e próxima data permitida, próximos agendamentos (cancelar/reagendar), histórico de doações e exclusão de dados (RF04, RF16) |
 | `/medico` | médico | Agenda do dia por horário e registro da doação (RF10, RF11) |
 | `/medico/atendimentos`, `/hemocentro/atendimentos` | médico e Admin do hemocentro | Atendimentos do próprio hemocentro por período, com resumo e link para o histórico do paciente (RF19) |
 | `/medico/pacientes/:id`, `/hemocentro/pacientes/:id` | equipe | Histórico do paciente em todos os hemocentros, com a origem de cada registro (RF12) |
@@ -89,7 +89,7 @@ Nada: todas as telas usam a API.
 | Representante do hospital | Virou Admin do hemocentro; as telas de Necessidades e Equipe médica (101:3114 e 101:3113) foram adaptadas a ele. A equipe médica não tem mais CRM nem declaração de CRM conferido. |
 | Encontrar locais | Virou Doar, sem mapa e sem geolocalização; a busca é por nome ou cidade. |
 | Níveis de necessidade | Urgente, Necessário e Estável, mais "Não informado" para o tipo que o hemocentro ainda não preencheu. |
-| Cadastro | O "pré-cadastro" do Figma (8:1257) virou cadastro simples, sem peso, sexo e município, porque não há verificação automática de elegibilidade. O texto do termo é exibido por completo. |
+| Cadastro | O "pré-cadastro" do Figma (8:1257) virou cadastro simples, sem peso e município. O sexo continua, porque define o intervalo entre doações (60 dias para homens, 90 para mulheres). O texto do termo é exibido por completo. |
 | Menu do visitante | Início, Doar, Entrar e Criar conta. |
 | Exclusão de dados | Depois de confirmar com a senha, a conta é encerrada e a pessoa volta à Apresentação com a confirmação. |
 | Breakpoints | O desktop segue os frames de 1440px. Abaixo de 768px (`md`), o rail vira menu sobreposto; tabelas viram listas abaixo de 640px (`sm`). |

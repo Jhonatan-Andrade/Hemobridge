@@ -243,7 +243,7 @@ Contas fictícias criadas com `SEED_DADOS_EXEMPLO=true` (senha: `SEED_SENHA_EXEM
 | `medico.curitiba@hemobridge.local` | Médico do hemocentro A |
 | `admin.londrina@hemobridge.local` | Admin do Hemocentro Exemplo Londrina (B) |
 | `medico.londrina@hemobridge.local` | Médico do hemocentro B |
-| `paciente@hemobridge.local` | Paciente ATIVA (O+): doou em A e tem agendamento em B |
+| `paciente@hemobridge.local` | Paciente ATIVA (O+), homem: doou em A há 70 dias e tem agendamento em B |
 
 ### 4.5 Prisma Studio (ver e editar o banco no navegador)
 

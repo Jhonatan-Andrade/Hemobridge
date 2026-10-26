@@ -53,7 +53,7 @@ describe('PacientesService.excluirDados (RF16)', () => {
       telefone: null,
       status: 'ENCERRADO',
       versaoSessao: { increment: 1 },
-      paciente: { update: { dataNascimento: null } },
+      paciente: { update: { dataNascimento: null, sexo: null } },
     });
     expect(data.senhaHash).toMatch(/^\$argon2id\$/);
     expect(prisma.consentimentoLgpd.updateMany).toHaveBeenCalledWith({
@@ -96,5 +96,38 @@ describe('PacientesService.painel (RF04)', () => {
 
     prisma.paciente.findUnique.mockResolvedValueOnce({ ...base, situacao: 'ATIVA' });
     expect((await service.painel('p1')).tipoSanguineo).toBe('O+');
+  });
+
+  it('informa a regra de intervalo do paciente e a próxima data permitida, pela última doação efetiva', async () => {
+    const { service, prisma } = await montar();
+    const doacao = (id: string, data: string, doou: boolean) => ({
+      id,
+      registradoEm: AGORA,
+      compareceu: true,
+      doou,
+      motivoNaoDoacao: doou ? null : 'Hemoglobina baixa',
+      hemocentro: { id: 'hA', nome: 'Hemocentro A', cidade: 'Curitiba', estado: 'PR' },
+      agendamento: { horario: { data: new Date(`${data}T00:00:00Z`) } },
+    });
+    prisma.paciente.findUnique.mockResolvedValueOnce({
+      dataNascimento: null,
+      sexo: 'MASCULINO',
+      situacao: 'ATIVA',
+      ativadoEm: AGORA,
+      tipoSanguineo: { sigla: 'O+' },
+      usuario: { id: 'p1', nome: 'Paulo', email: 'p@x.com', cpf: null, telefone: null, criadoEm: AGORA },
+      // Mais recente primeiro; a que não foi doação não conta.
+      doacoes: [doacao('d2', '2026-09-20', false), doacao('d1', '2026-08-01', true)],
+      agendamentos: [],
+    });
+
+    const painel = await service.painel('p1');
+
+    expect(painel).toMatchObject({
+      sexo: 'MASCULINO',
+      regraDoacao: { intervaloDias: 60, limiteAnual: 4 },
+      proximaDoacaoPermitida: '2026-09-30',
+    });
+    expect(painel.doacoes[0]).not.toHaveProperty('agendamento');
   });
 });

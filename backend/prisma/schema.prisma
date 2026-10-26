@@ -44,6 +44,14 @@ enum PapelEquipe {
   @@map("papel_equipe")
 }
 
+// Sexo do paciente: define o intervalo mínimo e o limite anual de doações (Ministério da Saúde).
+enum Sexo {
+  MASCULINO
+  FEMININO
+
+  @@map("sexo")
+}
+
 // Status da conta do paciente: nasce PENDENTE e vira ATIVA (doador) na ativação (RF13).
 enum SituacaoPaciente {
   PENDENTE
@@ -127,6 +135,8 @@ model Paciente {
   usuarioId       String           @id @map("usuario_id") @db.Uuid
   // Nula depois da exclusão de dados (RF16).
   dataNascimento  DateTime?        @map("data_nascimento") @db.Date
+  // Obrigatório no cadastro; nulo em contas anteriores a ele e depois da exclusão (RF16).
+  sexo            Sexo?
   situacao        SituacaoPaciente @default(PENDENTE)
   // Gravado só na ativação, a partir da doação registrada; o paciente nunca edita.
   tipoSanguineoId Int?             @map("tipo_sanguineo_id") @db.SmallInt

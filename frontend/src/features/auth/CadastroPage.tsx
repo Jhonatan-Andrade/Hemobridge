@@ -1,9 +1,9 @@
 import { useState, type FormEvent } from 'react'
 import { mensagemDeErro } from '../../api/client'
-import type { CadastroCriado } from '../../api/types'
+import type { CadastroCriado, Sexo } from '../../api/types'
 import { PageTitle } from '../../components/layout/AppShell'
-import { Button, ButtonLink, Card, Consent, ErrorState, Loading, Message, TextField } from '../../components/ui'
-import { mascaraCpf, mascaraTelefone, somenteDigitos } from '../../lib/formato'
+import { Button, ButtonLink, Card, Consent, ErrorState, Loading, Message, SelectField, TextField } from '../../components/ui'
+import { mascaraCpf, mascaraTelefone, SEXOS, somenteDigitos } from '../../lib/formato'
 import { useAsync } from '../../lib/useAsync'
 import { cpfValido, emailValido, erroConfirmacao, erroDataNascimento, erroSenha, telefoneValido, temErros, type Erros } from '../../lib/validacao'
 import { authService } from '../../services/auth'
@@ -17,6 +17,7 @@ type Campos = {
   confirmacaoSenha: string
   telefone: string
   dataNascimento: string
+  sexo: Sexo | ''
   aceiteTermo: boolean
 }
 
@@ -28,6 +29,7 @@ const vazio: Campos = {
   confirmacaoSenha: '',
   telefone: '',
   dataNascimento: '',
+  sexo: '',
   aceiteTermo: false,
 }
 
@@ -40,6 +42,7 @@ function validar(c: Campos): Erros<Campos> {
     confirmacaoSenha: erroConfirmacao(c.senha, c.confirmacaoSenha),
     telefone: !telefoneValido(c.telefone) ? 'Informe o telefone com DDD.' : undefined,
     dataNascimento: erroDataNascimento(c.dataNascimento),
+    sexo: !c.sexo ? 'Informe o sexo.' : undefined,
     aceiteTermo: !c.aceiteTermo ? 'O aceite do termo de consentimento é obrigatório.' : undefined,
   }
 }
@@ -64,7 +67,7 @@ export function CadastroPage() {
       setFalha(['Revise os campos destacados.'])
       return
     }
-    if (!termo.dados) return
+    if (!termo.dados || !c.sexo) return
     setEnviando(true)
     setFalha([])
     try {
@@ -75,6 +78,7 @@ export function CadastroPage() {
           cpf: somenteDigitos(c.cpf),
           email: c.email.trim(),
           telefone: somenteDigitos(c.telefone),
+          sexo: c.sexo,
           versaoTermo: termo.dados.versao,
         }),
       )
@@ -117,7 +121,15 @@ export function CadastroPage() {
           <TextField label="E-mail" hint="Será usado para entrar" type="email" autoComplete="email" value={c.email} onChange={(e) => set('email', e.target.value)} error={erros.email} />
           <TextField label="Telefone" hint="Com DDD" type="tel" autoComplete="tel" value={c.telefone} onChange={(e) => set('telefone', mascaraTelefone(e.target.value))} error={erros.telefone} />
           <TextField label="Data de nascimento" type="date" autoComplete="bday" value={c.dataNascimento} onChange={(e) => set('dataNascimento', e.target.value)} error={erros.dataNascimento} />
-          <span aria-hidden="true" className="hidden sm:block" />
+          <SelectField
+            label="Sexo"
+            hint="Define o intervalo entre doações: 60 dias para homens e 90 para mulheres"
+            placeholder="Selecione"
+            options={Object.entries(SEXOS).map(([value, label]) => ({ value, label }))}
+            value={c.sexo}
+            onChange={(e) => set('sexo', e.target.value as Sexo | '')}
+            error={erros.sexo}
+          />
           <TextField label="Senha" hint="8–128 caracteres; maiúscula, minúscula e número" type="password" autoComplete="new-password" value={c.senha} onChange={(e) => set('senha', e.target.value)} error={erros.senha} />
           <TextField label="Confirmar senha" hint="Repita a senha" type="password" autoComplete="new-password" value={c.confirmacaoSenha} onChange={(e) => set('confirmacaoSenha', e.target.value)} error={erros.confirmacaoSenha} />
         </fieldset>

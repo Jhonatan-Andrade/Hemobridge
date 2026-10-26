@@ -4,9 +4,11 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { apresentarHorario, inicioDoHorario } from '../common/horario.js';
+import { dataIsoParaDate, hojeIso } from '../common/data.js';
+import { apresentarHorario, dateParaIso, inicioDoHorario } from '../common/horario.js';
 import { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { impedimentoDeDoacao } from './regra-doacao.js';
 
 export const MENSAGEM_ESGOTADO = 'Horário esgotado. Escolha outro horário.';
 const MENSAGEM_DUPLICADO = 'Você já tem um agendamento neste horário.';
@@ -92,7 +94,7 @@ export class AgendamentosService {
         if (atual.horario.id === horarioId) {
           throw new BadRequestException('Escolha um horário diferente do atual.');
         }
-        await this.reservarVaga(tx, pacienteId, horarioId);
+        await this.reservarVaga(tx, pacienteId, horarioId, id);
         const { count } = await tx.agendamento.updateMany({
           where: { id, status: 'AGENDADO' },
           data: { status: 'CANCELADO', canceladoEm: new Date() },
@@ -107,9 +109,12 @@ export class AgendamentosService {
   /**
    * RF09 / RNF06: bloqueia a linha do horário (SELECT … FOR UPDATE) até o fim da
    * transação. Agendamentos simultâneos no mesmo horário esperam aqui, um de cada
-   * vez, e cada um conta as vagas já confirmadas pelos anteriores.
+   * vez, e cada um conta as vagas já confirmadas pelos anteriores. Antes, bloqueia o
+   * paciente, para que dois pedidos dele não driblem o intervalo entre doações.
+   * `substituido` é o agendamento que o reagendamento vai cancelar.
    */
-  private async reservarVaga(tx: Prisma.TransactionClient, pacienteId: string, horarioId: string) {
+  private async reservarVaga(tx: Prisma.TransactionClient, pacienteId: string, horarioId: string, substituido?: string) {
+    await tx.$queryRaw`SELECT usuario_id FROM paciente WHERE usuario_id = ${pacienteId}::uuid FOR UPDATE`;
     const [bloqueado] = await tx.$queryRaw<{ id: string }[]>`
       SELECT id FROM horario WHERE id = ${horarioId}::uuid FOR UPDATE`;
     const horario = bloqueado
@@ -130,6 +135,34 @@ export class AgendamentosService {
     ]);
     if (jaAgendado) throw new ConflictException(MENSAGEM_DUPLICADO);
     if (ocupadas >= horario.vagasTotal) throw new ConflictException(MENSAGEM_ESGOTADO);
+
+    const impedimento = await this.impedimentoDeDoacao(tx, pacienteId, dateParaIso(horario.data), substituido);
+    if (impedimento) throw new ConflictException(impedimento);
+  }
+
+  /** Intervalo mínimo e limite em 12 meses, contando doações efetivas e agendamentos ativos de hoje em diante. */
+  private async impedimentoDeDoacao(tx: Prisma.TransactionClient, pacienteId: string, data: string, substituido?: string) {
+    const paciente = await tx.paciente.findUnique({
+      where: { usuarioId: pacienteId },
+      select: {
+        sexo: true,
+        doacoes: { where: { doou: true }, select: { agendamento: { select: { horario: { select: { data: true } } } } } },
+        agendamentos: {
+          where: {
+            status: 'AGENDADO',
+            horario: { data: { gte: dataIsoParaDate(hojeIso()) } },
+            ...(substituido && { id: { not: substituido } }),
+          },
+          select: { horario: { select: { data: true } } },
+        },
+      },
+    });
+    if (!paciente) throw new NotFoundException('Paciente não encontrado.');
+    const datas = [
+      ...paciente.doacoes.map((d) => d.agendamento.horario.data),
+      ...paciente.agendamentos.map((a) => a.horario.data),
+    ].map(dateParaIso);
+    return impedimentoDeDoacao(paciente.sexo, data, datas);
   }
 
   private async agendamentoAtivo(cliente: Prisma.TransactionClient | PrismaService, pacienteId: string, id: string) {
