@@ -1,6 +1,7 @@
 import { api } from '../api/client'
 import type {
   AgendaDia,
+  Atendimentos,
   DoacaoRegistrada,
   HistoricoPaciente,
   HorarioGestao,
@@ -26,6 +27,11 @@ export const medicoService = {
 /** RF12: médico e Admin do hemocentro, só para pacientes com agendamento no hemocentro. */
 export const historicoService = {
   doPaciente: (pacienteId: string) => api.get<HistoricoPaciente>(`/pacientes/${pacienteId}/historico`),
+}
+
+/** Atendimentos do próprio hemocentro: médico e Admin do hemocentro. */
+export const atendimentosService = {
+  listar: (filtros: Paginacao & { de?: string; ate?: string }) => api.get<Atendimentos>('/atendimentos', filtros),
 }
 
 export type NovoHorario = { data: string; horaInicio: string; horaFim: string; vagasTotal: number }

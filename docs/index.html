@@ -663,10 +663,11 @@
 <span class="kw">GET</span>   /api/pacientes/me/painel
 <span class="kw">POST</span>  /api/pacientes/me/exclusao
 
-<span class="comment">// Médico (RF10–RF12)</span>
+<span class="comment">// Médico (RF10–RF12, RF19)</span>
 <span class="kw">GET</span>   /api/agenda?data=AAAA-MM-DD
 <span class="kw">POST</span>  /api/doacoes
 <span class="kw">GET</span>   /api/pacientes/:id/historico       <span class="comment">// regra de compartilhamento + auditoria</span>
+<span class="kw">GET</span>   /api/atendimentos?de=..&amp;ate=..     <span class="comment">// médico e Admin: só o próprio hemocentro (RF19)</span>
 
 <span class="comment">// Admin do hemocentro (RF08, RF13, RF14)</span>
 <span class="kw">GET</span>   /api/horarios
@@ -729,7 +730,7 @@
     <section class="doc-section" id="funcionalidades">
       <span class="section-kicker">08 — USO</span>
       <h2>Funcionalidades</h2>
-      <p class="muted">18 requisitos funcionais, agrupados por área do sistema.</p>
+      <p class="muted">19 requisitos funcionais, agrupados por área do sistema.</p>
 
       <details class="rf-group" open>
         <summary>Paciente<span class="count">7</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></summary>
@@ -752,7 +753,7 @@
       </details>
 
       <details class="rf-group">
-        <summary>Equipe do hemocentro<span class="count">8</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></summary>
+        <summary>Equipe do hemocentro<span class="count">9</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></summary>
         <div class="rf-list">
           <div class="rf-item"><span class="rf-code">RF08</span><p>O Admin do hemocentro define horários e a quantidade de vagas de cada um, inclusive em lote semanal.</p></div>
           <div class="rf-item"><span class="rf-code">RF09</span><p>O sistema impede overbooking, agendamento em horário passado/inativo e duplicidade.</p></div>
@@ -762,6 +763,7 @@
           <div class="rf-item"><span class="rf-code">RF13</span><p>O Admin do hemocentro lista pacientes com registro pendente de ativação e ativa a conta.</p></div>
           <div class="rf-item"><span class="rf-code">RF14</span><p>O Admin do hemocentro cadastra e desativa os médicos do seu hemocentro.</p></div>
           <div class="rf-item"><span class="rf-code">RF17</span><p>O Admin do hemocentro cadastra e atualiza o nível de necessidade de cada tipo sanguíneo do seu hemocentro.</p></div>
+          <div class="rf-item"><span class="rf-code">RF19</span><p>O médico e o Admin do hemocentro consultam o histórico de atendimentos do próprio hemocentro, por período, com o resultado de cada registro.</p></div>
         </div>
       </details>
 

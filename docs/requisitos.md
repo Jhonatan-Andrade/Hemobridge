@@ -62,6 +62,7 @@ O sistema organiza a doação de sangue a partir do agendamento: o paciente se c
 | RF16 | O paciente solicita exclusão dos seus dados (LGPD). |
 | RF17 | O Admin do hemocentro cadastra e atualiza o nível de necessidade de cada tipo sanguíneo do seu hemocentro. |
 | RF18 | A página Doar exibe as necessidades de cada hemocentro e destaca os que precisam do tipo sanguíneo do paciente, quando conhecido. |
+| RF19 | O médico e o Admin do hemocentro consultam o histórico de atendimentos do próprio hemocentro, por período, com o resultado de cada registro. |
 
 ### Requisitos Não Funcionais
 

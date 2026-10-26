@@ -67,6 +67,7 @@ Os tokens de design (cores, tipografia, raios, sombra e larguras) ficam em `tail
 | `/doar/:id` | todos (agendar: paciente) | Detalhes, necessidades, horários por data com vagas restantes e confirmação; com `?reagendar=<id>`, troca o horário (RF06, RF07) |
 | `/painel` | paciente | Dados, status da conta, tipo sanguíneo, próximos agendamentos (cancelar/reagendar), histórico de doações e exclusão de dados (RF04, RF16) |
 | `/medico` | médico | Agenda do dia por horário e registro da doação (RF10, RF11) |
+| `/medico/atendimentos`, `/hemocentro/atendimentos` | médico e Admin do hemocentro | Atendimentos do próprio hemocentro por período, com resumo e link para o histórico do paciente (RF19) |
 | `/medico/pacientes/:id`, `/hemocentro/pacientes/:id` | equipe | Histórico do paciente em todos os hemocentros, com a origem de cada registro (RF12) |
 | `/hemocentro` | Admin do hemocentro | Horários e vagas: avulso, lote semanal, ajuste de vagas e desativação (RF08) |
 | `/hemocentro/necessidades` | Admin do hemocentro | Nível de necessidade por tipo sanguíneo (RF17) |

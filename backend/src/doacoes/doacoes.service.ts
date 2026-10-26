@@ -6,11 +6,11 @@ import {
 } from '@nestjs/common';
 import { ACOES_AUDITORIA, AuditoriaService } from '../auditoria/auditoria.service.js';
 import type { MembroDaEquipe } from '../auth/auth.types.js';
-import { calcularIdade, dataIsoParaDate, hojeIso } from '../common/data.js';
-import { apresentarHorario, dateParaIso } from '../common/horario.js';
+import { calcularIdade, dataIsoParaDate, hojeIso, somarDias } from '../common/data.js';
+import { apresentarHorario, dateParaIso, timeParaHora } from '../common/horario.js';
 import { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { RegistrarDoacaoDto } from './dto/doacao.dto.js';
+import { AtendimentosDto, RegistrarDoacaoDto } from './dto/doacao.dto.js';
 
 const SELECAO_DOACAO = {
   id: true,
@@ -109,6 +109,56 @@ export class DoacoesService {
           };
         }),
       })),
+    };
+  }
+
+  /**
+   * Atendimentos registrados no hemocentro do membro (nunca de outro), do mais recente ao mais
+   * antigo. Sem período informado, mostra os últimos 90 dias.
+   */
+  async atendimentos(membro: MembroDaEquipe, { de, ate, pagina, tamanhoPagina }: AtendimentosDto) {
+    const fim = ate ?? hojeIso();
+    const inicio = de ?? somarDias(fim, -90);
+    if (inicio > fim) throw new BadRequestException('A data inicial deve ser anterior à final.');
+
+    const where = {
+      hemocentroId: membro.hemocentro.id,
+      agendamento: { horario: { data: { gte: dataIsoParaDate(inicio), lte: dataIsoParaDate(fim) } } },
+    } satisfies Prisma.DoacaoWhereInput;
+
+    const [doacoes, total, doaram, ausentes] = await this.prisma.$transaction([
+      this.prisma.doacao.findMany({
+        where,
+        select: {
+          ...SELECAO_DOACAO,
+          paciente: { select: { usuarioId: true, usuario: { select: { nome: true } } } },
+          medico: { select: { usuario: { select: { nome: true } } } },
+          agendamento: { select: { horario: { select: { data: true, horaInicio: true, horaFim: true } } } },
+        },
+        orderBy: [{ agendamento: { horario: { data: 'desc' } } }, { registradoEm: 'desc' }],
+        skip: (pagina - 1) * tamanhoPagina,
+        take: tamanhoPagina,
+      }),
+      this.prisma.doacao.count({ where }),
+      this.prisma.doacao.count({ where: { ...where, doou: true } }),
+      this.prisma.doacao.count({ where: { ...where, compareceu: false } }),
+    ]);
+
+    return {
+      de: inicio,
+      ate: fim,
+      resumo: { total, doaram, naoDoaram: total - doaram - ausentes, ausentes },
+      itens: doacoes.map(({ paciente, medico, agendamento: { horario }, ...d }) => ({
+        ...apresentarDoacao(d),
+        data: dateParaIso(horario.data),
+        horaInicio: timeParaHora(horario.horaInicio),
+        horaFim: timeParaHora(horario.horaFim),
+        paciente: { id: paciente.usuarioId, nome: paciente.usuario.nome },
+        medico: medico.usuario.nome,
+      })),
+      total,
+      pagina,
+      tamanhoPagina,
     };
   }
 

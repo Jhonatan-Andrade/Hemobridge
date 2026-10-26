@@ -201,6 +201,21 @@ export interface DoacaoRegistrada {
   registradoEm: string
 }
 
+/** Atendimento registrado no hemocentro do membro da equipe. */
+export interface Atendimento extends DoacaoRegistrada {
+  data: string
+  horaInicio: string
+  horaFim: string
+  paciente: { id: string; nome: string }
+  medico: string
+}
+
+export interface Atendimentos extends Paginado<Atendimento> {
+  de: string
+  ate: string
+  resumo: { total: number; doaram: number; naoDoaram: number; ausentes: number }
+}
+
 export interface PacienteNaAgenda {
   id: string
   nome: string

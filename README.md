@@ -23,8 +23,8 @@ Paciente agenda no hemocentro → Médico registra a doação → Admin do hemoc
 | Perfil | O que faz |
 | --- | --- |
 | 🧑 Paciente | Cria a conta, agenda, cancela e reagenda doações e acompanha o painel (status da conta, tipo sanguíneo, histórico). Pode pedir a exclusão dos dados. |
-| 👩‍⚕️ Médico (equipe do hemocentro) | Vê a agenda do dia por horário, registra cada doação e consulta o histórico do paciente. |
-| 🏥 Admin do hemocentro (equipe do hemocentro) | Cria horários e vagas (inclusive em lote semanal), informa as necessidades por tipo sanguíneo, cadastra os médicos e ativa as contas dos pacientes. |
+| 👩‍⚕️ Médico (equipe do hemocentro) | Vê a agenda do dia por horário, registra cada doação, consulta o histórico do paciente e os atendimentos do hemocentro. |
+| 🏥 Admin do hemocentro (equipe do hemocentro) | Cria horários e vagas (inclusive em lote semanal), informa as necessidades por tipo sanguíneo, cadastra os médicos, ativa as contas dos pacientes e consulta os atendimentos do hemocentro. |
 | 🛠️ Administrador da plataforma | Cadastra e desativa hemocentros e cria o Admin inicial de cada um. |
 
 O paciente usa três áreas: **Apresentação** (`/`, pública), **Painel** (`/painel`) e **Doar** (`/doar`, pública; agendar exige login).

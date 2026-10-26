@@ -1,5 +1,6 @@
 import { Transform } from 'class-transformer';
 import { IsBoolean, IsIn, IsISO8601, IsOptional, IsString, IsUUID, Length, Matches, MaxLength } from 'class-validator';
+import { PaginacaoDto } from '../../common/paginacao.dto.js';
 import { SIGLAS_TIPOS } from '../../common/tipos-sanguineos.js';
 import { aparar, maiusculas } from '../../common/transformacoes.js';
 
@@ -8,6 +9,21 @@ export class AgendaDoDiaDto {
   @IsISO8601({ strict: true }, { message: 'Data deve estar no formato AAAA-MM-DD' })
   @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: 'Data deve estar no formato AAAA-MM-DD' })
   data?: string;
+}
+
+const DATA = { message: 'Data deve estar no formato AAAA-MM-DD' };
+
+// Histórico de atendimentos do hemocentro, filtrado pela data do horário.
+export class AtendimentosDto extends PaginacaoDto {
+  @IsOptional()
+  @IsISO8601({ strict: true }, DATA)
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, DATA)
+  de?: string;
+
+  @IsOptional()
+  @IsISO8601({ strict: true }, DATA)
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, DATA)
+  ate?: string;
 }
 
 // RF11: registro do atendimento pelo médico.

@@ -44,11 +44,14 @@ function montar() {
         Promise.resolve(doacaoDb({ compareceu: data.compareceu, doou: data.doou, motivoNaoDoacao: data.motivoNaoDoacao })),
       ),
       findMany: vi.fn().mockResolvedValue([]),
+      count: vi.fn().mockResolvedValue(0),
     },
     horario: { findMany: vi.fn().mockResolvedValue([]) },
     $transaction: vi.fn(),
   };
-  prisma.$transaction.mockImplementation((fn: (tx: unknown) => unknown) => fn(prisma));
+  prisma.$transaction.mockImplementation((arg: unknown) =>
+    Array.isArray(arg) ? Promise.all(arg) : (arg as (tx: unknown) => unknown)(prisma),
+  );
   const auditoria = { registrar: vi.fn().mockResolvedValue(undefined) };
   const service = new DoacoesService(prisma as unknown as PrismaService, auditoria as unknown as AuditoriaService);
   return { service, prisma, auditoria };
@@ -188,5 +191,73 @@ describe('DoacoesService.agenda (RF10)', () => {
     expect(auditoria.registrar).toHaveBeenCalledWith([
       expect.objectContaining({ acao: 'VER_ULTIMA_DOACAO_COMPARTILHADA', entidadeId: 'p1', hemocentroId: 'hA' }),
     ]);
+  });
+});
+
+describe('DoacoesService.atendimentos', () => {
+  const admin: MembroDaEquipe = { ...medico, id: 'adm1', papel: 'ADMIN_HEMOCENTRO' };
+
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(AGORA);
+  });
+  afterEach(() => vi.useRealTimers());
+
+  it('lista só o hemocentro do membro, nos últimos 90 dias por padrão, com o resumo', async () => {
+    const { service, prisma } = montar();
+    prisma.doacao.findMany.mockResolvedValue([
+      {
+        ...doacaoDb(),
+        paciente: { usuarioId: 'p1', usuario: { nome: 'Ana' } },
+        medico: { usuario: { nome: 'Dr. Bruno' } },
+        agendamento: {
+          horario: {
+            data: new Date('2026-10-24T00:00:00Z'),
+            horaInicio: new Date('1970-01-01T08:00:00Z'),
+            horaFim: new Date('1970-01-01T09:00:00Z'),
+          },
+        },
+      },
+    ]);
+    prisma.doacao.count.mockResolvedValueOnce(5).mockResolvedValueOnce(3).mockResolvedValueOnce(1);
+
+    const r = await service.atendimentos(admin, { pagina: 1, tamanhoPagina: 20 });
+
+    const where = prisma.doacao.findMany.mock.calls[0][0].where;
+    expect(where).toEqual({
+      hemocentroId: 'hA',
+      agendamento: {
+        horario: { data: { gte: new Date('2026-07-27T00:00:00Z'), lte: new Date('2026-10-25T00:00:00Z') } },
+      },
+    });
+    expect(prisma.doacao.count.mock.calls.map((c) => c[0].where)).toEqual([
+      where,
+      { ...where, doou: true },
+      { ...where, compareceu: false },
+    ]);
+    expect(r).toMatchObject({
+      de: '2026-07-27',
+      ate: '2026-10-25',
+      resumo: { total: 5, doaram: 3, naoDoaram: 1, ausentes: 1 },
+      total: 5,
+      itens: [
+        {
+          id: 'd1',
+          data: '2026-10-24',
+          horaInicio: '08:00',
+          horaFim: '09:00',
+          tipoSanguineo: 'O+',
+          paciente: { id: 'p1', nome: 'Ana' },
+          medico: 'Dr. Bruno',
+        },
+      ],
+    });
+  });
+
+  it('recusa período invertido', async () => {
+    const { service } = montar();
+    await expect(
+      service.atendimentos(medico, { de: '2026-10-20', ate: '2026-10-01', pagina: 1, tamanhoPagina: 20 }),
+    ).rejects.toBeInstanceOf(BadRequestException);
   });
 });

@@ -1,18 +1,10 @@
-import type { ReactNode } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { PageTitle } from '../../components/layout/AppShell'
 import { Button, EmptyState, ErrorState, Loading, Message, Panel } from '../../components/ui'
 import { formatarDataHora, RESULTADOS_DOACAO, SITUACOES_PACIENTE } from '../../lib/formato'
 import { useAsync } from '../../lib/useAsync'
 import { historicoService } from '../../services/equipe'
-import { useAuth } from '../auth/authState'
-import { HemocentroLayout } from '../hemocentro/HemocentroLayout'
-import { MedicoLayout } from './MedicoLayout'
-
-function Layout({ children }: { children: ReactNode }) {
-  const { usuario } = useAuth()
-  return usuario?.papel === 'MEDICO' ? <MedicoLayout>{children}</MedicoLayout> : <HemocentroLayout>{children}</HemocentroLayout>
-}
+import { LayoutEquipe as Layout } from './LayoutEquipe'
 
 // RF12 – histórico do paciente em todos os hemocentros, com a origem de cada registro.
 // Só abre para pacientes com agendamento neste hemocentro; cada leitura é auditada.

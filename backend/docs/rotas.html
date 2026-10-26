@@ -514,7 +514,7 @@ const GRUPOS = [
     ],
   },
   {
-    id: 'medico', nome: 'Médico', desc: 'Agenda do dia e registro da doação (RF10, RF11).',
+    id: 'medico', nome: 'Médico', desc: 'Agenda do dia, registro da doação e atendimentos do hemocentro (RF10, RF11, RF19).',
     rotas: [
       {
         metodo: 'GET', caminho: '/api/agenda', resumo: 'Agenda do dia por horário', acesso: papeis('MEDICO'), status: 200,
@@ -543,6 +543,22 @@ const GRUPOS = [
         exReq: { agendamentoId: 'uuid', compareceu: true, doou: true, tipoSanguineo: 'O+', observacoes: 'Sem intercorrências' },
         exRes: { mensagem: 'Doação registrada.', doacao: { id: 'uuid', compareceu: true, doou: true, tipoSanguineo: 'O+', motivoNaoDoacao: null, observacoes: 'Sem intercorrências', registradoEm: '…' } },
         erros: [[400, 'Registro inconsistente ou antes do dia do horário.'], [404, 'Agendamento de outro hemocentro.'], [409, 'Já registrado ou cancelado.']],
+      },
+      {
+        metodo: 'GET', caminho: '/api/atendimentos', resumo: 'Atendimentos do próprio hemocentro (RF19)', acesso: papeis('MEDICO', 'ADMIN_HEMOCENTRO'), status: 200,
+        regras: [
+          'Só os registros feitos no hemocentro de quem consulta; nunca de outro hemocentro.',
+          'Filtra pela data do horário agendado, do mais recente ao mais antigo. Sem período: últimos 90 dias até hoje.',
+          'O resumo conta o período inteiro, não só a página.',
+        ],
+        query: [
+          ['de', 'string', false, 'AAAA-MM-DD (padrão: 90 dias antes de ate).'],
+          ['ate', 'string', false, 'AAAA-MM-DD (padrão: hoje).'],
+          ['pagina', 'number', false, 'Padrão 1.'],
+          ['tamanhoPagina', 'number', false, '1 a 50 (padrão 20).'],
+        ],
+        exRes: { de: '2026-07-28', ate: '2026-10-26', resumo: { total: 1, doaram: 1, naoDoaram: 0, ausentes: 0 }, itens: [{ id: 'uuid', compareceu: true, doou: true, tipoSanguineo: 'O+', motivoNaoDoacao: null, observacoes: 'Sem intercorrências', registradoEm: '…', data: '2026-09-25', horaInicio: '09:00', horaFim: '12:00', paciente: { id: 'uuid', nome: 'Paulo Paciente' }, medico: 'Dr. Bruno' }], total: 1, pagina: 1, tamanhoPagina: 20 },
+        erros: [[400, 'Data inválida ou inicial depois da final.']],
       },
     ],
   },

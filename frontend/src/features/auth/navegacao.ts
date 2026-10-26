@@ -20,14 +20,19 @@ export const navPaciente: NavItem[] = [
 ]
 
 // Figma: Web desktop / Médico / Overlay menu (558:5767). No novo escopo o médico tem só a agenda do
-// dia; o histórico do paciente abre a partir dela.
-export const navMedico: NavItem[] = [inicio, { to: '/medico', label: 'Agenda do dia', icon: painelIcon, end: true }]
+// dia e os atendimentos já registrados; o histórico do paciente abre a partir deles.
+export const navMedico: NavItem[] = [
+  inicio,
+  { to: '/medico', label: 'Agenda do dia', icon: painelIcon, end: true },
+  { to: '/medico/atendimentos', label: 'Atendimentos', icon: activityIcon },
+]
 
 // Admin do hemocentro (assume as funções do antigo representante). Figma: Navegação/desktop/representative (757:8887).
 export const navHemocentro: NavItem[] = [
   inicio,
   { to: '/hemocentro', label: 'Horários e vagas', icon: inventoryIcon, end: true },
   { to: '/hemocentro/necessidades', label: 'Necessidades', icon: activityIcon },
+  { to: '/hemocentro/atendimentos', label: 'Atendimentos', icon: perfilIcon },
   { to: '/hemocentro/ativacoes', label: 'Ativação de contas', icon: painelIcon },
   { to: '/hemocentro/equipe', label: 'Equipe', icon: communityIcon },
 ]
