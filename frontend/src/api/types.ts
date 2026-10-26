@@ -11,6 +11,10 @@ export type Sexo = 'MASCULINO' | 'FEMININO'
 export type NivelNecessidade = 'URGENTE' | 'NECESSARIO' | 'ESTAVEL'
 export type StatusAgendamento = 'AGENDADO' | 'CANCELADO' | 'CONCLUIDO' | 'AUSENTE'
 export type ResultadoDoacao = 'DOOU' | 'NAO_DOOU' | 'AUSENTE'
+/** Conclusão da triagem do doador. */
+export type Aptidao = 'APTO' | 'INAPTO_TEMPORARIO' | 'INAPTO_DEFINITIVO'
+export type ResultadoSorologia = 'NAO_REAGENTE' | 'REAGENTE' | 'INCONCLUSIVO'
+export type SituacaoExames = 'PENDENTE' | 'NORMAL' | 'ALTERADO'
 
 /** Os oito tipos ABO/Rh. */
 export type TipoSanguineo = 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-'
@@ -165,12 +169,38 @@ export interface ProximoAgendamento {
   podeCancelar: boolean
 }
 
-export interface DoacaoPaciente {
+/** Aferições do dia (null no que não foi aferido). */
+export interface Afericoes {
+  pesoKg: number | null
+  alturaCm: number | null
+  pressaoSistolica: number | null
+  pressaoDiastolica: number | null
+  pulso: number | null
+  temperatura: number | null
+  /** g/dL */
+  hemoglobina: number | null
+  /** % */
+  hematocrito: number | null
+}
+
+/** Aferições, coleta e aptidão: o que vai para o painel e para o histórico compartilhado. */
+export interface DadosClinicos {
+  afericoes: Afericoes | null
+  volumeMl: number | null
+  reacoes: string | null
+  aptidao: Aptidao | null
+  /** AAAA-MM-DD, só para inapto temporário. */
+  aptoAPartirDe: string | null
+}
+
+export interface DoacaoPaciente extends DadosClinicos {
   id: string
   registradoEm: string
   resultado: ResultadoDoacao
   motivoNaoDoacao: string | null
   hemocentro: HemocentroRef & { cidade: string; estado: string }
+  /** Exame da amostra alterado: o hemocentro vai entrar em contato de forma reservada. */
+  contatoReservado: boolean
 }
 
 // RF04
@@ -190,7 +220,9 @@ export interface Painel {
   tipoSanguineo: TipoSanguineo | null
   /** Intervalo mínimo entre doações e limite em 12 meses (Ministério da Saúde). */
   regraDoacao: { intervaloDias: number; limiteAnual: number }
-  /** AAAA-MM-DD: última doação efetiva + intervalo; nulo se nunca doou. */
+  /** Inaptidão definitiva declarada na triagem de algum hemocentro. */
+  inaptoDefinitivo: boolean
+  /** AAAA-MM-DD: o mais distante entre o intervalo da última doação e o fim de uma inaptidão temporária. */
   proximaDoacaoPermitida: string | null
   doacoes: DoacaoPaciente[]
   proximosAgendamentos: ProximoAgendamento[]
@@ -200,7 +232,7 @@ export interface Painel {
 // Equipe do hemocentro
 // ---------------------------------------------------------------------------
 
-export interface DoacaoRegistrada {
+export interface DoacaoRegistrada extends DadosClinicos {
   id: string
   compareceu: boolean
   doou: boolean
@@ -217,7 +249,48 @@ export interface Atendimento extends DoacaoRegistrada {
   horaFim: string
   paciente: { id: string; nome: string }
   medico: string
+  /** Só para o médico. */
+  situacaoExames?: SituacaoExames | null
 }
+
+/** Entrevista confidencial da triagem clínica. */
+export interface Triagem {
+  doencas: string | null
+  cirurgias: string | null
+  transfusaoAnterior: boolean
+  alergias: string | null
+  gestacoes: string | null
+  medicamentos: string | null
+  vacinasRecentes: string | null
+  tatuagemOuPiercingRecente: boolean
+  usoDeDrogas: boolean
+  comportamentoSexualDeRisco: boolean
+  viagemAreaDeRisco: string | null
+  observacoes: string | null
+}
+
+export interface ExamesAmostra {
+  pesquisaAnticorpos: 'NEGATIVA' | 'POSITIVA'
+  hiv: ResultadoSorologia
+  hepatiteB: ResultadoSorologia
+  hepatiteC: ResultadoSorologia
+  sifilis: ResultadoSorologia
+  chagas: ResultadoSorologia
+  htlv: ResultadoSorologia
+  /** Só em regiões endêmicas. */
+  malaria: ResultadoSorologia | null
+  observacoes: string | null
+}
+
+/** Registro completo, só para o médico do hemocentro que atendeu. */
+export interface DoacaoDetalhe extends Omit<Atendimento, 'situacaoExames'> {
+  numeroBolsa: string | null
+  triagem: Triagem | null
+  situacaoExames: SituacaoExames | null
+  exames: (ExamesAmostra & { registradoEm: string; registradoPor: string }) | null
+}
+
+export type LancamentoExames = Omit<ExamesAmostra, 'malaria' | 'observacoes'> & { malaria?: ResultadoSorologia; observacoes?: string }
 
 export interface Atendimentos extends Paginado<Atendimento> {
   de: string
@@ -248,6 +321,8 @@ export interface AgendaDia {
   horarios: (HorarioBase & { vagasTotal: number; ativo: boolean; agendamentos: AgendamentoNaAgenda[] })[]
 }
 
+type Opcionais<T> = { [K in keyof T]?: NonNullable<T[K]> }
+
 export interface RegistroDoacao {
   agendamentoId: string
   compareceu: boolean
@@ -255,15 +330,31 @@ export interface RegistroDoacao {
   tipoSanguineo?: TipoSanguineo
   motivoNaoDoacao?: string
   observacoes?: string
+  triagem?: Opcionais<Triagem> & Pick<Triagem, 'transfusaoAnterior' | 'tatuagemOuPiercingRecente' | 'usoDeDrogas' | 'comportamentoSexualDeRisco'>
+  afericoes?: Opcionais<Afericoes>
+  coleta?: { volumeMl: number; numeroBolsa: string; reacoes?: string }
+  aptidao?: Aptidao
+  aptoAPartirDe?: string
 }
 
 // RF12
 export interface HistoricoPaciente {
-  paciente: { id: string; nome: string; idade: number | null; situacao: SituacaoPaciente; tipoSanguineo: TipoSanguineo | null }
+  paciente: {
+    id: string
+    nome: string
+    idade: number | null
+    situacao: SituacaoPaciente
+    tipoSanguineo: TipoSanguineo | null
+    inaptoDefinitivo: boolean
+    /** Fim de uma inaptidão temporária ainda em curso. */
+    aptoAPartirDe: string | null
+  }
   doacoes: (DoacaoRegistrada & {
     resultado: ResultadoDoacao
     medico: string
     hemocentro: HemocentroRef & { cidade: string; estado: string }
+    /** Só nos registros do próprio hemocentro. */
+    numeroBolsa: string | null
     doMeuHemocentro: boolean
   })[]
 }

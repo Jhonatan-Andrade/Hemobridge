@@ -517,7 +517,7 @@ const GRUPOS = [
     ],
   },
   {
-    id: 'medico', nome: 'Médico', desc: 'Agenda do dia, registro da doação e atendimentos do hemocentro (RF10, RF11, RF19).',
+    id: 'medico', nome: 'Médico', desc: 'Agenda do dia, registro da doação, exames da amostra e atendimentos do hemocentro (RF10, RF11, RF19, RF20).',
     rotas: [
       {
         metodo: 'GET', caminho: '/api/agenda', resumo: 'Agenda do dia por horário', acesso: papeis('MEDICO'), status: 200,
@@ -532,7 +532,10 @@ const GRUPOS = [
         metodo: 'POST', caminho: '/api/doacoes', resumo: 'Registrar a doação (RF11)', acesso: papeis('MEDICO'), status: 201,
         regras: [
           'Vinculada ao hemocentro do médico; só agendamentos AGENDADO do próprio hemocentro, a partir do dia do horário.',
-          'Ausente: sem doação nem tipo. Compareceu e não doou: motivo obrigatório.',
+          'Ausente: sem doação, tipo, triagem, aferições, coleta nem aptidão.',
+          'Compareceu: triagem e aptidão obrigatórias. Inapto temporário exige aptoAPartirDe, posterior ao atendimento.',
+          'Doou: aptidão APTO, coleta (volume e bolsa) e aferições (peso, pressão, pulso, temperatura e hemoglobina ou hematócrito). Não doou: motivo obrigatório.',
+          'Inapto: os agendamentos futuros do paciente que caem na inaptidão são cancelados na mesma transação (RN21).',
           'O agendamento passa a CONCLUIDO (compareceu) ou AUSENTE. O registro não é editado depois.',
         ],
         corpo: [
@@ -542,10 +545,45 @@ const GRUPOS = [
           ['tipoSanguineo', 'string', false, 'ABO + Rh (A+, O-…), quando houver.'],
           ['motivoNaoDoacao', 'string', false, 'Obrigatório se compareceu e não doou.'],
           ['observacoes', 'string', false, 'Até 2000 caracteres.'],
+          ['triagem', 'objeto', false, 'transfusaoAnterior, tatuagemOuPiercingRecente, usoDeDrogas e comportamentoSexualDeRisco (boolean); doencas, cirurgias, alergias, gestacoes, medicamentos, vacinasRecentes, viagemAreaDeRisco e observacoes (texto opcional).'],
+          ['afericoes', 'objeto', false, 'pesoKg, alturaCm, pressaoSistolica, pressaoDiastolica, pulso, temperatura, hemoglobina (g/dL), hematocrito (%).'],
+          ['coleta', 'objeto', false, 'volumeMl (50–600), numeroBolsa (único no hemocentro), reacoes.'],
+          ['aptidao', 'string', false, 'APTO, INAPTO_TEMPORARIO ou INAPTO_DEFINITIVO.'],
+          ['aptoAPartirDe', 'string', false, 'AAAA-MM-DD; só para INAPTO_TEMPORARIO.'],
         ],
-        exReq: { agendamentoId: 'uuid', compareceu: true, doou: true, tipoSanguineo: 'O+', observacoes: 'Sem intercorrências' },
+        exReq: {
+          agendamentoId: 'uuid', compareceu: true, doou: true, tipoSanguineo: 'O+', observacoes: 'Sem intercorrências',
+          triagem: { transfusaoAnterior: false, tatuagemOuPiercingRecente: false, usoDeDrogas: false, comportamentoSexualDeRisco: false, medicamentos: 'Nenhum' },
+          afericoes: { pesoKg: 72.5, pressaoSistolica: 120, pressaoDiastolica: 80, pulso: 72, temperatura: 36.4, hemoglobina: 14.1 },
+          coleta: { volumeMl: 450, numeroBolsa: 'LDA-0042' }, aptidao: 'APTO',
+        },
         exRes: { mensagem: 'Doação registrada.', doacao: { id: 'uuid', compareceu: true, doou: true, tipoSanguineo: 'O+', motivoNaoDoacao: null, observacoes: 'Sem intercorrências', registradoEm: '…' } },
-        erros: [[400, 'Registro inconsistente ou antes do dia do horário.'], [404, 'Agendamento de outro hemocentro.'], [409, 'Já registrado ou cancelado.']],
+        erros: [[400, 'Registro inconsistente ou antes do dia do horário.'], [404, 'Agendamento de outro hemocentro.'], [409, 'Já registrado, cancelado ou número de bolsa repetido.']],
+      },
+      {
+        metodo: 'GET', caminho: '/api/doacoes/:id', resumo: 'Registro completo com triagem e exames', acesso: papeis('MEDICO'), status: 200,
+        regras: [
+          'Só doações do hemocentro do médico (outra é 404); o Admin do hemocentro não acessa.',
+          'Cada leitura é auditada (VER_DADOS_CLINICOS).',
+        ],
+        exRes: { id: 'uuid', doou: true, aptidao: 'APTO', numeroBolsa: 'LDA-0042', afericoes: { pesoKg: 72.5, hemoglobina: 14.1 }, triagem: { usoDeDrogas: false, medicamentos: 'Nenhum' }, situacaoExames: 'PENDENTE', exames: null },
+        erros: [[404, 'Doação inexistente ou de outro hemocentro.']],
+      },
+      {
+        metodo: 'POST', caminho: '/api/doacoes/:id/exames', resumo: 'Lançar os exames da amostra (RF20)', acesso: papeis('MEDICO'), status: 201,
+        regras: [
+          'Só doações com coleta, do hemocentro do médico, uma única vez (não há edição).',
+          'Resultado REAGENTE, INCONCLUSIVO ou pesquisa POSITIVA marca os exames como alterados: o painel do paciente mostra só o aviso de contato reservado.',
+          'Auditado (REGISTRAR_EXAMES).',
+        ],
+        corpo: [
+          ['pesquisaAnticorpos', 'string', true, 'NEGATIVA ou POSITIVA.'],
+          ['hiv, hepatiteB, hepatiteC, sifilis, chagas, htlv', 'string', true, 'NAO_REAGENTE, REAGENTE ou INCONCLUSIVO.'],
+          ['malaria', 'string', false, 'Só em regiões endêmicas.'],
+          ['observacoes', 'string', false, 'Até 2000 caracteres.'],
+        ],
+        exRes: { mensagem: 'Exames lançados.', alterados: false },
+        erros: [[400, 'Doação sem coleta.'], [404, 'Doação de outro hemocentro.'], [409, 'Exames já lançados.']],
       },
       {
         metodo: 'GET', caminho: '/api/atendimentos', resumo: 'Atendimentos do próprio hemocentro (RF19)', acesso: papeis('MEDICO', 'ADMIN_HEMOCENTRO'), status: 200,

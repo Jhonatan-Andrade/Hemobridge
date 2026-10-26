@@ -27,6 +27,21 @@ const etapas = [
   ['Doe', 'A equipe registra a doação e ativa sua conta de doador.'],
 ] as const
 
+// O que é registrado em cada etapa da doação (o mesmo conteúdo do termo de consentimento).
+const dadosDaDoacao = [
+  ['Identificação', 'Nome, CPF, data de nascimento, sexo, telefone e e-mail. No dia, leve um documento oficial com foto.'],
+  ['Triagem clínica', 'Entrevista confidencial: histórico de saúde, medicamentos, vacinas, hábitos e comportamentos de risco e viagens recentes.'],
+  ['Aferições e coleta', 'Peso, pressão, pulso, temperatura e hemoglobina; depois, o volume coletado, o número da bolsa e eventuais reações.'],
+  ['Exames da amostra', 'Tipagem ABO e Rh, pesquisa de anticorpos e testes para HIV, hepatites B e C, sífilis, doença de Chagas e HTLV (e malária em regiões endêmicas).'],
+] as const
+
+const sigilo = [
+  'As informações são sigilosas e protegidas pela LGPD, usadas para a segurança de quem doa e de quem recebe.',
+  'Outro hemocentro onde você agendar vê seu histórico de doações e se você está apto, mas não a entrevista nem os resultados dos exames.',
+  'Se algum exame der alterado, o hemocentro entra em contato com você de forma reservada para orientar e encaminhar ao atendimento.',
+  'Algumas doenças são de notificação compulsória e podem ser comunicadas às autoridades de saúde, como em qualquer serviço de saúde.',
+] as const
+
 // Figma: Web desktop / Acesso e orientações / Home pública / Inicial (43:1340) e mobile (660:7571).
 // RF03 – apresentação pública do Hemobridge. Aparece para todos os perfis: quem está logado
 // vê o menu da própria área e um atalho para ela no lugar de "Criar conta".
@@ -144,6 +159,31 @@ export function HomePage() {
               </li>
             ))}
           </ol>
+        </section>
+
+        <section aria-labelledby="seus-dados" className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1">
+            <h2 id="seus-dados" className="text-heading font-semibold text-ink">
+              Seus dados na doação
+            </h2>
+            <p className="text-body text-muted">O que o hemocentro registra em cada etapa e como esses dados são protegidos.</p>
+          </div>
+          <ul className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {dadosDaDoacao.map(([titulo, texto]) => (
+              <li key={titulo} className="flex flex-col gap-2 rounded-card border border-line bg-surface p-4">
+                <h3 className="text-section font-semibold text-ink">{titulo}</h3>
+                <p className="text-body text-muted">{texto}</p>
+              </li>
+            ))}
+          </ul>
+          <div className="flex flex-col gap-2 rounded-card bg-petrol-900 p-5 text-cream">
+            <h3 className="text-section font-semibold">Sigilo e uso dos dados</h3>
+            <ul className="flex list-disc flex-col gap-1.5 pl-5 text-body">
+              {sigilo.map((t) => (
+                <li key={t}>{t}</li>
+              ))}
+            </ul>
+          </div>
         </section>
 
         <section aria-labelledby="parceiros" className="flex flex-col gap-4">

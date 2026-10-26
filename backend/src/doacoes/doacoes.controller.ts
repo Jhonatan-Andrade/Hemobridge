@@ -1,8 +1,8 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Query } from '@nestjs/common';
 import type { MembroDaEquipe } from '../auth/auth.types.js';
 import { MembroAtual, Papeis } from '../auth/decorators.js';
 import { DoacoesService } from './doacoes.service.js';
-import { AgendaDoDiaDto, AtendimentosDto, RegistrarDoacaoDto } from './dto/doacao.dto.js';
+import { AgendaDoDiaDto, AtendimentosDto, RegistrarDoacaoDto, RegistrarExamesDto } from './dto/doacao.dto.js';
 
 // RF10: agenda do dia, por horário, no hemocentro do médico.
 @Papeis('MEDICO')
@@ -28,7 +28,8 @@ export class AtendimentosController {
   }
 }
 
-// RF11: registro da doação, vinculado ao hemocentro do médico.
+// RF11: registro da doação (triagem, aferições, coleta e aptidão), vinculado ao hemocentro do médico,
+// e os dados clínicos que só o médico desse hemocentro lê: triagem e exames da amostra.
 @Papeis('MEDICO')
 @Controller('doacoes')
 export class DoacoesController {
@@ -37,5 +38,19 @@ export class DoacoesController {
   @Post()
   registrar(@MembroAtual() medico: MembroDaEquipe, @Body() dto: RegistrarDoacaoDto) {
     return this.doacoes.registrar(medico, dto);
+  }
+
+  @Get(':id')
+  detalhe(@MembroAtual() medico: MembroDaEquipe, @Param('id', ParseUUIDPipe) id: string) {
+    return this.doacoes.detalhe(medico, id);
+  }
+
+  @Post(':id/exames')
+  registrarExames(
+    @MembroAtual() medico: MembroDaEquipe,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: RegistrarExamesDto,
+  ) {
+    return this.doacoes.registrarExames(medico, id, dto);
   }
 }

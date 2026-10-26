@@ -85,6 +85,32 @@ enum FatorRh {
   @@map("fator_rh")
 }
 
+// Conclusão da triagem do doador no atendimento.
+enum Aptidao {
+  APTO
+  INAPTO_TEMPORARIO
+  INAPTO_DEFINITIVO
+
+  @@map("aptidao")
+}
+
+// Sorologias da amostra (HIV, hepatites B e C, sífilis, Chagas, HTLV e malária).
+enum ResultadoSorologia {
+  NAO_REAGENTE
+  REAGENTE
+  INCONCLUSIVO
+
+  @@map("resultado_sorologia")
+}
+
+// Pesquisa de anticorpos irregulares na amostra.
+enum PesquisaAnticorpos {
+  NEGATIVA
+  POSITIVA
+
+  @@map("pesquisa_anticorpos")
+}
+
 enum StatusAgendamento {
   AGENDADO
   CANCELADO
@@ -164,7 +190,8 @@ model MembroEquipe {
   hemocentro Hemocentro @relation(fields: [hemocentroId], references: [id], onDelete: Restrict)
 
   doacoesRegistradas Doacao[]
-  pacientesAtivados  Paciente[] @relation("AtivadoPor")
+  examesRegistrados  ExameDoacao[]
+  pacientesAtivados  Paciente[]    @relation("AtivadoPor")
 
   @@index([hemocentroId, papel])
   @@map("equipe_hemocentro")
@@ -333,13 +360,81 @@ model Doacao {
   observacoes     String?  @db.VarChar(2000)
   registradoEm    DateTime @default(now()) @map("registrado_em") @db.Timestamptz(3)
 
-  agendamento   Agendamento    @relation(fields: [agendamentoId], references: [id], onDelete: Restrict)
-  paciente      Paciente       @relation(fields: [pacienteId], references: [usuarioId], onDelete: Restrict)
-  hemocentro    Hemocentro     @relation(fields: [hemocentroId], references: [id], onDelete: Restrict)
-  medico        MembroEquipe   @relation(fields: [medicoId], references: [usuarioId], onDelete: Restrict)
-  tipoSanguineo TipoSanguineo? @relation(fields: [tipoSanguineoId], references: [id], onDelete: Restrict)
+  // Aferições do dia. Obrigatórias quando houve doação; nulas em registros anteriores a elas.
+  pesoKg            Decimal? @map("peso_kg") @db.Decimal(5, 2)
+  alturaCm          Int?     @map("altura_cm") @db.SmallInt
+  pressaoSistolica  Int?     @map("pressao_sistolica") @db.SmallInt
+  pressaoDiastolica Int?     @map("pressao_diastolica") @db.SmallInt
+  pulso             Int?     @db.SmallInt
+  temperatura       Decimal? @db.Decimal(3, 1)
+  // Hemoglobina (g/dL) ou hematócrito (%), pela gota de sangue no dedo.
+  hemoglobina       Decimal? @db.Decimal(3, 1)
+  hematocrito       Decimal? @db.Decimal(3, 1)
 
+  // Dados da coleta, quando houve doação.
+  volumeMl    Int?    @map("volume_ml") @db.SmallInt
+  numeroBolsa String? @map("numero_bolsa") @db.VarChar(30)
+  reacoes     String? @db.VarChar(1000)
+
+  // Conclusão da triagem; nula em registros anteriores a ela e quando o paciente faltou.
+  aptidao       Aptidao?
+  aptoAPartirDe DateTime? @map("apto_a_partir_de") @db.Date
+
+  agendamento   Agendamento     @relation(fields: [agendamentoId], references: [id], onDelete: Restrict)
+  paciente      Paciente        @relation(fields: [pacienteId], references: [usuarioId], onDelete: Restrict)
+  hemocentro    Hemocentro      @relation(fields: [hemocentroId], references: [id], onDelete: Restrict)
+  medico        MembroEquipe    @relation(fields: [medicoId], references: [usuarioId], onDelete: Restrict)
+  tipoSanguineo TipoSanguineo?  @relation(fields: [tipoSanguineoId], references: [id], onDelete: Restrict)
+  triagem       TriagemClinica?
+  exames        ExameDoacao?
+
+  @@unique([hemocentroId, numeroBolsa])
   @@index([pacienteId, registradoEm])
   @@index([hemocentroId, registradoEm])
   @@map("doacao")
+}
+
+// Entrevista confidencial da triagem clínica. Fica só no hemocentro que atendeu:
+// não entra no histórico compartilhado nem no painel do paciente.
+model TriagemClinica {
+  doacaoId                   String  @id @map("doacao_id") @db.Uuid
+  doencas                    String? @db.VarChar(1000)
+  cirurgias                  String? @db.VarChar(1000)
+  transfusaoAnterior         Boolean @map("transfusao_anterior")
+  alergias                   String? @db.VarChar(1000)
+  gestacoes                  String? @db.VarChar(500)
+  medicamentos               String? @db.VarChar(1000)
+  vacinasRecentes            String? @map("vacinas_recentes") @db.VarChar(500)
+  tatuagemOuPiercingRecente  Boolean @map("tatuagem_ou_piercing_recente")
+  usoDeDrogas                Boolean @map("uso_de_drogas")
+  comportamentoSexualDeRisco Boolean @map("comportamento_sexual_de_risco")
+  viagemAreaDeRisco          String? @map("viagem_area_de_risco") @db.VarChar(500)
+  observacoes                String? @db.VarChar(2000)
+
+  doacao Doacao @relation(fields: [doacaoId], references: [id], onDelete: Restrict)
+
+  @@map("triagem_clinica")
+}
+
+// Exames da amostra, lançados depois da coleta pelo médico do hemocentro que coletou.
+// O resultado detalhado não é compartilhado; o paciente só vê o aviso de contato reservado.
+model ExameDoacao {
+  doacaoId           String              @id @map("doacao_id") @db.Uuid
+  pesquisaAnticorpos PesquisaAnticorpos  @map("pesquisa_anticorpos")
+  hiv                ResultadoSorologia
+  hepatiteB          ResultadoSorologia  @map("hepatite_b")
+  hepatiteC          ResultadoSorologia  @map("hepatite_c")
+  sifilis            ResultadoSorologia
+  chagas             ResultadoSorologia
+  htlv               ResultadoSorologia
+  // Só em regiões endêmicas.
+  malaria            ResultadoSorologia?
+  observacoes        String?             @db.VarChar(2000)
+  registradoPorId    String              @map("registrado_por") @db.Uuid
+  registradoEm       DateTime            @default(now()) @map("registrado_em") @db.Timestamptz(3)
+
+  doacao        Doacao       @relation(fields: [doacaoId], references: [id], onDelete: Restrict)
+  registradoPor MembroEquipe @relation(fields: [registradoPorId], references: [usuarioId], onDelete: Restrict)
+
+  @@map("exame_doacao")
 }

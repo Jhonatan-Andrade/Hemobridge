@@ -4,7 +4,7 @@ import type { Atendimento, ResultadoDoacao } from '../../api/types'
 import { DataTable } from '../../components/DataTable'
 import { PageTitle } from '../../components/layout/AppShell'
 import { EmptyState, ErrorState, Loading, Pagination, Panel, TextField } from '../../components/ui'
-import { dataLocalIso, formatarDiaCurto, RESULTADOS_DOACAO, somarDias } from '../../lib/formato'
+import { dataLocalIso, formatarAptidao, formatarDiaCurto, RESULTADOS_DOACAO, SITUACOES_EXAMES, somarDias } from '../../lib/formato'
 import { useAsync } from '../../lib/useAsync'
 import { atendimentosService } from '../../services/equipe'
 import { useAuth } from '../auth/authState'
@@ -17,7 +17,8 @@ const resultado = (a: Atendimento): ResultadoDoacao => (!a.compareceu ? 'AUSENTE
 // Histórico de atendimentos do próprio hemocentro, para o médico e o Admin do hemocentro.
 export function AtendimentosPage() {
   const { usuario } = useAuth()
-  const base = usuario?.papel === 'MEDICO' ? '/medico' : '/hemocentro'
+  const medico = usuario?.papel === 'MEDICO'
+  const base = medico ? '/medico' : '/hemocentro'
   const [ate, setAte] = useState(dataLocalIso())
   const [de, setDe] = useState(somarDias(dataLocalIso(), -90))
   const [pagina, setPagina] = useState(1)
@@ -72,9 +73,27 @@ export function AtendimentosPage() {
                 },
                 { titulo: 'Data', celula: (a) => `${formatarDiaCurto(a.data)} · ${a.horaInicio}–${a.horaFim}` },
                 { titulo: 'Resultado', celula: (a) => RESULTADOS_DOACAO[resultado(a)] },
+                { titulo: 'Aptidão', celula: (a) => formatarAptidao(a.aptidao, a.aptoAPartirDe) ?? '—' },
                 { titulo: 'Tipo', celula: (a) => a.tipoSanguineo ?? '—' },
                 { titulo: 'Motivo / observações', celula: (a) => [a.motivoNaoDoacao, a.observacoes].filter(Boolean).join(' · ') || '—' },
                 { titulo: 'Registrado por', celula: (a) => a.medico },
+                // Triagem e exames: só o médico do hemocentro abre (leitura auditada).
+                ...(medico
+                  ? [
+                      {
+                        titulo: 'Exames',
+                        celula: (a: Atendimento) =>
+                          a.compareceu ? (
+                            <Link to={`/medico/doacoes/${a.id}`} className={`font-semibold hover:underline ${a.situacaoExames === 'ALTERADO' ? 'text-error' : 'text-brand'}`}>
+                              {a.situacaoExames ? SITUACOES_EXAMES[a.situacaoExames] : 'Triagem'}
+                              <span className="sr-only"> de {a.paciente.nome}</span>
+                            </Link>
+                          ) : (
+                            '—'
+                          ),
+                      },
+                    ]
+                  : []),
               ]}
             />
             <Pagination pagina={pagina} total={lista.dados.total} tamanhoPagina={TAMANHO} onChange={setPagina} />

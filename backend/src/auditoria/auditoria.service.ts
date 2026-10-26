@@ -11,6 +11,9 @@ export const ACOES_AUDITORIA = {
   /** Agenda do médico com a última doação do paciente feita em outro hemocentro. */
   VER_ULTIMA_DOACAO_COMPARTILHADA: 'VER_ULTIMA_DOACAO_COMPARTILHADA',
   REGISTRAR_DOACAO: 'REGISTRAR_DOACAO',
+  /** Leitura da triagem clínica e dos exames de uma doação. */
+  VER_DADOS_CLINICOS: 'VER_DADOS_CLINICOS',
+  REGISTRAR_EXAMES: 'REGISTRAR_EXAMES',
   ATIVAR_CONTA: 'ATIVAR_CONTA',
   EXCLUIR_DADOS: 'EXCLUIR_DADOS',
 } as const;

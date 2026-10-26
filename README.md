@@ -15,7 +15,7 @@ Paciente agenda no hemocentro → Médico registra a doação → Admin do hemoc
 1. O paciente cria a conta, aceitando o termo LGPD (que inclui o compartilhamento entre hemocentros). A conta nasce **pendente**.
 2. Em **Doar**, escolhe o hemocentro, o dia e um horário com vaga.
    O sistema respeita o intervalo entre doações do Ministério da Saúde: homens a cada 60 dias (até 4 por ano) e mulheres a cada 90 dias (até 3 por ano).
-3. No dia, o **médico** vê os agendados na agenda e registra o atendimento: compareceu, doou ou não, tipo sanguíneo, motivo e observações.
+3. No dia, o **médico** vê os agendados na agenda e registra o atendimento: triagem clínica (confidencial), aferições, aptidão, coleta e tipo sanguíneo. Depois lança os exames da amostra; se algum der alterado, o paciente vê no painel que o hemocentro vai contatá-lo de forma reservada.
 4. O **Admin do hemocentro** ativa a conta; o tipo sanguíneo aparece no painel do paciente.
 5. Em outro hemocentro onde o paciente agendar, a equipe vê o histórico, sempre com o hemocentro de origem de cada registro, e o acesso fica auditado.
 
@@ -24,7 +24,7 @@ Paciente agenda no hemocentro → Médico registra a doação → Admin do hemoc
 | Perfil | O que faz |
 | --- | --- |
 | 🧑 Paciente | Cria a conta, agenda, cancela e reagenda doações e acompanha o painel (status da conta, tipo sanguíneo, histórico). Pode pedir a exclusão dos dados. |
-| 👩‍⚕️ Médico (equipe do hemocentro) | Vê a agenda do dia por horário, registra cada doação, consulta o histórico do paciente e os atendimentos do hemocentro. |
+| 👩‍⚕️ Médico (equipe do hemocentro) | Vê a agenda do dia por horário, registra cada atendimento (triagem, aferições, aptidão e coleta), lança os exames da amostra, consulta o histórico do paciente e os atendimentos do hemocentro. |
 | 🏥 Admin do hemocentro (equipe do hemocentro) | Cria horários e vagas (inclusive em lote semanal), informa as necessidades por tipo sanguíneo, cadastra os médicos, ativa as contas dos pacientes e consulta os atendimentos do hemocentro. |
 | 🛠️ Administrador da plataforma | Cadastra e desativa hemocentros e cria o Admin inicial de cada um. |
 

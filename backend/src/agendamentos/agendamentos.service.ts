@@ -8,7 +8,7 @@ import { dataIsoParaDate, hojeIso } from '../common/data.js';
 import { apresentarHorario, dateParaIso, inicioDoHorario } from '../common/horario.js';
 import { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { impedimentoDeDoacao } from './regra-doacao.js';
+import { impedimentoDeDoacao, impedimentoPorAptidao, situacaoDeAptidao } from './regra-doacao.js';
 
 export const MENSAGEM_ESGOTADO = 'Horário esgotado. Escolha outro horário.';
 const MENSAGEM_DUPLICADO = 'Você já tem um agendamento neste horário.';
@@ -140,13 +140,18 @@ export class AgendamentosService {
     if (impedimento) throw new ConflictException(impedimento);
   }
 
-  /** Intervalo mínimo e limite em 12 meses, contando doações efetivas e agendamentos ativos de hoje em diante. */
+  /**
+   * Inaptidão declarada na triagem (de qualquer hemocentro), intervalo mínimo e limite em
+   * 12 meses, contando doações efetivas e agendamentos ativos de hoje em diante.
+   */
   private async impedimentoDeDoacao(tx: Prisma.TransactionClient, pacienteId: string, data: string, substituido?: string) {
     const paciente = await tx.paciente.findUnique({
       where: { usuarioId: pacienteId },
       select: {
         sexo: true,
-        doacoes: { where: { doou: true }, select: { agendamento: { select: { horario: { select: { data: true } } } } } },
+        doacoes: {
+          select: { doou: true, aptidao: true, aptoAPartirDe: true, agendamento: { select: { horario: { select: { data: true } } } } },
+        },
         agendamentos: {
           where: {
             status: 'AGENDADO',
@@ -158,8 +163,10 @@ export class AgendamentosService {
       },
     });
     if (!paciente) throw new NotFoundException('Paciente não encontrado.');
+    const porAptidao = impedimentoPorAptidao(situacaoDeAptidao(paciente.doacoes), data);
+    if (porAptidao) return porAptidao;
     const datas = [
-      ...paciente.doacoes.map((d) => d.agendamento.horario.data),
+      ...paciente.doacoes.filter((d) => d.doou).map((d) => d.agendamento.horario.data),
       ...paciente.agendamentos.map((a) => a.horario.data),
     ].map(dateParaIso);
     return impedimentoDeDoacao(paciente.sexo, data, datas);

@@ -31,7 +31,8 @@ const agendamentoDb = (alteracao: Record<string, unknown> = {}) => ({
 /** Data (YYYY-MM-DD) como o Prisma devolve uma coluna DATE. */
 const dia = (data: string) => ({ data: new Date(`${data}T00:00:00Z`) });
 
-type PacienteDb = { sexo: 'MASCULINO' | 'FEMININO' | null; doacoes: string[]; agendamentos: string[] };
+type Inaptidao = { doou: false; aptidao: string; aptoAPartirDe: Date | null; agendamento: { horario: { data: Date } } };
+type PacienteDb = { sexo: 'MASCULINO' | 'FEMININO' | null; doacoes: string[]; agendamentos: string[]; inaptidoes?: Inaptidao[] };
 
 function montar({
   ocupadas = 0,
@@ -49,7 +50,10 @@ function montar({
     paciente: {
       findUnique: vi.fn().mockResolvedValue({
         sexo: paciente.sexo,
-        doacoes: paciente.doacoes.map((d) => ({ agendamento: { horario: dia(d) } })),
+        doacoes: [
+          ...paciente.doacoes.map((d) => ({ doou: true, aptidao: 'APTO', aptoAPartirDe: null, agendamento: { horario: dia(d) } })),
+          ...(paciente.inaptidoes ?? []),
+        ],
         agendamentos: paciente.agendamentos.map((d) => ({ horario: dia(d) })),
       }),
     },
@@ -140,6 +144,36 @@ describe('AgendamentosService', () => {
       const { service, prisma } = montar({ paciente });
       await expect(service.agendar('p1', 'hor1')).rejects.toThrow(mensagem);
       expect(prisma.agendamento.create).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['inapto definitivo', { aptidao: 'INAPTO_DEFINITIVO', aptoAPartirDe: null }, /inapto definitivo/],
+      ['inapto temporário até depois do horário', { aptidao: 'INAPTO_TEMPORARIO', aptoAPartirDe: new Date('2026-11-10T00:00:00Z') }, /a partir de 10\/11\/2026/],
+    ])('recusa paciente %s na triagem anterior', async (_, inaptidao, mensagem) => {
+      const { service, prisma } = montar({
+        paciente: {
+          sexo: 'FEMININO',
+          doacoes: [],
+          agendamentos: [],
+          inaptidoes: [{ doou: false, ...inaptidao, agendamento: { horario: dia('2026-10-20') } }],
+        },
+      });
+      await expect(service.agendar('p1', 'hor1')).rejects.toThrow(mensagem);
+      expect(prisma.agendamento.create).not.toHaveBeenCalled();
+    });
+
+    it('aceita quem já cumpriu a inaptidão temporária (o atendimento sem doação não conta no intervalo)', async () => {
+      const { service } = montar({
+        paciente: {
+          sexo: 'FEMININO',
+          doacoes: [],
+          agendamentos: [],
+          inaptidoes: [
+            { doou: false, aptidao: 'INAPTO_TEMPORARIO', aptoAPartirDe: new Date('2026-10-26T00:00:00Z'), agendamento: { horario: dia('2026-10-01') } },
+          ],
+        },
+      });
+      await expect(service.agendar('p1', 'hor1')).resolves.toMatchObject({ mensagem: 'Agendamento confirmado.' });
     });
 
     it('aceita homem que doou há 60 dias', async () => {

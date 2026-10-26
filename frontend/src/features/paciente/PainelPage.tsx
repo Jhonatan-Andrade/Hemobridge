@@ -3,7 +3,7 @@ import { mensagemDeErro } from '../../api/client'
 import type { DoacaoPaciente, Painel, ProximoAgendamento } from '../../api/types'
 import { PageTitle } from '../../components/layout/AppShell'
 import { Button, ButtonLink, Card, EmptyState, ErrorState, Loading, Message, Panel, PatientBadge, ReadOnlyField } from '../../components/ui'
-import { dataLocalIso, formatarData, formatarDiaLongo, mascaraTelefone, RESULTADOS_DOACAO, SEXOS } from '../../lib/formato'
+import { dataLocalIso, formatarAfericoes, formatarAptidao, formatarData, formatarDiaLongo, mascaraTelefone, RESULTADOS_DOACAO, SEXOS } from '../../lib/formato'
 import { useAsync } from '../../lib/useAsync'
 import { agendamentosService, pacienteService } from '../../services/paciente'
 import { ExclusaoDados } from './ExclusaoDados'
@@ -40,7 +40,9 @@ export function PainelPage() {
                 : 'Conta pendente. Ela é ativada pelo hemocentro depois que a sua primeira doação for registrada.'}
             </Card>
             <Card title="Próximo passo">
-              {p.proximosAgendamentos.length
+              {p.inaptoDefinitivo
+                ? 'Na triagem de uma doação você foi considerado inapto definitivo para doar sangue. Procure o hemocentro para orientação.'
+                : p.proximosAgendamentos.length
                 ? 'Compareça ao hemocentro no horário agendado com um documento com foto.'
                 : p.proximaDoacaoPermitida && p.proximaDoacaoPermitida > dataLocalIso()
                   ? `Você pode doar de novo a partir de ${formatarDiaLongo(p.proximaDoacaoPermitida)}. Já dá para agendar um horário dessa data em diante.`
@@ -209,6 +211,21 @@ function HistoricoDoacoes({ doacoes }: { doacoes: DoacaoPaciente[] }) {
                 {d.hemocentro.nome} · {d.hemocentro.cidade}/{d.hemocentro.estado}
               </p>
               {d.motivoNaoDoacao && <p className="text-body text-ink">Motivo: {d.motivoNaoDoacao}</p>}
+              {d.aptidao && <p className="text-small text-ink">Triagem: {formatarAptidao(d.aptidao, d.aptoAPartirDe)}</p>}
+              {d.afericoes && <p className="text-small text-muted">Aferições: {formatarAfericoes(d.afericoes)}</p>}
+              {d.volumeMl !== null && (
+                <p className="text-small text-muted">
+                  Volume coletado: {d.volumeMl} mL{d.reacoes && ` · reações: ${d.reacoes}`}
+                </p>
+              )}
+              {d.contatoReservado && (
+                <Message tone="info">
+                  <p>
+                    O {d.hemocentro.nome} vai entrar em contato com você de forma reservada sobre os exames desta doação, para orientar e, se for o caso, encaminhar ao
+                    atendimento.
+                  </p>
+                </Message>
+              )}
             </li>
           ))}
         </ul>

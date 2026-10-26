@@ -1,5 +1,6 @@
-import { somarDias } from '../common/data.js';
-import type { Sexo } from '../generated/prisma/client.js';
+import { hojeIso, somarDias } from '../common/data.js';
+import { dateParaIso } from '../common/horario.js';
+import type { Aptidao, Sexo } from '../generated/prisma/client.js';
 
 /**
  * Intervalo mínimo entre doações de sangue total e limite em 12 meses, conforme o
@@ -58,4 +59,32 @@ export function impedimentoDeDoacao(sexo: Sexo | null, nova: string, datas: stri
 /** Primeira data em que o paciente pode voltar a doar, a partir da última doação efetiva. */
 export function proximaDoacaoPermitida(sexo: Sexo | null, ultimaDoacao: string | null): string | null {
   return ultimaDoacao ? somarDias(ultimaDoacao, regraDoacao(sexo).intervaloDias) : null;
+}
+
+/**
+ * Inaptidão declarada na triagem de qualquer hemocentro: definitiva, ou temporária até
+ * a data mais distante ainda por vir (primeiro dia em que o paciente volta a ser apto).
+ */
+export function situacaoDeAptidao(doacoes: { aptidao: Aptidao | null; aptoAPartirDe: Date | null }[], hoje = hojeIso()) {
+  const aptoAPartirDe =
+    doacoes
+      .map((d) => (d.aptidao === 'INAPTO_TEMPORARIO' && d.aptoAPartirDe ? dateParaIso(d.aptoAPartirDe) : null))
+      .filter((d): d is string => d !== null && d > hoje)
+      .sort()
+      .at(-1) ?? null;
+  return { inaptoDefinitivo: doacoes.some((d) => d.aptidao === 'INAPTO_DEFINITIVO'), aptoAPartirDe };
+}
+
+/** Motivo de não poder doar na data `nova` por inaptidão declarada na triagem, ou null. */
+export function impedimentoPorAptidao(
+  { inaptoDefinitivo, aptoAPartirDe }: ReturnType<typeof situacaoDeAptidao>,
+  nova: string,
+): string | null {
+  if (inaptoDefinitivo) {
+    return 'Na triagem de uma doação anterior você foi considerado inapto definitivo para doar sangue. Procure o hemocentro para orientação.';
+  }
+  if (aptoAPartirDe && nova < aptoAPartirDe) {
+    return `Na triagem de uma doação anterior você foi considerado inapto temporariamente. Escolha uma data a partir de ${formatar(aptoAPartirDe)}.`;
+  }
+  return null;
 }

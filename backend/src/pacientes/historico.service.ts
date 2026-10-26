@@ -3,7 +3,9 @@ import { ACOES_AUDITORIA, AuditoriaService } from '../auditoria/auditoria.servic
 import type { MembroDaEquipe } from '../auth/auth.types.js';
 import { calcularIdade } from '../common/data.js';
 import { dateParaIso } from '../common/horario.js';
+import { apresentarClinica, SELECAO_CLINICA } from '../doacoes/apresentacao.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { situacaoDeAptidao } from '../agendamentos/regra-doacao.js';
 import { resultadoDe } from './pacientes.service.js';
 
 /**
@@ -11,6 +13,7 @@ import { resultadoDe } from './pacientes.service.js';
  * - A equipe só consulta pacientes que têm ou tiveram agendamento no seu hemocentro
  *   (não há busca livre por paciente).
  * - Cada registro mostra o hemocentro de origem; ninguém edita registro de outro.
+ * - Vão aferições, coleta e aptidão; a triagem clínica e os exames da amostra, não.
  * - Toda leitura é auditada, com ação própria quando inclui outro hemocentro (RNF05).
  */
 @Injectable()
@@ -45,6 +48,8 @@ export class HistoricoService {
             tipoSanguineo: { select: { sigla: true } },
             hemocentro: { select: { id: true, nome: true, cidade: true, estado: true } },
             medico: { select: { usuario: { select: { nome: true } } } },
+            ...SELECAO_CLINICA,
+            numeroBolsa: true,
           },
           orderBy: { registradoEm: 'desc' },
         },
@@ -67,17 +72,28 @@ export class HistoricoService {
         idade: paciente.dataNascimento ? calcularIdade(dateParaIso(paciente.dataNascimento)) : null,
         situacao: paciente.situacao,
         tipoSanguineo: paciente.tipoSanguineo?.sigla ?? null,
+        ...situacaoDeAptidao(paciente.doacoes),
       },
-      doacoes: paciente.doacoes.map(({ tipoSanguineo, medico, compareceu, doou, ...d }) => ({
-        ...d,
-        compareceu,
-        doou,
-        resultado: resultadoDe({ compareceu, doou }),
-        tipoSanguineo: tipoSanguineo?.sigla ?? null,
-        medico: medico.usuario.nome,
-        // A interface sempre mostra de qual hemocentro veio o registro.
-        doMeuHemocentro: d.hemocentro.id === hemocentroId,
-      })),
+      doacoes: paciente.doacoes.map((d) => {
+        const doMeuHemocentro = d.hemocentro.id === hemocentroId;
+        return {
+          id: d.id,
+          registradoEm: d.registradoEm,
+          compareceu: d.compareceu,
+          doou: d.doou,
+          resultado: resultadoDe(d),
+          motivoNaoDoacao: d.motivoNaoDoacao,
+          observacoes: d.observacoes,
+          tipoSanguineo: d.tipoSanguineo?.sigla ?? null,
+          hemocentro: d.hemocentro,
+          medico: d.medico.usuario.nome,
+          ...apresentarClinica(d),
+          // O número da bolsa é controle interno do hemocentro que coletou.
+          numeroBolsa: doMeuHemocentro ? d.numeroBolsa : null,
+          // A interface sempre mostra de qual hemocentro veio o registro.
+          doMeuHemocentro,
+        };
+      }),
     };
   }
 

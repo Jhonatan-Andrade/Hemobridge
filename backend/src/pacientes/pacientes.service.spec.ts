@@ -130,4 +130,57 @@ describe('PacientesService.painel (RF04)', () => {
     });
     expect(painel.doacoes[0]).not.toHaveProperty('agendamento');
   });
+
+  it('com exame alterado só avisa o contato reservado; inapto definitivo não tem próxima data', async () => {
+    const { service, prisma } = await montar();
+    const exames = {
+      pesquisaAnticorpos: 'NEGATIVA',
+      hiv: 'NAO_REAGENTE',
+      hepatiteB: 'NAO_REAGENTE',
+      hepatiteC: 'REAGENTE',
+      sifilis: 'NAO_REAGENTE',
+      chagas: 'NAO_REAGENTE',
+      htlv: 'NAO_REAGENTE',
+      malaria: null,
+    };
+    prisma.paciente.findUnique.mockResolvedValueOnce({
+      dataNascimento: null,
+      sexo: 'FEMININO',
+      situacao: 'ATIVA',
+      ativadoEm: AGORA,
+      tipoSanguineo: { sigla: 'O+' },
+      usuario: { id: 'p1', nome: 'Ana', email: 'a@x.com', cpf: null, telefone: null, criadoEm: AGORA },
+      doacoes: [
+        {
+          id: 'd1',
+          registradoEm: AGORA,
+          compareceu: true,
+          doou: true,
+          motivoNaoDoacao: null,
+          hemocentro: { id: 'hA', nome: 'Hemocentro A', cidade: 'Curitiba', estado: 'PR' },
+          agendamento: { horario: { data: new Date('2026-08-01T00:00:00Z') } },
+          pesoKg: 60,
+          alturaCm: null,
+          pressaoSistolica: 110,
+          pressaoDiastolica: 70,
+          pulso: 70,
+          temperatura: 36.2,
+          hemoglobina: 12.8,
+          hematocrito: null,
+          volumeMl: 450,
+          reacoes: null,
+          aptidao: 'INAPTO_DEFINITIVO',
+          aptoAPartirDe: null,
+          exames,
+        },
+      ],
+      agendamentos: [],
+    });
+
+    const painel = await service.painel('p1');
+
+    expect(painel).toMatchObject({ inaptoDefinitivo: true, proximaDoacaoPermitida: null });
+    expect(painel.doacoes[0]).toMatchObject({ contatoReservado: true, afericoes: { hemoglobina: 12.8 }, aptidao: 'INAPTO_DEFINITIVO' });
+    expect(JSON.stringify(painel)).not.toMatch(/REAGENTE|hepatite/i);
+  });
 });

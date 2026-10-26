@@ -9,5 +9,5 @@ export const cadastroValido = () => ({
   dataNascimento: '1995-05-20',
   sexo: 'FEMININO',
   aceiteTermo: true,
-  versaoTermo: '2.1',
+  versaoTermo: '3.0',
 });

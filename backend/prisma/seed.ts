@@ -242,6 +242,37 @@ async function seedDadosExemplo() {
         tipoSanguineoId: tipos.get('O+')!,
         observacoes: 'Doação sem intercorrências.',
         registradoEm: instanteLocal(somarDias(hojeIso(), -70), '10:00'),
+        pesoKg: 78.4,
+        alturaCm: 176,
+        pressaoSistolica: 122,
+        pressaoDiastolica: 78,
+        pulso: 70,
+        temperatura: 36.5,
+        hemoglobina: 14.6,
+        volumeMl: 450,
+        numeroBolsa: 'CTBA-0001',
+        aptidao: 'APTO',
+        triagem: {
+          create: {
+            transfusaoAnterior: false,
+            tatuagemOuPiercingRecente: false,
+            usoDeDrogas: false,
+            comportamentoSexualDeRisco: false,
+            medicamentos: 'Nenhum',
+          },
+        },
+        exames: {
+          create: {
+            pesquisaAnticorpos: 'NEGATIVA',
+            hiv: 'NAO_REAGENTE',
+            hepatiteB: 'NAO_REAGENTE',
+            hepatiteC: 'NAO_REAGENTE',
+            sifilis: 'NAO_REAGENTE',
+            chagas: 'NAO_REAGENTE',
+            htlv: 'NAO_REAGENTE',
+            registradoPorId: a.medico,
+          },
+        },
       },
     });
     await prisma.paciente.update({

@@ -4,7 +4,8 @@ import { ACOES_AUDITORIA, AuditoriaService } from '../auditoria/auditoria.servic
 import { mascararCpf } from '../common/cpf.js';
 import { apresentarHorario, dateParaIso, inicioDoHorario } from '../common/horario.js';
 import { gerarHashSenha, verificarSenha } from '../common/senha.js';
-import { proximaDoacaoPermitida, regraDoacao } from '../agendamentos/regra-doacao.js';
+import { proximaDoacaoPermitida, regraDoacao, situacaoDeAptidao } from '../agendamentos/regra-doacao.js';
+import { apresentarClinica, examesAlterados, SELECAO_CLINICA, SELECAO_EXAMES } from '../doacoes/apresentacao.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 
 /** Resultado de um atendimento, como o paciente vê no painel. */
@@ -40,6 +41,8 @@ export class PacientesService {
             motivoNaoDoacao: true,
             hemocentro: { select: { id: true, nome: true, cidade: true, estado: true } },
             agendamento: { select: { horario: { select: { data: true } } } },
+            ...SELECAO_CLINICA,
+            exames: { select: SELECAO_EXAMES },
           },
           orderBy: { registradoEm: 'desc' },
         },
@@ -68,6 +71,8 @@ export class PacientesService {
     const { usuario, doacoes, agendamentos } = paciente;
     const agora = new Date();
     const ultimaDoacao = doacoes.find((d) => d.doou)?.agendamento.horario.data;
+    const aptidao = situacaoDeAptidao(doacoes);
+    const pelaRegra = proximaDoacaoPermitida(paciente.sexo, ultimaDoacao ? dateParaIso(ultimaDoacao) : null);
     return {
       id: usuario.id,
       nome: usuario.nome,
@@ -83,13 +88,21 @@ export class PacientesService {
       tipoSanguineo: paciente.situacao === 'ATIVA' ? (paciente.tipoSanguineo?.sigla ?? null) : null,
       // Intervalo mínimo e limite em 12 meses que valem para este paciente.
       regraDoacao: regraDoacao(paciente.sexo),
-      proximaDoacaoPermitida: proximaDoacaoPermitida(paciente.sexo, ultimaDoacao ? dateParaIso(ultimaDoacao) : null),
-      doacoes: doacoes.map(({ id, registradoEm, compareceu, doou, motivoNaoDoacao, hemocentro }) => ({
-        id,
-        registradoEm,
-        resultado: resultadoDe({ compareceu, doou }),
-        motivoNaoDoacao,
-        hemocentro,
+      // Inaptidão declarada na triagem de qualquer hemocentro.
+      inaptoDefinitivo: aptidao.inaptoDefinitivo,
+      // A mais distante entre o intervalo da última doação e o fim da inaptidão temporária.
+      proximaDoacaoPermitida: aptidao.inaptoDefinitivo
+        ? null
+        : ([pelaRegra, aptidao.aptoAPartirDe].filter((d): d is string => d !== null).sort().at(-1) ?? null),
+      doacoes: doacoes.map((d) => ({
+        id: d.id,
+        registradoEm: d.registradoEm,
+        resultado: resultadoDe(d),
+        motivoNaoDoacao: d.motivoNaoDoacao,
+        hemocentro: d.hemocentro,
+        ...apresentarClinica(d),
+        // Exame alterado: o paciente só sabe que o hemocentro vai contatá-lo de forma reservada.
+        contatoReservado: d.exames ? examesAlterados(d.exames) : false,
       })),
       proximosAgendamentos: agendamentos
         .filter((a) => inicioDoHorario(a.horario) > agora)

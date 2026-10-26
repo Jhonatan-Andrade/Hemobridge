@@ -93,6 +93,7 @@ describe.skipIf(!URL_BANCO)('Fluxo paciente → médico → admin (e2e)', () => 
     paciente: { id: string; email: string; token: string };
     horarioA: string;
     agendamentoA: string;
+    doacaoA: string;
   };
 
   beforeAll(async () => {
@@ -311,25 +312,72 @@ describe.skipIf(!URL_BANCO)('Fluxo paciente → médico → admin (e2e)', () => 
       doacao: null,
     });
 
+    const doacao = {
+      agendamentoId: ctx.agendamentoA,
+      compareceu: true,
+      doou: true,
+      tipoSanguineo: 'O+',
+      observacoes: 'Sem intercorrências',
+      triagem: {
+        transfusaoAnterior: false,
+        tatuagemOuPiercingRecente: false,
+        usoDeDrogas: false,
+        comportamentoSexualDeRisco: false,
+        medicamentos: 'Nenhum',
+      },
+      afericoes: { pesoKg: 78.4, pressaoSistolica: 122, pressaoDiastolica: 78, pulso: 70, temperatura: 36.5, hemoglobina: 14.6 },
+      coleta: { volumeMl: 450, numeroBolsa: 'a-0001' },
+      aptidao: 'APTO',
+    };
+
     // O médico de B não registra atendimento de A (RNF04).
-    await api()
-      .post('/api/doacoes')
-      .set(autorizado(ctx.medicoB))
-      .send({ agendamentoId: ctx.agendamentoA, compareceu: true, doou: true, tipoSanguineo: 'O+' })
-      .expect(404);
+    await api().post('/api/doacoes').set(autorizado(ctx.medicoB)).send(doacao).expect(404);
+    // Quem doou tem triagem e aferições.
+    await api().post('/api/doacoes').set(autorizado(ctx.medicoA)).send({ ...doacao, triagem: undefined }).expect(400);
 
-    const r = await api()
-      .post('/api/doacoes')
-      .set(autorizado(ctx.medicoA))
-      .send({ agendamentoId: ctx.agendamentoA, compareceu: true, doou: true, tipoSanguineo: 'O+', observacoes: 'Sem intercorrências' })
-      .expect(201);
-    expect(r.body.doacao).toMatchObject({ doou: true, tipoSanguineo: 'O+' });
+    const r = await api().post('/api/doacoes').set(autorizado(ctx.medicoA)).send(doacao).expect(201);
+    expect(r.body.doacao).toMatchObject({
+      doou: true,
+      tipoSanguineo: 'O+',
+      aptidao: 'APTO',
+      volumeMl: 450,
+      afericoes: { pesoKg: 78.4, hemoglobina: 14.6 },
+    });
+    ctx.doacaoA = r.body.doacao.id;
 
-    await api()
-      .post('/api/doacoes')
-      .set(autorizado(ctx.medicoA))
-      .send({ agendamentoId: ctx.agendamentoA, compareceu: true, doou: true })
-      .expect(409);
+    await api().post('/api/doacoes').set(autorizado(ctx.medicoA)).send(doacao).expect(409);
+  });
+
+  it('o médico de A lança os exames da amostra; a triagem e os exames ficam só com ele (dados clínicos)', async () => {
+    const exames = {
+      pesquisaAnticorpos: 'NEGATIVA',
+      hiv: 'NAO_REAGENTE',
+      hepatiteB: 'NAO_REAGENTE',
+      hepatiteC: 'NAO_REAGENTE',
+      sifilis: 'REAGENTE',
+      chagas: 'NAO_REAGENTE',
+      htlv: 'NAO_REAGENTE',
+    };
+    await api().post(`/api/doacoes/${ctx.doacaoA}/exames`).set(autorizado(ctx.medicoB)).send(exames).expect(404);
+    await api().post(`/api/doacoes/${ctx.doacaoA}/exames`).set(autorizado(ctx.adminA)).send(exames).expect(403);
+    const r = await api().post(`/api/doacoes/${ctx.doacaoA}/exames`).set(autorizado(ctx.medicoA)).send(exames).expect(201);
+    expect(r.body.alterados).toBe(true);
+    await api().post(`/api/doacoes/${ctx.doacaoA}/exames`).set(autorizado(ctx.medicoA)).send(exames).expect(409);
+
+    const detalhe = await api().get(`/api/doacoes/${ctx.doacaoA}`).set(autorizado(ctx.medicoA)).expect(200);
+    expect(detalhe.body).toMatchObject({
+      numeroBolsa: 'A-0001',
+      triagem: { medicamentos: 'Nenhum', usoDeDrogas: false },
+      exames: { sifilis: 'REAGENTE' },
+      situacaoExames: 'ALTERADO',
+    });
+    await api().get(`/api/doacoes/${ctx.doacaoA}`).set(autorizado(ctx.medicoB)).expect(404);
+    await api().get(`/api/doacoes/${ctx.doacaoA}`).set(autorizado(ctx.adminA)).expect(403);
+
+    // O paciente só sabe que o hemocentro vai contatá-lo; não vê o resultado.
+    const painel = await api().get('/api/pacientes/me/painel').set(autorizado(ctx.paciente.token)).expect(200);
+    expect(painel.body.doacoes[0]).toMatchObject({ contatoReservado: true, aptidao: 'APTO' });
+    expect(JSON.stringify(painel.body)).not.toMatch(/sifilis|REAGENTE/i);
   });
 
   it('o Admin de A ativa a conta e o tipo sanguíneo aparece no painel (RF13 / RF04)', async () => {
@@ -389,8 +437,12 @@ describe.skipIf(!URL_BANCO)('Fluxo paciente → médico → admin (e2e)', () => 
         doMeuHemocentro: false,
         tipoSanguineo: 'O+',
         observacoes: 'Sem intercorrências',
+        afericoes: expect.objectContaining({ hemoglobina: 14.6 }),
+        numeroBolsa: null,
       }),
     ]);
+    expect(historico.body.doacoes[0]).not.toHaveProperty('triagem');
+    expect(historico.body.doacoes[0]).not.toHaveProperty('exames');
 
     const medicoB = await prisma.usuario.findUniqueOrThrow({ where: { email: 'medico.b@teste.local' } });
     expect(

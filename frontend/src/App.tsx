@@ -13,6 +13,7 @@ import { NecessidadesPage } from './features/hemocentro/NecessidadesPage'
 import { HomePage } from './features/home/HomePage'
 import { AgendaPage } from './features/medico/AgendaPage'
 import { AtendimentosPage } from './features/medico/AtendimentosPage'
+import { DoacaoPage } from './features/medico/DoacaoPage'
 import { HistoricoPacientePage } from './features/medico/HistoricoPacientePage'
 import { DoarPage } from './features/paciente/DoarPage'
 import { HemocentroPage } from './features/paciente/HemocentroPage'
@@ -39,6 +40,7 @@ function App() {
       <Route element={<ProtectedRoute papeis={['MEDICO']} />}>
         <Route path="/medico" element={<AgendaPage />} />
         <Route path="/medico/atendimentos" element={<AtendimentosPage />} />
+        <Route path="/medico/doacoes/:id" element={<DoacaoPage />} />
         <Route path="/medico/pacientes/:id" element={<HistoricoPacientePage />} />
       </Route>
 

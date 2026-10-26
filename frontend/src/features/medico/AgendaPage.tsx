@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import type { AgendamentoNaAgenda } from '../../api/types'
 import { PageTitle } from '../../components/layout/AppShell'
 import { Button, EmptyState, ErrorState, Loading, Message, Panel, TextField } from '../../components/ui'
-import { dataLocalIso, formatarData, formatarDiaLongo, RESULTADOS_DOACAO, SITUACOES_PACIENTE, somarDias, STATUS_AGENDAMENTO } from '../../lib/formato'
+import { dataLocalIso, formatarAptidao, formatarData, formatarDiaLongo, RESULTADOS_DOACAO, SITUACOES_PACIENTE, somarDias, STATUS_AGENDAMENTO } from '../../lib/formato'
 import { useAsync } from '../../lib/useAsync'
 import { medicoService } from '../../services/equipe'
 import { MedicoLayout } from './MedicoLayout'
@@ -77,6 +77,7 @@ export function AgendaPage() {
                     key={a.id}
                     agendamento={a}
                     podeRegistrar={data <= hoje}
+                    dataAtendimento={data}
                     onRegistrado={(m) => {
                       setAviso(m)
                       setVersao((v) => v + 1)
@@ -97,10 +98,12 @@ export function AgendaPage() {
 function PacienteAgendado({
   agendamento: a,
   podeRegistrar,
+  dataAtendimento,
   onRegistrado,
 }: {
   agendamento: AgendamentoNaAgenda
   podeRegistrar: boolean
+  dataAtendimento: string
   onRegistrado: (m: string) => void
 }) {
   const [registrando, setRegistrando] = useState(false)
@@ -130,6 +133,7 @@ function PacienteAgendado({
           Registro: {RESULTADOS_DOACAO[!a.doacao.compareceu ? 'AUSENTE' : a.doacao.doou ? 'DOOU' : 'NAO_DOOU']}
           {a.doacao.tipoSanguineo && ` · ${a.doacao.tipoSanguineo}`}
           {a.doacao.motivoNaoDoacao && ` · ${a.doacao.motivoNaoDoacao}`}
+          {a.doacao.aptidao && ` · ${formatarAptidao(a.doacao.aptidao, a.doacao.aptoAPartirDe)}`}
         </p>
       )}
 
@@ -137,13 +141,18 @@ function PacienteAgendado({
         <Link to={`/medico/pacientes/${p.id}`} className="self-start rounded text-small font-semibold text-brand hover:underline">
           Ver histórico de doações<span className="sr-only"> de {p.nome}</span>
         </Link>
+        {a.doacao?.compareceu && (
+          <Link to={`/medico/doacoes/${a.doacao.id}`} className="self-start rounded text-small font-semibold text-brand hover:underline">
+            Triagem e exames<span className="sr-only"> de {p.nome}</span>
+          </Link>
+        )}
       </div>
 
       {a.status === 'AGENDADO' &&
         (!podeRegistrar ? (
           <p className="text-small text-muted">O registro fica disponível a partir do dia do agendamento.</p>
         ) : registrando ? (
-          <RegistroDoacao agendamentoId={a.id} onRegistrado={onRegistrado} onCancelar={() => setRegistrando(false)} />
+          <RegistroDoacao agendamentoId={a.id} dataAtendimento={dataAtendimento} onRegistrado={onRegistrado} onCancelar={() => setRegistrando(false)} />
         ) : (
           <Button onClick={() => setRegistrando(true)}>Registrar atendimento</Button>
         ))}

@@ -665,7 +665,9 @@
 
 <span class="comment">// Médico (RF10–RF12, RF19)</span>
 <span class="kw">GET</span>   /api/agenda?data=AAAA-MM-DD
-<span class="kw">POST</span>  /api/doacoes
+<span class="kw">POST</span>  /api/doacoes                       <span class="comment">// triagem, aferições, coleta e aptidão</span>
+<span class="kw">GET</span>   /api/doacoes/:id                   <span class="comment">// triagem e exames: só o médico do hemocentro</span>
+<span class="kw">POST</span>  /api/doacoes/:id/exames            <span class="comment">// exames da amostra (RF20)</span>
 <span class="kw">GET</span>   /api/pacientes/:id/historico       <span class="comment">// regra de compartilhamento + auditoria</span>
 <span class="kw">GET</span>   /api/atendimentos?de=..&amp;ate=..     <span class="comment">// médico e Admin: só o próprio hemocentro (RF19)</span>
 
@@ -730,7 +732,7 @@
     <section class="doc-section" id="funcionalidades">
       <span class="section-kicker">08 — USO</span>
       <h2>Funcionalidades</h2>
-      <p class="muted">19 requisitos funcionais, agrupados por área do sistema.</p>
+      <p class="muted">20 requisitos funcionais, agrupados por área do sistema.</p>
 
       <details class="rf-group" open>
         <summary>Paciente<span class="count">7</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></summary>
@@ -753,16 +755,17 @@
       </details>
 
       <details class="rf-group">
-        <summary>Equipe do hemocentro<span class="count">9</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></summary>
+        <summary>Equipe do hemocentro<span class="count">10</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></summary>
         <div class="rf-list">
           <div class="rf-item"><span class="rf-code">RF08</span><p>O Admin do hemocentro define horários e a quantidade de vagas de cada um, inclusive em lote semanal.</p></div>
           <div class="rf-item"><span class="rf-code">RF09</span><p>O sistema impede overbooking, agendamento em horário passado/inativo, duplicidade e agendamento fora do intervalo mínimo entre doações (RN20).</p></div>
           <div class="rf-item"><span class="rf-code">RF10</span><p>O médico visualiza, por data e horário, os pacientes agendados no seu hemocentro.</p></div>
-          <div class="rf-item"><span class="rf-code">RF11</span><p>O médico registra a doação (comparecimento, doou ou não, tipo sanguíneo, motivo, observações), vinculada ao hemocentro.</p></div>
+          <div class="rf-item"><span class="rf-code">RF11</span><p>O médico registra o atendimento, vinculado ao hemocentro: comparecimento, triagem clínica (entrevista confidencial), aferições do dia (peso, pressão, pulso, temperatura, hemoglobina ou hematócrito), aptidão (apto, inapto temporário até uma data ou inapto definitivo), dados da coleta (volume, número da bolsa, reações), tipo sanguíneo, motivo de não doar e observações.</p></div>
           <div class="rf-item"><span class="rf-code">RF12</span><p>A equipe consulta o histórico de doações do paciente em outros hemocentros, nas condições da regra de compartilhamento.</p></div>
           <div class="rf-item"><span class="rf-code">RF13</span><p>O Admin do hemocentro lista pacientes com registro pendente de ativação e ativa a conta.</p></div>
           <div class="rf-item"><span class="rf-code">RF14</span><p>O Admin do hemocentro cadastra e desativa os médicos do seu hemocentro.</p></div>
           <div class="rf-item"><span class="rf-code">RF17</span><p>O Admin do hemocentro cadastra e atualiza o nível de necessidade de cada tipo sanguíneo do seu hemocentro.</p></div>
+          <div class="rf-item"><span class="rf-code">RF20</span><p>O médico lança, uma única vez, os exames da amostra de cada doação (pesquisa de anticorpos e sorologias para HIV, hepatites B e C, sífilis, Chagas, HTLV e, em regiões endêmicas, malária). Com resultado alterado, o paciente só vê no painel que o hemocentro vai contatá-lo de forma reservada.</p></div>
           <div class="rf-item"><span class="rf-code">RF19</span><p>O médico e o Admin do hemocentro consultam o histórico de atendimentos do próprio hemocentro, por período, com o resultado de cada registro.</p></div>
         </div>
       </details>

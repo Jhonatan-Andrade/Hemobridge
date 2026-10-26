@@ -54,7 +54,7 @@ O sistema organiza a doação de sangue a partir do agendamento: o paciente se c
 | RF08 | O Admin do hemocentro define horários e a quantidade de vagas de cada um, inclusive em lote semanal. |
 | RF09 | O sistema impede overbooking, agendamento em horário passado/inativo, duplicidade e agendamento fora do intervalo mínimo entre doações (RN20). |
 | RF10 | O médico visualiza, por data e horário, os pacientes agendados no seu hemocentro. |
-| RF11 | O médico registra a doação (comparecimento, doou ou não, tipo sanguíneo, motivo, observações), vinculada ao hemocentro. |
+| RF11 | O médico registra o atendimento, vinculado ao hemocentro: comparecimento, triagem clínica (entrevista confidencial), aferições do dia (peso, pressão, pulso, temperatura, hemoglobina ou hematócrito), aptidão (apto, inapto temporário até uma data ou inapto definitivo), dados da coleta (volume, número da bolsa, reações), tipo sanguíneo, motivo de não doar e observações. |
 | RF12 | A equipe consulta o histórico de doações do paciente em outros hemocentros, nas condições da regra de compartilhamento. |
 | RF13 | O Admin do hemocentro lista pacientes com registro pendente de ativação e ativa a conta. |
 | RF14 | O Admin do hemocentro cadastra e desativa os médicos do seu hemocentro. |
@@ -63,6 +63,7 @@ O sistema organiza a doação de sangue a partir do agendamento: o paciente se c
 | RF17 | O Admin do hemocentro cadastra e atualiza o nível de necessidade de cada tipo sanguíneo do seu hemocentro. |
 | RF18 | A página Doar exibe as necessidades de cada hemocentro e destaca os que precisam do tipo sanguíneo do paciente, quando conhecido. |
 | RF19 | O médico e o Admin do hemocentro consultam o histórico de atendimentos do próprio hemocentro, por período, com o resultado de cada registro. |
+| RF20 | O médico lança, uma única vez, os exames da amostra de cada doação (pesquisa de anticorpos e sorologias para HIV, hepatites B e C, sífilis, Chagas, HTLV e, em regiões endêmicas, malária). Com resultado alterado, o paciente só vê no painel que o hemocentro vai contatá-lo de forma reservada. |
 
 ### Requisitos Não Funcionais
 
@@ -86,6 +87,7 @@ Regras de acesso herdadas da versão anterior e mantidas no código, mais a regr
 | RN07 | Cinco tentativas de login inválidas seguidas bloqueiam a conta por 15 minutos. |
 | RN14 | A recuperação de senha responde sempre a mesma mensagem, exista ou não a conta. |
 | RN20 | Intervalo entre doações de sangue total (Ministério da Saúde): homens a cada 60 dias, até 4 doações em 12 meses; mulheres a cada 90 dias, até 3. Contam as doações efetivas e os agendamentos ativos, nos dois sentidos da data. Sem sexo informado (contas anteriores ao campo), vale a regra mais restritiva (90 dias, 3 doações). |
+| RN21 | Inaptidão declarada na triagem: inapto definitivo não agenda mais; inapto temporário só agenda a partir da data informada pelo médico. Ao registrar a inaptidão, os agendamentos futuros que caem nela são cancelados. Quem doou foi considerado apto. |
 | RN15 | Contas criadas por terceiros (equipe e administradores) recebem senha provisória válida por 72 horas e precisam trocá-la no primeiro acesso, aceitando o termo de responsabilidade e sigilo. |
 
 ## Fluxo Principal
@@ -125,18 +127,20 @@ Quando o paciente doa em outro hemocentro, a equipe desse hemocentro pode ver o 
 - Cada registro de doação guarda `hemocentro_id`, e a interface sempre mostra **de qual hemocentro veio**.
 - A equipe de um hemocentro só consulta o histórico completo (incluindo registros de outros hemocentros) de pacientes que **têm ou tiveram agendamento nesse hemocentro**. Não existe busca livre por paciente.
 - Um hemocentro **não edita** registros criados por outro; só lê. Depois de registrada, a doação não é editada.
-- Todo acesso ao histórico de outro hemocentro gera registro em `auditoria`.
+- Vão para os outros hemocentros: data, resultado, tipo sanguíneo, aferições, volume, reações e aptidão. **A triagem clínica, os exames da amostra e o número da bolsa ficam só no hemocentro que atendeu**, e só o médico desse hemocentro os lê.
+- Todo acesso ao histórico de outro hemocentro gera registro em `auditoria`, assim como cada leitura da triagem e dos exames (`VER_DADOS_CLINICOS`).
 - O texto de consentimento do cadastro informa claramente esse compartilhamento.
 
 ## Conformidade com a LGPD
 
-O sistema trata dados sensíveis de saúde (tipo sanguíneo e registros de doação) e adota as seguintes salvaguardas:
+O sistema trata dados sensíveis de saúde (tipo sanguíneo, triagem clínica, aferições, registros de doação e exames da amostra) e adota as seguintes salvaguardas:
 
-- **Consentimento explícito e versionado** no cadastro, cobrindo o compartilhamento do histórico entre hemocentros (RF01).
+- **Consentimento explícito e versionado** no cadastro (termo 3.0), descrevendo a triagem, as aferições, a coleta e os exames, o compartilhamento do histórico entre hemocentros, o contato reservado em caso de exame alterado e a notificação compulsória às autoridades de saúde (RF01).
+- **Sigilo dos dados clínicos:** triagem e exames não saem do hemocentro que atendeu; o Admin do hemocentro não os vê; o paciente vê aferições e aptidão, e de exame alterado só o aviso de contato reservado (RF20).
 - **Minimização:** o cadastro não coleta peso nem endereço; só o necessário para agendar, identificar o paciente e aplicar o intervalo entre doações (sexo).
 - **Controle de acesso** por perfil e papel, com o hemocentro vindo sempre do vínculo da conta (RNF03, RNF04).
 - **Log de auditoria** de leitura do histórico, registro de doação, ativação de conta e exclusão de dados (RNF05).
-- **Direito de exclusão** (RF16): o paciente pede a exclusão pelo Painel, confirmando a senha. Nome, CPF, e-mail, telefone e data de nascimento são anonimizados, a conta é encerrada, os agendamentos ativos são cancelados e o consentimento é revogado. Os registros de doação são mantidos sem identificação direta, por obrigação legal de retenção da legislação sanitária (Art. 16 da LGPD).
+- **Direito de exclusão** (RF16): o paciente pede a exclusão pelo Painel, confirmando a senha. Nome, CPF, e-mail, telefone e data de nascimento são anonimizados, a conta é encerrada, os agendamentos ativos são cancelados e o consentimento é revogado. Os registros de doação, de triagem e de exames são mantidos sem identificação direta, por obrigação legal de retenção da legislação sanitária (Art. 16 da LGPD).
 
 ## Fora do Escopo
 

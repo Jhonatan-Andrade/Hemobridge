@@ -19,6 +19,9 @@ erDiagram
     HORARIO ||--o{ AGENDAMENTO : "recebe"
     PACIENTE ||--o{ AGENDAMENTO : "faz"
     AGENDAMENTO ||--o| DOACAO : "resulta em"
+    DOACAO ||--o| TRIAGEM_CLINICA : "triagem (confidencial)"
+    DOACAO ||--o| EXAME_DOACAO : "exames da amostra"
+    EQUIPE_HEMOCENTRO ||--o{ EXAME_DOACAO : "lança (médico)"
     PACIENTE ||--o{ DOACAO : "doa"
     EQUIPE_HEMOCENTRO ||--o{ DOACAO : "registra (médico)"
     EQUIPE_HEMOCENTRO |o--o{ PACIENTE : "ativa (admin)"
@@ -93,6 +96,48 @@ erDiagram
         varchar motivo_nao_doacao
         varchar observacoes
         timestamptz registrado_em
+        decimal peso_kg
+        smallint altura_cm
+        smallint pressao_sistolica
+        smallint pressao_diastolica
+        smallint pulso
+        decimal temperatura
+        decimal hemoglobina
+        decimal hematocrito
+        smallint volume_ml
+        varchar numero_bolsa "UK com hemocentro_id"
+        varchar reacoes
+        aptidao aptidao "APTO | INAPTO_TEMPORARIO | INAPTO_DEFINITIVO"
+        date apto_a_partir_de
+    }
+    TRIAGEM_CLINICA {
+        uuid doacao_id PK, FK
+        varchar doencas
+        varchar cirurgias
+        boolean transfusao_anterior
+        varchar alergias
+        varchar gestacoes
+        varchar medicamentos
+        varchar vacinas_recentes
+        boolean tatuagem_ou_piercing_recente
+        boolean uso_de_drogas
+        boolean comportamento_sexual_de_risco
+        varchar viagem_area_de_risco
+        varchar observacoes
+    }
+    EXAME_DOACAO {
+        uuid doacao_id PK, FK
+        pesquisa_anticorpos pesquisa_anticorpos "NEGATIVA | POSITIVA"
+        resultado_sorologia hiv "NAO_REAGENTE | REAGENTE | INCONCLUSIVO"
+        resultado_sorologia hepatite_b
+        resultado_sorologia hepatite_c
+        resultado_sorologia sifilis
+        resultado_sorologia chagas
+        resultado_sorologia htlv
+        resultado_sorologia malaria "só em regiões endêmicas"
+        varchar observacoes
+        uuid registrado_por FK
+        timestamptz registrado_em
     }
     NECESSIDADE {
         uuid id PK
@@ -139,6 +184,9 @@ erDiagram
 | Vagas entre 1 e 500; fim depois do início | CHECKs em `horario` |
 | Só doa quem compareceu; quem compareceu e não doou tem motivo | CHECKs em `doacao` |
 | Conta ATIVA tem tipo sanguíneo e quem ativou | CHECK em `paciente` |
+| Inapto temporário tem data de volta (e só ele); quem doou é apto; aferições em faixas fisiológicas | CHECKs em `doacao` |
+| Número da bolsa único no hemocentro | `UNIQUE (hemocentro_id, numero_bolsa)` em `doacao` |
+| Exames lançados uma única vez | chave primária `doacao_id` em `exame_doacao` |
 | Sem overbooking (RNF06) | `SELECT … FOR UPDATE` na linha de `horario` durante o agendamento (aplicação) |
 
 ## Índices de consulta

@@ -1,4 +1,4 @@
-import type { NivelNecessidade, PapelEquipe, ResultadoDoacao, Sexo, SituacaoPaciente, StatusAgendamento, StatusUsuario } from '../api/types'
+import type { Afericoes, Aptidao, NivelNecessidade, PapelEquipe, ResultadoDoacao, ResultadoSorologia, Sexo, SituacaoExames, SituacaoPaciente, StatusAgendamento, StatusUsuario } from '../api/types'
 
 // Os oito tipos ABO/Rh, na ordem de exibição.
 export const TIPOS_SANGUINEOS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] as const
@@ -42,6 +42,60 @@ export const RESULTADOS_DOACAO: Record<ResultadoDoacao, string> = {
   DOOU: 'Doou',
   NAO_DOOU: 'Não doou',
   AUSENTE: 'Não compareceu',
+}
+
+export const APTIDOES: Record<Aptidao, string> = {
+  APTO: 'Apto',
+  INAPTO_TEMPORARIO: 'Inapto temporário',
+  INAPTO_DEFINITIVO: 'Inapto definitivo',
+}
+
+export const SITUACOES_EXAMES: Record<SituacaoExames, string> = {
+  PENDENTE: 'Pendentes',
+  NORMAL: 'Normais',
+  ALTERADO: 'Alterados',
+}
+
+export const SOROLOGIAS: Record<ResultadoSorologia, string> = {
+  NAO_REAGENTE: 'Não reagente',
+  REAGENTE: 'Reagente',
+  INCONCLUSIVO: 'Inconclusivo',
+}
+
+/** Sorologias da amostra, na ordem em que aparecem nos formulários. */
+export const EXAMES_SOROLOGICOS = [
+  ['hiv', 'HIV'],
+  ['hepatiteB', 'Hepatite B'],
+  ['hepatiteC', 'Hepatite C'],
+  ['sifilis', 'Sífilis'],
+  ['chagas', 'Doença de Chagas'],
+  ['htlv', 'HTLV'],
+] as const
+
+const decimal = (v: number, casas = 1) => v.toLocaleString('pt-BR', { maximumFractionDigits: casas })
+
+/** "72,5 kg · PA 120/80 mmHg · pulso 72 bpm · 36,4 °C · Hb 14,1 g/dL" (só o que foi aferido). */
+export function formatarAfericoes(a: Afericoes | null) {
+  if (!a) return null
+  return [
+    a.pesoKg !== null ? `${decimal(a.pesoKg, 2)} kg` : null,
+    a.alturaCm !== null ? `${a.alturaCm} cm` : null,
+    a.pressaoSistolica !== null && a.pressaoDiastolica !== null ? `PA ${a.pressaoSistolica}/${a.pressaoDiastolica} mmHg` : null,
+    a.pulso !== null ? `pulso ${a.pulso} bpm` : null,
+    a.temperatura !== null ? `${decimal(a.temperatura)} °C` : null,
+    a.hemoglobina !== null ? `Hb ${decimal(a.hemoglobina)} g/dL` : null,
+    a.hematocrito !== null ? `Ht ${decimal(a.hematocrito)}%` : null,
+  ]
+    .filter(Boolean)
+    .join(' · ')
+}
+
+/** "Inapto temporário até 30/11" a partir da aptidão e do primeiro dia apto. */
+export function formatarAptidao(aptidao: Aptidao | null, aptoAPartirDe: string | null) {
+  if (!aptidao) return null
+  return aptidao === 'INAPTO_TEMPORARIO' && aptoAPartirDe
+    ? `${APTIDOES[aptidao]} · apto a partir de ${aptoAPartirDe.split('-').reverse().join('/')}`
+    : APTIDOES[aptidao]
 }
 
 export const DIAS_SEMANA = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'] as const

@@ -1,4 +1,4 @@
-import { impedimentoDeDoacao, proximaDoacaoPermitida, regraDoacao } from './regra-doacao.js';
+import { impedimentoDeDoacao, impedimentoPorAptidao, proximaDoacaoPermitida, regraDoacao, situacaoDeAptidao } from './regra-doacao.js';
 
 describe('regra de intervalo entre doações (Ministério da Saúde)', () => {
   it('homens: 60 dias e até 4 doações em 12 meses; mulheres: 90 dias e até 3', () => {
@@ -32,5 +32,26 @@ describe('regra de intervalo entre doações (Ministério da Saúde)', () => {
     expect(proximaDoacaoPermitida('MASCULINO', '2026-08-01')).toBe('2026-09-30');
     expect(proximaDoacaoPermitida('FEMININO', '2026-08-01')).toBe('2026-10-30');
     expect(proximaDoacaoPermitida('MASCULINO', null)).toBeNull();
+  });
+});
+
+describe('inaptidão declarada na triagem', () => {
+  const d = (aptidao: 'APTO' | 'INAPTO_TEMPORARIO' | 'INAPTO_DEFINITIVO', aptoAPartirDe?: string) => ({
+    aptidao,
+    aptoAPartirDe: aptoAPartirDe ? new Date(`${aptoAPartirDe}T00:00:00Z`) : null,
+  });
+
+  it('considera a inaptidão temporária mais distante ainda por vir', () => {
+    expect(situacaoDeAptidao([d('INAPTO_TEMPORARIO', '2026-11-01'), d('INAPTO_TEMPORARIO', '2026-12-01'), d('APTO')], '2026-10-25')).toEqual({
+      inaptoDefinitivo: false,
+      aptoAPartirDe: '2026-12-01',
+    });
+    expect(situacaoDeAptidao([d('INAPTO_TEMPORARIO', '2026-10-01')], '2026-10-25').aptoAPartirDe).toBeNull();
+  });
+
+  it('inapto definitivo não agenda; temporário só a partir da data de volta', () => {
+    expect(impedimentoPorAptidao({ inaptoDefinitivo: true, aptoAPartirDe: null }, '2027-01-01')).toMatch(/inapto definitivo/);
+    expect(impedimentoPorAptidao({ inaptoDefinitivo: false, aptoAPartirDe: '2026-12-01' }, '2026-11-30')).toMatch(/01\/12\/2026/);
+    expect(impedimentoPorAptidao({ inaptoDefinitivo: false, aptoAPartirDe: '2026-12-01' }, '2026-12-01')).toBeNull();
   });
 });

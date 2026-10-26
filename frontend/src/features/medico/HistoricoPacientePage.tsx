@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from 'react-router-dom'
 import { PageTitle } from '../../components/layout/AppShell'
 import { Button, EmptyState, ErrorState, Loading, Message, Panel } from '../../components/ui'
-import { formatarDataHora, RESULTADOS_DOACAO, SITUACOES_PACIENTE } from '../../lib/formato'
+import { formatarAfericoes, formatarAptidao, formatarDataHora, RESULTADOS_DOACAO, SITUACOES_PACIENTE } from '../../lib/formato'
 import { useAsync } from '../../lib/useAsync'
 import { historicoService } from '../../services/equipe'
 import { LayoutEquipe as Layout } from './LayoutEquipe'
@@ -33,8 +33,20 @@ export function HistoricoPacientePage() {
               .filter(Boolean)
               .join(' · ')}
           />
+          {(h.paciente.inaptoDefinitivo || h.paciente.aptoAPartirDe) && (
+            <Message tone="error">
+              <p>
+                {h.paciente.inaptoDefinitivo
+                  ? 'Paciente considerado inapto definitivo na triagem de uma doação. Não pode doar.'
+                  : `Paciente inapto temporariamente: apto a partir de ${h.paciente.aptoAPartirDe!.split('-').reverse().join('/')}.`}
+              </p>
+            </Message>
+          )}
           <Message tone="info">
-            <p>Registros de outros hemocentros são somente leitura. Este acesso fica registrado na auditoria (LGPD).</p>
+            <p>
+              Registros de outros hemocentros são somente leitura e não trazem a triagem nem os exames, que ficam no hemocentro que atendeu. Este acesso fica registrado
+              na auditoria (LGPD).
+            </p>
           </Message>
           {!h.doacoes.length ? (
             <EmptyState title="Nenhuma doação registrada">O paciente ainda não foi atendido em nenhum hemocentro.</EmptyState>
@@ -57,6 +69,32 @@ export function HistoricoPacientePage() {
                       <dd className="text-ink">{RESULTADOS_DOACAO[d.resultado]}</dd>
                       <dt className="text-muted">Tipo sanguíneo</dt>
                       <dd className="text-ink">{d.tipoSanguineo ?? '—'}</dd>
+                      {d.aptidao && (
+                        <>
+                          <dt className="text-muted">Aptidão</dt>
+                          <dd className="text-ink">{formatarAptidao(d.aptidao, d.aptoAPartirDe)}</dd>
+                        </>
+                      )}
+                      {d.afericoes && (
+                        <>
+                          <dt className="text-muted">Aferições</dt>
+                          <dd className="text-ink">{formatarAfericoes(d.afericoes)}</dd>
+                        </>
+                      )}
+                      {d.volumeMl !== null && (
+                        <>
+                          <dt className="text-muted">Coleta</dt>
+                          <dd className="text-ink">
+                            {d.volumeMl} mL{d.numeroBolsa && ` · bolsa ${d.numeroBolsa}`}
+                          </dd>
+                        </>
+                      )}
+                      {d.reacoes && (
+                        <>
+                          <dt className="text-muted">Reações</dt>
+                          <dd className="text-ink">{d.reacoes}</dd>
+                        </>
+                      )}
                       {d.motivoNaoDoacao && (
                         <>
                           <dt className="text-muted">Motivo</dt>

@@ -1,6 +1,8 @@
 import { api } from '../api/client'
 import type {
   AgendaDia,
+  DoacaoDetalhe,
+  LancamentoExames,
   Atendimentos,
   DoacaoRegistrada,
   HistoricoPaciente,
@@ -22,6 +24,10 @@ type Paginacao = { pagina?: number; tamanhoPagina?: number }
 export const medicoService = {
   agenda: (data?: string) => api.get<AgendaDia>('/agenda', { data }),
   registrarDoacao: (dados: RegistroDoacao) => api.post<{ mensagem: string; doacao: DoacaoRegistrada }>('/doacoes', dados),
+  /** Registro completo com triagem e exames (leitura auditada). */
+  doacao: (id: string) => api.get<DoacaoDetalhe>(`/doacoes/${id}`),
+  registrarExames: (id: string, dados: LancamentoExames) =>
+    api.post<{ mensagem: string; alterados: boolean }>(`/doacoes/${id}/exames`, dados),
 }
 
 /** RF12: médico e Admin do hemocentro, só para pacientes com agendamento no hemocentro. */
