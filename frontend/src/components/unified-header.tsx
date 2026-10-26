@@ -10,6 +10,7 @@ export type UnifiedHeaderProps = {
   route: string
   navigate: Navigate
   professionalRole: ProfessionalRole
+  tourLabel?: string
   onTour?: () => void
 }
 
@@ -50,6 +51,7 @@ export function UnifiedHeader({
   navigate,
   professionalRole,
   onTour,
+  tourLabel = 'Rever minha jornada',
 }: UnifiedHeaderProps) {
   const railId = useId()
   const menuId = useId()
@@ -219,14 +221,14 @@ export function UnifiedHeader({
               {onTour && (
                 <button
                   type="button"
-                  aria-label="Ver tour de orientação"
+                  aria-label={tourLabel}
                   onClick={() => {
                     followRoute()
                     onTour()
                   }}
                 >
                   <Icon name="help" />
-                  <span className="hb-unified-rail-label">Ver tour</span>
+                  <span className="hb-unified-rail-label">{tourLabel}</span>
                 </button>
               )}
             </nav>
@@ -278,14 +280,14 @@ export function UnifiedHeader({
               <button
                 className="hb-unified-tour-button"
                 type="button"
-                aria-label="Ver tour"
+                aria-label={tourLabel}
                 onClick={() => {
                   followRoute()
                   onTour()
                 }}
               >
                 <Icon name="help" />
-                <span>Ver tour</span>
+                <span>{tourLabel}</span>
               </button>
             )}
           </div>
@@ -364,7 +366,7 @@ export function UnifiedHeader({
                 }}
               >
                 <Icon name="help" />
-                <span>Ver tour</span>
+                <span>{tourLabel}</span>
               </button>
             )}
           </div>

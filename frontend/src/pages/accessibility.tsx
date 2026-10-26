@@ -15,6 +15,8 @@ export function AccessibilityPage({
   widgetError,
   onVlibras,
   onTour,
+  journeyPending,
+  signedIn,
 }: {
   navigate: Navigate
   backTo: string
@@ -25,6 +27,8 @@ export function AccessibilityPage({
   widgetError: string
   onVlibras: (enabled: boolean) => void
   onTour: () => void
+  journeyPending: boolean
+  signedIn: boolean
 }) {
   return (
     <main className="accessibility-page">
@@ -109,12 +113,13 @@ export function AccessibilityPage({
         <div>
           <h2 id="tour-heading">Tour de orientação</h2>
           <p>
-            Reveja as etapas principais conforme a interface de visitante, paciente ou profissional.
-            O tour é opcional.
+            {signedIn
+              ? 'No primeiro acesso, leia a introdução e inicie a apresentação da sua jornada. Ela é necessária para liberar as funções da conta. Depois de concluída, a revisão é opcional e pode ser fechada.'
+              : 'Conheça o propósito da plataforma e as etapas gerais na explicação pública. A apresentação da sua conta só acontece após entrar e escolher iniciá-la.'}
           </p>
         </div>
         <button className="button secondary" type="button" onClick={onTour}>
-          Rever tour
+          {!signedIn ? 'Como funciona' : journeyPending ? 'Conhecer minha jornada' : 'Rever minha jornada'}
         </button>
       </section>
     </main>

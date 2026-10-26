@@ -1,84 +1,20 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 import type { SessionUser } from '../types/domain'
-import { useResource } from '../services/use-resource'
-import { journeyTimings, tourRoleLabels, tourSteps } from '../services/tour-content'
+import { tourRoleLabels, tourSteps } from '../services/tour-content'
 import { messageOf } from '../services/api-client'
-
-function InstitutionTimes({
-  estimates,
-}: {
-  estimates: ReturnType<typeof journeyTimings>[number]['estimates']
-}) {
-  const list = (
-    <ul>
-      {estimates.map((value, index) => (
-        <li key={`${value.hospital.nome}-${index}`}>
-          {value.hospital.nome}: cerca de {value.minutos.toLocaleString('pt-BR')} min.
-          <small>Fonte: {value.fonte}</small>
-        </li>
-      ))}
-    </ul>
-  )
-  return estimates.length > 1 ? (
-    <details>
-      <summary>Prazos por instituição ({estimates.length})</summary>
-      {list}
-    </details>
-  ) : (
-    list
-  )
-}
-
-function JourneyTimes() {
-  const estimates = useResource<unknown>('/jornada/estimativas')
-  return (
-    <section className="onboarding-time" aria-label="Tempos das etapas">
-      <h3>Tempos das etapas</h3>
-      <p>Estimativas variam por unidade e não incluem garantia de horário ou aprovação.</p>
-      <ol className="onboarding-phases">
-        {journeyTimings(estimates.data).map((item) => (
-          <li key={item.stage}>
-            <strong>{item.title}</strong>
-            <p>{item.text}</p>
-            {item.estimates.length ? (
-              <InstitutionTimes estimates={item.estimates} />
-            ) : (
-              <>
-                <p>{item.fallback}</p>
-                {item.url && (
-                  <a href={item.url} target="_blank" rel="noopener noreferrer">
-                    {item.source} ↗
-                  </a>
-                )}
-              </>
-            )}
-          </li>
-        ))}
-      </ol>
-      {estimates.loading && <p role="status">Consultando os prazos das instituições…</p>}
-      {estimates.error && (
-        <p role="status">
-          Os prazos das instituições estão indisponíveis. As orientações gerais continuam
-          disponíveis.{' '}
-          <button type="button" className="text-button" onClick={estimates.reload}>
-            Tentar novamente
-          </button>
-        </p>
-      )}
-    </section>
-  )
-}
 
 export function GuidedTour({
   user,
   mandatory,
   onComplete,
   onClose,
+  onExit,
 }: {
-  user: SessionUser | null
+  user: SessionUser
   mandatory: boolean
   onComplete: () => void | Promise<void>
   onClose: () => void
+  onExit: () => Promise<void>
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null)
   const headingRef = useRef<HTMLHeadingElement>(null)
@@ -98,7 +34,7 @@ export function GuidedTour({
       setSaving(false)
     }
   }
-  const steps = tourSteps(user?.perfil)
+  const steps = tourSteps(user.perfil, user.papel === 'DOADOR')
   const step = steps[index]
   useLayoutEffect(() => {
     const dialog = dialogRef.current
@@ -164,10 +100,17 @@ export function GuidedTour({
         </p>
         <progress value={index + 1} max={steps.length} aria-label="Progresso da orientação" />
         <h2 ref={headingRef} tabIndex={-1} id="tour-title">
-          {!user ? <><span className="brand-phrase-accent">A ponte que</span> conecta vidas</> : step.title}
+          {step.title}
         </h2>
         <p id="tour-description">{step.text}</p>
-        {step.journey && user && <JourneyTimes />}
+        <section className="onboarding-time" aria-label="Onde encontrar esta função">
+          <h3>Onde fica</h3>
+          <p>{step.location}</p>
+        </section>
+        {step.duration && <p className="help">{step.duration}</p>}
+        {step.collectionReference && (
+          <a href="https://www.hemominas.mg.gov.br/servicos/doar-sangue" target="_blank" rel="noopener noreferrer">Fonte: Hemominas ↗</a>
+        )}
       </div>
       <div className="onboarding-footer">
         {error && <p role="alert">{error}</p>}
@@ -189,15 +132,22 @@ export function GuidedTour({
               disabled={saving}
               onClick={() => void finish()}
             >
-              {saving ? 'Salvando…' : 'Concluir e acessar'}
+              {saving ? 'Salvando…' : mandatory ? 'Concluir e acessar' : 'Concluir revisão'}
             </button>
           ) : (
-            <button type="button" className="button" onClick={() => setIndex((v) => v + 1)}>
+            <button type="button" className="button" disabled={saving} onClick={() => setIndex((v) => v + 1)}>
               Continuar
             </button>
           )}
+          {mandatory && (
+            <button type="button" className="text-button" disabled={saving} onClick={() => {
+              setSaving(true)
+              setError('')
+              void onExit().catch((error) => setError(messageOf(error))).finally(() => setSaving(false))
+            }}>Sair e continuar depois</button>
+          )}
           {!mandatory && (
-            <button type="button" className="text-button" onClick={onClose}>
+            <button type="button" className="text-button" disabled={saving} onClick={onClose}>
               Fechar orientação
             </button>
           )}

@@ -5,7 +5,17 @@ import '../../core/app_theme.dart';
 class CommunityPage extends StatefulWidget {
   final ApiClient api;
   final String role;
-  const CommunityPage({super.key, required this.api, required this.role});
+  final bool readOnly;
+  final VoidCallback? onLogin;
+  final String? readOnlyMessage;
+  const CommunityPage({
+    super.key,
+    required this.api,
+    required this.role,
+    this.readOnly = false,
+    this.onLogin,
+    this.readOnlyMessage,
+  });
   @override
   State<CommunityPage> createState() => _CommunityPageState();
 }
@@ -29,6 +39,7 @@ class _CommunityPageState extends State<CommunityPage> {
     try {
       final data = await widget.api.request(
         '/comunidade/publicacoes?pagina=${reset ? 1 : page + 1}',
+        authenticated: !widget.readOnly,
       );
       if (mounted) {
         setState(() {
@@ -79,11 +90,27 @@ class _CommunityPageState extends State<CommunityPage> {
           'Saúde e doação em uma conversa responsável. Avisos críticos ativos aparecem primeiro; as demais publicações seguem a ordem cronológica.',
         ),
         const SizedBox(height: 20),
-        FilledButton.icon(
-          onPressed: compose,
-          icon: const Icon(Icons.edit_outlined),
-          label: const Text('Criar publicação'),
-        ),
+        if (widget.readOnly)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: Text(
+              widget.readOnlyMessage ??
+                  (widget.onLogin != null
+                      ? 'Leia as conversas. Para publicar ou comentar, entre na sua conta.'
+                      : 'Leitura pública. Conclua sua apresentação para publicar ou comentar.'),
+            ),
+          ),
+        if (widget.readOnly && widget.onLogin != null)
+          OutlinedButton(
+            onPressed: widget.onLogin,
+            child: const Text('Entrar para participar'),
+          ),
+        if (!widget.readOnly)
+          FilledButton.icon(
+            onPressed: compose,
+            icon: const Icon(Icons.edit_outlined),
+            label: const Text('Criar publicação'),
+          ),
         if (loading)
           const Padding(
             padding: EdgeInsets.all(24),
@@ -106,8 +133,11 @@ class _CommunityPageState extends State<CommunityPage> {
             post: Map<String, dynamic>.from(post),
             onOpen: () => Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (_) =>
-                    CommentsPage(api: widget.api, id: post['id'] as String),
+                builder: (_) => CommentsPage(
+                  api: widget.api,
+                  id: post['id'] as String,
+                  readOnly: widget.readOnly,
+                ),
               ),
             ),
           ),
@@ -314,7 +344,13 @@ class _ComposeDialogState extends State<ComposeDialog> {
 class CommentsPage extends StatefulWidget {
   final ApiClient api;
   final String id;
-  const CommentsPage({super.key, required this.api, required this.id});
+  final bool readOnly;
+  const CommentsPage({
+    super.key,
+    required this.api,
+    required this.id,
+    this.readOnly = false,
+  });
   @override
   State<CommentsPage> createState() => _CommentsPageState();
 }
@@ -341,6 +377,7 @@ class _CommentsPageState extends State<CommentsPage> {
     try {
       final value = await widget.api.request(
         '/comunidade/publicacoes/${widget.id}',
+        authenticated: !widget.readOnly,
       );
       if (mounted) {
         setState(() {
@@ -367,6 +404,7 @@ class _CommentsPageState extends State<CommentsPage> {
     try {
       final data = await widget.api.request(
         '/comunidade/publicacoes/${widget.id}/comentarios?pagina=$nextPage',
+        authenticated: !widget.readOnly,
       );
       if (mounted) {
         setState(() {
@@ -454,28 +492,37 @@ class _CommentsPageState extends State<CommentsPage> {
                       : 'Mostrar mais comentários',
                 ),
               ),
-            TextField(
-              controller: text,
-              maxLines: 4,
-              maxLength: 2000,
-              decoration: const InputDecoration(
-                labelText: 'Escrever um comentário',
+            if (widget.readOnly)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 20),
+                child: Text(
+                  'Entre e conclua a apresentação da sua conta para participar da conversa.',
+                ),
               ),
-            ),
-            CheckboxListTile(
-              value: consent,
-              onChanged: (v) => setState(() => consent = v ?? false),
-              title: const Text(
-                'Concordo com as normas da comunidade e preservo a privacidade.',
+            if (!widget.readOnly) ...[
+              TextField(
+                controller: text,
+                maxLines: 4,
+                maxLength: 2000,
+                decoration: const InputDecoration(
+                  labelText: 'Escrever um comentário',
+                ),
               ),
-              subtitle: const Text(
-                'Converse apenas sobre saúde e doação, sem dados pessoais ou avaliação individual.',
+              CheckboxListTile(
+                value: consent,
+                onChanged: (v) => setState(() => consent = v ?? false),
+                title: const Text(
+                  'Concordo com as normas da comunidade e preservo a privacidade.',
+                ),
+                subtitle: const Text(
+                  'Converse apenas sobre saúde e doação, sem dados pessoais ou avaliação individual.',
+                ),
               ),
-            ),
-            FilledButton(
-              onPressed: busy || loadingMore || !consent ? null : send,
-              child: Text(busy ? 'Enviando…' : 'Enviar comentário'),
-            ),
+              FilledButton(
+                onPressed: busy || loadingMore || !consent ? null : send,
+                child: Text(busy ? 'Enviando…' : 'Enviar comentário'),
+              ),
+            ],
           ],
         ],
       ),

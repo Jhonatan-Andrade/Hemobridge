@@ -12,10 +12,12 @@ typedef PatientExamPicker = Future<XFile?> Function();
 class PatientWorkspace extends StatefulWidget {
   final ApiClient api;
   final bool examsOnly;
+  final VoidCallback? onFindDonationLocation;
   const PatientWorkspace({
     super.key,
     required this.api,
     this.examsOnly = false,
+    this.onFindDonationLocation,
   });
   @override
   State<PatientWorkspace> createState() => _PatientWorkspaceState();
@@ -105,6 +107,15 @@ class _PatientWorkspaceState extends State<PatientWorkspace> {
                 'Acompanhe suas consultas e envie os resultados solicitados na área privada. A aptidão para doar depende da avaliação profissional e da triagem do serviço de hemoterapia.',
               ),
               const SizedBox(height: 20),
+              if (data['status'] == 'APROVADO' &&
+                  widget.onFindDonationLocation != null) ...[
+                FilledButton.icon(
+                  onPressed: widget.onFindDonationLocation,
+                  icon: const Icon(Icons.location_on_outlined),
+                  label: const Text('Encontrar onde doar'),
+                ),
+                const SizedBox(height: 12),
+              ],
               if (data['status'] == 'PRE_CADASTRADO' ||
                   data['status'] == 'REPROVADO') ...[
                 FilledButton.icon(

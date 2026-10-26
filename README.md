@@ -35,5 +35,6 @@ O plano em infra/aws/README.md descreve RDS criptografado, ECS/Fargate, S3 priva
 - Arquitetura: infra/aws/README.md
 - Termos e privacidade: docs/legal/README.md
 - Interfaces e navegação: docs/design/interfaces-oficiais.md
+- Revisão das interfaces e jornada: [evidências de 26/10/2026](docs/testes/revisao-interfaces-2026-10-26.md)
 
 O código recebido por bundle foi integrado em uma branch própria, preservando a autoria dos commits. Banco, arquivos de exames, código e chave SSH são entregas distintas: o bundle não contém o conteúdo da VM. A revisão e o merge permanecem a cargo de Jhonatan.

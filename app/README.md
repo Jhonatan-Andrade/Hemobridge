@@ -2,6 +2,8 @@
 
 Aplicativo Flutter/Dart para Android e iOS, com Poppins, cores magenta e petróleo, cards arredondados e navegação inferior. Compartilha contratos da API com o site. Não armazena exames ou dados de saúde nas preferências locais.
 
+Abre no Início do visitante, com explicação da plataforma e leitura pública da Comunidade. Após entrar, uma conta com apresentação pendente recebe primeiro a introdução. O tour só abre pela ação posterior à explicação: seis etapas para Paciente/Doador e quatro por perfil profissional. A obrigatoriedade depende da conclusão no servidor; sair preserva a pendência. Consulte a [revisão de 26/10/2026](../docs/testes/revisao-interfaces-2026-10-26.md): análise aprovada e 105 testes passaram nesta versão, sem nova homologação física.
+
 ## Executar e validar
 
 Instale o Flutter e os SDKs da plataforma. Execute flutter pub get, flutter analyze e flutter test. Use flutter run --dart-define=API_URL=https://seu-dominio/api com o endereço do ambiente autorizado. Em modo release, o cliente recusa API sem HTTPS. O endereço acima é apenas a forma de configuração; nenhum domínio foi provisionado por este projeto.

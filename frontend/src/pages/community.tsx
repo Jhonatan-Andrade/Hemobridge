@@ -4,12 +4,15 @@ import { communityRoleLabels } from '../types/domain'
 import type { CommunityParticipantRole, Identity, Publication, RequestState } from '../types/domain'
 import { api, messageOf } from '../services/api-client'
 import { isInstitutionalPin, isVerifiedAuthor } from '../services/feed-expiration'
+import { localDateTimeValue } from '../services/local-date-time'
 import { Alert, Icon, Intro, RouteLink } from '../components/ui'
 import type { Navigate } from '../components/ui'
 export type CommunityProps = {
   route: string
   navigate: Navigate
   identity: Identity
+  needsIntroduction?: boolean
+  onPrepareAccount?: () => void
   participantRole: CommunityParticipantRole
   userName: string
   publications: Publication[]
@@ -199,7 +202,12 @@ function CommunityComposer(p: CommunityProps) {
           profissionais.
         </p>
       </div>
-      {p.identity === 'visitor' ? (
+      {p.needsIntroduction ? (
+        <div className="community-journey-notice">
+          <p>Você pode ler a Comunidade agora. Para publicar, conheça o HemoBridge e conclua a apresentação da sua jornada.</p>
+          <button type="button" className="button" onClick={p.onPrepareAccount}>Conhecer minha jornada</button>
+        </div>
+      ) : p.identity === 'visitor' ? (
         <RouteLink className="button" to="login" navigate={p.navigate}>
           Entrar para publicar
         </RouteLink>
@@ -261,7 +269,7 @@ function CommunityComposer(p: CommunityProps) {
                     type="datetime-local"
                     required
                     value={expires}
-                    min={new Date().toISOString().slice(0, 16)}
+                    min={localDateTimeValue()}
                     onChange={(e) => setExpires(e.target.value)}
                   />
                   <span className="help">
@@ -436,7 +444,12 @@ export function PostPage(p: CommunityProps) {
             Mostrar mais comentários
           </button>
         )}
-        {p.identity === 'visitor' ? (
+        {p.needsIntroduction ? (
+          <div className="community-journey-notice">
+            <p>Para comentar, conheça o HemoBridge e conclua a apresentação da sua jornada. A leitura continua disponível.</p>
+            <button type="button" className="button" onClick={p.onPrepareAccount}>Conhecer minha jornada</button>
+          </div>
+        ) : p.identity === 'visitor' ? (
           <RouteLink className="button" to="login" navigate={p.navigate}>
             Entrar para comentar
           </RouteLink>

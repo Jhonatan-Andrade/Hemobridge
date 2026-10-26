@@ -42,6 +42,7 @@ void main() {
         }),
       )..token = 'token-representante';
       final session = SessionController(api)
+        ..isFirstAccess = false
         ..user = {
           'id': 'representante-teste',
           'nome': 'Representante de teste',
@@ -142,6 +143,7 @@ void main() {
           }),
         );
         final session = SessionController(api)
+          ..isFirstAccess = false
           ..user = {
             'id': 'conta-teste',
             'nome': 'Conta de teste',

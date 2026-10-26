@@ -56,7 +56,7 @@ void main() {
     },
   );
 
-  test('perfis apresentam suas abas e o mesmo processo inicial', () {
+  test('perfis apresentam jornadas específicas e funções existentes', () {
     final areas = {
       'PACIENTE': ['Painel', 'Locais', 'Comunidade', 'Perfil'],
       'MEDICO': ['Agenda', 'Exames', 'Comunidade', 'Perfil'],
@@ -65,14 +65,27 @@ void main() {
     };
     for (final entry in areas.entries) {
       final steps = tourSteps(entry.key);
-      expect(steps, hasLength(4));
-      expect(steps.first.journey, isTrue);
+      expect(steps, hasLength(entry.key == 'PACIENTE' ? 6 : 4));
+      expect(steps.first.journey, isFalse);
+      if (entry.key != 'PACIENTE') {
+        expect(steps.any((step) => step.journey), isFalse);
+      }
       final text = steps.map((step) => '${step.title} ${step.text}').join(' ');
       for (final label in entry.value) {
         expect(text, contains(label), reason: entry.key);
       }
     }
   });
+
+  test(
+    'doador aprovado recebe contexto do percurso concluído e localização da próxima ação',
+    () {
+      final steps = tourSteps('PACIENTE', approvedDonor: true);
+      expect(steps.first.text, contains('já passou pelo pré-cadastro'));
+      expect(steps[1].text, contains('Encontrar onde doar'));
+      expect(steps[1].text, isNot(contains('toque em Agendar consulta')));
+    },
+  );
 
   test(
     'prazos usam fonte da instituição e não misturam médias de unidades',
@@ -119,7 +132,7 @@ void main() {
       expect(timings[1].estimates, isEmpty);
       expect(timings[1].fallback, contains('10 minutos'));
       expect(timings.last.estimates.single.minutes, 120);
-      expect(journeyTimings(null).last.fallback, contains('unidade'));
+      expect(journeyTimings(null).last.fallback, contains('instituição'));
     },
   );
 }

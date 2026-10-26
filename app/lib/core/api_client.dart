@@ -24,18 +24,19 @@ class ApiClient {
     String path, {
     String method = 'GET',
     Map<String, dynamic>? body,
+    bool authenticated = true,
   }) async {
     final req = http.Request(method, _uri(path));
     req.headers.addAll({
       'Accept': 'application/json',
-      if (token != null) 'Authorization': 'Bearer $token',
+      if (authenticated && token != null) 'Authorization': 'Bearer $token',
     });
     if (body != null) {
       req.headers['Content-Type'] = 'application/json';
       req.body = jsonEncode(body);
     }
     try {
-      final response = await _send(req);
+      final response = await _send(req, authenticated: authenticated);
       final data = response.body.isEmpty ? null : jsonDecode(response.body);
       if (response.statusCode >= 400) {
         final message = data is Map ? data['message'] : null;
@@ -72,10 +73,15 @@ class ApiClient {
     return Uri.parse('${baseUrl.replaceAll(RegExp(r'/$'), '')}$path');
   }
 
-  Future<http.Response> _send(http.BaseRequest request) async {
+  Future<http.Response> _send(
+    http.BaseRequest request, {
+    bool authenticated = true,
+  }) async {
     request.followRedirects = false;
     request.headers['Accept'] = 'application/json';
-    if (token != null) request.headers['Authorization'] = 'Bearer $token';
+    if (authenticated && token != null) {
+      request.headers['Authorization'] = 'Bearer $token';
+    }
     try {
       return await (() async {
         final response = await http.Response.fromStream(

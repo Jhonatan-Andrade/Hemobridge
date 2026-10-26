@@ -6,7 +6,7 @@
 
 *Aplicação web executada em 21/10/2026. Fonte: HemoBridge; níveis e instituição da carga de testes, sem correspondência com estoque real.*
 
-No site, a área do hospital contém **Necessidades** e **Estoque**. No aplicativo, os quatro destinos inferiores são **Necessidades**, **Comunidade**, **Estoque** e **Perfil**. Confira sempre a instituição vinculada à conta.
+No site, a área do hospital contém **Necessidades**, **Estoque** e **Registrar doação**. No aplicativo, os quatro destinos inferiores são **Necessidades**, **Comunidade**, **Estoque** e **Perfil**; o cabeçalho oferece **Registrar doação**. Confira a instituição vinculada à conta.
 
 ## Atualizar necessidades de sangue
 
@@ -61,4 +61,6 @@ Os próximos estados dependem da situação atual. Por exemplo, uma bolsa em qua
 
 Em **Perfil**, confira a identificação da conta e encerre a sessão em **Sair**. A Comunidade está disponível para publicação, comentários e denúncias conforme as [normas de participação](README.md#comunidade-publicar-comentar-e-acompanhar).
 
-O menu desta versão não oferece telas para cadastrar médicos, registrar a doação individual por CPF, consultar gráficos de doações ou exportar relatórios. O [registro de revisão](revisao-e-evidencias.md) identifica essas diferenças entre os serviços existentes e a navegação apresentada, para que a equipe as confira antes da apresentação final.
+Para **Registrar doação**, localize o doador aprovado pelo CPF apresentado na triagem, confira a identidade e informe data da coleta, peso aferido e confirmações aplicáveis. Confirme a triagem e o registro, e aguarde a resposta. **Doação avulsa** registra data e tipo sanguíneo sem vínculo cadastral, para fins estatísticos. Nenhuma modalidade atualiza automaticamente os níveis de necessidade ou o estoque de bolsas.
+
+Os clientes não expõem todos os contratos da API para cadastro de médicos ou exportação de relatórios. O [registro de revisão](revisao-e-evidencias.md) mantém o histórico da cobertura anterior; a [revisão atual](../testes/revisao-interfaces-2026-10-26.md) registra os percursos e limites desta entrega.

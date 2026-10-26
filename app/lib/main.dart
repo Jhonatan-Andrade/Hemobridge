@@ -4,7 +4,7 @@ import 'core/app_theme.dart';
 import 'core/session_controller.dart';
 import 'features/auth/login_page.dart';
 import 'features/navigation/app_shell.dart';
-import 'features/onboarding/onboarding_page.dart';
+import 'features/home/public_home_page.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,10 +28,10 @@ class HemoBridgeApp extends StatelessWidget {
       theme: hemobridgeTheme(),
       home: !session.ready
           ? const Scaffold(body: Center(child: CircularProgressIndicator()))
-          : session.user == null || session.user!['senhaProvisoria'] == true
-          ? LoginPage(session: session, firstPassword: session.user != null)
-          : session.isFirstAccess
-          ? OnboardingPage(session: session)
+          : session.user == null
+          ? PublicHomeShell(session: session)
+          : session.user!['senhaProvisoria'] == true
+          ? LoginPage(session: session, firstPassword: true)
           : AppShell(session: session),
     ),
   );

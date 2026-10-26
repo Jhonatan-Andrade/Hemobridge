@@ -467,3 +467,15 @@ form .button {
 .privacy-requests { display: grid; gap: 1.5rem; }
 .privacy-requests form { display: grid; gap: 1rem; }
 .privacy-requests textarea { min-height: 8rem; resize: vertical; }
+
+.platform-introduction { max-width: 960px; overflow-wrap: anywhere; }
+.platform-introduction h1 { margin-bottom: 20px; }
+.platform-introduction > p { line-height: 1.8; margin-bottom: 28px; }
+.platform-introduction .surface { margin: 24px 0; }
+.platform-introduction .surface p { line-height: 1.8; margin-top: 16px; }
+.platform-introduction .actions { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 24px; }
+.platform-introduction .actions > * { max-width: 100%; white-space: normal; }
+.platform-steps { padding-left: 24px; }
+.platform-steps li { line-height: 1.8; margin: 20px 0; }
+.introduction-acknowledge { max-width: 100%; white-space: normal; padding: 16px 24px; }
+.community-journey-notice p { margin: 16px 0; }

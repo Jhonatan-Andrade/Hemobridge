@@ -1,7 +1,9 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFirstAccess, completeFirstAccess } from '../src/services/first-access.ts'
-import { journeyTimings, tourSteps, tourRoleLabels } from '../src/services/tour-content.ts'
+import { tourSteps, tourRoleLabels } from '../src/services/tour-content.ts'
+
+import { hasPendingJourney, journeyDialogMode, needsJourneyIntroduction } from '../src/services/onboarding-flow.ts'
 
 function storage(t, values = new Map()) {
   const previous = globalThis.window
@@ -48,74 +50,77 @@ test('erro de gravação não libera o tour e pode ser tentado novamente', async
   await assert.rejects(completeFirstAccess(account), /confirmar/)
 })
 
-test('cada perfil apresenta o processo, suas áreas e o perfil sem instruções de inputs', () => {
+test('cada perfil explica seu próprio trabalho e onde estão as funções existentes', () => {
   const areas = {
-    PACIENTE: [
-      'Meu painel',
-      'Consultas',
-      'Exames',
-      'Notificações',
-      'Locais',
-      'Comunidade',
-      'Perfil',
-    ],
-    MEDICO: ['instituição', 'Agenda', 'Atendimento', 'Exames', 'Comunidade', 'Perfil'],
-    REPRESENTANTE: ['Necessidades', 'Estoque', 'Comunidade', 'Perfil'],
-    ADMINISTRADOR: ['Mapa', 'Moderação', 'Comunidade', 'Perfil'],
+    PACIENTE: ['Meu painel', 'Minhas consultas', 'Meus exames', 'Notificações', 'Locais', 'Comunidade', 'Perfil'],
+    MEDICO: ['instituição', 'Minha agenda', 'Atendimento', 'Exames', 'Comunidade', 'Perfil'],
+    REPRESENTANTE: ['Necessidades', 'Registrar doação', 'Estoque', 'Comunidade', 'Perfil'],
+    ADMINISTRADOR: ['Mapa regional', 'Moderação', 'Privacidade', 'Comunidade', 'Perfil'],
   }
   for (const [role, labels] of Object.entries(areas)) {
     const steps = tourSteps(role)
-    assert.equal(steps.length, 4)
-    assert.equal(steps[0].journey, true)
-    assert.match(steps[3].title, /Perfil/)
+    assert.equal(steps.length, role === 'PACIENTE' ? 6 : 4)
     assert.ok(tourRoleLabels[role])
-    const text = steps.map((s) => `${s.title} ${s.text}`).join(' ')
+    const text = steps.map((s) => `${s.title} ${s.text} ${s.location}`).join(' ')
     for (const label of labels) assert.ok(text.includes(label), `${role}: ${label}`)
-    assert.doesNotMatch(text, /fict[ií]ci|\bHEM[- ]?\d+|preencha o campo/i)
+    for (const step of steps) assert.ok(step.location.length > 5)
+    assert.doesNotMatch(text, /fict[ií]ci|\bHEM[- ]?\d+|preencha o campo|gestão de acessos/i)
   }
-  assert.equal(tourSteps().length, 1)
-  assert.equal(tourSteps()[0].journey, undefined)
 })
-
-test('os três prazos só usam números da instituição quando possuem origem válida', () => {
-  const result = journeyTimings([
-    {
-      etapa: 'TRIAGEM',
-      minutos: 15,
-      fonte: 'Protocolo da unidade',
-      hospital: { nome: 'Hospital Aurora' },
-    },
-    {
-      etapa: 'ATUALIZACAO_STATUS',
-      minutos: 120,
-      fonte: 'Prazo operacional',
-      hospital: { nome: 'Hospital Aurora' },
-    },
-    { etapa: 'TRIAGEM', minutos: 0, fonte: 'Protocolo', hospital: { nome: 'Inválido' } },
-    { etapa: 'DOACAO', minutos: 8, fonte: '', hospital: { nome: 'Sem fonte' } },
-    null,
-  ])
-  assert.deepEqual(
-    result.map((s) => s.stage),
-    ['TRIAGEM', 'DOACAO', 'ATUALIZACAO_STATUS'],
-  )
-  assert.equal(result[0].estimates[0].minutos, 15)
-  assert.equal(result[0].estimates.length, 1)
-  assert.equal(result[1].estimates.length, 0)
-  assert.match(result[1].fallback, /10 minutos/)
-  assert.equal(result[2].estimates[0].minutos, 120)
-  assert.match(journeyTimings({})[2].fallback, /unidade/)
+test('a jornada distingue cadastro, orientação automática, exames condicionais e aptidão presencial', () => {
+  const steps = tourSteps('PACIENTE')
+  assert.match(steps[0].text, /Não há uma aprovação administrativa separada/)
+  assert.match(steps[1].text, /não é uma aprovação clínica/)
+  assert.match(steps[2].text, /concluir a consulta, por si só, não indica aprovação/)
+  assert.match(steps[3].text, /Se o médico solicitar/)
+  assert.match(steps[3].text, /avaliação dos resultados solicitados/)
+  assert.match(steps[4].text, /não reserva a coleta/)
+  assert.match(steps[4].text, /triagem presencial/)
+  assert.match(steps[5].text, /instituição registra/)
+  assert.doesNotMatch(steps[5].text, /processando|sincroniza.*automaticamente/i)
 })
-
-test('prazos de hospitais diferentes são apresentados separadamente', () => {
-  const estimates = [15, 30].map((minutos, index) => ({
-    etapa: 'TRIAGEM',
-    minutos,
-    fonte: 'Protocolo',
-    hospital: { nome: `Instituição ${index}` },
-  }))
-  assert.deepEqual(
-    journeyTimings(estimates)[0].estimates.map((s) => s.minutos),
-    [15, 30],
-  )
+test('doador aprovado recebe contexto das etapas já percorridas, sem novo agendamento como pendência', () => {
+  const steps = tourSteps('PACIENTE', true)
+  assert.match(steps[0].text, /já concluiu o pré-cadastro e sua avaliação/)
+  assert.match(steps[1].text, /histórico/)
+  assert.match(steps[1].text, /onde doar agora, use Locais/)
+  assert.doesNotMatch(steps[1].location, /Agendar consulta/)
+})
+test('a única duração numérica é a referência da coleta presencial do paciente', () => {
+  for (const role of Object.keys(tourRoleLabels)) {
+    const steps = tourSteps(role)
+    const references = steps.filter((s) => s.collectionReference)
+    assert.equal(references.length, role === 'PACIENTE' ? 1 : 0)
+    for (const step of steps) {
+      if (step.collectionReference) {
+        assert.match(step.duration, /Hemominas.*dez minutos/)
+        assert.match(step.duration, /não inclui todo o atendimento/)
+      } else if (step.duration) assert.match(step.duration, /varia conforme a instituição/)
+    }
+  }
+})
+const account = { id: 'conta-1', perfil: 'PACIENTE', isFirstAccess: true, senhaProvisoria: false }
+test('login, restauração de sessão e troca de rota não abrem a apresentação automaticamente', () => {
+  assert.equal(hasPendingJourney(account), true)
+  for (const route of ['home', 'dashboard', 'profile', 'professional/exams', 'community']) {
+    assert.equal(journeyDialogMode(account, null), null, route)
+  }
+  assert.equal(journeyDialogMode(null, null), null)
+  assert.equal(journeyDialogMode({ ...account, senhaProvisoria: true }, account.id), null)
+  assert.equal(journeyDialogMode({ ...account, id: 'outra-conta' }, account.id), null)
+})
+test('só a escolha explícita da conta abre o modo obrigatório; revisão permanece opcional', () => {
+  assert.equal(journeyDialogMode(account, account.id), 'mandatory')
+  assert.equal(journeyDialogMode({ ...account, isFirstAccess: false }, account.id), 'review')
+  assert.equal(journeyDialogMode({ ...account, isFirstAccess: false }, null), null)
+})
+test('conta pendente preserva conteúdo público e mostra introdução antes das funções privadas', () => {
+  for (const route of ['dashboard', 'profile', 'notifications', 'professional', 'professional/stock', 'external-booking', 'external-exams']) {
+    assert.equal(needsJourneyIntroduction(account, route), true, route)
+    assert.equal(needsJourneyIntroduction({ ...account, isFirstAccess: false }, route), false, route)
+    assert.equal(needsJourneyIntroduction(null, route), false, route)
+  }
+  for (const route of ['home', 'how-it-works', 'community', 'post/123/comments', 'external-locations', 'privacy', 'accessibility', 'first']) {
+    assert.equal(needsJourneyIntroduction(account, route), false, route)
+  }
 })

@@ -40,10 +40,10 @@ void main() {
         home: OnboardingPage(session: session),
       ),
     );
-    expect(find.text('Etapa 1 de 4'), findsOneWidget);
+    expect(find.text('Etapa 1 de 6'), findsOneWidget);
     expect(find.text('Pular'), findsNothing);
     expect(completions, 0);
-    for (var i = 0; i < 3; i++) {
+    for (var i = 0; i < 5; i++) {
       await tester.ensureVisible(find.text('Continuar'));
       await tester.tap(find.text('Continuar'));
       await tester.pumpAndSettle();
@@ -183,6 +183,11 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    for (var i = 0; i < 4; i++) {
+      await tester.ensureVisible(find.text('Continuar'));
+      await tester.tap(find.text('Continuar'));
+      await tester.pumpAndSettle();
+    }
     expect(find.text('Hospital Aurora: cerca de 15 min.'), findsOneWidget);
     expect(find.text('Hospital Aurora: cerca de 40 min.'), findsOneWidget);
     expect(find.text('Hospital Aurora: cerca de 120 min.'), findsOneWidget);

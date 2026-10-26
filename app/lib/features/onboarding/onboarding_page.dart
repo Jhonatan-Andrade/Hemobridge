@@ -17,6 +17,8 @@ class OnboardingPage extends StatefulWidget {
 }
 
 class _OnboardingPageState extends State<OnboardingPage> {
+  final titleFocus = FocusNode(debugLabel: 'Título da etapa');
+  final scroll = ScrollController();
   int step = 0;
   bool busy = false, loadingEstimates = true, estimatesFailed = false;
   String? error;
@@ -25,7 +27,25 @@ class _OnboardingPageState extends State<OnboardingPage> {
   @override
   void initState() {
     super.initState();
-    loadEstimates();
+    if (widget.session.user?['perfil'] == 'PACIENTE') loadEstimates();
+    focusTitle();
+  }
+
+  void focusTitle() => WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (mounted) titleFocus.requestFocus();
+  });
+
+  void changeStep(int value) {
+    setState(() => step = value);
+    if (scroll.hasClients) scroll.jumpTo(0);
+    focusTitle();
+  }
+
+  @override
+  void dispose() {
+    titleFocus.dispose();
+    scroll.dispose();
+    super.dispose();
   }
 
   Future<void> loadEstimates() async {
@@ -55,6 +75,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
     });
     try {
       await widget.session.completeTour();
+      if (mounted && Navigator.canPop(context)) Navigator.pop(context);
     } catch (_) {
       if (mounted) {
         setState(
@@ -149,115 +170,116 @@ class _OnboardingPageState extends State<OnboardingPage> {
   @override
   Widget build(BuildContext context) {
     final role = widget.session.user!['perfil'] as String;
-    final steps = tourSteps(role);
+    final steps = tourSteps(
+      role,
+      approvedDonor: widget.session.user?['papel'] == 'DOADOR',
+    );
     final current = steps[step];
     return PopScope(
       canPop: widget.optional && !busy,
-      child: Scaffold(
-        backgroundColor: petrol.withValues(alpha: 0.88),
-        body: SafeArea(
-          child: Center(
-            child: Dialog(
-              insetPadding: const EdgeInsets.all(16),
-              backgroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(24),
-              ),
-              clipBehavior: Clip.antiAlias,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxWidth: 620,
-                  maxHeight: MediaQuery.sizeOf(context).height - 64,
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Flexible(
-                      child: SingleChildScrollView(
-                        padding: const EdgeInsets.all(24),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            const BrandTitle(),
-                            const SizedBox(height: 16),
-                            Text(tourRoleLabel(role)),
-                            const SizedBox(height: 12),
-                            Semantics(
-                              liveRegion: true,
-                              child: Text(
-                                'Etapa ${step + 1} de ${steps.length}',
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            LinearProgressIndicator(
-                              value: (step + 1) / steps.length,
-                            ),
-                            const SizedBox(height: 24),
-                            Semantics(
-                              header: true,
-                              child: Text(
-                                current.title,
-                                style: Theme.of(
-                                  context,
-                                ).textTheme.headlineSmall,
-                              ),
-                            ),
-                            const SizedBox(height: 18),
-                            Text(current.text),
-                            if (current.journey) journeyTimes(),
-                          ],
+      child: Dialog(
+        insetPadding: const EdgeInsets.all(16),
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        clipBehavior: Clip.antiAlias,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: 620,
+            maxHeight: MediaQuery.sizeOf(context).height - 64,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Flexible(
+                child: SingleChildScrollView(
+                  controller: scroll,
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const BrandTitle(),
+                      const SizedBox(height: 16),
+                      Text(tourRoleLabel(role)),
+                      const SizedBox(height: 12),
+                      Semantics(
+                        liveRegion: true,
+                        child: Text('Etapa ${step + 1} de ${steps.length}'),
+                      ),
+                      const SizedBox(height: 12),
+                      LinearProgressIndicator(value: (step + 1) / steps.length),
+                      const SizedBox(height: 24),
+                      Semantics(
+                        header: true,
+                        child: Focus(
+                          focusNode: titleFocus,
+                          child: Text(
+                            current.title,
+                            style: Theme.of(context).textTheme.headlineSmall,
+                          ),
                         ),
                       ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          if (error != null)
-                            Semantics(liveRegion: true, child: Text(error!)),
-                          FilledButton(
-                            onPressed: busy
-                                ? null
-                                : step == steps.length - 1
-                                ? complete
-                                : () => setState(() => step++),
-                            child: Text(
-                              busy
-                                  ? 'Salvando…'
-                                  : step == steps.length - 1
-                                  ? 'Concluir e acessar'
-                                  : 'Continuar',
-                            ),
-                          ),
-                          if (step > 0)
-                            TextButton(
-                              onPressed: busy
-                                  ? null
-                                  : () => setState(() => step--),
-                              child: const Text('Voltar'),
-                            ),
-                          if (widget.optional)
-                            TextButton(
-                              onPressed: busy
-                                  ? null
-                                  : () => Navigator.pop(context),
-                              child: const Text('Fechar orientação'),
-                            ),
-                          const SizedBox(height: 12),
-                          Text(
-                            widget.optional
-                                ? 'Você pode rever esta apresentação sempre que precisar.'
-                                : 'Conclua a apresentação para acessar sua área. Você poderá revê-la pelo Perfil.',
-                          ),
-                        ],
+                      const SizedBox(height: 18),
+                      Text(current.text),
+                      if (current.journey) journeyTimes(),
+                    ],
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (error != null)
+                      Semantics(liveRegion: true, child: Text(error!)),
+                    FilledButton(
+                      onPressed: busy
+                          ? null
+                          : step == steps.length - 1
+                          ? complete
+                          : () => changeStep(step + 1),
+                      child: Text(
+                        busy
+                            ? 'Salvando…'
+                            : step == steps.length - 1
+                            ? 'Concluir e acessar'
+                            : 'Continuar',
                       ),
+                    ),
+                    if (step > 0)
+                      TextButton(
+                        onPressed: busy ? null : () => changeStep(step - 1),
+                        child: const Text('Voltar'),
+                      ),
+                    if (widget.optional)
+                      TextButton(
+                        onPressed: busy ? null : () => Navigator.pop(context),
+                        child: const Text('Fechar orientação'),
+                      ),
+                    if (!widget.optional)
+                      TextButton(
+                        onPressed: busy || widget.session.signingOut
+                            ? null
+                            : () async {
+                                try {
+                                  await widget.session.logout();
+                                } catch (_) {
+                                  /* O logout local também limpa a sessão. */
+                                }
+                              },
+                        child: const Text('Sair da conta'),
+                      ),
+                    const SizedBox(height: 12),
+                    Text(
+                      widget.optional
+                          ? 'Você pode rever esta apresentação sempre que precisar.'
+                          : 'Conclua a apresentação para acessar sua área. Você poderá revê-la pelo Perfil.',
                     ),
                   ],
                 ),
               ),
-            ),
+            ],
           ),
         ),
       ),

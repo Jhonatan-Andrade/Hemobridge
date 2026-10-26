@@ -2,7 +2,7 @@ import { Alert, RouteLink } from '../components/ui'
 import { PublicationCard } from './community'
 import type { CommunityProps } from './community'
 export function HomePage(props: CommunityProps) {
-  const { identity, navigate, publications, response, onLike, onOpenPost, onTour } = props
+  const { identity, navigate, publications, response, onLike, onOpenPost } = props
   return (
     <div className="public-home">
       <main className="home-grid" aria-label="Conheça o HemoBridge">
@@ -40,9 +40,9 @@ export function HomePage(props: CommunityProps) {
             <p className="home-context">
               O pré-cadastro inicia o processo. A avaliação acontece nas etapas seguintes.
             </p>
-            <button className="button secondary home-tour-button" type="button" onClick={onTour}>
-              Como funciona? Ver tour
-            </button>
+            <RouteLink className="button secondary home-tour-button" to="how-it-works" navigate={navigate}>
+              Como funciona
+            </RouteLink>
           </div>
           <aside className="home-hero-explainer" aria-labelledby="home-explainer-title">
             <span className="home-explainer-kicker">Conheça a plataforma</span>

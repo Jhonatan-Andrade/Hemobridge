@@ -20,7 +20,9 @@ import {
   saveFontScale,
   saveVlibrasAuto,
 } from './services/accessibility-preferences'
-import { completeFirstAccess, readFirstAccess } from './services/first-access'
+import { completeFirstAccess } from './services/first-access'
+import { hasPendingJourney, journeyDialogMode, needsJourneyIntroduction } from './services/onboarding-flow'
+import { FirstAccessIntroduction, PlatformExplanation } from './pages/platform-introduction'
 import { postContext, routeFromLocation } from './services/saved-routes'
 import type { PostContext } from './services/saved-routes'
 import type { FontScale } from './services/accessibility-preferences'
@@ -68,7 +70,7 @@ function App() {
     [loadedRevision, setLoadedRevision] = useState(-1),
     [feedError, setFeedError] = useState(false),
     [drafts, setDrafts] = useState<Record<string, string>>({}),
-    [tourRequested, setTourRequested] = useState(false),
+    [tourRequested, setTourRequested] = useState<string | null>(null),
     [postOrigin, setPostOrigin] = useState<'home' | 'community'>(
       () => postContext(history.state?.postContext)?.origin ?? 'community',
     ),
@@ -91,6 +93,11 @@ function App() {
         ? 'patient'
         : 'professional',
     participantRole: CommunityParticipantRole = identity === 'professional' ? role : 'patient'
+  const pendingJourney = hasPendingJourney(user)
+  const dialogMode = journeyDialogMode(user, tourRequested)
+  const loadedPostId = route.startsWith('post/') && feed.items.some((post) => post.id === route.split('/')[1])
+    ? route.split('/')[1]
+    : null
   const navigate: Navigate = (next, options) => {
     if (next === 'login' && (protectedRoute(route) || route.startsWith('post/')))
       loginReturn.current = route
@@ -160,7 +167,7 @@ function App() {
     return () => window.clearTimeout(timer)
   }, [feed.items])
   useEffect(() => {
-    if (!user) return
+    if (!user || hasPendingJourney(user)) return
     const controller = new AbortController()
     api<{ publicacaoId: string }[]>('/comunidade/minhas-reacoes', { signal: controller.signal })
       .then((items) => {
@@ -177,7 +184,7 @@ function App() {
       api<Publication>(`/comunidade/publicacoes/${route.split('/')[1]}`, {
         signal: controller.signal,
       }),
-      user
+      user && !hasPendingJourney(user)
         ? api<{ publicacaoId: string }[]>('/comunidade/minhas-reacoes', {
             signal: controller.signal,
           })
@@ -220,7 +227,7 @@ function App() {
       if (route.endsWith('/comments')) target?.scrollIntoView({ block: 'start' })
     })
     return () => cancelAnimationFrame(frame)
-  }, [route])
+  }, [route, user?.id, user?.isFirstAccess, loadedPostId])
   useEffect(() => {
     document.documentElement.style.fontSize = `${fontScale}%`
   }, [fontScale])
@@ -254,6 +261,7 @@ function App() {
     try {
       await endSession()
       setUser(null)
+      setTourRequested(null)
       navigate('home')
     } catch (e) {
       setError(messageOf(e))
@@ -262,6 +270,7 @@ function App() {
   async function authDone(kind: string) {
     if (kind === 'login' || kind === 'first') {
       const u = await api<SessionUser>('/auth/me')
+      setTourRequested(null)
       setUser(u)
       navigate(loginRouteOf(u, loginReturn.current))
       loginReturn.current = null
@@ -271,9 +280,17 @@ function App() {
         kind === 'register' ? 'registered' : kind === 'forgot' ? 'neutral' : 'passwordSuccess',
       )
   }
-  const invite = () => navigate('login')
+  function requestTour() {
+    if (!user) navigate('how-it-works')
+    else if (user.senhaProvisoria) navigate('first')
+    else if (pendingJourney) {
+      navigate(entryRouteOf(user))
+      requestAnimationFrame(() => document.querySelector<HTMLElement>('main h1')?.focus())
+    } else setTourRequested(user.id)
+  }
+  const invite = () => user ? requestTour() : navigate('login')
   async function like(id: string) {
-    if (!user) {
+    if (!user || pendingJourney) {
       invite()
       return
     }
@@ -290,6 +307,7 @@ function App() {
     }
   }
   async function sendComment(id: string, text: string) {
+    if (pendingJourney) throw new Error('Conheça o HemoBridge e conclua a apresentação da sua jornada antes de comentar.')
     const comment = await api<Comment>(`/comunidade/publicacoes/${id}/comentarios`, {
       method: 'POST',
       body: { texto: text, aceiteNormas: true, versaoNormas: '2026-10' },
@@ -310,6 +328,7 @@ function App() {
     critical: boolean,
     expires: string,
   ) {
+    if (pendingJourney) throw new Error('Conheça o HemoBridge e conclua a apresentação da sua jornada antes de publicar.')
     await api('/comunidade/publicacoes', {
       method: 'POST',
       body: {
@@ -373,6 +392,8 @@ function App() {
     route,
     navigate,
     identity,
+    needsIntroduction: pendingJourney,
+    onPrepareAccount: requestTour,
     participantRole,
     userName: user?.nome ?? '',
     publications: feed.items,
@@ -405,10 +426,8 @@ function App() {
     drafts,
     onDraft: (id: string, value: string) => setDrafts((d) => ({ ...d, [id]: value })),
     postOrigin,
-    onTour: () => setTourRequested(true),
+    onTour: requestTour,
   }
-  const isFirstAccess = !!user && readFirstAccess(user)
-  const mandatory = !!user && !user.senhaProvisoria && isFirstAccess
   const denied =
     user &&
     ((identity === 'patient' && route.startsWith('professional')) ||
@@ -423,7 +442,8 @@ function App() {
         route={route}
         navigate={navigate}
         professionalRole={role}
-        onTour={() => setTourRequested(true)}
+        onTour={requestTour}
+        tourLabel={!user ? 'Como funciona' : pendingJourney ? 'Conhecer minha jornada' : 'Rever minha jornada'}
       />
       {user && (
         <div className="session-actions">
@@ -462,6 +482,10 @@ function App() {
               Abrir minha área
             </RouteLink>
           </main>
+        ) : user && needsJourneyIntroduction(user, route) ? (
+          <FirstAccessIntroduction user={user} navigate={navigate} onUnderstand={() => setTourRequested(user.id)} />
+        ) : route === 'how-it-works' ? (
+          <PlatformExplanation navigate={navigate} user={user} />
         ) : route === 'home' ? (
           <HomePage {...common} />
         ) : route === 'community' ? (
@@ -487,10 +511,12 @@ function App() {
               setVlibrasAuto(enabled)
               if (!enabled) location.reload()
             }}
-            onTour={() => setTourRequested(true)}
+            onTour={requestTour}
+            journeyPending={pendingJourney}
+            signedIn={!!user}
           />
         ) : route === 'external-locations' ? (
-          <LocalDiscovery user={user} />
+          <LocalDiscovery user={pendingJourney ? null : user} />
         ) : route.startsWith('external-') ? (
           <PatientJourneyPage key={route} route={route} navigate={navigate} />
         ) : route === 'dashboard' || route === 'profile' ? (
@@ -551,19 +577,25 @@ function App() {
           Fechar
         </button>
       </dialog>
-      {(mandatory || tourRequested) && (
+      {user && dialogMode && (
         <GuidedTour
           key={user?.id ?? 'visitor'}
           user={user}
-          mandatory={mandatory}
+          mandatory={dialogMode === 'mandatory'}
           onComplete={async () => {
-            if (user && mandatory) {
+            if (dialogMode === 'mandatory') {
               const result = await completeFirstAccess(user)
-              setUser({ ...user, ...result })
+              setUser((current) => current?.id === user.id ? { ...current, ...result } : current)
             }
-            setTourRequested(false)
+            setTourRequested(null)
           }}
-          onClose={() => setTourRequested(false)}
+          onClose={() => setTourRequested(null)}
+          onExit={async () => {
+            await endSession()
+            setTourRequested(null)
+            setUser(null)
+            navigate('home')
+          }}
         />
       )}
     </>

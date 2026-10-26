@@ -11,6 +11,7 @@ import 'package:hemobridge/core/session_controller.dart';
 import 'package:hemobridge/features/auth/login_page.dart';
 import 'package:hemobridge/features/navigation/app_shell.dart';
 import 'package:hemobridge/main.dart';
+import 'package:hemobridge/features/home/public_home_page.dart';
 
 class PendingLogin extends SessionController {
   final Completer<void> pending = Completer<void>();
@@ -97,7 +98,7 @@ void main() {
     await session.logout();
     await tester.pumpAndSettle();
     expect(find.text('Conteúdo privado empilhado'), findsNothing);
-    expect(find.byType(LoginPage), findsOneWidget);
+    expect(find.byType(PublicHomeShell), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

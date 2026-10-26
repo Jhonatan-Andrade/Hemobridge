@@ -1,5 +1,7 @@
 # Manual de uso do HemoBridge
 
+Navegação e apresentação inicial atualizadas em 26/10/2026. A [revisão atual das interfaces](../testes/revisao-interfaces-2026-10-26.md) complementa as evidências históricas abaixo.
+
 Versão preparada em 21/10/2026 e consolidada em 22/10. Os passos foram conferidos com a base `7b3ac2e4` e a navegação web executada após a reconciliação `1b64f929`. As figuras indicadas como protótipo ilustram o Figma e não comprovam a execução do aplicativo em um aparelho. As capturas identificadas como aplicação web foram obtidas no site local com contas de teste. A revisão de capturas e o ensaio da equipe estão registrados em [Revisão e evidências](revisao-e-evidencias.md).
 
 O HemoBridge aproxima pessoas interessadas em doar sangue de instituições de saúde. A plataforma organiza cadastro, consultas, solicitações de exames, necessidades de sangue e conversas na comunidade. A equipe responsável pelo atendimento orienta cada etapa e avalia a aptidão para doar.
@@ -26,7 +28,7 @@ Para apresentar o projeto, use os [slides editáveis](../apresentacao/hemobridge
 
 O site e o aplicativo usam a mesma conta, quando conectados ao mesmo serviço. O protótipo do Figma serve para conhecer as telas; ações feitas nele não gravam cadastro, horários ou exames.
 
-O aplicativo abre na tela de acesso. A exploração pública do Início e da Comunidade está disponível no site. Na versão atual do app, o acesso à Comunidade acontece após entrar na conta.
+Site e aplicativo abrem no Início do visitante. A explicação da plataforma e a leitura da Comunidade podem ser exploradas antes de entrar. A sessão já concluída pode acessar sua área; uma conta com apresentação pendente encontra a introdução antes das funções privadas.
 
 Para instalar e preparar o ambiente local de testes, a equipe deve seguir o [guia de instalação e testes](../guia-de-testes.md). Este manual não contém senhas de usuários nem credenciais operacionais.
 
@@ -34,11 +36,11 @@ Para instalar e preparar o ambiente local de testes, a equipe deve seguir o [gui
 
 1. Entre com seu e-mail e sua senha pessoal.
 2. Se a conta profissional exigir a troca da senha inicial, defina a nova senha e leia o termo apresentado antes de confirmar.
-3. No primeiro acesso à área autenticada, leia a apresentação de boas-vindas. Use **Avançar** para conhecer as áreas do seu perfil.
+3. No primeiro acesso à área autenticada, leia a introdução sobre o HemoBridge. Só depois escolha **Entendi o HemoBridge. Conhecer minha jornada**. Use **Continuar** para conhecer as etapas e áreas do seu perfil.
 4. Na última etapa, escolha **Concluir e acessar**. Aguarde a confirmação para começar a usar a área.
-5. Para rever a apresentação, use **Ver tour** no site ou **Perfil → Ver apresentação** no app.
+5. Para rever a apresentação, use **Rever minha jornada** no menu do site ou no Perfil do app. A revisão pode ser fechada e preserva a tela de origem.
 
-A apresentação inicial precisa ser concluída. Se surgir erro ao concluir, leia a mensagem e tente novamente quando a conexão estiver disponível. Recarregar a página não substitui essa confirmação.
+A apresentação inicial precisa ser concluída para liberar as funções da conta. Você pode usar **Sair e continuar depois**; a pendência será preservada. Se surgir erro ao concluir, leia a mensagem e tente novamente quando a conexão estiver disponível. Recarregar não substitui a confirmação nem abre o modal automaticamente.
 
 ## Comunidade: publicar, comentar e acompanhar
 

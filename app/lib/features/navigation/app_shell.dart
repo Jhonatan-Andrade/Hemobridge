@@ -4,7 +4,8 @@ import '../../core/app_theme.dart';
 import '../../core/session_controller.dart';
 import '../community/community_page.dart';
 import '../locations/locations_page.dart';
-import '../onboarding/onboarding_page.dart';
+import '../onboarding/journey_introduction.dart';
+import '../home/public_home_page.dart';
 import '../workspace/role_workspace.dart';
 import '../patient/patient_workspace.dart';
 import '../patient/patient_notifications_page.dart';
@@ -27,6 +28,7 @@ class _AppShellState extends State<AppShell> {
   @override
   Widget build(BuildContext context) {
     final role = widget.session.user!['perfil'] as String;
+    final pending = widget.session.isFirstAccess;
     final patient = role == 'PACIENTE',
         doctor = role == 'MEDICO',
         representative = role == 'REPRESENTANTE';
@@ -66,14 +68,22 @@ class _AppShellState extends State<AppShell> {
           : Icons.rule_outlined,
       Icons.person_outline,
     ];
-    final body = index == 1
-        ? CommunityPage(api: widget.session.api, role: role)
+    final body = pending && index != 1
+        ? JourneyIntroduction(
+            session: widget.session,
+            onStart: () => showJourneyTour(context, widget.session),
+          )
+        : index == 1
+        ? CommunityPage(api: widget.session.api, role: role, readOnly: pending)
         : index == 2 && patient
         ? LocationsPage(api: widget.session.api, patient: true)
         : index == 3
         ? ProfilePage(session: widget.session)
         : patient
-        ? PatientWorkspace(api: widget.session.api)
+        ? PatientWorkspace(
+            api: widget.session.api,
+            onFindDonationLocation: () => setState(() => index = 2),
+          )
         : doctor
         ? index == 2
               ? DoctorExamsPage(api: widget.session.api)
@@ -92,57 +102,89 @@ class _AppShellState extends State<AppShell> {
       appBar: AppBar(
         title: const BrandTitle(),
         actions: [
-          if (representative)
+          if (pending) ...[
+            IconButton(
+              tooltip: 'Página inicial',
+              icon: const Icon(Icons.home_outlined),
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => PublicHomeShell(session: widget.session),
+                ),
+              ),
+            ),
+            IconButton(
+              tooltip: 'Sair da conta',
+              icon: const Icon(Icons.logout),
+              onPressed: widget.session.signingOut
+                  ? null
+                  : () async {
+                      try {
+                        await widget.session.logout();
+                      } catch (_) {
+                        /* A sessão local também é removida. */
+                      }
+                    },
+            ),
+          ],
+          if (representative && !pending)
             IconButton(
               tooltip: 'Registrar doação',
               icon: const Icon(Icons.bloodtype_outlined),
               onPressed: () => Navigator.push(
                 context,
                 MaterialPageRoute<void>(
-                  builder: (_) => Scaffold(appBar: AppBar(title: const Text('Doações')), body: SafeArea(child: RepresentativeDonationsPage(api: widget.session.api))),
-                ),
-              ),
-            ),
-          IconButton(
-            tooltip: 'Notificações',
-            icon: const Icon(Icons.notifications_outlined),
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute<void>(
-                builder: (_) => PatientNotificationsPage(
-                  api: widget.session.api,
-                  destinationBuilder: (destination) => switch (destination) {
-                    'exams' when patient => PatientExamsPage(
-                      api: widget.session.api,
-                    ),
-                    'appointments' when patient => PatientAppointmentsPage(
-                      api: widget.session.api,
-                    ),
-                    'locations' when patient => Scaffold(
-                      appBar: AppBar(title: const Text('Locais')),
-                      body: LocationsPage(
+                  builder: (_) => Scaffold(
+                    appBar: AppBar(title: const Text('Doações')),
+                    body: SafeArea(
+                      child: RepresentativeDonationsPage(
                         api: widget.session.api,
-                        patient: true,
                       ),
                     ),
-                    'doctor-exams' when doctor => Scaffold(
-                      appBar: AppBar(title: const Text('Exames')),
-                      body: DoctorExamsPage(api: widget.session.api),
-                    ),
-                    'agenda' when doctor => Scaffold(
-                      appBar: AppBar(title: const Text('Agenda')),
-                      body: DoctorAgendaPage(api: widget.session.api),
-                    ),
-                    'profile' => Scaffold(
-                      appBar: AppBar(title: const Text('Meu perfil')),
-                      body: ProfilePage(session: widget.session),
-                    ),
-                    _ => null,
-                  },
+                  ),
                 ),
               ),
             ),
-          ),
+          if (!pending)
+            IconButton(
+              tooltip: 'Notificações',
+              icon: const Icon(Icons.notifications_outlined),
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute<void>(
+                  builder: (_) => PatientNotificationsPage(
+                    api: widget.session.api,
+                    destinationBuilder: (destination) => switch (destination) {
+                      'exams' when patient => PatientExamsPage(
+                        api: widget.session.api,
+                      ),
+                      'appointments' when patient => PatientAppointmentsPage(
+                        api: widget.session.api,
+                      ),
+                      'locations' when patient => Scaffold(
+                        appBar: AppBar(title: const Text('Locais')),
+                        body: LocationsPage(
+                          api: widget.session.api,
+                          patient: true,
+                        ),
+                      ),
+                      'doctor-exams' when doctor => Scaffold(
+                        appBar: AppBar(title: const Text('Exames')),
+                        body: DoctorExamsPage(api: widget.session.api),
+                      ),
+                      'agenda' when doctor => Scaffold(
+                        appBar: AppBar(title: const Text('Agenda')),
+                        body: DoctorAgendaPage(api: widget.session.api),
+                      ),
+                      'profile' => Scaffold(
+                        appBar: AppBar(title: const Text('Meu perfil')),
+                        body: ProfilePage(session: widget.session),
+                      ),
+                      _ => null,
+                    },
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
       body: SafeArea(child: body),
@@ -150,7 +192,8 @@ class _AppShellState extends State<AppShell> {
         selectedIndex: index,
         onDestinationSelected: widget.session.signingOut
             ? null
-            : (value) => setState(() => index = value),
+            : (value) =>
+                  setState(() => index = pending && value != 1 ? 0 : value),
         destinations: List.generate(
           4,
           (i) => NavigationDestination(icon: Icon(icons[i]), label: labels[i]),
@@ -214,12 +257,24 @@ class ProfilePage extends StatelessWidget {
             : () => Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) =>
-                      OnboardingPage(session: session, optional: true),
+                  builder: (introductionContext) => Scaffold(
+                    appBar: AppBar(title: const Text('Minha jornada')),
+                    body: SafeArea(
+                      child: JourneyIntroduction(
+                        session: session,
+                        onStart: () async {
+                          await showJourneyTour(introductionContext, session);
+                          if (introductionContext.mounted) {
+                            Navigator.of(introductionContext).pop();
+                          }
+                        },
+                      ),
+                    ),
+                  ),
                 ),
               ),
         icon: const Icon(Icons.help_outline),
-        label: const Text('Ver apresentação'),
+        label: const Text('Rever minha jornada'),
       ),
       FilledButton(
         onPressed: session.signingOut

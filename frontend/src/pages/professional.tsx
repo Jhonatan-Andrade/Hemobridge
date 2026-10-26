@@ -355,6 +355,7 @@ function RepresentativeNeeds() {
                   <label>
                     Nível
                     <select
+                      aria-label={`Nível de necessidade ${n.tipo}`}
                       value={changes[n.tipo] ?? n.nivel}
                       onChange={(e) => setChanges((v) => ({ ...v, [n.tipo]: e.target.value }))}
                     >
