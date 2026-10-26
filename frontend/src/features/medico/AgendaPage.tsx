@@ -67,7 +67,7 @@ export function AgendaPage() {
                 {!h.ativo && <span className="ml-2 text-small font-medium text-muted">(inativo)</span>}
               </h2>
               <p className="text-small text-muted">
-                {h.agendamentos.length} de {h.vagasTotal} vagas ocupadas
+                {h.agendamentos.length}/{h.vagasTotal} agendados
               </p>
             </div>
             {h.agendamentos.length ? (
