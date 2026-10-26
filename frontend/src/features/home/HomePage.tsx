@@ -1,21 +1,45 @@
 import fundoEditorial from '../../assets/home/fundo-editorial.jpg'
 import gotaExterior from '../../assets/home/gota-exterior.svg'
 import gotaInterior from '../../assets/home/gota-interior.svg'
+import { useLocation } from 'react-router-dom'
 import { AppShell } from '../../components/layout/AppShell'
-import { ButtonLink } from '../../components/ui'
+import { ButtonLink, Card, ErrorState, Loading, Message } from '../../components/ui'
+import { useAsync } from '../../lib/useAsync'
+import { hemocentrosService } from '../../services/hemocentros'
 import { navVisitante } from '../auth/navVisitante'
-import { PublicationCard } from './PublicationCard'
-import { publicacoes } from './publicacoes'
+import { HemocentroCard } from '../paciente/HemocentroCard'
 
 const oQueE =
-  'O HemoBridge conecta quem deseja doar sangue a hospitais e hemocentros que precisam de doações. Você encontra orientações para se cadastrar, acompanhar sua avaliação e descobrir onde sua doação pode ajudar.'
+  'O HemoBridge é uma plataforma de agendamento de doação de sangue. Você escolhe um hemocentro parceiro, vê os horários com vaga e agenda. O histórico das suas doações acompanha você entre os hemocentros.'
+
+const motivos = [
+  ['Uma doação ajuda até quatro pessoas', 'O sangue é separado em componentes usados em cirurgias, tratamentos de câncer, partos e acidentes.'],
+  ['Não há substituto', 'O sangue não pode ser fabricado. Os estoques dependem de quem doa com regularidade.'],
+  ['Sem fila e sem viagem perdida', 'Cada horário tem um número de vagas. Quando você agenda, a sua está garantida.'],
+] as const
+
+const etapas = [
+  ['Crie sua conta', 'Cadastro rápido, com o consentimento para o uso dos seus dados.'],
+  ['Escolha o hemocentro', 'Veja de quais tipos sanguíneos cada um precisa agora.'],
+  ['Agende', 'Escolha o dia e um horário com vaga.'],
+  ['Doe', 'A equipe registra a doação e ativa sua conta de doador.'],
+] as const
 
 // Figma: Web desktop / Acesso e orientações / Home pública / Inicial (43:1340) e mobile (660:7571).
-// Página estática, sem chamadas à API.
+// RF03 – apresentação pública do Hemobridge.
 export function HomePage() {
+  const parceiros = useAsync(() => hemocentrosService.listar({ tamanhoPagina: 4 }), [])
+  // Ex.: confirmação da exclusão de dados (RF16), que encerra a sessão e volta para cá.
+  const aviso = (useLocation().state as { aviso?: string } | null)?.aviso
+
   return (
     <AppShell nav={navVisitante} compacto>
-      <div className="mx-auto flex w-full max-w-296 flex-col gap-6">
+      <div className="mx-auto flex w-full max-w-296 flex-col gap-10">
+        {aviso && (
+          <Message tone="success">
+            <p>{aviso}</p>
+          </Message>
+        )}
         {/* Destaque e apresentação */}
         <section className="relative" aria-labelledby="home-titulo">
           {/* Motivo / Gota: uma parcialmente fora e outra dentro do card, sem cobrir texto. */}
@@ -36,21 +60,18 @@ export function HomePage() {
                     <br />
                     conecta vidas.
                   </h1>
-                  <p className="text-body">Consulte sua situação, veja os próximos passos e acompanhe suas consultas em um só lugar.</p>
+                  <p className="text-body">Escolha um hemocentro, veja os horários com vaga e agende sua doação de sangue.</p>
                 </div>
                 <div className="flex w-full flex-col gap-3 sm:flex-row">
                   <ButtonLink to="/cadastro" kind="editorial">
-                    Fazer pré-cadastro
+                    Criar conta
                   </ButtonLink>
                   <ButtonLink to="/entrar" kind="secondary">
                     Já tenho conta
                   </ButtonLink>
                 </div>
-                <p className="text-caption lg:max-w-168">
-                  O pré-cadastro inicia o processo. Consultas e exames aparecem quando houver dados disponíveis.
-                </p>
-                <ButtonLink to="/boas-vindas" kind="secondary">
-                  Como funciona? Ver tour
+                <ButtonLink to="/doar" kind="secondary">
+                  Ver hemocentros
                 </ButtonLink>
               </div>
 
@@ -64,10 +85,6 @@ export function HomePage() {
                   O que é o HemoBridge?
                 </h2>
                 <p className="text-body text-editorial-text">{oQueE}</p>
-                <p className="text-body text-editorial-text">
-                  Depois de entrar, você encontra sua situação, os próximos passos e as informações de suas consultas no painel. A comunidade
-                  reúne publicações e conversas sobre doação de sangue.
-                </p>
               </aside>
             </div>
 
@@ -89,38 +106,70 @@ export function HomePage() {
           <p className="text-body">{oQueE}</p>
         </section>
 
-        {/* Comunidade HemoBridge (Figma 49:15012): conteúdo de demonstração; as ações levam ao login. */}
-        <section
-          aria-labelledby="home-comunidade"
-          className="flex flex-col gap-4 rounded-sheet bg-linear-92 from-petrol-900 via-editorial-plum to-editorial-berry p-5 text-cream shadow-community lg:-mx-8 lg:rounded-sheet-lg lg:bg-linear-107 lg:p-8"
-        >
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-            <div className="flex flex-col gap-4">
-              <h2 id="home-comunidade" className="text-community-sm font-medium lg:text-community">
-                Comunidade HemoBridge
-              </h2>
-              <p className="text-body">Informações, novidades e conversas sobre doação de sangue.</p>
-              <p className="text-caption">Conversas da comunidade</p>
-              <ButtonLink to="/entrar" kind="secondary">
-                Ver comunidade
-              </ButtonLink>
-            </div>
-            <ButtonLink to="/boas-vindas" kind="secondary">
-              Próximos passos<span aria-hidden="true" className="hidden lg:inline"> →</span>
-            </ButtonLink>
-          </div>
-          <div className="grid gap-5 pt-5 lg:grid-cols-3">
-            {publicacoes.map((p) => (
-              <PublicationCard key={p.id} publicacao={p} />
+        <section aria-labelledby="por-que" className="flex flex-col gap-4">
+          <h2 id="por-que" className="text-heading font-semibold text-ink">
+            Por que doar
+          </h2>
+          <div className="grid gap-4 md:grid-cols-3">
+            {motivos.map(([titulo, texto]) => (
+              <Card key={titulo} title={titulo}>
+                {texto}
+              </Card>
             ))}
           </div>
         </section>
 
-        <div className="flex justify-center">
-          <ButtonLink to="/entrar" kind="secondary">
-            Entrar como paciente
-          </ButtonLink>
-        </div>
+        <section aria-labelledby="como-funciona" className="flex flex-col gap-4">
+          <h2 id="como-funciona" className="text-heading font-semibold text-ink">
+            Como funciona
+          </h2>
+          <ol className="grid gap-4 md:grid-cols-4">
+            {etapas.map(([titulo, texto], i) => (
+              <li key={titulo} className="flex flex-col gap-2 rounded-card border border-line bg-surface p-4">
+                <span className="flex size-9 items-center justify-center rounded-full bg-brand text-label font-semibold text-surface" aria-hidden="true">
+                  {i + 1}
+                </span>
+                <h3 className="text-section font-semibold text-ink">{titulo}</h3>
+                <p className="text-body text-muted">{texto}</p>
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        <section aria-labelledby="parceiros" className="flex flex-col gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <h2 id="parceiros" className="text-heading font-semibold text-ink">
+              Hemocentros parceiros
+            </h2>
+            <ButtonLink to="/doar" kind="secondary">
+              Ver todos
+            </ButtonLink>
+          </div>
+          {parceiros.carregando ? (
+            <Loading texto="Carregando hemocentros…" />
+          ) : parceiros.erro || !parceiros.dados ? (
+            <ErrorState mensagens={parceiros.erro ?? ['Não foi possível carregar os hemocentros.']} onRetry={parceiros.recarregar} />
+          ) : !parceiros.dados.itens.length ? (
+            <Card title="Em breve">Os primeiros hemocentros parceiros aparecerão aqui.</Card>
+          ) : (
+            <ul className="grid gap-4 md:grid-cols-2">
+              {parceiros.dados.itens.map((h) => (
+                <HemocentroCard key={h.id} hemocentro={h} />
+              ))}
+            </ul>
+          )}
+        </section>
+
+        <section className="flex flex-col items-center gap-3 rounded-sheet bg-surface p-6 text-center">
+          <h2 className="text-section font-semibold text-ink">Pronto para doar?</h2>
+          <p className="text-body text-muted">Crie sua conta e agende em poucos minutos.</p>
+          <div className="flex w-full flex-col justify-center gap-3 sm:flex-row">
+            <ButtonLink to="/cadastro">Criar conta</ButtonLink>
+            <ButtonLink to="/entrar" kind="secondary">
+              Entrar
+            </ButtonLink>
+          </div>
+        </section>
       </div>
     </AppShell>
   )
