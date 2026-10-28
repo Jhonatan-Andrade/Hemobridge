@@ -1,13 +1,17 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Ip, Post } from '@nestjs/common';
 import {
+  LimiteCadastro,
   LimiteLogin,
   LimiteRecuperacaoSenha,
   LimiteRedefinicaoSenha,
 } from '../common/limite-requisicoes.js';
+import { TERMO_CONSENTIMENTO } from '../lgpd/termo-consentimento.js';
 import { TERMO_RESPONSABILIDADE } from '../lgpd/termo-responsabilidade.js';
 import { AuthService } from './auth.service.js';
 import type { UsuarioAutenticado } from './auth.types.js';
+import { CadastroService } from './cadastro.service.js';
 import { PermitePrimeiroAcesso, Perfis, Publico, UsuarioAtual } from './decorators.js';
+import { CadastroDto } from './dto/cadastro.dto.js';
 import { LoginDto } from './dto/login.dto.js';
 import { PrimeiroAcessoDto } from './dto/primeiro-acesso.dto.js';
 import { RecuperarSenhaDto, RedefinirSenhaDto } from './dto/recuperacao-senha.dto.js';
@@ -18,7 +22,23 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly recuperacaoSenha: RecuperacaoSenhaService,
+    private readonly cadastro: CadastroService,
   ) {}
+
+  // Versão vigente do termo, para o formulário de cadastro (RF01).
+  @Publico()
+  @Get('termo-consentimento')
+  termoConsentimento() {
+    return TERMO_CONSENTIMENTO;
+  }
+
+  // RF01: cadastro do paciente. Pré-condição: o visitante não estar autenticado.
+  @Publico()
+  @LimiteCadastro()
+  @Post('register')
+  cadastrar(@Body() dto: CadastroDto, @Ip() ip: string) {
+    return this.cadastro.cadastrar(dto, ip);
+  }
 
   @Publico()
   @LimiteLogin()
@@ -59,16 +79,16 @@ export class AuthController {
     return usuario;
   }
 
-  // Contas de pacientes nunca recebem senha provisória (RN04/RN15).
+  // Contas de pacientes nunca recebem senha provisória (RN15).
   @PermitePrimeiroAcesso()
-  @Perfis('MEDICO', 'REPRESENTANTE', 'ADMINISTRADOR')
+  @Perfis('EQUIPE', 'ADMIN_PLATAFORMA')
   @Get('primeiro-acesso/termo')
   termoResponsabilidade() {
     return TERMO_RESPONSABILIDADE;
   }
 
   @PermitePrimeiroAcesso()
-  @Perfis('MEDICO', 'REPRESENTANTE', 'ADMINISTRADOR')
+  @Perfis('EQUIPE', 'ADMIN_PLATAFORMA')
   @Post('primeiro-acesso')
   @HttpCode(HttpStatus.OK)
   definirSenhaPrimeiroAcesso(

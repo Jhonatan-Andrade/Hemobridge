@@ -7,5 +7,8 @@ export default defineConfig({
     globals: true,
     root: './',
     include: ['**/*.e2e-spec.ts'],
+    // Decorators do class-transformer/Nest dependem dos metadados de reflexão.
+    setupFiles: ['reflect-metadata'],
+    testTimeout: 30_000,
   },
 });

@@ -3,7 +3,7 @@ import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { AuthGuard } from './auth.guard.js';
-import { PERFIS_KEY, PRIMEIRO_ACESSO_KEY, PUBLICO_KEY } from './decorators.js';
+import { PAPEIS_KEY, PERFIS_KEY, PRIMEIRO_ACESSO_KEY, PUBLICO_KEY } from './decorators.js';
 
 const jwt = new JwtService({ secret: 'segredo-teste', signOptions: { expiresIn: '1h' } });
 
@@ -15,7 +15,7 @@ const usuarioDb = (alteracao: Record<string, unknown> = {}) => ({
   status: 'ATIVO',
   senhaProvisoria: false,
   versaoSessao: 0,
-  paciente: { situacao: 'APROVADO' },
+  equipe: null,
   ...alteracao,
 });
 
@@ -66,7 +66,8 @@ describe('AuthGuard', () => {
       nome: 'Maria',
       email: 'maria@email.com',
       perfil: 'PACIENTE',
-      papel: 'DOADOR',
+      papel: null,
+      hemocentro: null,
       senhaProvisoria: false,
     });
   });
@@ -86,11 +87,31 @@ describe('AuthGuard', () => {
   });
 
   it('restringe por perfil', async () => {
-    const negado = montar({ [PERFIS_KEY]: ['ADMINISTRADOR'] }, usuarioDb(), bearer());
+    const negado = montar({ [PERFIS_KEY]: ['ADMIN_PLATAFORMA'] }, usuarioDb(), bearer());
     await expect(negado.guard.canActivate(negado.ctx)).rejects.toBeInstanceOf(ForbiddenException);
 
-    const permitido = montar({ [PERFIS_KEY]: ['PACIENTE', 'MEDICO'] }, usuarioDb(), bearer());
+    const permitido = montar({ [PERFIS_KEY]: ['PACIENTE', 'EQUIPE'] }, usuarioDb(), bearer());
     await expect(permitido.guard.canActivate(permitido.ctx)).resolves.toBe(true);
+  });
+
+  const medico = (ativo = true) =>
+    usuarioDb({ perfil: 'EQUIPE', equipe: { papel: 'MEDICO', hemocentro: { id: 'h1', nome: 'Hemocentro A', ativo } } });
+
+  it('restringe por papel na equipe e anexa o hemocentro do vínculo', async () => {
+    const paciente = montar({ [PAPEIS_KEY]: ['MEDICO'] }, usuarioDb(), bearer());
+    await expect(paciente.guard.canActivate(paciente.ctx)).rejects.toBeInstanceOf(ForbiddenException);
+
+    const admin = montar({ [PAPEIS_KEY]: ['ADMIN_HEMOCENTRO'] }, medico(), bearer());
+    await expect(admin.guard.canActivate(admin.ctx)).rejects.toBeInstanceOf(ForbiddenException);
+
+    const permitido = montar({ [PAPEIS_KEY]: ['MEDICO'] }, medico(), bearer());
+    await expect(permitido.guard.canActivate(permitido.ctx)).resolves.toBe(true);
+    expect(permitido.req['usuario']).toMatchObject({ papel: 'MEDICO', hemocentro: { id: 'h1', nome: 'Hemocentro A' } });
+  });
+
+  it('recusa a equipe de hemocentro desativado', async () => {
+    const { guard, ctx } = montar({}, medico(false), bearer());
+    await expect(guard.canActivate(ctx)).rejects.toThrow(/hemocentro vinculado/);
   });
 
   it('com senha provisória, só libera rotas de primeiro acesso', async () => {

@@ -348,7 +348,6 @@
   }
   tbody tr:nth-child(even) { background: rgba(196,193,189,0.10); }
   .mono-cell { font-family: var(--mono); font-weight: 500; color: var(--cor-sangue-escuro); white-space: nowrap; }
-  .compat-yes { color: var(--cor-sangue-escuro); font-weight: 600; }
 
   /* ---------- RF ACCORDION ---------- */
   .rf-group {
@@ -537,7 +536,7 @@
   <div class="side-group">
     <div class="side-group-label">TÉCNICO</div>
     <a class="side-link" href="#arquitetura">Arquitetura e tecnologias</a>
-    <a class="side-link" href="#compatibilidade">Compatibilidade sanguínea</a>
+    <a class="side-link" href="#vagas">Vagas e concorrência</a>
     <a class="side-link" href="#api">Visão geral da API</a>
   </div>
   <div class="side-group">
@@ -566,7 +565,7 @@
         <path d="M2 24 L15 24 L19 12 L24 30 L28 18 L31 24 L50 24" stroke="var(--cor-sangue)" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
       <h1>Documentação do <span>Hemobridge</span></h1>
-      <p class="lead">Plataforma web para conectar doadores de sangue às necessidades reais de estoque dos bancos de sangue, com tipo sanguíneo validado por um profissional de saúde antes de qualquer direcionamento.</p>
+      <p class="lead">Plataforma web de agendamento de doação de sangue em hemocentros, com vagas por horário e histórico de doações compartilhado entre os hemocentros.</p>
       <div class="hero-badges">
         <span class="badge">React</span>
         <span class="badge">NestJS</span>
@@ -582,61 +581,58 @@
     <section class="doc-section" id="introducao">
       <span class="section-kicker">01 — VISÃO GERAL</span>
       <h2>Introdução</h2>
-      <p>Muita gente disposta a doar sangue simplesmente não sabe onde fazer isso, ou se o seu tipo sanguíneo é o que está em falta em algum banco de sangue naquele momento. As informações costumam estar espalhadas entre redes sociais, campanhas pontuais e balcões de hospital, sem um canal único e atualizado.</p>
-      <p>O <strong>Hemobridge</strong> nasce para resolver esse desencontro: uma plataforma que centraliza as necessidades de estoque de cada banco de sangue por tipo sanguíneo e direciona o doador certo para o lugar certo, no momento certo. Como o tipo sanguíneo é um dado crítico para a segurança de uma transfusão, o sistema não aceita autodeclaração — cada cadastro passa pela validação de um profissional de saúde a partir de exame laboratorial.</p>
+      <p>Quem quer doar sangue costuma chegar ao hemocentro sem saber se haverá fila, e o hemocentro recebe doadores sem previsão: alguns horários lotam e outros ficam vazios. Além disso, cada hemocentro conhece apenas as doações feitas ali.</p>
+      <p>O <strong>Hemobridge</strong> organiza a doação pelo agendamento. O paciente escolhe um hemocentro, vê de quais tipos sanguíneos ele precisa e agenda um horário com vaga. O hemocentro define quantas pessoas atende em cada horário e registra cada doação, e esse histórico acompanha o doador nos outros hemocentros onde ele agendar — com consentimento e registro de cada acesso.</p>
     </section>
 
     <section class="doc-section" id="objetivos">
       <span class="section-kicker">02 — VISÃO GERAL</span>
       <h2>Objetivos</h2>
-      <p>O objetivo geral do projeto é desenvolver uma plataforma que centralize as necessidades de estoque dos bancos de sangue por tipo sanguíneo, direcionando o doador ao local onde sua doação é mais necessária, sempre com o tipo sanguíneo validado por um profissional de saúde.</p>
+      <p>O objetivo geral do projeto é desenvolver uma plataforma de agendamento de doação de sangue em hemocentros, com controle de vagas por horário e histórico de doações compartilhado entre hemocentros, em conformidade com a LGPD.</p>
       <h3>Objetivos específicos</h3>
       <div class="steps">
-        <div class="step"><h4>Pré-cadastro do doador</h4><p>Coleta de dados básicos e consentimento LGPD antes da validação médica.</p></div>
-        <div class="step"><h4>Agendamento com um médico</h4><p>O paciente marca uma consulta online para iniciar o processo de validação do seu tipo sanguíneo.</p></div>
-        <div class="step"><h4>Solicitação e envio de exames</h4><p>O médico solicita exames e o paciente anexa os resultados para análise.</p></div>
-        <div class="step"><h4>Registro do tipo sanguíneo</h4><p>O médico confirma o tipo sanguíneo com base no exame e aprova a ativação da conta.</p></div>
-        <div class="step"><h4>Centralização das necessidades</h4><p>Cada banco de sangue mantém suas necessidades de estoque por tipo sanguíneo atualizadas em um único canal.</p></div>
-        <div class="step"><h4>Consulta e notificação</h4><p>O doador consulta por localização e tipo sanguíneo, e é notificado quando surge uma necessidade compatível.</p></div>
+        <div class="step"><h4>Cadastro com consentimento</h4><p>Conta do paciente com aceite explícito do termo LGPD, que inclui o compartilhamento do histórico entre hemocentros.</p></div>
+        <div class="step"><h4>Agendamento com vagas</h4><p>Horários definidos pelo hemocentro, cada um com um número de vagas, sem overbooking mesmo com pedidos simultâneos.</p></div>
+        <div class="step"><h4>Registro da doação</h4><p>O médico registra comparecimento, doação, tipo sanguíneo, motivo e observações, vinculados ao hemocentro.</p></div>
+        <div class="step"><h4>Ativação do doador</h4><p>O Admin do hemocentro ativa a conta, e o tipo sanguíneo passa a aparecer no painel do paciente.</p></div>
+        <div class="step"><h4>Necessidades por tipo</h4><p>Cada hemocentro informa se o tipo está urgente, necessário ou estável, e a página Doar destaca quem precisa do tipo do paciente.</p></div>
+        <div class="step"><h4>Histórico compartilhado e auditado</h4><p>A equipe de outro hemocentro lê o histórico de quem agendou ali; cada leitura fica registrada em auditoria.</p></div>
       </div>
     </section>
 
     <section class="doc-section" id="arquitetura">
       <span class="section-kicker">03 — TÉCNICO</span>
       <h2>Arquitetura e tecnologias</h2>
-      <p>O Hemobridge segue uma arquitetura com front-end e back-end separados, escolhida para lidar com múltiplos domínios de negócio — pacientes, médicos, bancos de sangue e notificações — sem comprometer a manutenibilidade do sistema.</p>
+      <p>O Hemobridge segue uma arquitetura com front-end e back-end separados. O backend é dividido em módulos por domínio — autenticação, hemocentros e necessidades, horários, agendamentos, doações, pacientes, equipe e auditoria.</p>
       <div class="tech-grid">
         <div class="tech-card">
           <div class="tech-name"><span class="tech-dot"></span>React</div>
-          <p>Biblioteca de interface baseada em componentes, escolhida por reaproveitar elementos como cartões de bancos de sangue e filtros de busca entre diferentes telas.</p>
+          <p>Interface baseada em componentes, com as três áreas do paciente (Apresentação, Painel e Doar) e as áreas do médico, do Admin do hemocentro e do administrador da plataforma.</p>
         </div>
         <div class="tech-card">
           <div class="tech-name"><span class="tech-dot"></span>NestJS</div>
-          <p>Framework Node.js em TypeScript, organizado em módulos com injeção de dependência — adequado para separar autenticação, gestão de estoque e agendamento em domínios independentes.</p>
+          <p>API em TypeScript com guard global de JWT e restrição por perfil e papel em cada rota; o hemocentro de quem é da equipe vem sempre do vínculo no banco.</p>
         </div>
         <div class="tech-card">
           <div class="tech-name"><span class="tech-dot"></span>PostgreSQL</div>
-          <p>Banco relacional com conformidade ACID, escolhido pela consistência em atualizações concorrentes de estoque feitas por diferentes hospitais ao mesmo tempo.</p>
+          <p>Banco relacional com transações ACID e bloqueio de linha, usados para garantir que nenhum horário receba mais agendamentos do que vagas.</p>
         </div>
       </div>
     </section>
 
-    <section class="doc-section" id="compatibilidade">
+    <section class="doc-section" id="vagas">
       <span class="section-kicker">04 — TÉCNICO</span>
-      <h2>Compatibilidade sanguínea</h2>
-      <p class="muted">É a partir desta lógica que o sistema direciona notificações e recomendações de doação ao doador certo.</p>
+      <h2>Vagas e concorrência</h2>
+      <p class="muted">Exemplo: domingo às 13h com 6 vagas — só 6 pacientes conseguem agendar; o 7º vê o horário esgotado.</p>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Tipo do doador</th><th>Pode doar para</th></tr></thead>
+          <thead><tr><th>Regra</th><th>Como é garantida</th></tr></thead>
           <tbody>
-            <tr><td class="mono-cell">O−</td><td><span class="compat-yes">Doador universal</span> — O−, O+, A−, A+, B−, B+, AB−, AB+</td></tr>
-            <tr><td class="mono-cell">O+</td><td>O+, A+, B+, AB+</td></tr>
-            <tr><td class="mono-cell">A−</td><td>A−, A+, AB−, AB+</td></tr>
-            <tr><td class="mono-cell">A+</td><td>A+, AB+</td></tr>
-            <tr><td class="mono-cell">B−</td><td>B−, B+, AB−, AB+</td></tr>
-            <tr><td class="mono-cell">B+</td><td>B+, AB+</td></tr>
-            <tr><td class="mono-cell">AB−</td><td>AB−, AB+</td></tr>
-            <tr><td class="mono-cell">AB+</td><td><span class="compat-yes">Receptor universal</span> — só doa para AB+</td></tr>
+            <tr><td>Vagas restantes</td><td><code>vagas_total</code> − agendamentos com status <code>AGENDADO</code>; cancelar libera a vaga.</td></tr>
+            <tr><td>Sem overbooking</td><td>O agendamento roda numa transação com <code>SELECT … FOR UPDATE</code> na linha do horário: pedidos simultâneos esperam e cada um conta as vagas já confirmadas.</td></tr>
+            <tr><td>Sem duplicidade</td><td>Índice único parcial <code>(paciente_id, horario_id) WHERE status = 'AGENDADO'</code>.</td></tr>
+            <tr><td>Horário válido</td><td>Não se agenda horário passado, inativo ou de hemocentro desativado.</td></tr>
+            <tr><td>Teste</td><td>O teste e2e dispara 10 agendamentos ao mesmo tempo num horário de 3 vagas: exatamente 3 são aceitos.</td></tr>
           </tbody>
         </table>
       </div>
@@ -645,74 +641,78 @@
     <section class="doc-section" id="api">
       <span class="section-kicker">05 — TÉCNICO</span>
       <h2>Visão geral da API</h2>
-      <p>A API é organizada em módulos NestJS que espelham os domínios levantados nos requisitos funcionais. A autenticação usa JWT no cabeçalho <code>Authorization: Bearer &lt;token&gt;</code>; rotas marcadas como públicas não exigem login, e as demais são restritas ao perfil indicado.</p>
-      <pre><span class="comment">// Autenticação (UC05, UC07) — login e recuperação de senha são públicos</span>
-<span class="kw">POST</span>  /auth/login
-<span class="kw">POST</span>  /auth/logout
-<span class="kw">GET</span>   /auth/me
-<span class="kw">POST</span>  /auth/recuperar-senha
-<span class="kw">POST</span>  /auth/redefinir-senha
-<span class="kw">GET</span>   /auth/primeiro-acesso/termo     <span class="comment">// médico, representante, admin</span>
-<span class="kw">POST</span>  /auth/primeiro-acesso           <span class="comment">// troca da senha provisória</span>
+      <p>Todas as rotas ficam sob o prefixo <code>/api</code>. A autenticação usa JWT no cabeçalho <code>Authorization: Bearer &lt;token&gt;</code>; rotas públicas não exigem login, e as demais são restritas ao perfil ou papel indicado.</p>
+      <pre><span class="comment">// Autenticação e cadastro (RF01, RF02)</span>
+<span class="kw">GET</span>   /api/auth/termo-consentimento
+<span class="kw">POST</span>  /api/auth/register               <span class="comment">// cadastro do paciente (conta PENDENTE)</span>
+<span class="kw">POST</span>  /api/auth/login
+<span class="kw">GET</span>   /api/auth/me
+<span class="kw">POST</span>  /api/auth/primeiro-acesso         <span class="comment">// troca da senha provisória</span>
 
-<span class="comment">// Pacientes (RF01, RF02) — público</span>
-<span class="kw">GET</span>   /pacientes/termo-consentimento
-<span class="kw">POST</span>  /pacientes                      <span class="comment">// pré-cadastro com consentimento LGPD</span>
+<span class="comment">// Página Doar (RF05, RF17, RF18) — público</span>
+<span class="kw">GET</span>   /api/hemocentros?busca=..&amp;tipo=<span class="str">O%2B</span>
+<span class="kw">GET</span>   /api/hemocentros/:id
+<span class="kw">GET</span>   /api/hemocentros/:id/horarios?de=..&amp;ate=..   <span class="comment">// vagas restantes</span>
+<span class="kw">GET</span>   /api/hemocentros/:id/necessidades
+<span class="kw">PUT</span>   /api/hemocentros/:id/necessidades  <span class="comment">// Admin do hemocentro dono</span>
 
-<span class="comment">// Consulta de bancos de sangue (RF20–RF22) — público</span>
-<span class="kw">GET</span>   /hospitais?estado=..&amp;cidade=..&amp;tipos=<span class="str">O-</span>&amp;lat=..&amp;lng=..&amp;raioKm=..
-<span class="kw">GET</span>   /hospitais/:id
-<span class="kw">GET</span>   /tipos-sanguineos
-<span class="kw">GET</span>   /tipos-sanguineos/compatibilidade
+<span class="comment">// Paciente (RF04, RF06, RF07, RF16)</span>
+<span class="kw">POST</span>  /api/agendamentos
+<span class="kw">GET</span>   /api/agendamentos/meus
+<span class="kw">PATCH</span> /api/agendamentos/:id/cancelar | reagendar
+<span class="kw">GET</span>   /api/pacientes/me/painel
+<span class="kw">POST</span>  /api/pacientes/me/exclusao
 
-<span class="comment">// Representante do hospital (RF13, RF17, UC18, UC22)</span>
-<span class="kw">GET</span>   /representante/necessidades
-<span class="kw">PUT</span>   /representante/necessidades
-<span class="kw">GET</span>   /representante/necessidades/historico
-<span class="kw">GET</span>   /representante/medicos
-<span class="kw">POST</span>  /representante/medicos
-<span class="kw">GET</span>   /representante/medicos/:id
-<span class="kw">PATCH</span> /representante/medicos/:id
-<span class="kw">POST</span>  /representante/medicos/:id/desativar | ativar | reenviar-senha-provisoria
+<span class="comment">// Médico (RF10–RF12, RF19)</span>
+<span class="kw">GET</span>   /api/agenda?data=AAAA-MM-DD
+<span class="kw">POST</span>  /api/doacoes                       <span class="comment">// triagem, aferições, coleta e aptidão</span>
+<span class="kw">GET</span>   /api/doacoes/:id                   <span class="comment">// triagem e exames: só o médico do hemocentro</span>
+<span class="kw">POST</span>  /api/doacoes/:id/exames            <span class="comment">// exames da amostra (RF20)</span>
+<span class="kw">GET</span>   /api/pacientes/:id/historico       <span class="comment">// regra de compartilhamento + auditoria</span>
+<span class="kw">GET</span>   /api/atendimentos?de=..&amp;ate=..     <span class="comment">// médico e Admin: só o próprio hemocentro (RF19)</span>
 
-<span class="comment">// Administrador (RF27, UC26)</span>
-<span class="kw">GET</span>   /admin/hospitais
-<span class="kw">POST</span>  /admin/hospitais
-<span class="kw">GET</span>   /admin/hospitais/:id
-<span class="kw">PATCH</span> /admin/hospitais/:id
-<span class="kw">POST</span>  /admin/hospitais/:id/desativar | ativar
-<span class="kw">POST</span>  /admin/hospitais/:id/representantes
-<span class="kw">GET</span>   /admin/usuarios
-<span class="kw">POST</span>  /admin/usuarios/administradores
-<span class="kw">GET</span>   /admin/usuarios/:id
-<span class="kw">PATCH</span> /admin/usuarios/:id
-<span class="kw">POST</span>  /admin/usuarios/:id/desativar | ativar | reenviar-senha-provisoria</pre>
-      <p class="muted">Rotas já implementadas no backend. Agendamento de consultas, envio de exames e notificações ainda estão em desenvolvimento. Parâmetros, corpos e respostas de cada rota estão em <a href="../backend/docs/rotas.html"><code>backend/docs/rotas.html</code></a>.</p>
+<span class="comment">// Admin do hemocentro (RF08, RF13, RF14)</span>
+<span class="kw">GET</span>   /api/horarios
+<span class="kw">POST</span>  /api/horarios | /api/horarios/lote
+<span class="kw">PATCH</span> /api/horarios/:id
+<span class="kw">GET</span>   /api/pacientes/pendentes-ativacao
+<span class="kw">PATCH</span> /api/pacientes/:id/ativar
+<span class="kw">GET</span>   /api/equipe
+<span class="kw">POST</span>  /api/equipe
+<span class="kw">PATCH</span> /api/equipe/:id
+
+<span class="comment">// Administrador da plataforma (RF15)</span>
+<span class="kw">GET</span>   /api/hemocentros/gestao
+<span class="kw">POST</span>  /api/hemocentros                  <span class="comment">// com o Admin inicial</span>
+<span class="kw">PATCH</span> /api/hemocentros/:id
+<span class="kw">POST</span>  /api/hemocentros/:id/admins</pre>
+      <p class="muted">Parâmetros, corpos, respostas e erros de cada rota estão em <code>backend/docs/rotas.html</code>. O modelo de dados está em <code>docs/der.md</code>.</p>
     </section>
 
     <section class="doc-section" id="instalacao">
       <span class="section-kicker">06 — DESENVOLVIMENTO</span>
       <h2>Instalação</h2>
-      <p>Para rodar o backend localmente você precisa de <strong>Node.js 24</strong> e <strong>Docker</strong>. O <code>docker-compose.yml</code> sobe o PostgreSQL 17 com PostGIS e o Mailpit, que captura os e-mails enviados em desenvolvimento. Todos os comandos são executados dentro da pasta <code>backend/</code>.</p>
+      <p>Para rodar o backend localmente você precisa de <strong>Node.js 20 ou superior</strong> e <strong>Docker</strong>. O <code>docker-compose.yml</code> sobe o PostgreSQL 17 e o Mailpit, que captura os e-mails enviados em desenvolvimento. Todos os comandos são executados dentro da pasta <code>backend/</code>.</p>
       <pre><span class="kw">cp</span> .env.example .env           <span class="comment"># ajuste senhas e JWT_SECRET</span>
 <span class="kw">docker</span> compose up -d           <span class="comment"># PostgreSQL + Mailpit</span>
 <span class="kw">npm</span> install                    <span class="comment"># dependências + prisma generate</span>
-<span class="kw">npx</span> prisma migrate dev         <span class="comment"># cria as tabelas</span>
-<span class="kw">npx</span> prisma db seed             <span class="comment"># tipos sanguíneos + administrador inicial</span>
+<span class="kw">npx</span> prisma migrate deploy      <span class="comment"># cria as tabelas</span>
+<span class="kw">npx</span> prisma db seed             <span class="comment"># tipos sanguíneos + administrador (+ dados de exemplo)</span>
 <span class="kw">npm</span> run start:dev              <span class="comment"># sobe a API</span></pre>
       <h3>Endereços em desenvolvimento</h3>
       <div class="table-wrap">
         <table>
           <thead><tr><th>Serviço</th><th>Endereço</th><th>Observação</th></tr></thead>
           <tbody>
-            <tr><td>API</td><td class="mono-cell">localhost:3333</td><td>Porta definida em <code>PORT</code> no <code>.env</code>.</td></tr>
+            <tr><td>API</td><td class="mono-cell">localhost:3333/api</td><td>Porta definida em <code>PORT</code> no <code>.env</code>.</td></tr>
+            <tr><td>Frontend</td><td class="mono-cell">localhost:5173</td><td><code>npm run dev</code> na pasta <code>frontend/</code>.</td></tr>
             <tr><td>Prisma Studio</td><td class="mono-cell">localhost:5555</td><td>Abra com <code>npm run db:studio</code> para ver e editar o banco.</td></tr>
             <tr><td>E-mails (Mailpit)</td><td class="mono-cell">localhost:8025</td><td>Caixa de entrada com todos os e-mails enviados pela API.</td></tr>
             <tr><td>PostgreSQL</td><td class="mono-cell">localhost:5434</td><td>Deve bater com a <code>DATABASE_URL</code> do <code>.env</code>.</td></tr>
           </tbody>
         </table>
       </div>
-      <p class="muted">A senha do administrador inicial (<code>ADMIN_SENHA_INICIAL</code>) precisa ter de 8 a 128 caracteres, com letra maiúscula, letra minúscula e número (RN06); caso contrário o seed falha. Ela é provisória e deve ser trocada no primeiro acesso. O passo a passo completo, com todas as variáveis de ambiente, comandos do Prisma e problemas comuns, está em <a href="../backend/docs/install.md"><code>backend/docs/install.md</code></a>.</p>
+      <p class="muted">Com <code>SEED_DADOS_EXEMPLO=true</code> e <code>SEED_SENHA_EXEMPLO</code>, o seed cria 2 hemocentros com Admin e médico, horários e um paciente que doou no hemocentro A e tem agendamento no B. O passo a passo completo está em <code>backend/docs/install.md</code>.</p>
     </section>
 
     <section class="doc-section" id="fluxo">
@@ -720,76 +720,61 @@
       <h2>Como funciona</h2>
       <h3>Para quem quer doar</h3>
       <div class="steps">
-        <div class="step"><h4>Pré-cadastro</h4><p>Informe dados básicos (idade, peso) e aceite o tratamento de dados sensíveis conforme a LGPD.</p></div>
-        <div class="step"><h4>Consulta com um médico</h4><p>Escolha um horário disponível para uma consulta online de validação.</p></div>
-        <div class="step"><h4>Envio do exame</h4><p>Anexe o resultado do exame solicitado pelo médico durante ou após a consulta.</p></div>
-        <div class="step"><h4>Aprovação da conta</h4><p>Com o tipo sanguíneo confirmado, o médico aprova o cadastro e ativa a conta de doador.</p></div>
-        <div class="step"><h4>Busca por necessidade</h4><p>Filtre bancos de sangue por localização e tipo sanguíneo compatível com o seu.</p></div>
-        <div class="step"><h4>Notificação</h4><p>Receba um aviso automático quando surgir uma necessidade compatível com seu tipo.</p></div>
+        <div class="step"><h4>Crie sua conta</h4><p>Informe seus dados e aceite o termo de consentimento. A conta nasce pendente.</p></div>
+        <div class="step"><h4>Escolha o hemocentro</h4><p>Em Doar, veja de quais tipos sanguíneos cada hemocentro precisa agora.</p></div>
+        <div class="step"><h4>Agende</h4><p>Escolha o dia e um horário com vaga; cancele ou reagende pelo painel até o início do horário.</p></div>
+        <div class="step"><h4>Doe</h4><p>No dia, a equipe registra o atendimento e ativa sua conta de doador, com o tipo sanguíneo no seu painel.</p></div>
       </div>
-      <h3>Para bancos de sangue (hospitais)</h3>
-      <p>Um representante do hospital cadastra e atualiza as necessidades de estoque por tipo sanguíneo, registra a data de coleta de cada lote e acompanha indicadores de doação — sempre restritos aos dados do próprio hospital.</p>
+      <h3>Para os hemocentros</h3>
+      <p>O <strong>Admin do hemocentro</strong> cria os horários e as vagas (inclusive em lote semanal), informa as necessidades por tipo sanguíneo, cadastra os médicos e ativa as contas. O <strong>médico</strong> vê a agenda do dia, registra cada doação e consulta o histórico do paciente, inclusive o de outros hemocentros onde ele já doou. O <strong>administrador da plataforma</strong> cadastra e desativa os hemocentros.</p>
     </section>
 
     <section class="doc-section" id="funcionalidades">
       <span class="section-kicker">08 — USO</span>
       <h2>Funcionalidades</h2>
-      <p class="muted">27 requisitos funcionais, agrupados por área do sistema.</p>
+      <p class="muted">20 requisitos funcionais, agrupados por área do sistema.</p>
 
       <details class="rf-group" open>
-        <summary>Cadastro e validação médica<span class="count">13</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></summary>
+        <summary>Paciente<span class="count">7</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></summary>
         <div class="rf-list">
-          <div class="rf-item"><span class="rf-code">RF01</span><p>Pré-cadastro do paciente com dados básicos, incluindo idade e peso.</p></div>
-          <div class="rf-item"><span class="rf-code">RF02</span><p>Consentimento do paciente para tratamento de dados sensíveis de saúde, conforme a LGPD.</p></div>
-          <div class="rf-item"><span class="rf-code">RF03</span><p>Cadastro e gestão dos horários de disponibilidade do médico para consultas.</p></div>
-          <div class="rf-item"><span class="rf-code">RF04</span><p>Agendamento de consulta online a partir dos horários disponíveis do médico.</p></div>
-          <div class="rf-item"><span class="rf-code">RF05</span><p>Cancelamento ou reagendamento de uma consulta previamente marcada.</p></div>
-          <div class="rf-item"><span class="rf-code">RF06</span><p>Solicitação de exames pelo médico, durante ou após a consulta.</p></div>
-          <div class="rf-item"><span class="rf-code">RF07</span><p>Envio do resultado do exame solicitado pelo paciente.</p></div>
-          <div class="rf-item"><span class="rf-code">RF08</span><p>Revisão do exame e registro do tipo sanguíneo pelo médico.</p></div>
-          <div class="rf-item"><span class="rf-code">RF09</span><p>Aprovação do cadastro, ativando a conta como doador.</p></div>
-          <div class="rf-item"><span class="rf-code">RF10</span><p>Reprovação do cadastro com motivo informado e reenvio de um novo exame.</p></div>
-          <div class="rf-item"><span class="rf-code">RF11</span><p>Acesso às funcionalidades completas restrito a contas aprovadas pelo médico.</p></div>
-          <div class="rf-item"><span class="rf-code">RF12</span><p>Exibição do tipo sanguíneo registrado, não editável pelo próprio doador.</p></div>
-          <div class="rf-item"><span class="rf-code">RF13</span><p>Cadastro de médicos mediante aprovação do administrador e validação do CRM.</p></div>
+          <div class="rf-item"><span class="rf-code">RF01</span><p>Cadastro do paciente com dados básicos (inclusive o sexo) e aceite do termo LGPD (incluindo compartilhamento entre hemocentros).</p></div>
+          <div class="rf-item"><span class="rf-code">RF03</span><p>Página pública de apresentação do Hemobridge.</p></div>
+          <div class="rf-item"><span class="rf-code">RF04</span><p>Painel do paciente com dados, status da conta, tipo sanguíneo e histórico de doações com o hemocentro de origem.</p></div>
+          <div class="rf-item"><span class="rf-code">RF05</span><p>Página Doar: listar hemocentros, buscar por nome/cidade e ver horários com vagas restantes.</p></div>
+          <div class="rf-item"><span class="rf-code">RF06</span><p>Agendamento de doação pelo paciente em horário com vaga.</p></div>
+          <div class="rf-item"><span class="rf-code">RF07</span><p>Cancelamento e reagendamento pelo paciente, liberando a vaga.</p></div>
+          <div class="rf-item"><span class="rf-code">RF16</span><p>O paciente solicita exclusão dos seus dados (LGPD).</p></div>
         </div>
       </details>
 
       <details class="rf-group">
-        <summary>Autenticação<span class="count">1</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></summary>
+        <summary>Acesso<span class="count">1</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></summary>
         <div class="rf-list">
-          <div class="rf-item"><span class="rf-code">RF14</span><p>Autenticação obrigatória via credenciais para acesso às funcionalidades restritas, conforme o perfil do usuário.</p></div>
+          <div class="rf-item"><span class="rf-code">RF02</span><p>Autenticação por credenciais com controle de acesso por perfil e papel.</p></div>
         </div>
       </details>
 
       <details class="rf-group">
-        <summary>Bancos de sangue e estoque<span class="count">8</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></summary>
+        <summary>Equipe do hemocentro<span class="count">10</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></summary>
         <div class="rf-list">
-          <div class="rf-item"><span class="rf-code">RF15</span><p>Cadastro, edição e desativação de bancos de sangue (hospitais).</p></div>
-          <div class="rf-item"><span class="rf-code">RF16</span><p>Cadastro de representantes de cada hospital, mediante aprovação do administrador.</p></div>
-          <div class="rf-item"><span class="rf-code">RF17</span><p>Cadastro e atualização da necessidade de estoque por tipo sanguíneo, por representante.</p></div>
-          <div class="rf-item"><span class="rf-code">RF18</span><p>Registro da data de coleta de cada lote de hemocomponente em estoque.</p></div>
-          <div class="rf-item"><span class="rf-code">RF19</span><p>Informação sobre a compatibilidade entre os diferentes tipos sanguíneos.</p></div>
-          <div class="rf-item"><span class="rf-code">RF20</span><p>Consulta de bancos de sangue e suas respectivas necessidades.</p></div>
-          <div class="rf-item"><span class="rf-code">RF21</span><p>Busca e filtragem por localização e tipo sanguíneo.</p></div>
-          <div class="rf-item"><span class="rf-code">RF22</span><p>Armazenamento da localização geográfica de cada banco de sangue cadastrado.</p></div>
+          <div class="rf-item"><span class="rf-code">RF08</span><p>O Admin do hemocentro define horários e a quantidade de vagas de cada um, inclusive em lote semanal.</p></div>
+          <div class="rf-item"><span class="rf-code">RF09</span><p>O sistema impede overbooking, agendamento em horário passado/inativo, duplicidade e agendamento fora do intervalo mínimo entre doações (RN20).</p></div>
+          <div class="rf-item"><span class="rf-code">RF10</span><p>O médico visualiza, por data e horário, os pacientes agendados no seu hemocentro.</p></div>
+          <div class="rf-item"><span class="rf-code">RF11</span><p>O médico registra o atendimento, vinculado ao hemocentro: comparecimento, triagem clínica (entrevista confidencial), aferições do dia (peso, pressão, pulso, temperatura, hemoglobina ou hematócrito), aptidão (apto, inapto temporário até uma data ou inapto definitivo), dados da coleta (volume, número da bolsa, reações), tipo sanguíneo, motivo de não doar e observações.</p></div>
+          <div class="rf-item"><span class="rf-code">RF12</span><p>A equipe consulta o histórico de doações do paciente em outros hemocentros, nas condições da regra de compartilhamento.</p></div>
+          <div class="rf-item"><span class="rf-code">RF13</span><p>O Admin do hemocentro lista pacientes com registro pendente de ativação e ativa a conta.</p></div>
+          <div class="rf-item"><span class="rf-code">RF14</span><p>O Admin do hemocentro cadastra e desativa os médicos do seu hemocentro.</p></div>
+          <div class="rf-item"><span class="rf-code">RF17</span><p>O Admin do hemocentro cadastra e atualiza o nível de necessidade de cada tipo sanguíneo do seu hemocentro.</p></div>
+          <div class="rf-item"><span class="rf-code">RF20</span><p>O médico lança, uma única vez, os exames da amostra de cada doação (pesquisa de anticorpos e sorologias para HIV, hepatites B e C, sífilis, Chagas, HTLV e, em regiões endêmicas, malária). Com resultado alterado, o paciente só vê no painel que o hemocentro vai contatá-lo de forma reservada.</p></div>
+          <div class="rf-item"><span class="rf-code">RF19</span><p>O médico e o Admin do hemocentro consultam o histórico de atendimentos do próprio hemocentro, por período, com o resultado de cada registro.</p></div>
         </div>
       </details>
 
       <details class="rf-group">
-        <summary>Direcionamento e notificação ao doador<span class="count">3</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></summary>
+        <summary>Plataforma e página Doar<span class="count">2</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></summary>
         <div class="rf-list">
-          <div class="rf-item"><span class="rf-code">RF23</span><p>Exibição dos locais com necessidade do tipo sanguíneo do doador ou de tipos compatíveis.</p></div>
-          <div class="rf-item"><span class="rf-code">RF24</span><p>Verificação da elegibilidade do doador (idade, peso, intervalo desde a última doação) antes de confirmar uma doação.</p></div>
-          <div class="rf-item"><span class="rf-code">RF25</span><p>Notificação ao doador quando surgir necessidade de estoque compatível com seu tipo.</p></div>
-        </div>
-      </details>
-
-      <details class="rf-group">
-        <summary>Administração e relatórios<span class="count">2</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></summary>
-        <div class="rf-list">
-          <div class="rf-item"><span class="rf-code">RF26</span><p>Relatórios e dashboards com métricas de doações, estoque e necessidades — restritos ao hospital do usuário, exceto para o administrador, que vê dados agregados de todos os hospitais.</p></div>
-          <div class="rf-item"><span class="rf-code">RF27</span><p>Gestão de usuários e instituições cadastradas pelo administrador.</p></div>
+          <div class="rf-item"><span class="rf-code">RF15</span><p>O administrador da plataforma cadastra e desativa hemocentros e cria o Admin inicial de cada um.</p></div>
+          <div class="rf-item"><span class="rf-code">RF18</span><p>A página Doar exibe as necessidades de cada hemocentro e destaca os que precisam do tipo sanguíneo do paciente, quando conhecido.</p></div>
         </div>
       </details>
     </section>
@@ -801,12 +786,13 @@
         <table>
           <thead><tr><th>Código</th><th>Descrição</th></tr></thead>
           <tbody>
-            <tr><td class="mono-cell">RNF01</td><td>Interface responsiva, adaptável a dispositivos móveis e desktop.</td></tr>
-            <tr><td class="mono-cell">RNF02</td><td>Proteção de dados pessoais e de saúde, em conformidade com a LGPD (Lei nº 13.709/2018).</td></tr>
-            <tr><td class="mono-cell">RNF03</td><td>Controle de acesso por perfil: paciente/doador, médico, representante de banco de sangue e administrador.</td></tr>
-            <tr><td class="mono-cell">RNF04</td><td>Isolamento lógico dos dados entre hospitais, via identificação de hospital em todas as consultas relevantes.</td></tr>
-            <tr><td class="mono-cell">RNF05</td><td>Log de auditoria de acessos a dados sensíveis de saúde (usuário, data/hora, tipo de acesso).</td></tr>
-            <tr><td class="mono-cell">RNF06</td><td>Solicitação de exclusão de dados pessoais pelo paciente, respeitadas as retenções legais previstas na LGPD.</td></tr>
+            <tr><td class="mono-cell">RNF01</td><td>Interface responsiva (mobile e desktop).</td></tr>
+            <tr><td class="mono-cell">RNF02</td><td>Proteção de dados pessoais e de saúde conforme a LGPD (Lei nº 13.709/2018).</td></tr>
+            <tr><td class="mono-cell">RNF03</td><td>Controle de acesso por perfil/papel em todas as rotas do backend e do frontend.</td></tr>
+            <tr><td class="mono-cell">RNF04</td><td>Equipe de hemocentro só acessa dados de pacientes vinculados ao seu hemocentro por agendamento.</td></tr>
+            <tr><td class="mono-cell">RNF05</td><td>Log de auditoria de acesso e alteração de dados sensíveis, em especial leitura de histórico de outro hemocentro.</td></tr>
+            <tr><td class="mono-cell">RNF06</td><td>Consistência de vagas sob concorrência (transação + lock).</td></tr>
+            <tr><td class="mono-cell">RNF07</td><td>Senhas com hash forte (Argon2id), validação de entrada nos DTOs e segredos só via <code>.env</code>.</td></tr>
           </tbody>
         </table>
       </div>
@@ -817,24 +803,24 @@
       <h2>Perguntas frequentes</h2>
 
       <details class="faq-item" open>
-        <summary>Por que o tipo sanguíneo não pode ser informado pelo próprio doador?<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
-        <p>Porque a compatibilidade sanguínea é decisiva para a segurança de uma transfusão. Um erro de autodeclaração poderia comprometer toda a lógica de direcionamento do sistema — por isso o registro exige exame validado por um profissional de saúde.</p>
+        <summary>Por que o tipo sanguíneo não pode ser informado pelo próprio paciente?<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+        <p>Porque o tipo é um dado de saúde que precisa ser confiável. Ele é registrado pela equipe do hemocentro na doação e só passa ao painel do paciente quando o Admin do hemocentro ativa a conta.</p>
       </details>
       <details class="faq-item">
-        <summary>Um hospital consegue ver os dados de outro hospital?<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
-        <p>Não. Os dados de estoque, pacientes e exames são logicamente isolados por hospital. Apenas o administrador tem acesso a dados agregados de todas as instituições cadastradas.</p>
+        <summary>Um hemocentro consegue ver os dados de qualquer paciente?<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+        <p>Não. A equipe só consulta o histórico de quem tem ou teve agendamento naquele hemocentro; não há busca livre por paciente. Os registros de outros hemocentros são somente leitura, e cada leitura fica registrada em auditoria.</p>
       </details>
       <details class="faq-item">
-        <summary>O Hemobridge substitui o cadastro em bancos de sangue oficiais?</br><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
-        <p>Não. A plataforma direciona o doador ao local certo, mas o processo de doação em si continua acontecendo presencialmente no banco de sangue ou hospital parceiro.</p>
+        <summary>O que acontece se duas pessoas agendarem a última vaga ao mesmo tempo?<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+        <p>Só uma consegue. O horário fica bloqueado durante a reserva, e a segunda pessoa recebe a mensagem de horário esgotado com a opção de ver os horários atualizados.</p>
       </details>
       <details class="faq-item">
-        <summary>Como funciona a notificação de necessidade compatível?<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
-        <p>Quando um banco de sangue atualiza sua necessidade de estoque, o sistema verifica quais doadores aprovados têm tipo sanguíneo compatível com aquela necessidade e envia uma notificação a eles.</p>
+        <summary>O Hemobridge substitui a triagem do hemocentro?<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+        <p>Não. A plataforma organiza o agendamento e o histórico, mas a triagem e a doação continuam acontecendo presencialmente no hemocentro, que registra o resultado depois do atendimento.</p>
       </details>
       <details class="faq-item">
         <summary>É possível excluir meus dados da plataforma?<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
-        <p>Sim. O paciente pode solicitar a exclusão de seus dados pessoais a qualquer momento, respeitadas eventuais obrigações legais de retenção previstas na LGPD (Art. 16).</p>
+        <p>Sim, pelo painel. Os dados pessoais são anonimizados e a conta é encerrada; os registros de doação são mantidos sem identificação direta, por obrigação legal de retenção (Art. 16 da LGPD).</p>
       </details>
     </section>
 

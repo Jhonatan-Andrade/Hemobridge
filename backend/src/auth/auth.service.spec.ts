@@ -19,7 +19,7 @@ async function criarUsuario(alteracao: Record<string, unknown> = {}) {
     senhaProvisoriaExpiraEm: null,
     bloqueadoAte: null,
     versaoSessao: 3,
-    paciente: { situacao: 'PRE_CADASTRADO' },
+    equipe: null,
     ...alteracao,
   };
 }
@@ -54,7 +54,7 @@ describe('AuthService.login', () => {
       tokenType: 'Bearer',
       expiraEm: '2026-10-03T13:00:00.000Z',
       primeiroAcesso: false,
-      usuario: { id: 'u1', perfil: 'PACIENTE', papel: 'PACIENTE' },
+      usuario: { id: 'u1', perfil: 'PACIENTE', papel: null, hemocentro: null },
     });
     expect(jwt.verify(r.accessToken)).toMatchObject({ sub: 'u1', perfil: 'PACIENTE', ver: 3 });
     expect(prisma.usuario.update).toHaveBeenCalledWith({
@@ -63,9 +63,20 @@ describe('AuthService.login', () => {
     });
   });
 
-  it('identifica o paciente aprovado como DOADOR', async () => {
-    const { service } = criarService(await criarUsuario({ paciente: { situacao: 'APROVADO' } }));
-    expect((await service.login(login())).usuario.papel).toBe('DOADOR');
+  it('devolve o papel e o hemocentro de quem é da equipe', async () => {
+    const equipe = { papel: 'MEDICO', hemocentro: { id: 'h1', nome: 'Hemocentro A', ativo: true } };
+    const { service } = criarService(await criarUsuario({ perfil: 'EQUIPE', equipe }));
+    expect((await service.login(login())).usuario).toMatchObject({
+      perfil: 'EQUIPE',
+      papel: 'MEDICO',
+      hemocentro: { id: 'h1', nome: 'Hemocentro A' },
+    });
+  });
+
+  it('recusa a equipe de hemocentro desativado', async () => {
+    const equipe = { papel: 'MEDICO', hemocentro: { id: 'h1', nome: 'Hemocentro A', ativo: false } };
+    const { service } = criarService(await criarUsuario({ perfil: 'EQUIPE', equipe }));
+    await expect(service.login(login())).rejects.toThrow(/hemocentro vinculado/);
   });
 
   it('usa a mesma mensagem para e-mail inexistente e senha errada (FE01)', async () => {
@@ -131,8 +142,7 @@ describe('AuthService.login', () => {
   it('sinaliza primeiro acesso para conta com senha provisória válida', async () => {
     const { service } = criarService(
       await criarUsuario({
-        perfil: 'MEDICO',
-        paciente: null,
+        perfil: 'ADMIN_PLATAFORMA',
         senhaProvisoria: true,
         senhaProvisoriaExpiraEm: new Date('2026-10-05T12:00:00Z'),
       }),
@@ -175,11 +185,11 @@ describe('AuthService.definirSenhaPrimeiroAcesso', () => {
       Promise.resolve({
         id: 'm1',
         nome: 'Dr. João',
-        email: 'joao@hospital.com',
-        perfil: 'MEDICO',
+        email: 'joao@hemocentro.org',
+        perfil: 'EQUIPE',
         senhaProvisoria: data.senhaProvisoria,
         versaoSessao: 1,
-        paciente: null,
+        equipe: { papel: 'MEDICO', hemocentro: { id: 'h1', nome: 'Hemocentro A', ativo: true } },
       }),
     );
     return ctx;

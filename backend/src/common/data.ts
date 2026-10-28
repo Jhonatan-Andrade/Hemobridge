@@ -13,6 +13,21 @@ export function calcularIdade(dataNascimento: string, hoje: string = hojeIso()):
   return anoH - anoN - (jaFezAniversario ? 0 : 1);
 }
 
+// America/Sao_Paulo não tem horário de verão desde 2019: o deslocamento é fixo.
+const DESLOCAMENTO_PADRAO = '-03:00';
+
+/** Instante correspondente a uma data (YYYY-MM-DD) e hora (HH:mm) no fuso da plataforma. */
+export function instanteLocal(data: string, hora = '00:00'): Date {
+  return new Date(`${data}T${hora}:00.000${DESLOCAMENTO_PADRAO}`);
+}
+
+/** Soma dias a uma data YYYY-MM-DD. */
+export function somarDias(data: string, dias: number): string {
+  const d = new Date(`${data}T00:00:00.000Z`);
+  d.setUTCDate(d.getUTCDate() + dias);
+  return d.toISOString().slice(0, 10);
+}
+
 /** Converte YYYY-MM-DD para Date em UTC, como o Prisma espera para colunas DATE. */
 export function dataIsoParaDate(data: string): Date {
   return new Date(`${data}T00:00:00.000Z`);

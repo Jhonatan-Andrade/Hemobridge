@@ -1,6 +1,7 @@
 import { ValidateBy, ValidationOptions, buildMessage } from 'class-validator';
 import { isCnpjValido } from './cnpj.js';
 import { isCpfValido } from './cpf.js';
+import { hojeIso } from './data.js';
 
 /** CPF válido pelos dígitos verificadores (RN06). */
 export function IsCpf(options?: ValidationOptions): PropertyDecorator {
@@ -67,6 +68,20 @@ export function IsIgualA(propriedade: string, options?: ValidationOptions): Prop
           (prefixo) => `${prefixo}$property deve ser igual a $constraint1`,
           options,
         ),
+      },
+    },
+    options,
+  );
+}
+
+/** Data AAAA-MM-DD anterior ao dia de hoje (fuso da plataforma). */
+export function IsDataPassada(options?: ValidationOptions): PropertyDecorator {
+  return ValidateBy(
+    {
+      name: 'isDataPassada',
+      validator: {
+        validate: (valor) => typeof valor === 'string' && valor < hojeIso(),
+        defaultMessage: buildMessage(() => 'A data deve ser anterior a hoje', options),
       },
     },
     options,

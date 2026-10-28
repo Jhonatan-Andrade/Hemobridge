@@ -1,4 +1,4 @@
-import type { Perfil, SituacaoPaciente } from '../generated/prisma/enums.js';
+import type { PapelEquipe, Perfil } from '../generated/prisma/enums.js';
 
 export interface TokenPayload {
   sub: string;
@@ -7,33 +7,42 @@ export interface TokenPayload {
   ver: number;
 }
 
-/** Papel exibido ao usuário: Doador é o Paciente com situação APROVADO. */
-export type Papel = Perfil | 'DOADOR';
+/** Hemocentro de quem pertence à equipe (perfil EQUIPE). */
+export interface HemocentroDaEquipe {
+  id: string;
+  nome: string;
+}
 
 export interface UsuarioAutenticado {
   id: string;
   nome: string;
   email: string;
   perfil: Perfil;
-  papel: Papel;
+  /** Papel na equipe do hemocentro; nulo para paciente e administrador da plataforma. */
+  papel: PapelEquipe | null;
+  hemocentro: HemocentroDaEquipe | null;
   senhaProvisoria: boolean;
 }
 
-/** Seleção do vínculo institucional de médicos e representantes. */
-export const SELECAO_INSTITUICAO = {
-  medico: { select: { hospital: { select: { ativo: true } } } },
-  representante: { select: { hospital: { select: { ativo: true } } } },
+/** Usuário com acesso à equipe de um hemocentro (vem sempre do banco, nunca da requisição). */
+export type MembroDaEquipe = UsuarioAutenticado & { papel: PapelEquipe; hemocentro: HemocentroDaEquipe };
+
+/** Seleção do vínculo com o hemocentro, usada no login e no guard. */
+export const SELECAO_EQUIPE = {
+  equipe: { select: { papel: true, hemocentro: { select: { id: true, nome: true, ativo: true } } } },
 } as const;
 
-/** RN09: médico ou representante de banco de sangue desativado perde o acesso. */
-export function instituicaoDesativada(usuario: {
-  medico: { hospital: { ativo: boolean } } | null;
-  representante: { hospital: { ativo: boolean } } | null;
-}): boolean {
-  const hospital = usuario.medico?.hospital ?? usuario.representante?.hospital;
-  return hospital !== undefined && !hospital.ativo;
+type VinculoEquipe = {
+  equipe: { papel: PapelEquipe; hemocentro: HemocentroDaEquipe & { ativo: boolean } } | null;
+};
+
+/** A equipe de um hemocentro desativado perde o acesso. */
+export function hemocentroDesativado(usuario: VinculoEquipe): boolean {
+  return usuario.equipe !== null && !usuario.equipe.hemocentro.ativo;
 }
 
-export function papelDe(perfil: Perfil, situacao?: SituacaoPaciente | null): Papel {
-  return perfil === 'PACIENTE' && situacao === 'APROVADO' ? 'DOADOR' : perfil;
+export function vinculoDe(usuario: VinculoEquipe): Pick<UsuarioAutenticado, 'papel' | 'hemocentro'> {
+  if (!usuario.equipe) return { papel: null, hemocentro: null };
+  const { id, nome } = usuario.equipe.hemocentro;
+  return { papel: usuario.equipe.papel, hemocentro: { id, nome } };
 }

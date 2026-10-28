@@ -5,6 +5,7 @@ import { JwtModule, type JwtModuleOptions } from '@nestjs/jwt';
 import { AuthController } from './auth.controller.js';
 import { AuthGuard } from './auth.guard.js';
 import { AuthService } from './auth.service.js';
+import { CadastroService } from './cadastro.service.js';
 import { RecuperacaoSenhaService } from './recuperacao-senha.service.js';
 
 @Module({
@@ -22,6 +23,6 @@ import { RecuperacaoSenhaService } from './recuperacao-senha.service.js';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, RecuperacaoSenhaService, { provide: APP_GUARD, useClass: AuthGuard }],
+  providers: [AuthService, CadastroService, RecuperacaoSenhaService, { provide: APP_GUARD, useClass: AuthGuard }],
 })
 export class AuthModule {}

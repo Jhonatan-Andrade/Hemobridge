@@ -1,10 +1,10 @@
 import { BadRequestException, ForbiddenException, HttpException, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { gerarHashSenha, verificarSenha } from '../common/senha.js';
-import type { Perfil, SituacaoPaciente } from '../generated/prisma/enums.js';
+import type { PapelEquipe, Perfil } from '../generated/prisma/enums.js';
 import { TERMO_RESPONSABILIDADE } from '../lgpd/termo-responsabilidade.js';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { SELECAO_INSTITUICAO, instituicaoDesativada, papelDe, type TokenPayload } from './auth.types.js';
+import { SELECAO_EQUIPE, hemocentroDesativado, vinculoDe, type TokenPayload } from './auth.types.js';
 import { LoginDto } from './dto/login.dto.js';
 import { PrimeiroAcessoDto } from './dto/primeiro-acesso.dto.js';
 
@@ -23,7 +23,7 @@ interface DadosSessao {
   perfil: Perfil;
   senhaProvisoria: boolean;
   versaoSessao: number;
-  paciente: { situacao: SituacaoPaciente } | null;
+  equipe: { papel: PapelEquipe; hemocentro: { id: string; nome: string; ativo: boolean } } | null;
 }
 
 @Injectable()
@@ -52,12 +52,11 @@ export class AuthService {
         senhaProvisoriaExpiraEm: true,
         bloqueadoAte: true,
         versaoSessao: true,
-        paciente: { select: { situacao: true } },
-        ...SELECAO_INSTITUICAO,
+        ...SELECAO_EQUIPE,
       },
     });
 
-    // Conta encerrada (RN13) não tem mais acesso: tratada como inexistente.
+    // Conta encerrada (dados excluídos, RF16) não tem mais acesso: tratada como inexistente.
     if (!usuario || usuario.status === 'ENCERRADO') {
       await verificarSenha(await this.hashFicticio, dto.senha);
       throw new UnauthorizedException(MENSAGEM_CREDENCIAIS_INVALIDAS);
@@ -77,14 +76,13 @@ export class AuthService {
     // FE03
     if (usuario.status === 'INATIVO') {
       throw new ForbiddenException(
-        'Sua conta está desativada. Entre em contato com a instituição ou com a plataforma.',
+        'Sua conta está desativada. Entre em contato com o hemocentro ou com a plataforma.',
       );
     }
 
-    // RN09
-    if (instituicaoDesativada(usuario)) {
+    if (hemocentroDesativado(usuario)) {
       throw new ForbiddenException(
-        'A instituição vinculada à sua conta está desativada. Entre em contato com a plataforma.',
+        'O hemocentro vinculado à sua conta está desativado. Entre em contato com a plataforma.',
       );
     }
 
@@ -148,11 +146,11 @@ export class AuthService {
         perfil: true,
         senhaProvisoria: true,
         versaoSessao: true,
-        paciente: { select: { situacao: true } },
+        ...SELECAO_EQUIPE,
       },
     });
 
-    // Passo 6: segue para o painel com uma sessão nova.
+    // Passo 6: segue para a área do perfil com uma sessão nova.
     return this.emitirSessao(atualizado);
   }
 
@@ -184,7 +182,7 @@ export class AuthService {
         nome: usuario.nome,
         email: usuario.email,
         perfil: usuario.perfil,
-        papel: papelDe(usuario.perfil, usuario.paciente?.situacao),
+        ...vinculoDe(usuario),
       },
     };
   }
