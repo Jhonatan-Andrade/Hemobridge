@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { gerarHashSenha } from '../common/senha.js';
 import { gerarTokenAleatorio, hashToken } from '../common/token.js';
 import { EmailService } from '../email/email.service.js';
+import { LOGO_EMAIL, htmlRedefinirSenha } from '../email/modelos.js';
 import { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { RecuperarSenhaDto, RedefinirSenhaDto } from './dto/recuperacao-senha.dto.js';
@@ -122,19 +123,8 @@ export class RecuperacaoSenhaService {
         '',
         'O link só pode ser usado uma vez. Se você não fez este pedido, ignore este e-mail: sua senha continua a mesma.',
       ].join('\n'),
-      html: `<p>Olá, ${escaparHtml(primeiroNome)}.</p>
-<p>Recebemos um pedido para redefinir a senha da sua conta no Hemobridge.</p>
-<p>Para criar uma nova senha, acesse o link abaixo em até ${MINUTOS_VALIDADE_LINK} minutos:</p>
-<p><a href="${link}">Redefinir minha senha</a></p>
-<p>O link só pode ser usado uma vez. Se você não fez este pedido, ignore este e-mail: sua senha continua a mesma.</p>`,
+      html: htmlRedefinirSenha({ nome: primeiroNome, link, minutos: MINUTOS_VALIDADE_LINK }),
+      imagens: [LOGO_EMAIL],
     });
   }
-}
-
-function escaparHtml(texto: string): string {
-  return texto
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
 }

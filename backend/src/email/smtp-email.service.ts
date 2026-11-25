@@ -21,7 +21,19 @@ export class SmtpEmailService extends EmailService {
     this.remetente = config.get<string>('EMAIL_REMETENTE', 'Hemobridge <nao-responda@hemobridge.local>');
   }
 
-  async enviar({ para, assunto, texto, html }: MensagemEmail): Promise<void> {
-    await this.transporter.sendMail({ from: this.remetente, to: para, subject: assunto, text: texto, html });
+  async enviar({ para, assunto, texto, html, imagens }: MensagemEmail): Promise<void> {
+    await this.transporter.sendMail({
+      from: this.remetente,
+      to: para,
+      subject: assunto,
+      text: texto,
+      html,
+      attachments: imagens?.map(({ nome, cid, conteudo }) => ({
+        filename: nome,
+        cid,
+        content: conteudo,
+        contentDisposition: 'inline' as const,
+      })),
+    });
   }
 }

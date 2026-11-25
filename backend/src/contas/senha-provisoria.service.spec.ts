@@ -62,6 +62,25 @@ describe('SenhaProvisoriaService', () => {
     expect(await montar(null, true).service.enviar(destinatario, 'x')).toBe(false);
   });
 
+  it('monta o HTML com os dados de acesso e o logo embutido, escapando o nome', async () => {
+    const { service, email } = montar();
+
+    await service.enviar(
+      { nome: '<b>Ana</b> Souza', email: 'ana@h.com', perfil: 'EQUIPE', papel: 'ADMIN_HEMOCENTRO' },
+      'Abc123xyzWQ9',
+    );
+
+    const { html, imagens } = email.enviar.mock.calls[0][0];
+    expect(html).toContain('Olá, &lt;b&gt;Ana&lt;/b&gt;');
+    expect(html).toContain('Uma conta de administrador(a) do hemocentro foi criada');
+    expect(html).toContain('ana@h.com');
+    expect(html).toContain('Abc123xyzWQ9');
+    expect(html).toContain('72&nbsp;horas');
+    expect(html).toContain('href="http://localhost:5173"');
+    expect(html).toContain(`src="cid:${imagens[0].cid}"`);
+    expect(html).not.toContain('{{');
+  });
+
   it('reenvia: nova senha, invalida sessões e desbloqueia', async () => {
     const { service, prisma } = montar({
       nome: 'Ana', email: 'ana@h.com', perfil: 'EQUIPE', status: 'ATIVO', senhaProvisoria: true, equipe: { papel: 'MEDICO' },
