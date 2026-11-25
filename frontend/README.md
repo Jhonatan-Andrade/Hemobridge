@@ -61,7 +61,8 @@ Os tokens de design (cores, tipografia, raios, sombra e larguras) ficam em `tail
 | Rota | Quem acessa | Tela |
 | --- | --- | --- |
 | `/` | todos | Apresentação: o que é, por que doar, como funciona, seus dados na doação (sigilo, contato reservado, notificação compulsória) e hemocentros parceiros (RF03). Logado, mostra o menu da própria área (todos têm o item Início) e um atalho para ela |
-| `/entrar`, `/cadastro`, `/recuperar-senha` | visitante | Login, cadastro com o termo LGPD (inclui o compartilhamento entre hemocentros) e recuperação de senha |
+| `/entrar`, `/cadastro` | visitante | Login e cadastro com o termo LGPD (inclui o compartilhamento entre hemocentros) |
+| `/recuperar-senha`, `/redefinir-senha` | todos | Pedido do link de redefinição e definição da nova senha a partir do link do e-mail (`?token=`) |
 | `/primeiro-acesso` | equipe e administradores | Troca da senha provisória e aceite do termo de responsabilidade |
 | `/doar` | todos | Hemocentros com busca por nome/cidade e necessidades; com conta ativa, quem precisa do tipo do paciente vem primeiro (RF05, RF18) |
 | `/doar/:id` | todos (agendar: paciente) | Detalhes, necessidades, horários por data com agendados/limite ("4/6 agendados") e confirmação; com `?reagendar=<id>`, troca o horário (RF06, RF07) |

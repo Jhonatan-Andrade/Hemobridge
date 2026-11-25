@@ -6,6 +6,7 @@ import { LoginPage } from './features/auth/LoginPage'
 import { PrimeiroAcessoPage } from './features/auth/PrimeiroAcessoPage'
 import { ProtectedRoute, PublicOnlyRoute } from './features/auth/ProtectedRoute'
 import { RecuperarSenhaPage } from './features/auth/RecuperarSenhaPage'
+import { RedefinirSenhaPage } from './features/auth/RedefinirSenhaPage'
 import { AtivacoesPage } from './features/hemocentro/AtivacoesPage'
 import { EquipePage } from './features/hemocentro/EquipePage'
 import { HorariosPage } from './features/hemocentro/HorariosPage'
@@ -25,8 +26,11 @@ function App() {
       <Route element={<PublicOnlyRoute />}>
         <Route path="/entrar" element={<LoginPage />} />
         <Route path="/cadastro" element={<CadastroPage />} />
-        <Route path="/recuperar-senha" element={<RecuperarSenhaPage />} />
       </Route>
+
+      {/* Fora do PublicOnlyRoute: o link do e-mail precisa abrir mesmo com uma sessão ativa no navegador. */}
+      <Route path="/recuperar-senha" element={<RecuperarSenhaPage />} />
+      <Route path="/redefinir-senha" element={<RedefinirSenhaPage />} />
 
       {/* As 3 áreas do paciente: Apresentação e Doar são públicas; o Painel exige login. */}
       <Route path="/" element={<HomePage />} />
