@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hemobridge — Como iniciar</title>
+<style>
+  @font-face { font-family: 'Poppins'; font-weight: 400; src: url('../assets/fonts/Poppins-Regular.ttf'); }
+  @font-face { font-family: 'Poppins'; font-weight: 500; src: url('../assets/fonts/Poppins-Medium.ttf'); }
+  @font-face { font-family: 'Poppins'; font-weight: 600; src: url('../assets/fonts/Poppins-SemiBold.ttf'); }
+  @font-face { font-family: 'Poppins'; font-weight: 700; src: url('../assets/fonts/Poppins-Bold.ttf'); }
+
+  :root {
+    color-scheme: light;
+    --sangue: #C0102B;
+    --sangue-suave: #F6E1E3;
+    --estrutura: #1B202B;
+    --base: #F4F2F0;
+    --texto: #23262E;
+    --texto-2: #5B6270;
+    --borda: #E3DFDA;
+    --card: #FFFFFF;
+    --ok: #1F6B45;
+    --ok-suave: #E2F1E9;
+    --mono: Consolas, 'Cascadia Mono', Menlo, monospace;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; font-family: 'Poppins', 'Segoe UI', sans-serif; background: var(--base); color: var(--texto); line-height: 1.6; }
+  :focus-visible { outline: 2px solid var(--sangue); outline-offset: 2px; }
+  a { color: var(--sangue); }
+
+  header { background: var(--estrutura); color: var(--base); padding: 44px 20px 40px; }
+  header h1 { margin: 0 0 8px; font-size: 2rem; line-height: 1.2; }
+  header p { margin: 0; max-width: 60ch; color: rgba(244, 242, 240, .78); }
+  .dentro, main { max-width: 820px; margin: 0 auto; }
+  main { padding: 28px 20px 80px; }
+
+  .atalhos { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+  .atalhos a { color: #fff; text-decoration: none; border: 1px solid rgba(255, 255, 255, .28); border-radius: 8px; padding: 7px 14px; font-size: .88rem; font-weight: 500; }
+  .atalhos a:hover { background: var(--sangue); border-color: var(--sangue); }
+
+  h2 { font-size: 1.4rem; margin: 44px 0 6px; color: var(--estrutura); }
+  h2 + p { margin: 0 0 16px; color: var(--texto-2); }
+  h3 { margin: 0; font-size: 1.08rem; line-height: 1.35; color: var(--estrutura); }
+  h4 { margin: 18px 0 4px; font-size: .95rem; }
+
+  .passo { background: var(--card); border: 1px solid var(--borda); border-radius: 10px; padding: 20px; margin: 14px 0; }
+  .passo.feito { border-color: var(--ok); }
+  .passo-topo { display: flex; align-items: center; gap: 12px; }
+  .num { flex: none; width: 32px; height: 32px; border-radius: 50%; background: var(--sangue); color: #fff; font-weight: 600; display: grid; place-items: center; font-size: .9rem; }
+  .feito .num { background: var(--ok); }
+  .passo-topo h3 { flex: 1; min-width: 0; }
+  .passo label { flex: none; display: flex; align-items: center; gap: 6px; font-size: .84rem; color: var(--texto-2); cursor: pointer; }
+  .passo input { width: 18px; height: 18px; accent-color: var(--ok); }
+
+  .cmd { position: relative; margin: 10px 0; }
+  .cmd pre { margin: 0; background: var(--estrutura); color: #F4F2F0; border-radius: 8px; padding: 14px 92px 14px 16px; overflow-x: auto; font: .88rem/1.65 var(--mono); }
+  .cmd button { position: absolute; top: 8px; right: 8px; font: 500 .78rem 'Poppins', 'Segoe UI', sans-serif; color: #fff; background: #3A4354; border: 0; border-radius: 6px; padding: 6px 11px; cursor: pointer; }
+  .cmd button:hover { background: var(--sangue); }
+  code { font-family: var(--mono); font-size: .9em; background: #EDE9E5; border-radius: 4px; padding: 1px 5px; overflow-wrap: anywhere; }
+  pre code { background: none; padding: 0; overflow-wrap: normal; }
+
+  .aviso, .certo { border-radius: 8px; padding: 12px 16px; margin: 14px 0 0; font-size: .93rem; }
+  .aviso { background: var(--sangue-suave); border: 1px solid #E5B9BF; }
+  .certo { background: var(--ok-suave); border: 1px solid #B4DAC5; }
+
+  .rolagem { overflow-x: auto; background: var(--card); border: 1px solid var(--borda); border-radius: 10px; margin: 12px 0; }
+  table { border-collapse: collapse; width: 100%; font-size: .91rem; }
+  th, td { text-align: left; vertical-align: top; padding: 10px 14px; border-bottom: 1px solid var(--borda); }
+  tr:last-child td { border-bottom: 0; }
+  th { font-weight: 600; background: #FAF8F6; }
+
+  @media (max-width: 520px) {
+    .passo-topo { flex-wrap: wrap; }
+    header h1 { font-size: 1.6rem; }
+  }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  @media print { .cmd button, .passo label, .atalhos { display: none; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="dentro">
+    <h1>Como iniciar o Hemobridge</h1>
+    <p>Passo a passo para Windows (PowerShell). São três partes: banco e e-mail no Docker, a API e o site.</p>
+    <nav class="atalhos" aria-label="Seções">
+      <a href="#primeira-vez">Primeira vez</a>
+      <a href="#dia-a-dia">No dia a dia</a>
+      <a href="#contas">Contas para entrar</a>
+      <a href="#senha">Testar "Esqueci minha senha"</a>
+      <a href="#problemas">Problemas comuns</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <h2 id="primeira-vez">Primeira vez</h2>
+  <p>Faça os passos em ordem. Se já instalou, vá direto para <a href="#dia-a-dia">No dia a dia</a>.</p>
+
+  <section class="passo" data-passo="1">
+    <div class="passo-topo"><span class="num">1</span><h3>Conferir os programas</h3><label><input type="checkbox"> Feito</label></div>
+    <p>Abra o <strong>Docker Desktop</strong> e espere ele terminar de iniciar. Depois, abra a pasta do projeto no Explorador de Arquivos, clique com o botão direito numa área vazia e escolha <strong>Abrir no Terminal</strong>. Confira:</p>
+    <div class="cmd"><pre><code>node -v
+npm.cmd -v
+docker compose version</code></pre></div>
+    <p>Os três precisam mostrar uma versão. O projeto usa o Node 24.</p>
+    <div class="aviso"><strong>Por que <code>npm.cmd</code> e não <code>npm</code>?</strong> O PowerShell do Windows costuma bloquear o <code>npm</code> com "a execução de scripts foi desabilitada neste sistema". Com <code>.cmd</code> no final, funciona sem mudar nenhuma configuração.</div>
+  </section>
+
+  <section class="passo" data-passo="2">
+    <div class="passo-topo"><span class="num">2</span><h3>Criar o arquivo de configuração da API</h3><label><input type="checkbox"> Feito</label></div>
+    <p>A partir da pasta do projeto:</p>
+    <div class="cmd"><pre><code>cd backend
+Copy-Item .env.example .env
+notepad .env</code></pre></div>
+    <p>Gere o segredo da autenticação e copie o resultado:</p>
+    <div class="cmd"><pre><code>node -e "console.log(require('crypto').randomBytes(48).toString('base64'))"</code></pre></div>
+    <p>No Bloco de Notas, ajuste estas linhas, deixe as outras como estão e salve:</p>
+    <div class="cmd"><pre><code>POSTGRES_PASSWORD=Hemobridge123
+DATABASE_URL=postgresql://hemobridge:Hemobridge123@localhost:5434/hemobridge
+JWT_SECRET=cole-aqui-o-segredo-gerado
+SEED_DADOS_EXEMPLO=true
+SEED_SENHA_EXEMPLO=Demo-Senha1</code></pre></div>
+    <p>A senha em <code>DATABASE_URL</code> tem que ser igual a <code>POSTGRES_PASSWORD</code>. Estes valores são só para uso local.</p>
+    <div class="aviso"><strong>Já rodou o projeto em outra pasta deste computador?</strong> As cópias usam o mesmo banco no Docker, e ele guarda a senha de quando foi criado. Em vez de criar um <code>.env</code> novo, copie o <code>backend\.env</code> da outra pasta.</div>
+    <div class="aviso"><strong><code>FRONTEND_URL</code> aceita um endereço só</strong> (<code>http://localhost:5173</code>). Com dois endereços separados por vírgula, os links dos e-mails saem quebrados. Para liberar mais endereços, use <code>CORS_ORIGENS</code>.</div>
+  </section>
+
+  <section class="passo" data-passo="3">
+    <div class="passo-topo"><span class="num">3</span><h3>Subir o banco e a caixa de e-mails</h3><label><input type="checkbox"> Feito</label></div>
+    <p>Ainda em <code>backend</code>:</p>
+    <div class="cmd"><pre><code>docker compose up -d
+docker compose ps</code></pre></div>
+    <div class="certo"><strong>Deu certo se</strong> <code>hemobridge-postgres</code> aparece como <code>healthy</code> e <code>hemobridge-mailpit</code> está rodando. O banco pode levar alguns segundos.</div>
+  </section>
+
+  <section class="passo" data-passo="4">
+    <div class="passo-topo"><span class="num">4</span><h3>Instalar a API e preparar o banco</h3><label><input type="checkbox"> Feito</label></div>
+    <p>Um comando por vez, em <code>backend</code>:</p>
+    <div class="cmd"><pre><code>npm.cmd install</code></pre></div>
+    <div class="cmd"><pre><code>npx.cmd prisma generate</code></pre></div>
+    <div class="cmd"><pre><code>npx.cmd prisma migrate deploy</code></pre></div>
+    <div class="cmd"><pre><code>npx.cmd prisma db seed</code></pre></div>
+    <div class="certo"><strong>Deu certo se</strong> as migrations terminam sem erro e o seed mostra <code>Tipos sanguíneos: 8</code>. Com <code>SEED_DADOS_EXEMPLO=true</code>, mostra também <code>Dados de exemplo: 2 hemocentros…</code>.</div>
+  </section>
+
+  <section class="passo" data-passo="5">
+    <div class="passo-topo"><span class="num">5</span><h3>Iniciar a API</h3><label><input type="checkbox"> Feito</label></div>
+    <div class="cmd"><pre><code>npm.cmd run start:dev</code></pre></div>
+    <div class="certo"><strong>Deu certo se</strong> aparece <code>API rodando na porta 3333</code> e <a href="http://localhost:3333/api/hemocentros" target="_blank" rel="noopener">esta página da API</a> responde com uma lista. Deixe este terminal aberto.</div>
+  </section>
+
+  <section class="passo" data-passo="6">
+    <div class="passo-topo"><span class="num">6</span><h3>Instalar e iniciar o site</h3><label><input type="checkbox"> Feito</label></div>
+    <p>Abra <strong>outro terminal</strong> na pasta do projeto:</p>
+    <div class="cmd"><pre><code>cd frontend
+Copy-Item .env.example .env
+npm.cmd install</code></pre></div>
+    <div class="cmd"><pre><code>npm.cmd run dev</code></pre></div>
+    <div class="certo"><strong>Deu certo se</strong> aparece <code>http://localhost:5173</code>. Abra o <a href="http://localhost:5173" target="_blank" rel="noopener">Hemobridge</a> no navegador e deixe este terminal aberto também.</div>
+    <div class="aviso">Se o endereço terminar em <code>5174</code>, a porta 5173 já está em uso. Feche o outro terminal que está com o site aberto e rode de novo; senão a API recusa o site.</div>
+  </section>
+
+  <h2 id="dia-a-dia">No dia a dia</h2>
+  <p>Com tudo instalado, abra o Docker Desktop e use dois terminais na pasta do projeto.</p>
+
+  <section class="passo">
+    <h3>Terminal 1: banco, e-mail e API</h3>
+    <div class="cmd"><pre><code>cd backend
+docker compose up -d
+npm.cmd run start:dev</code></pre></div>
+    <h3>Terminal 2: site</h3>
+    <div class="cmd"><pre><code>cd frontend
+npm.cmd run dev</code></pre></div>
+    <h3>Depois de um <code>git pull</code></h3>
+    <p>Antes de iniciar, atualize em <code>backend</code>:</p>
+    <div class="cmd"><pre><code>npm.cmd install
+npx.cmd prisma generate
+npx.cmd prisma migrate deploy</code></pre></div>
+    <p>E em <code>frontend</code>:</p>
+    <div class="cmd"><pre><code>npm.cmd install</code></pre></div>
+    <h3>Para parar</h3>
+    <p>Aperte <code>Ctrl + C</code> nos dois terminais. Para parar também o banco (os dados ficam guardados), em <code>backend</code>:</p>
+    <div class="cmd"><pre><code>docker compose stop</code></pre></div>
+    <div class="aviso"><strong>Cuidado:</strong> <code>docker compose down -v</code> apaga o banco inteiro.</div>
+  </section>
+
+  <div class="rolagem">
+    <table>
+      <thead><tr><th>O quê</th><th>Endereço</th></tr></thead>
+      <tbody>
+        <tr><td>Site</td><td><a href="http://localhost:5173" target="_blank" rel="noopener">http://localhost:5173</a></td></tr>
+        <tr><td>API</td><td><a href="http://localhost:3333/api/hemocentros" target="_blank" rel="noopener">http://localhost:3333/api</a></td></tr>
+        <tr><td>E-mails (Mailpit)</td><td><a href="http://localhost:8025" target="_blank" rel="noopener">http://localhost:8025</a></td></tr>
+        <tr><td>Banco de dados</td><td><code>localhost:5434</code></td></tr>
+        <tr><td>Rotas da API</td><td><a href="../backend/docs/rotas.html">backend/docs/rotas.html</a></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 id="contas">Contas para entrar</h2>
+  <p>Criadas pelo seed. As contas de exemplo só existem com <code>SEED_DADOS_EXEMPLO=true</code>.</p>
+  <div class="rolagem">
+    <table>
+      <thead><tr><th>E-mail</th><th>Perfil</th><th>Senha (no <code>.env</code>)</th></tr></thead>
+      <tbody>
+        <tr><td><code>paciente@hemobridge.local</code></td><td>Paciente</td><td><code>SEED_SENHA_EXEMPLO</code></td></tr>
+        <tr><td><code>medico.curitiba@hemobridge.local</code></td><td>Médico, Curitiba</td><td><code>SEED_SENHA_EXEMPLO</code></td></tr>
+        <tr><td><code>admin.curitiba@hemobridge.local</code></td><td>Admin do hemocentro, Curitiba</td><td><code>SEED_SENHA_EXEMPLO</code></td></tr>
+        <tr><td><code>medico.londrina@hemobridge.local</code></td><td>Médico, Londrina</td><td><code>SEED_SENHA_EXEMPLO</code></td></tr>
+        <tr><td><code>admin.londrina@hemobridge.local</code></td><td>Admin do hemocentro, Londrina</td><td><code>SEED_SENHA_EXEMPLO</code></td></tr>
+        <tr><td><code>admin@hemobridge.local</code> (<code>ADMIN_EMAIL</code>)</td><td>Administrador da plataforma</td><td><code>ADMIN_SENHA_INICIAL</code>, com troca no primeiro acesso</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 id="senha">Testar "Esqueci minha senha"</h2>
+  <section class="passo">
+    <ol>
+      <li>No site, abra <strong>Entrar</strong> e clique em <strong>Esqueci minha senha</strong>.</li>
+      <li>Informe <code>paciente@hemobridge.local</code> e envie.</li>
+      <li>Abra o <a href="http://localhost:8025" target="_blank" rel="noopener">Mailpit</a>: os e-mails locais chegam ali, não na sua caixa real.</li>
+      <li>Clique em <strong>Redefinir minha senha</strong>. O link vale 30 minutos e só funciona uma vez.</li>
+      <li>Crie a nova senha e entre com ela.</li>
+    </ol>
+    <div class="aviso">Contas inativas ou que ainda usam senha provisória não recebem o e-mail, embora a tela mostre a mesma mensagem. O limite é de 5 pedidos a cada 15 minutos.</div>
+  </section>
+
+  <h2 id="problemas">Problemas comuns</h2>
+  <p>Procure a mensagem que apareceu no terminal ou na tela.</p>
+  <div class="rolagem">
+    <table>
+      <thead><tr><th>O que aparece</th><th>O que fazer</th></tr></thead>
+      <tbody>
+        <tr><td>"a execução de scripts foi desabilitada neste sistema"</td><td>Use <code>npm.cmd</code> e <code>npx.cmd</code> no lugar de <code>npm</code> e <code>npx</code>.</td></tr>
+        <tr><td>Erro de conexão com o Docker (<code>docker daemon</code>, <code>pipe</code>)</td><td>Abra o Docker Desktop e espere iniciar.</td></tr>
+        <tr><td><code>defina POSTGRES_PASSWORD no .env</code></td><td>Falta o <code>backend\.env</code>. Volte ao passo 2.</td></tr>
+        <tr><td><code>port is already allocated</code></td><td>Outro programa usa a porta 5434, 1025 ou 8025. Feche-o ou troque a porta no <code>.env</code>.</td></tr>
+        <tr><td><code>P1001: Can't reach database server</code></td><td>O banco não está no ar. Rode <code>docker compose up -d</code> e espere ficar <code>healthy</code>.</td></tr>
+        <tr><td><code>P1000: Authentication failed</code></td><td>A senha do <code>.env</code> não é a do banco já criado. Use o <code>.env</code> antigo. Se puder perder os dados, rode <code>docker compose down -v</code> e refaça os passos 3 e 4.</td></tr>
+        <tr><td><code>JWT_SECRET does not exist</code></td><td>Preencha <code>JWT_SECRET</code> no <code>backend\.env</code>.</td></tr>
+        <tr><td><code>Cannot find module '…/generated/prisma/…'</code></td><td>O Prisma Client não foi gerado. Em <code>backend</code>, rode <code>npx.cmd prisma generate</code> e repita o comando.</td></tr>
+        <tr><td><code>EADDRINUSE</code> na porta 3333</td><td>A API já está aberta em outro terminal. Feche a outra.</td></tr>
+        <tr><td>Site: "Não foi possível conectar ao servidor"</td><td>Veja se a API está rodando e se o site está em <code>http://localhost:5173</code>, igual ao <code>FRONTEND_URL</code>.</td></tr>
+        <tr><td>O link do e-mail não abre</td><td>Deixe só <code>FRONTEND_URL=http://localhost:5173</code> no <code>backend\.env</code>, reinicie a API e peça outro link.</td></tr>
+        <tr><td>O link do e-mail volta para a página inicial</td><td>O site em execução está sem a página de redefinir senha. Confira se ele foi iniciado na pasta atualizada do projeto.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>Mais detalhes da API: <a href="../backend/docs/install.md">backend/docs/install.md</a>.</p>
+</main>
+
+<script>
+  // Botões de copiar.
+  document.querySelectorAll('.cmd').forEach(function (bloco) {
+    var botao = document.createElement('button')
+    botao.type = 'button'
+    botao.textContent = 'Copiar'
+    botao.addEventListener('click', function () {
+      var texto = bloco.querySelector('code').textContent
+      function avisar(ok) {
+        botao.textContent = ok ? 'Copiado' : 'Use Ctrl+C'
+        setTimeout(function () { botao.textContent = 'Copiar' }, 1600)
+      }
+      function selecionar() {
+        var faixa = document.createRange()
+        faixa.selectNodeContents(bloco.querySelector('code'))
+        var selecao = getSelection()
+        selecao.removeAllRanges()
+        selecao.addRange(faixa)
+        var ok = false
+        try { ok = document.execCommand('copy') } catch (e) { /* o texto fica selecionado */ }
+        avisar(ok)
+      }
+      if (navigator.clipboard) navigator.clipboard.writeText(texto).then(function () { avisar(true) }, selecionar)
+      else selecionar()
+    })
+    bloco.appendChild(botao)
+  })
+
+  // Passos concluídos ficam lembrados neste navegador.
+  var CHAVE = 'hemobridge.como-iniciar'
+  var feitos = {}
+  try { feitos = JSON.parse(localStorage.getItem(CHAVE)) || {} } catch (e) { /* sem armazenamento */ }
+  document.querySelectorAll('[data-passo]').forEach(function (passo) {
+    var id = passo.dataset.passo
+    var caixa = passo.querySelector('input')
+    caixa.checked = !!feitos[id]
+    passo.classList.toggle('feito', caixa.checked)
+    caixa.addEventListener('change', function () {
+      feitos[id] = caixa.checked
+      passo.classList.toggle('feito', caixa.checked)
+      try { localStorage.setItem(CHAVE, JSON.stringify(feitos)) } catch (e) { /* sem armazenamento */ }
+    })
+  })
+</script>
+</body>
+</html>
