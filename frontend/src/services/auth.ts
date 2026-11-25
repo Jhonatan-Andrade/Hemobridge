@@ -6,6 +6,8 @@ export const authService = {
   me: () => api.get<UsuarioAutenticado>('/auth/me'),
   logout: () => api.post<void>('/auth/logout'),
   recuperarSenha: (email: string) => api.post<{ mensagem: string }>('/auth/recuperar-senha', { email }),
+  redefinirSenha: (dados: { token: string; novaSenha: string; confirmacaoSenha: string }) =>
+    api.post<{ mensagem: string }>('/auth/redefinir-senha', dados),
 
   termoPrimeiroAcesso: () => api.get<Termo>('/auth/primeiro-acesso/termo'),
   definirSenhaPrimeiroAcesso: (dados: { novaSenha: string; confirmacaoSenha: string; aceiteTermo: boolean; versaoTermo: string }) =>

@@ -62,6 +62,21 @@ describe('RecuperacaoSenhaService', () => {
       expect(data.senhaResetTokenHash).not.toContain(token);
     });
 
+    it('monta o HTML com o link, a validade e o logo embutido, escapando o nome', async () => {
+      const { service, email } = montar(usuarioAtivo({ nome: '<b>Maria</b> da Silva' }));
+
+      await service.solicitar({ email: 'maria@email.com' });
+
+      const { texto, html, imagens } = email.enviar.mock.calls[0][0];
+      const link = /http:\S+/.exec(texto)![0];
+      expect(html).toContain(`href="${link}"`);
+      expect(html).toContain('30&nbsp;minutos');
+      expect(html).toContain('Olá, &lt;b&gt;Maria&lt;/b&gt;');
+      expect(html).toContain(`src="cid:${imagens[0].cid}"`);
+      expect(html).not.toContain('{{');
+      expect(imagens[0].conteudo.length).toBeGreaterThan(0);
+    });
+
     it.each([
       ['e-mail sem conta (FA01)', null],
       ['conta desativada', usuarioAtivo({ status: 'INATIVO' })],

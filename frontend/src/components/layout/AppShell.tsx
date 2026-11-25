@@ -29,7 +29,7 @@ export function AppShell({ nav, contexto, acoes, compacto, children }: AppShellP
       <NavigationRail items={nav} aberto={aberto} onToggle={() => setAberto((v) => !v)} onClose={fechar} />
       <div className={`transition-[margin] duration-rail ease-rail ${aberto ? 'md:ml-rail-open' : 'md:ml-rail'}`}>
         <header
-          className={`flex items-center gap-3 bg-surface ${compacto ? 'border-b border-line px-5 py-2.5 md:px-8 md:py-4' : 'px-5 py-6 md:p-12'}`}
+          className={`flex items-center gap-3 bg-surface ${compacto ? 'border-b border-line px-5 py-2.5 md:px-8 md:py-4' : 'px-5 py-6 md:px-12 md:py-3'}`}
         >
           <button
             type="button"

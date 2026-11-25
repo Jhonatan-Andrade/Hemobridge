@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { randomInt } from 'node:crypto';
 import { gerarHashSenha } from '../common/senha.js';
 import { EmailService } from '../email/email.service.js';
+import { LOGO_EMAIL, htmlContaCriada } from '../email/modelos.js';
 import type { PapelEquipe, Perfil } from '../generated/prisma/enums.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 
@@ -94,6 +95,15 @@ export class SenhaProvisoriaService {
           '',
           'Se a senha expirar, peça o reenvio a quem criou sua conta.',
         ].join('\n'),
+        html: htmlContaCriada({
+          nome: primeiroNome,
+          perfil,
+          email: destinatario.email,
+          senha,
+          horas: HORAS_VALIDADE_SENHA_PROVISORIA,
+          link: this.frontendUrl,
+        }),
+        imagens: [LOGO_EMAIL],
       });
       return true;
     } catch (erro) {
